@@ -31,14 +31,14 @@ python_code_quality:
     when: always
   allow_failure: true
 
-python_code_test:
-  stage: test
-  image: python:3.7
-  before_script:
-    - cd backend/proxmox_api/tests
-    - pip3 install pytest
-  script:
-    - pytest
+#python_code_test:
+ # stage: test
+  #image: python:3.7
+ # before_script:
+  #  - cd backend/proxmox_api/tests
+   # - pip3 install pytest
+  #script:
+   # - pytest
 
 angular_code_quality:
   stage: test
