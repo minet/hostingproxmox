@@ -1,0 +1,67 @@
+<div style="background-color: whitesmoke">
+  <div class="main" style="min-height: calc(100vh - 5.5em) !important ">
+
+    <app-navbar></app-navbar>
+    <br>
+
+    <section>
+      <div *ngIf="user == null" class="container">
+        <div class="container-fluid">
+          <div class="container my-1">
+            <div class="row bg-light align-items-center rounded-1 border shadow-lg">
+              <div class="col-12 p-3 p-lg-5 pt-lg-3 text-center">
+                <img style="height: 150px" src="assets/images/minet.png">
+                <div class="alert alert-success" role="alert">
+                  <p>Welcom to MiNET's new hosting service. It is still in beta, please report any problem to our <a href="mailto:webmaster@listes.minet.net"> webmaster</a>.</p>
+                  <p>This service is free if you already own a MiNET account. Otherwise, please use <a href="https://payment.minet.net"> payment.minet.net </a> to get a subscription.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="jumbotron bg-dark text-white border shadow-lg">
+                <h2 class="text-center">
+                  <img style="height: 55px" src="assets/images/server.png">
+                </h2>
+                <p class="text-center">
+                  Create a Virtual Machine or a Web Server ready to use.
+                </p>
+
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="jumbotron bg-dark text-white border shadow-lg">
+                <h2 class="text-center">
+                  <img style="height: 55px" src="assets/images/domain.png">
+                </h2>
+                <p class="text-center">
+                  Register a DNS record pointing to your Virtual Machine.
+                </p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="jumbotron bg-dark text-white border shadow-lg">
+                <h2 class="text-center">
+                  <img style="height: 55px" src="assets/images/question.png">
+                </h2>
+                <p class="text-center">
+                  Contact our <a href="mailto:webmaster@listes.minet.net"> webmaster</a> for any information.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <router-outlet *ngIf="user != null"></router-outlet>
+
+
+    </section>
+  </div>
+  <app-footer></app-footer>
+
+
+</div>

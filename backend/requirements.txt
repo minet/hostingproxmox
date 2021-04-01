@@ -1,0 +1,12 @@
+configparser
+mysqlclient
+flask_sqlalchemy
+connexion~=2.7.0
+python_dateutil == 2.6.0
+setuptools >= 21.0.0
+python-slugify
+flask-cors
+Flask~=1.1.2
+six~=1.15.0
+proxmoxer
+dnspython~=2.1.0

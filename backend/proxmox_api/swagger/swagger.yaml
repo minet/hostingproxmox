@@ -1,0 +1,297 @@
+openapi: 3.0.0
+info:
+  title: Proxmox
+  description: Proxmox VPS provider
+  contact:
+    email: webmaster@listes.minet.net
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://proxmox-backend.minet.net/api/1.0.0
+  description: Main URL
+security:
+- OAuth2: []
+paths:
+  /vm:
+    get:
+      summary: get all user vms
+      operationId: get_vm
+      responses:
+        "201":
+          description: all user vms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VmIdItem'
+                x-content-type: application/json
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+    post:
+      summary: create vm
+      operationId: create_vm
+      requestBody:
+        description: VM to create
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VmItem'
+      responses:
+        "201":
+          description: created
+        "400":
+          description: invalid input, object invalid
+        "409":
+          description: a vm already exists
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /vm/{vmid}:
+    get:
+      summary: get a vm by id
+      operationId: get_vm_id
+      parameters:
+      - name: vmid
+        in: path
+        description: vmid to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: "105"
+      responses:
+        "201":
+          description: get vm by id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VmItem'
+        "400":
+          description: invalid input, object invalid
+        "404":
+          description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+    delete:
+      summary: delete vm by id
+      operationId: delete_vm_id
+      parameters:
+      - name: vmid
+        in: path
+        description: vmid to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: "105"
+      responses:
+        "201":
+          description: deleted vm by id
+        "400":
+          description: invalid input, object invalid
+        "404":
+          description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+    patch:
+      summary: update a vm
+      operationId: patch_vm
+      parameters:
+      - name: vmid
+        in: path
+        description: vmid to update
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: "105"
+      requestBody:
+        description: VM to update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VmItem'
+      responses:
+        "201":
+          description: updated
+        "400":
+          description: invalid input, object invalid
+        "404":
+          description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /dns:
+    get:
+      summary: get all user's dns entries
+      operationId: get_dns
+      responses:
+        "201":
+          description: all user's dns entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DnsEntryItem'
+                x-content-type: application/json
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+    post:
+      summary: create dns entry
+      operationId: create_dns
+      requestBody:
+        description: Dns entry to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DnsItem'
+      responses:
+        "201":
+          description: created
+        "400":
+          description: invalid input, object invalid
+        "409":
+          description: a vm already exists
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /dns/{dnsid}:
+    get:
+      summary: get a dns entry by id
+      operationId: get_dns_id
+      parameters:
+      - name: dnsid
+        in: path
+        description: id of the dns entry entry to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: "2"
+      responses:
+        "201":
+          description: get dns entry by id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DnsItem'
+        "400":
+          description: invalid input, object invalid
+        "404":
+          description: dns entry not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+    delete:
+      summary: delete dns entry by id
+      operationId: delete_dns_id
+      parameters:
+      - name: dnsid
+        in: path
+        description: id of the dns entry to delete
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: "3"
+      responses:
+        "201":
+          description: deleted dns entry by id
+        "400":
+          description: invalid input, object invalid
+        "404":
+          description: dns entry not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+components:
+  schemas:
+    VmIdItem:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: number
+          description: VM id
+          example: 105
+      example:
+        id: 105
+    DnsEntryItem:
+      required:
+      - entry
+      type: object
+      properties:
+        entry:
+          type: string
+          description: dns entry
+          example: host
+      example:
+        entry: host
+    DnsItem:
+      required:
+      - entry
+      - ip
+      type: object
+      properties:
+        entry:
+          type: string
+          description: dns entry
+          example: host
+        ip:
+          type: string
+          description: entry to this ip
+          example: 192.0.0.1
+      example:
+        entry: host
+        ip: 192.0.0.1
+    VmItem:
+      type: object
+      properties:
+        name:
+          type: string
+          description: vm name
+          example: vm
+        type:
+          type: string
+          description: type of vm
+          example: wordpress, bare_vm
+        user:
+          type: string
+          description: user of vm
+          example: user1
+        password:
+          type: string
+          description: password of vm
+          example: salut
+        ssh:
+          type: boolean
+          description: ssh key auth
+          example: true
+        sshKey:
+          type: string
+          description: ssh pub key for auth
+          example: ssh-rsa ...
+        ip:
+          type: string
+          description: vm public ip
+          example: 192.1.1.1
+        status:
+          type: string
+          description: vm status
+          example: running
+      example:
+        password: salut
+        sshKey: ssh-rsa ...
+        ip: 192.1.1.1
+        name: vm
+        ssh: true
+        type: wordpress, bare_vm
+        user: user1
+        status: running
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://cas.minet.net/oidc/authorize
+          scopes:
+            profile: The user's basic information, including groups they are a part
+              of
+      x-tokenInfoFunc: proxmox_api.controllers.authorization_controller.check_OAuth2
+      x-scopeValidateFunc: proxmox_api.controllers.authorization_controller.validate_scope_OAuth2

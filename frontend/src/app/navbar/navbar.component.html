@@ -1,0 +1,39 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand">
+    <img src="../../assets/images/logo_vertical_blanc.png" height="40"
+         width="40"/>
+    MiNET
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+          aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="#" *ngIf="user" [routerLink]="['/']" [routerLinkActive]="['is-active']">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" *ngIf="user" [routerLink]="['vms']" [routerLinkActive]="['is-active']">Your VMs</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" *ngIf="user" [routerLink]="['dns']" [routerLinkActive]="['is-active']" >MiNET DNS entries</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" *ngIf="user" [routerLink]="['manual']" [routerLinkActive]="['is-active']" >User manual</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" *ngIf="user" href="https://adh6.minet.net">{{user.name}}</a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" *ngIf="!user" (click)="userService.login()">Login</a>
+      </li>
+
+   <!--   <li class="nav-item">
+        <a class="nav-link" href="#" *ngIf="user" (click)="userService.logout()">Logout</a>
+      </li> -->
+
+    </ul>
+  </div>
+</nav>
+

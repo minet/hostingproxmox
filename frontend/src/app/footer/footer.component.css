@@ -1,0 +1,11 @@
+footer{
+    position: static;
+    height: 5em !important;
+    color: white;
+    margin-top: 0.5em;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #343a40 !important;
+}
