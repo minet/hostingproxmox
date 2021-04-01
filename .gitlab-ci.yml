@@ -82,7 +82,7 @@ deploy_backend:
     - sudo /bin/systemctl stop proxmox_api
     - rm -rf /var/www/proxmox_api
   script:
-    - cp -r backend/proxmox_api /var/www/proxmox_api
+    - cp -r proxmox_api /var/www/proxmox_api
     - cd /var/www/proxmox_api
     - sudo /bin/systemctl start proxmox_api
   tags:
