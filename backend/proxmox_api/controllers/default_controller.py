@@ -46,14 +46,11 @@ def create_vm(body=None):  # noqa: E501
 
     if r.status_code != 200:
         return {"status": "error"}, 403
-    print(str(body))
 
     if connexion.request.is_json:
         body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
-    print(str(body))
 
-    if body.ssh == True:
-        print(body.ssh_key)
+    if body.ssh:
         return proxmox.create_vm(body.name, body.type, user_id, body.password, body.user, body.ssh_key)
     else:
         return proxmox.create_vm(body.name, body.type, user_id, body.password, body.user)

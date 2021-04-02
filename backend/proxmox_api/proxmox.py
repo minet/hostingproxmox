@@ -79,32 +79,64 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
     next_vmid = int(proxmox.cluster.nextid.get())
     server = random_server()
 
+    template_node = ""
+
     try:
         if vm_type == "bare_vm":
-            proxmox.nodes(server).qemu(10000).clone.create(
+
+            for vm in proxmox.cluster.resources.get(type="vm"):
+                if vm["vmid"] == 10000:
+                    template_node = vm["node"]
+
+            print(template_node)
+
+            proxmox.nodes(template_node).qemu(10000).clone.create(
                 name=name,
-                newid=next_vmid
+                newid=next_vmid,
+                target=server
             )
+
         elif vm_type == "nginx_vm":
-            proxmox.nodes(server).qemu(10001).clone.create(
+
+            for vm in proxmox.cluster.resources.get(type="vm"):
+                if vm["vmid"] == 10001:
+                    template_node = vm["node"]
+
+            proxmox.nodes(template_node).qemu(10001).clone.create(
                 name=name,
-                newid=next_vmid
+                newid=next_vmid,
+                target=server
+
             )
+
         else:
             return {"status": "vm type not defines"}, 500
 
         user = get_user_id(user_id=user_id)
+
         print("Selecting user")
+
         if user is None:
             add_user(user_id)
             add_vm(id=next_vmid, user_id=user_id, type=vm_type)
         else:
             add_vm(id=next_vmid, user_id=user_id, type=vm_type)
         print("User selected")
+
     except:
+
         print("erreur lors de la création")
         delete_vm(next_vmid)
         return {"status": "error"}, 500
+
+    sync = False
+
+    while not sync:  # Synchronisation
+        try:
+            proxmox.nodes(server).qemu(next_vmid).status.current.get()
+            sync = True
+        except ResourceException:  # Exception si pas encore synchronisés
+            continue
 
     if password != "no":
         print("Setting password")
