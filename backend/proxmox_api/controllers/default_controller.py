@@ -152,7 +152,7 @@ def get_vm_id(vmid):  # noqa: E501
     ram = proxmox.get_vm_ram(vmid)
     cpu = proxmox.get_vm_cpu(vmid)
     disk = proxmox.get_vm_disk(vmid)
-    type = proxmox.get_vm_type(vmid)
+    type = dbfct.get_vm_type(vmid)
 
     if status[0]["status"] != 'running':
         return {"name": name[0]["name"], "ip": None, "status": status[0]["status"], "ram": ram[0]['ram']
