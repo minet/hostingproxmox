@@ -29,7 +29,6 @@ export class VmsComponent implements OnInit, OnDestroy {
     this.user = this.userService.getUser();
     this.get_vms();
     this.user.vms = Array<Vm>();
-    console.log(this.user.vms);
 
   }
 
@@ -48,7 +47,6 @@ export class VmsComponent implements OnInit, OnDestroy {
           this.loading = false;
         }
         for (let i = 0; i < vmList.length; i++) {
-          console.log('INDEX:' + i);
           const vmid = vmList[i];
           const last = (i === vmList.length - 1);
           this.get_vm(vmid, last);

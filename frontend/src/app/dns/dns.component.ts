@@ -61,13 +61,22 @@ export class DnsComponent implements OnInit, OnDestroy {
             this.loading = false;
           }
           for (let i = 0; i < dnsList.length; i++) {
-            console.log('INDEX:' + i);
             const id = dnsList[i];
             const last = (i === dnsList.length - 1);
             this.get_dns(id, last);
           }
         },
         error => {
+          if (error.status === 404) {
+            window.alert('Not found');
+            this.router.navigate(['']);
+          } else if (error.status === 403) {
+            window.alert('Session expired');
+            this.router.navigate(['']);
+          } else {
+            window.alert('Unknown error');
+            this.router.navigate(['']);
+          }
 
         });
 
@@ -76,7 +85,6 @@ export class DnsComponent implements OnInit, OnDestroy {
   get_dns(id: string, last: boolean): void {
     const dns = new Dns();
     dns.id = id;
-    console.log(typeof id);
     this.user.dns.push(dns);
     const newTimer = timer(0, 3000).pipe(
       flatMap(() => this.http.get(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})))
@@ -88,6 +96,16 @@ export class DnsComponent implements OnInit, OnDestroy {
           }
         },
         error => {
+          if (error.status === 404) {
+            window.alert('DNS not found');
+            this.router.navigate(['']);
+          } else if (error.status === 403) {
+            window.alert('Session expired');
+            this.router.navigate(['']);
+          } else {
+            window.alert('Unknown error');
+            this.router.navigate(['']);
+          }
 
         });
 
@@ -125,7 +143,7 @@ export class DnsComponent implements OnInit, OnDestroy {
         },
         error => {
           if (error.status === 409) {
-            window.alert('VM already exists');
+            window.alert('Dns entry already exists');
             window.location.reload();
           } else if (error.status === 403) {
             window.alert('Session expired');

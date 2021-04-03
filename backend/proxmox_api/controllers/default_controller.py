@@ -20,6 +20,10 @@ def create_dns(body=None):  # noqa: E501
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     print("GET DNS REQUEST")
@@ -42,6 +46,10 @@ def create_vm(body=None):  # noqa: E501
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if r.status_code != 200:
@@ -73,6 +81,10 @@ def delete_vm_id(vmid):  # noqa: E501
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
@@ -92,6 +104,10 @@ def get_dns():  # noqa: E501
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     return proxmox.get_user_dns(user_id)
 
@@ -107,6 +123,10 @@ def get_vm():  # noqa: E501
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     return proxmox.get_vm(user_id=user_id)
@@ -167,6 +187,10 @@ def delete_dns_id(dnsid):  # noqa: E501
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if dnsid in map(int, proxmox.get_user_dns(user_id)[0]):
@@ -224,6 +248,10 @@ def patch_vm(vmid, body=None):  # noqa: E501
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if vmid in map(int, proxmox.get_vm(user_id)[0]):

@@ -57,7 +57,6 @@ export class HomeComponent implements OnInit {
 
   create_vm(vm: Vm): void {
     let data = {};
-    console.log(vm.ssh === 'No');
     if (vm.ssh === 'No') {
       data = {
         name: this.slugifyPipe.transform(vm.name),

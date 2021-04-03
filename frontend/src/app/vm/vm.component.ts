@@ -38,7 +38,6 @@ export class VmComponent implements OnInit, OnDestroy {
     this.user = this.userService.getUser();
     this.user.vms = Array<Vm>();
     this.vmid = this.activatedRoute.snapshot.params.vmid;
-    console.log(this.vmid);
     this.get_vm(this.vmid);
 
   }
@@ -54,7 +53,6 @@ export class VmComponent implements OnInit, OnDestroy {
     this.newVm.ram = this.user.vms[0].ram;
     this.newVm.cpu = this.user.vms[0].cpu;
     this.newVm.disk = this.user.vms[0].disk;
-    console.log(this.newVm);
     this.editing = true;
   }
 
@@ -69,6 +67,17 @@ export class VmComponent implements OnInit, OnDestroy {
       this.loading = true;
     }, error => {
 
+      if (error.status === 404) {
+        window.alert('VM not found');
+        this.router.navigate(['']);
+      } else if (error.status === 403) {
+        window.alert('Session expired');
+        this.router.navigate(['']);
+      } else {
+        window.alert('Unknown error');
+        this.router.navigate(['']);
+      }
+
     });
 
   }
@@ -81,6 +90,17 @@ export class VmComponent implements OnInit, OnDestroy {
       },
 
       error => {
+
+        if (error.status === 404) {
+          window.alert('VM not found');
+          this.router.navigate(['']);
+        } else if (error.status === 403) {
+          window.alert('Session expired');
+          this.router.navigate(['']);
+        } else {
+          window.alert('Unknown error');
+          this.router.navigate(['']);
+        }
 
       });
   }
@@ -113,6 +133,17 @@ export class VmComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error => {
+
+          if (error.status === 404) {
+            window.alert('VM not found');
+            this.router.navigate(['']);
+          } else if (error.status === 403) {
+            window.alert('Session expired');
+            this.router.navigate(['']);
+          } else {
+            window.alert('Unknown error');
+            this.router.navigate(['']);
+          }
 
         });
     this.intervals.add(newTimer);
