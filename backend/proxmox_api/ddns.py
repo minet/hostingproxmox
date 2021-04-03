@@ -5,7 +5,11 @@ import dns.query
 import dns.reversename
 import dns.rdatatype
 import dns.tsigkeyring
+import logging
 from proxmox_api.config import configuration
+
+logging.basicConfig(filename=configuration.LOG_FILE_NAME, filemode="a", level=configuration.LOG_LEVEL, format='%(asctime)s ==> %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p')
 
 keyring = dns.tsigkeyring.from_text(
     {configuration.KEYRING_DNS_NAME: ("HMAC-SHA512", configuration.KEYRING_DNS_SECRET)}
@@ -42,5 +46,5 @@ def delete_dns_record(entry):
         return {"dns": "entry deleted"}, 201
     if response.rcode() == 3:
         return {"dns": "entry does not exist"}, 405
-
+    logging.error("Problem in get_vm_status(" + str(vmid) + ") when getting VM status: " + str(e))
     return {"dns": "error occured"}, 500

@@ -13,7 +13,6 @@ def get_vm_list(user_id):
         list = []
         for i in User.query.filter_by(id=user_id).first().vms:
             list.append(i.id)
-        print(list)
         return list
 
 

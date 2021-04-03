@@ -1,5 +1,10 @@
 """File used to configure hosting service"""
 import os
+import logging
+
+# Logging info
+LOG_FILE_NAME = "backend.log"
+LOG_LEVEL = logging.DEBUG
 
 # Proxmox host
 PROXMOX_HOST = "192.168.104.16"

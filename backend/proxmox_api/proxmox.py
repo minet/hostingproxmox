@@ -1,12 +1,15 @@
 import random
 import urllib.parse
 from time import sleep
-
+import logging
 from proxmoxer import ProxmoxAPI
 from proxmoxer import ResourceException
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration as config
 from proxmox_api.db.db_functions import *
+
+logging.basicConfig(filename=config.LOG_FILE_NAME, filemode="a", level=logging.DEBUG
+                    , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 proxmox = ProxmoxAPI(host=config.PROXMOX_HOST, user=config.PROXMOX_USER
                      , token_name=config.PROXMOX_API_KEY_NAME
@@ -24,7 +27,8 @@ def get_user_dns(user_id):
     try:
         dnsList = get_dns_entries(user_id)
         return dnsList, 201
-    except:
+    except Exception as e:
+        logging.error("Problem in get_user_dns: " + str(e))
         return {"dns": "error occured"}, 500
 
 
@@ -49,28 +53,18 @@ def delete_vm(vmid):
 
             try:
                 if get_vm_status(vmid)[0]['status'] == 'stopped':
-                    print("Del VM")
                     proxmox.nodes(vm["node"]).qemu(vmid).delete()
-                    print("VM deleted")
-                    print("Updating user")
                     del_vm_list(vmid)
-                    print("User updated")
                     return {"state": "vm deleted"}, 201
                 else:
-                    print("Stopping vm")
                     stop_vm(vmid)
                     while get_vm_status(vmid)[0]['status'] != 'stopped':
                         sleep(1)
-                    print("Vm stopped")
-                    print("Del VM")
                     proxmox.nodes(vm["node"]).qemu(vmid).delete()
-                    print("VM deleted")
-                    print("Updating user")
                     del_vm_list(vmid)
-                    print("User updated")
                     return {"state": "vm deleted"}, 201
-            except:
-                print("ERREUR")
+            except Exception as e:
+                logging.error("Problem in delete_vm: " + str(e))
                 return {"state": "error"}, 500
     return {"state": "vm not found"}, 404
 
@@ -87,8 +81,6 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             for vm in proxmox.cluster.resources.get(type="vm"):
                 if vm["vmid"] == 10000:
                     template_node = vm["node"]
-
-            print(template_node)
 
             proxmox.nodes(template_node).qemu(10000).clone.create(
                 name=name,
@@ -114,8 +106,6 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
 
         user = get_user_id(user_id=user_id)
 
-        print("Selecting user")
-
         if user is None:
             add_user(user_id)
             add_vm(id=next_vmid, user_id=user_id, type=vm_type)
@@ -123,9 +113,8 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             add_vm(id=next_vmid, user_id=user_id, type=vm_type)
         print("User selected")
 
-    except:
-
-        print("erreur lors de la création")
+    except Exception as e:
+        logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         delete_vm(next_vmid)
         return {"status": "error"}, 500
 
@@ -139,47 +128,40 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             continue
 
     if password != "no":
-        print("Setting password")
         try:
             proxmox.nodes(server).qemu(next_vmid).config.create(
                 cipassword=password
             )
-        except:
-            print("ERREUR")
+        except Exception as e:
+            logging.error("Problem in create_vm(" + str(next_vmid) + ") when setting password: " + str(e))
             delete_vm(next_vmid)
             return {"status": "error"}, 500
-        print("Password set")
 
     if vm_user != "no":
-        print("Setting user")
         try:
             proxmox.nodes(server).qemu(next_vmid).config.create(
                 ciuser=vm_user
             )
-        except:
-            print("ERREUR")
+        except Exception as e:
+            logging.error("Problem in create_vm(" + str(next_vmid) + ") when setting user: " + str(e))
             delete_vm(next_vmid)
             return {"status": "error"}, 500
-        print("user set")
 
     if main_ssh_key != "no":
-        print("Setting ssh")
         try:
-            print(main_ssh_key)
             proxmox.nodes(server).qemu(next_vmid).config.create(
                 sshkeys=urllib.parse.quote(main_ssh_key, safe='')
             )
-        except:
+        except Exception as e:
+            logging.error("Problem in create_vm(" + str(next_vmid) + ") when setting ssh key: " + str(e))
             delete_vm(next_vmid)
-            print("ERREUR SSH")
             return {"status": "error"}, 500
-        print("ssh set")
 
     try:
         proxmox.nodes(server).qemu(next_vmid).status.start.create()
 
-    except:
-        print("ERREUR")
+    except Exception as e:
+        logging.error("Problem in create_vm(" + str(next_vmid) + ") when sarting VM: " + str(e))
         delete_vm(next_vmid)
         return {"status": "error"}, 500
     return {"status": "Vm created"}, 201
@@ -191,8 +173,8 @@ def start_vm(vmid):
             try:
                 proxmox.nodes(vm["node"]).qemu(vmid).status.start.create()
                 return {"state": "vm started"}, 201
-            except:
-                print("ERREUR")
+            except Exception as e:
+                logging.error("Problem in start_vm(" + str(vmid) + ") when starting VM: " + str(e))
                 return {"status": "error"}, 500
     return {"state": "vm not found"}, 404
 
@@ -206,8 +188,8 @@ def stop_vm(vmid):
                     return {"state": "vm stopped"}, 201
                 else:
                     return {"state": "vm already stopped"}, 201
-            except:
-                print("ERREUR")
+            except Exception as e:
+                logging.error("Problem in stop_vm(" + str(vmid) + ") when stopping VM: " + str(e))
                 return {"state": "error"}, 500
     return {"state": "vm not found"}, 404
 
@@ -225,8 +207,8 @@ def get_vm_ip(vmid):
                                 ips.append(ip["ip-address"])
 
                 return {"vm_ip": ips}, 201
-            except:
-                print("ERREUR")
+            except Exception as e:
+                logging.error("Problem in get_vm_ip(" + str(vmid) + ") when getting VM infos: " + str(e))
                 return {"vm_ip": "error"}, 500
     return {"vm_ip": "Vm not found"}, 404
 
@@ -237,8 +219,8 @@ def get_vm_name(vmid):
             try:
                 name = proxmox.nodes(vm["node"]).qemu(vmid).config.get()['name']
                 return {"name": name}, 201
-            except:
-                print("ERREUR")
+            except Exception as e:
+                logging.error("Problem in get_vm_name(" + str(vmid) + ") when getting VM name: " + str(e))
                 return {"name": "error"}, 500
     return {"name": "Vm not found"}, 404
 
@@ -254,8 +236,8 @@ def get_vm_cpu(vmid):
                 cpu = proxmox.nodes(vm["node"]).qemu(vmid).config.get()['sockets'] * \
                       proxmox.nodes(vm["node"]).qemu(vmid).config.get()['cores']
                 return {"cpu": cpu}, 201
-            except:
-                print("ERREUR")
+            except Exception as e:
+                logging.error("Problem in get_vm_cpu(" + str(vmid) + ") when getting VM cpu: " + str(e))
                 return {"cpu": "error"}, 500
     return {"cpu": "Vm not found"}, 404
 
@@ -266,8 +248,8 @@ def get_vm_disk(vmid):
             try:
                 disk = int(proxmox.nodes(vm["node"]).qemu(vmid).config.get()['scsi0'].split('=')[-1].replace('G', ''))
                 return {"disk": disk}, 201
-            except:
-                print("ERREUR")
+            except Exception as e:
+                logging.error("Problem in get_vm_disk(" + str(vmid) + ") when getting VM disk size: " + str(e))
                 return {"disk": "error"}, 500
     return {"disk": "Vm not found"}, 404
 
@@ -303,7 +285,6 @@ def get_vm_status(vmid):
                 else:
                     return {"status": "stopped"}, 201
 
-
             except ResourceException:  # qemu_agent error
                 if qemu_status == 'running':
                     return {"status": "booting"}, 201
@@ -311,8 +292,8 @@ def get_vm_status(vmid):
                 else:
                     return {"status": "stopped"}, 201
 
-            except:
-                print("Erreur")
+            except Exception as e:
+                logging.error("Problem in get_vm_status(" + str(vmid) + ") when getting VM status: " + str(e))
                 return {"status": "error"}, 500
 
     return {"status": "vm not found"}, 404
