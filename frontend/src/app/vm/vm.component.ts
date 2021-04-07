@@ -124,7 +124,7 @@ export class VmComponent implements OnInit, OnDestroy {
 
           if (rep.body['type'] === 'nginx_vm') {
             vm.type = 'web server';
-          } else if (vm.type === 'bare_vm') {
+          } else if (rep.body['type'] === 'bare_vm') {
             vm.type = 'bare vm';
           } else {
             vm.type = 'not defined';
