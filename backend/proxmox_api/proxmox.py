@@ -85,7 +85,8 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             proxmox.nodes(template_node).qemu(10000).clone.create(
                 name=name,
                 newid=next_vmid,
-                target=server
+                target=server,
+                full=True,
             )
 
         elif vm_type == "nginx_vm":
@@ -97,7 +98,8 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             proxmox.nodes(template_node).qemu(10001).clone.create(
                 name=name,
                 newid=next_vmid,
-                target=server
+                target=server,
+                full=True,
 
             )
 

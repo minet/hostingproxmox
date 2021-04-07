@@ -90,7 +90,6 @@ export class VmComponent implements OnInit, OnDestroy {
       },
 
       error => {
-
         if (error.status === 404) {
           window.alert('VM not found');
           this.router.navigate(['']);
