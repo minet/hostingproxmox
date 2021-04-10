@@ -92,7 +92,7 @@ export class HomeComponent implements OnInit {
       },
       error => {
         this.progress = 0;
-        this.interval.stop();
+        clearInterval(this.interval);
         if (error.status === 409) {
           window.alert('VM already exists');
           this.router.navigate(['']);

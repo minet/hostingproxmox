@@ -126,8 +126,9 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             if "lock" not in proxmox.nodes(server)\
                     .qemu(next_vmid).status.current.get():  # Si lockée, on attend
                 sync = True
+            sleep(1)
         except ResourceException:  # Exception si pas encore synchronisés
-            continue
+            sleep(1)
 
     if password != "no":
         try:
