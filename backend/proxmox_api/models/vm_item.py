@@ -95,8 +95,6 @@ class VmItem(Model):
         :param name: The name of this VmItem.
         :type name: str
         """
-        if name is None:
-            raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
 
         self._name = name
 
@@ -120,8 +118,6 @@ class VmItem(Model):
         :param type: The type of this VmItem.
         :type type: str
         """
-        if type is None:
-            raise ValueError("Invalid value for `type`, must not be `None`")  # noqa: E501
 
         self._type = type
 
@@ -145,8 +141,6 @@ class VmItem(Model):
         :param user: The user of this VmItem.
         :type user: str
         """
-        if user is None:
-            raise ValueError("Invalid value for `user`, must not be `None`")  # noqa: E501
 
         self._user = user
 

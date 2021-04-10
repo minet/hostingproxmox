@@ -23,7 +23,8 @@ export class HomeComponent implements OnInit {
   valide = false;
   url: string;
   sshAddress: string;
-  vmCreated = false;
+  interval;
+  progress = 0;
 
   images = [
     {name: 'Bare VM', id: 'bare_vm'},
@@ -42,8 +43,16 @@ export class HomeComponent implements OnInit {
 
 
   ngOnInit(): void {
-
     this.user = this.userService.getUser();
+
+  }
+
+  progress_bar(): void{
+    this.interval = setInterval(() => {
+      if (this.progress < 100){
+        this.progress = this.progress + 100000 / 180000;
+      }
+    }, 1000);
 
   }
 
@@ -56,6 +65,8 @@ export class HomeComponent implements OnInit {
   }
 
   create_vm(vm: Vm): void {
+    this.loading = true;
+    this.progress_bar();
     let data = {};
     if (vm.ssh === 'No') {
       data = {
@@ -77,10 +88,11 @@ export class HomeComponent implements OnInit {
       };
     }
     this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).subscribe(rep => {
-        this.vmCreated = true;
-        this.router.navigate(['vms']);
+        this.progress = 100;
       },
       error => {
+        this.progress = 0;
+        this.interval.stop();
         if (error.status === 409) {
           window.alert('VM already exists');
           this.router.navigate(['']);
@@ -92,9 +104,6 @@ export class HomeComponent implements OnInit {
           this.router.navigate(['']);
         }
       });
-
-
   }
-
 
 }

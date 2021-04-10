@@ -17,13 +17,15 @@ PROXMOX_API_KEY = os.environ.get('PROXMOX_API_KEY')
 
 
 
+
 # Proxmox host
 
 PROXMOX_API_KEY_NAME = os.environ.get('PROXMOX_API_KEY_NAME')
 
 
+
 # Database uri : "mysql://user:pass@dbhost/dbname"
-#DATABASE_URI = "mysql://project:project@localhost/projet4"
+
 DATABASE_URI = os.environ.get('PROXMOX_BACK_DB')
 
 

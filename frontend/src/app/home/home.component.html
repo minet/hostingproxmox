@@ -21,16 +21,6 @@
       Create a new VM:
       <div>
         <form (ngSubmit)="create_vm(vm)" #vmForm="ngForm">
-          <div *ngIf="vmForm.submitted && !vmCreated">
-            <div class="d-flex justify-content-center">
-              <div class="spinner-grow text-primary" role="status">
-                <span class="sr-only">Loading...</span>
-              </div>
-            </div>
-          </div>
-          <div class="text-center" *ngIf="vmForm.submitted && vmCreated">
-            Your VM is being created, check progress in the VMs tab.
-          </div>
           <div *ngIf="!vmForm.submitted">
             <div class="">
             </div>
@@ -116,6 +106,16 @@
         </form>
 
       </div>
+      <div class="text-center" *ngIf="vmForm.submitted && loading">
+        Your VM is being created, please wait
+        <p *ngIf="progress == 100">Your VM has been created, click <a [routerLink]="['vms']">here</a></p>
+      </div>
+
+      <div class="progress" *ngIf="vmForm.submitted && loading">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: {{progress}}%"></div>
+      </div>
+
+
     </div>
   </div>
 

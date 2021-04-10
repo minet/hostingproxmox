@@ -42,7 +42,7 @@ paths:
         "201":
           description: created
         "400":
-          description: invalid input, object invalid
+          description: "invalid input, object invalid"
         "409":
           description: a vm already exists
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -68,7 +68,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/VmItem'
         "400":
-          description: invalid input, object invalid
+          description: "invalid input, object invalid"
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -89,7 +89,7 @@ paths:
         "201":
           description: deleted vm by id
         "400":
-          description: invalid input, object invalid
+          description: "invalid input, object invalid"
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -116,7 +116,7 @@ paths:
         "201":
           description: updated
         "400":
-          description: invalid input, object invalid
+          description: "invalid input, object invalid"
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -148,7 +148,7 @@ paths:
         "201":
           description: created
         "400":
-          description: invalid input, object invalid
+          description: "invalid input, object invalid"
         "409":
           description: a vm already exists
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -174,7 +174,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DnsItem'
         "400":
-          description: invalid input, object invalid
+          description: "invalid input, object invalid"
         "404":
           description: dns entry not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -195,7 +195,7 @@ paths:
         "201":
           description: deleted dns entry by id
         "400":
-          description: invalid input, object invalid
+          description: "invalid input, object invalid"
         "404":
           description: dns entry not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -250,7 +250,7 @@ components:
         type:
           type: string
           description: type of vm
-          example: wordpress, bare_vm
+          example: "wordpress, bare_vm"
         user:
           type: string
           description: user of vm
@@ -281,7 +281,7 @@ components:
         ip: 192.1.1.1
         name: vm
         ssh: true
-        type: wordpress, bare_vm
+        type: "wordpress, bare_vm"
         user: user1
         status: running
   securitySchemes:
@@ -291,7 +291,7 @@ components:
         implicit:
           authorizationUrl: https://cas.minet.net/oidc/authorize
           scopes:
-            profile: The user's basic information, including groups they are a part
-              of
+            profile: "The user's basic information, including groups they are a part\
+              \ of"
       x-tokenInfoFunc: proxmox_api.controllers.authorization_controller.check_OAuth2
       x-scopeValidateFunc: proxmox_api.controllers.authorization_controller.validate_scope_OAuth2

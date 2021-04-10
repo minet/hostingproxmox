@@ -16,6 +16,7 @@ proxmox = ProxmoxAPI(host=config.PROXMOX_HOST, user=config.PROXMOX_USER
                      , token_value=config.PROXMOX_API_KEY, verify_ssl=False)
 
 
+
 def add_user_dns(user_id, entry, ip):
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
@@ -86,7 +87,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
                 name=name,
                 newid=next_vmid,
                 target=server,
-                full=True,
+                full=1,
             )
 
         elif vm_type == "nginx_vm":
@@ -99,7 +100,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
                 name=name,
                 newid=next_vmid,
                 target=server,
-                full=True,
+                full=0,
 
             )
 
@@ -113,7 +114,6 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             add_vm(id=next_vmid, user_id=user_id, type=vm_type)
         else:
             add_vm(id=next_vmid, user_id=user_id, type=vm_type)
-        print("User selected")
 
     except Exception as e:
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
@@ -121,11 +121,11 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
         return {"status": "error"}, 500
 
     sync = False
-
     while not sync:  # Synchronisation
         try:
-            proxmox.nodes(server).qemu(next_vmid).status.current.get()
-            sync = True
+            if "lock" not in proxmox.nodes(server)\
+                    .qemu(next_vmid).status.current.get():  # Si lockée, on attend
+                sync = True
         except ResourceException:  # Exception si pas encore synchronisés
             continue
 
@@ -202,7 +202,6 @@ def get_vm_ip(vmid):
             try:
                 ips = []
                 for int in proxmox.nodes(vm["node"]).qemu(vmid).agent.get("network-get-interfaces")['result']:
-                    print(int['name'])
                     if int['name'] != 'lo':
                         for ip in int['ip-addresses']:
                             if ip['ip-address-type'] == "ipv4":
@@ -263,7 +262,6 @@ def get_vm_ram(vmid):
                 ram = proxmox.nodes(vm["node"]).qemu(vmid).config.get()['memory']
                 return {"ram": ram}, 201
             except:
-                print("ERREUR")
                 return {"ram": "error"}, 500
     return {"ram": "Vm not found"}, 404
 
@@ -271,7 +269,9 @@ def get_vm_ram(vmid):
 def get_vm_status(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
         if vm["vmid"] == vmid:
-            qemu_status = proxmox.nodes(vm["node"]).qemu(vmid).status.current.get()['status']
+            qemu_status = proxmox.nodes(vm["node"]).qemu(vmid).status.current.get()
+            if "lock" in qemu_status:
+                return {"status": "creating"}, 201
             try:
                 qemu_agent_status = proxmox.nodes(vm["node"]).qemu(vmid).agent.ping.create()
 
@@ -280,15 +280,14 @@ def get_vm_status(vmid):
                 else:
                     qemu_agent_status = False
 
-                if (qemu_status == 'running') & qemu_agent_status:
+                if (qemu_status['status'] == 'running') & qemu_agent_status:
                     return {"status": "running"}, 201
-                elif (qemu_status == 'running') & (not qemu_agent_status):
+                if (qemu_status['status'] == 'running') & (not qemu_agent_status):
                     return {"status": "booting"}, 201
-                else:
-                    return {"status": "stopped"}, 201
+                return {"status": "stopped"}, 201
 
             except ResourceException:  # qemu_agent error
-                if qemu_status == 'running':
+                if qemu_status['status'] == 'running':
                     return {"status": "booting"}, 201
 
                 else:

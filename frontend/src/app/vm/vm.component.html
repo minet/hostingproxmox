@@ -46,20 +46,20 @@
       </td>
       <td>{{vm.type}}</td>
       <td>
-        <button *ngIf="vm.status == 'booting'" class="btn btn-sm btn-primary" type="button" disabled>
+
+        <button *ngIf="vm.status === 'booting'  || vm.status === 'creating'" class="btn btn-sm btn-primary" type="button" disabled>
           <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
           {{vm.status}}
         </button>
-        <button *ngIf="vm.status != 'booting'" class="btn btn-sm btn-primary" type="button" disabled>
+        <button *ngIf="vm.status != 'booting' && vm.status != 'creating'" class="btn btn-sm btn-primary" type="button" disabled>
           {{vm.status}}
         </button>
-
       </td>
     </tr>
     </tbody>
   </table>
 
-  <button type="button" class="btn btn-danger" (click)="delete_vm()">Delete</button>
+  <button type="button" *ngIf="user.vms[0].status != 'creating'" class="btn btn-danger" (click)="delete_vm()">Delete</button>
   <!-- <button type="button" class="btn btn-primary" *ngIf="!editing" (click)="edit()">Edit</button> -->
   <!--<button type="button" class="btn btn-primary" *ngIf="editing" (click)="editing = false;">Confirm</button>-->
   <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'stopped'" (click)="commit_edit('start')">Start</button>

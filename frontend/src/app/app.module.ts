@@ -41,7 +41,7 @@ import { ManualComponent } from './manual/manual.component';
     HttpClientModule,
     OAuthModule.forRoot({
       resourceServer: {
-         // allowedUrls: [ 'http://localhost:8080' ],
+        // allowedUrls: [ 'http://localhost:8080' ],
         allowedUrls: [ 'https://backprox.minet.net' ],
         sendAccessToken: true
       }

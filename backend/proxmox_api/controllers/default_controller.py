@@ -6,6 +6,8 @@ from proxmox_api.models.dns_entry_item import DnsEntryItem  # noqa: E501
 from proxmox_api.models.dns_item import DnsItem  # noqa: E501
 from proxmox_api.models.vm_id_item import VmIdItem  # noqa: E501
 from proxmox_api.models.vm_item import VmItem  # noqa: E501
+from proxmox_api import util
+
 import proxmox_api.db.db_functions as dbfct
 
 def create_dns(body=None):  # noqa: E501
@@ -25,8 +27,6 @@ def create_dns(body=None):  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-
-    print("GET DNS REQUEST")
 
     if connexion.request.is_json:
         body = DnsItem.from_dict(connexion.request.get_json())  # noqa: E501
@@ -88,7 +88,6 @@ def delete_vm_id(vmid):  # noqa: E501
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
-        print("Deleting vm")
         return proxmox.delete_vm(vmid)
     else:
         return {"status": "error"}, 500
@@ -148,17 +147,23 @@ def get_vm_id(vmid):  # noqa: E501
     except:
         return {"status": "error not an integer"}, 500
     status = proxmox.get_vm_status(vmid)
+    type = dbfct.get_vm_type(vmid)
+
+    if status[0]["status"] == 'creating':
+        return {"status": status[0]["status"], "type": type[0]["type"]}, 201
+
     name = proxmox.get_vm_name(vmid)
     ram = proxmox.get_vm_ram(vmid)
     cpu = proxmox.get_vm_cpu(vmid)
     disk = proxmox.get_vm_disk(vmid)
-    type = dbfct.get_vm_type(vmid)
+
 
     if status[0]["status"] != 'running':
         return {"name": name[0]["name"], "ip": None, "status": status[0]["status"], "ram": ram[0]['ram']
-                   , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
+                   ,"cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
 
     ip = proxmox.get_vm_ip(vmid)
+
     if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[1] == 201 and \
             type[1] == 201:
         return {"name": name[0]["name"], "ip": ip[0]["vm_ip"], "status": status[0]["status"], "ram": ram[0]['ram']
@@ -194,7 +199,6 @@ def delete_dns_id(dnsid):  # noqa: E501
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if dnsid in map(int, proxmox.get_user_dns(user_id)[0]):
-        print("Deleting dns record")
         return proxmox.del_user_dns(dnsid)
     else:
         return {"status": "error"}, 500

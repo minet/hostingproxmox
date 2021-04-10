@@ -30,12 +30,12 @@
         <td>{{vm.ip}}</td>
         <td>{{vm.type}}</td>
         <td>
-          <button *ngIf="vm.status == 'booting'" class="btn btn-sm btn-primary" type="button" disabled>
+          <button *ngIf="vm.status === 'booting'  || vm.status === 'creating'" class="btn btn-sm btn-primary" type="button" disabled>
             <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
             {{vm.status}}
           </button>
 
-          <button *ngIf="vm.status != 'booting'" class="btn btn-sm btn-primary" type="button" disabled>
+          <button *ngIf="vm.status != 'booting' && vm.status != 'creating'" class="btn btn-sm btn-primary" type="button" disabled>
             {{vm.status}}
           </button>
         </td>
