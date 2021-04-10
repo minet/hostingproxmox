@@ -1,25 +1,26 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { UserService } from './common/services/user.service';
-import { User } from './models/user';
+import { timer } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit{
   title = 'VPS MiNET';
 
 
-  constructor(public user: User, private userService: UserService) {
+  constructor(private userService: UserService) {
   }
 
+  validToken = this.userService.validToken();
   ngOnInit(): void {
-    this.user = this.userService.getUser();
-    console.log(this.userService.validToken());
+    timer(300).subscribe(x => {this.refreshToken(); });
   }
-  ngOnDestroy(): void {
-    this.user = this.userService.getUser();
+
+  refreshToken(): void{
+    this.validToken = this.userService.validToken();
   }
 
 

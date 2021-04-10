@@ -5,7 +5,7 @@
     <br>
 
     <section>
-      <div *ngIf="user == null" class="container">
+      <div *ngIf="!validToken" class="container">
         <div class="container-fluid">
           <div class="container my-1">
             <div class="row bg-light align-items-center rounded-1 border shadow-lg">
@@ -56,8 +56,7 @@
       </div>
 
 
-      <router-outlet *ngIf="user != null"></router-outlet>
-
+      <router-outlet *ngIf="validToken"></router-outlet>
 
     </section>
   </div>

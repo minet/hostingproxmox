@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { User } from '../../models/user';
-import { JwksValidationHandler, OAuthService} from 'angular-oauth2-oidc';
+import { OAuthService} from 'angular-oauth2-oidc';
+import { JwksValidationHandler } from 'angular-oauth2-oidc-jwks';
 import { authCodeFlowConfig } from '../../sso.config';
 
 @Injectable({
