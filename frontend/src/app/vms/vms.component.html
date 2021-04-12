@@ -6,43 +6,46 @@
   </div>
 </div>
 
-<div class="vms container" *ngIf="!loading">
+<div class="vms container flex-fill" *ngIf="!loading">
 
-  <div class="card-body" *ngIf="user.vms.length == 0">
-    No deployments yet, create them from the Home page
+  <h1 class="text-center mb-2">My VMs</h1>
+  <hr>
+  <div class="text-center">
+    <ng-container *ngIf="user.vms.length == 0">
+      <h4 class="text-danger">You currently have no VMs, create one first!</h4>
+    </ng-container>
+    <ng-container *ngIf="user.vms.length != 0">
+      <button *ngIf="!loading" class="btn btn-primary" (click)="showSsh = !showSsh">Show the web-based SSH interface</button>
+    </ng-container>
   </div>
+  <hr>
   <div class="flex-fill">
-
-    <table class="table table-dark" *ngIf="user.vms.length !=0">
-      <thead>
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Name</th>
-        <th scope="col">IPs</th>
-        <th scope="col">Type</th>
-        <th scope="col">Status</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let vm of user.vms">
-        <th scope="row"><a href="#" [routerLink]="[vm.id]">{{vm.id}}</a></th>
-        <td>{{vm.name}}</td>
-        <td>{{vm.ip}}</td>
-        <td>{{vm.type}}</td>
-        <td>
-          <button *ngIf="vm.status === 'booting'  || vm.status === 'creating'" class="btn btn-sm btn-primary" type="button" disabled>
-            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-            {{vm.status}}
-          </button>
-
-          <button *ngIf="vm.status != 'booting' && vm.status != 'creating'" class="btn btn-sm btn-primary" type="button" disabled>
-            {{vm.status}}
-          </button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-    <button *ngIf="user.vms.length != 0 && !loading" class="btn btn-info" (click)="showSsh = !showSsh">SSH into one of your VMs</button>
+    <div class="row" *ngFor="let vm of user.vms">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-img-top" style='background-image: url("assets/images/vms/{{ vm.type }}.png"); height: 100px;
+background-position: 50% 50%; background-size: 100%; position: relative'>
+            <small class="text-white m-2" style="position: absolute; right: 0; bottom: 0">{{ vm.type }}</small>
+          </div>
+          <div class="card-body">
+            <h4 class="card-title">
+              <span class="badge badge-pill"
+                    [ngClass]="{
+                    'badge-danger': vm.status === 'stopped',
+                    'badge-info': vm.status === 'creating',
+                    'badge-warning': vm.status === 'booting',
+                    'badge-success': vm.status === 'running'
+                    }"
+              ><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" *ngIf="vm.status === 'booting'  || vm.status === 'creating'"></span>{{ vm.status }}</span>
+              &nbsp;{{ vm.name }}&nbsp;<small class="text-muted">(#{{ vm.id }})</small>
+              <span class="float-right">{{ vm.ip }}</span>
+            </h4>
+            <a href="#" [routerLink]="[vm.id]" class="stretched-link"></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr *ngIf="showSsh">
     <app-ssh *ngIf="showSsh"></app-ssh>
   </div>
 </div>

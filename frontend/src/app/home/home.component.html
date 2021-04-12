@@ -1,32 +1,41 @@
 <div class="home container flex-fill">
 
-  <h3 style="margin-bottom: 3%" class="text-center text-muted"><u>MiNET's Hosting</u></h3>
-  <div class="alert alert alert-success" role="alert">
-    <p>
-      Here you can create a virtual machine which will host your website or whatever service you need.
-    </p>
+  <h1 class="text-center mb-2">Home</h1>
+  <hr>
+
+  <div class="alert alert-info text-center" role="alert">
+    <h3 class="alert-heading">
+      Here you can create a virtual machine which will host your website or whichever service you want.
+    </h3>
     <hr>
     <p>
       Be sure to read our <a [routerLink]="['rules']">rules</a> and our user's manual before. Do not hesitate to contact our <a href="mailto:webmaster@listes.minet.net"> webmaster</a> for any question.
     </p>
   </div>
 
-  <div class="card text-white bg-dark mb-3">
-    <div class="card-title text-center">Create your VM</div>
-    <div class="card-header">
-      <p class="small"><i>Bare Vm: Bare Debian 10 VM, use it as storage, compute machine or test machine.</i></p>
-      <p class="small"><i>Simple web server: Wordpress ready to use with ftps server.</i></p>
-    </div>
+  <div class="card mb-3">
+    <h4 class="card-header">
+      Create your VM
+    </h4>
     <div class="card-body">
-      Create a new VM:
+      <p class="lead">Overview of the available machine types</p>
+      <dl>
+        <dt>Bare VM</dt>
+        <dd>Bare Debian 10 VM, use it as storage, compute machine or test machine.</dd>
+        <dt>Simple web server</dt>
+        <dd>Wordpress ready to use with ftps server.</dd>
+      </dl>
+      <hr>
       <div>
         <form (ngSubmit)="create_vm(vm)" #vmForm="ngForm">
           <div *ngIf="!vmForm.submitted">
-            <div class="">
-            </div>
-            <div class="form-group">
-              <label for="type">Type</label>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="type-select-prepend">Type</span>
+              </div>
               <select class="form-control" id="type"
+                      aria-label="Type"
+                      aria-describedby="type-select-prepend"
                       required
                       [(ngModel)]="vm.type" name="type"
                       #type="ngModel">
@@ -94,14 +103,14 @@
                 Password is required
               </div>
 
-              <div class="form-check mb-2">
+              <div class="form-check mb-2 text-center m-3">
                 <input (click)="rules_checked()" [checked]="rulesCheck" id="checkbox" type="checkbox" class="form-check-input">
                 <label class="form-check-label" for="checkbox">I agree with MiNET's and MiNET's Hosting service <a [routerLink]="['rules']">rules</a>.</label>
               </div>
-
-
             </div>
-          <button *ngIf="vmForm.valid && rulesCheck" type="submit" class="btn btn-primary">Submit</button>
+            <div class="text-center">
+            <button *ngIf="vmForm.valid && rulesCheck" type="submit" class="btn btn-primary text-center">Submit</button>
+            </div>
           </div>
         </form>
 
