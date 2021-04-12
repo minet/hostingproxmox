@@ -6,65 +6,77 @@
   </div>
 </div>
 
-
+<div *ngIf="loading">
+  <div class="d-flex justify-content-center">
+    <div class="spinner-grow text-primary" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+</div>
 <div class="container text-center" *ngIf="!loading && !deleting">
 
-  <div class="card-body" *ngIf="user.vms.length == 0">
-    No deployments yet, create them from the Home page
+  <h1 class="text-center mb-2">VM: {{ user.vms[0].name }}</h1>
+  <hr>
+  <div class="alert"
+        [ngClass]="{
+                    'alert-danger': user.vms[0].status === 'stopped',
+                    'alert-info': user.vms[0].status === 'creating',
+                    'alert-warning': user.vms[0].status === 'booting',
+                    'alert-success': user.vms[0].status === 'running'
+                    }"
+  ><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating'"></span>Status:&nbsp;{{ user.vms[0].status }}</div>
+  <hr>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h4>VM information</h4>
+          <hr>
+          <div class="text-left">
+            <p><b>ID:</b>&nbsp; {{ user.vms[0].id }}</p>
+            <p><b>Type:</b>&nbsp; {{ user.vms[0].type }}</p>
+            <p><b>Status:</b>&nbsp; {{ user.vms[0].status }}</p>
+            <p><b>Name:</b>&nbsp; {{ user.vms[0].name }}</p>
+            <p><b>IPv4 address:</b>&nbsp; {{ user.vms[0].ip }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h4>System information</h4>
+          <hr>
+          <div class="text-left">
+            <!--<p *ngIf="editing"><button (click)="dec('ram')" class="btn btn-danger btn-sm">-</button>{{newVm.ram}}<button (click)="add('ram')" class="btn btn-primary btn-sm">+</button></p>-->
+            <p *ngIf="!editing"><b>CPU:</b>&nbsp; {{ user.vms[0].cpu }}</p>
+            <!--  <p *ngIf="editing"><button (click)="dec('cpu')" class="btn btn-danger btn-sm">-</button>{{newVm.cpu}}<button (click)="add('cpu')" class="btn btn-primary btn-sm">+</button></p>-->
+            <p *ngIf="!editing"><b>RAM (MB):</b>&nbsp; {{ user.vms[0].ram }}</p>
+            <!-- <p *ngIf="editing">{{newVm.disk}}<button (click)="add('disk')" class="btn btn-primary btn-sm">+</button></p> -->
+            <p *ngIf="!editing"><b>Disk space (GB):</b>&nbsp; {{ user.vms[0].disk }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <table class="table table-dark" *ngIf="user.vms.length !=0">
-    <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Name</th>
-      <th scope="col">IPs</th>
-      <th scope="col">RAM(Mo)</th>
-      <th scope="col">Disk(Go)</th>
-      <th scope="col">CPU</th>
-      <th scope="col">Type</th>
-      <th scope="col">Status</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let vm of user.vms">
-      <th scope="row">{{vm.id}}</th>
-      <td>{{vm.name}}</td>
-      <td>{{vm.ip}}</td>
-      <td>
-        <p *ngIf="!editing">{{vm.ram}}</p>
-        <!--<p *ngIf="editing"><button (click)="dec('ram')" class="btn btn-danger btn-sm">-</button>{{newVm.ram}}<button (click)="add('ram')" class="btn btn-primary btn-sm">+</button></p>-->
+  <hr>
 
-      </td>
-      <td>
-        <p *ngIf="!editing">{{vm.disk}}</p>
-       <!-- <p *ngIf="editing">{{newVm.disk}}<button (click)="add('disk')" class="btn btn-primary btn-sm">+</button></p> -->
-      </td>
-      <td>
-        <p *ngIf="!editing">{{vm.cpu}}</p>
-      <!--  <p *ngIf="editing"><button (click)="dec('cpu')" class="btn btn-danger btn-sm">-</button>{{newVm.cpu}}<button (click)="add('cpu')" class="btn btn-primary btn-sm">+</button></p>-->
-      </td>
-      <td>{{vm.type}}</td>
-      <td>
-
-        <button *ngIf="vm.status === 'booting'  || vm.status === 'creating'" class="btn btn-sm btn-primary" type="button" disabled>
-          <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-          {{vm.status}}
-        </button>
-        <button *ngIf="vm.status != 'booting' && vm.status != 'creating'" class="btn btn-sm btn-primary" type="button" disabled>
-          {{vm.status}}
-        </button>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-
-  <button type="button" *ngIf="user.vms[0].status != 'creating'" class="btn btn-danger" (click)="delete_vm()">Delete</button>
-  <!-- <button type="button" class="btn btn-primary" *ngIf="!editing" (click)="edit()">Edit</button> -->
-  <!--<button type="button" class="btn btn-primary" *ngIf="editing" (click)="editing = false;">Confirm</button>-->
-  <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'stopped'" (click)="commit_edit('start')">Start</button>
-  <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'running'" (click)="commit_edit('stop')">Stop</button>
-
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="btn-group">
+            <button type="button" *ngIf="user.vms[0].status != 'creating'" class="btn btn-danger" (click)="delete_vm()">Delete</button>
+            <!-- <button type="button" class="btn btn-primary" *ngIf="!editing" (click)="edit()">Edit</button> -->
+            <!--<button type="button" class="btn btn-primary" *ngIf="editing" (click)="editing = false;">Confirm</button>-->
+            <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'stopped'" (click)="commit_edit('start')">Start</button>
+            <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'running'" (click)="commit_edit('stop')">Stop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
