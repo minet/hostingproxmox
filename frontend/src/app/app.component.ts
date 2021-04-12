@@ -20,9 +20,4 @@ export class AppComponent implements OnInit{
     this.validToken$.subscribe((next) => console.log(next));
   }
 
-  refreshToken(): void{
-    //this.validToken = this.userService.validToken();
-  }
-
-
 }

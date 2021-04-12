@@ -19,11 +19,4 @@ export class NavbarComponent implements OnInit {
     this.userService.getUser().subscribe((user) => this.user = user);
   }
 
-  refreshUser(): void{
-    //this.user = this.userService.getUser();
-  }
-
-
-
-
 }
