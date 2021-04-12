@@ -36,7 +36,7 @@ export class DnsComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
-    this.user = this.userService.getUser();
+    this.userService.getUser().subscribe((user) => this.user = user);
     this.get_dns_list();
     this.user.dns = Array<Dns>();
     this.newDns.entry = 'YourEntry';
