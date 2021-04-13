@@ -43,9 +43,21 @@ def del_user_dns(dnsid):
     return ddns_rep
 
 
-def random_server():
-    node_number = len(proxmox.nodes.get())
-    return proxmox.nodes.get()[random.randint(0, node_number - 1)]['node']
+def load_balance_server():
+    nodes_info = proxmox.nodes.get()
+    server = ""
+    perram_min = 100
+    for i in nodes_info:
+        perram = round(i["mem"] * 100 / i["maxmem"], 2)
+        percpu = round(i["cpu"] * 100, 2)
+        if i["status"] == "online" and perram < 90 and percpu < 70:
+            if perram < perram_min:
+                perram_min = perram
+                server = i["node"]
+    if server == "":
+        return {"server": "no server available"}, 500
+
+    return {"server": server}, 201
 
 
 def delete_vm(vmid):
@@ -72,7 +84,12 @@ def delete_vm(vmid):
 
 def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key="no"):
     next_vmid = int(proxmox.cluster.nextid.get())
-    server = random_server()
+    server = load_balance_server()
+
+    if server[1] != 201:
+        return server
+    else:
+        server = server[0]["server"]
 
     template_node = ""
 
