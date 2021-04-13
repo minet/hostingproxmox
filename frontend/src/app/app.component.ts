@@ -11,7 +11,7 @@ export class AppComponent implements OnInit{
   title = 'VPS MiNET';
 
 
-  constructor(private userService: UserService) {
+  constructor(public userService: UserService) {
   }
 
   public validToken$: Observable<boolean>;

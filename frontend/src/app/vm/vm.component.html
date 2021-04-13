@@ -6,13 +6,6 @@
   </div>
 </div>
 
-<div *ngIf="loading">
-  <div class="d-flex justify-content-center">
-    <div class="spinner-grow text-primary" role="status">
-      <span class="sr-only">Loading...</span>
-    </div>
-  </div>
-</div>
 <div class="container text-center" *ngIf="!loading && !deleting">
 
   <h1 class="text-center mb-2">VM: {{ user.vms[0].name }}</h1>
