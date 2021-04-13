@@ -227,8 +227,11 @@ def get_vm_name(vmid):
     return {"name": "Vm not found"}, 404
 
 
-def get_vm(user_id):
-    return get_vm_list(user_id), 201
+def get_vm(user_id = 0):
+    if user_id != 0:
+        return get_vm_list(user_id), 201
+    else:
+        return get_vm_list(), 201
 
 
 def get_vm_cpu(vmid):

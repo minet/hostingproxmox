@@ -40,7 +40,11 @@ export class UserService {
     const user: any = this.oauthService.getIdentityClaims();
     if (user != null) {
       this.user.username = user.sub;
+      this.user.sn = user.sn;
       this.user.name = user.given_name;
+      this.user.admin = false;
+      if(['seberus', 'zastava', 'lionofinterest'].includes(user.sub))
+        this.user.admin = true;
       return this.user;
     }
     else{

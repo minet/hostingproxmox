@@ -8,7 +8,8 @@
 
 <div class="vms container flex-fill" *ngIf="!loading">
 
-  <h1 class="text-center mb-2">My VMs</h1>
+  <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
+  <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
   <hr>
   <div class="text-center">
     <ng-container *ngIf="user.vms.length == 0">
@@ -37,8 +38,12 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
                     'badge-success': vm.status === 'running'
                     }"
               ><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" *ngIf="vm.status === 'booting'  || vm.status === 'creating'"></span>{{ vm.status }}</span>
-              &nbsp;{{ vm.name }}&nbsp;<small class="text-muted">(#{{ vm.id }})</small>
+              &nbsp;{{ vm.name }}&nbsp;<small class="text-muted">(#{{ vm.id }})
+            </small>
               <span class="float-right">{{ vm.ip }}</span>
+              <br *ngIf="user.admin" />
+              <br *ngIf="user.admin" />
+              <p *ngIf="user.admin">Créée par {{ vm.user }}</p>
             </h4>
             <a href="#" [routerLink]="[vm.id]" class="stretched-link"></a>
           </div>
