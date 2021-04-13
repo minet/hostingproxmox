@@ -127,7 +127,7 @@ def get_vm():  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if user_id in ("seberus","zastava","lionofinterest") :
-        return proxmox.get_vm()
+        return proxmox.get_vm() # affichage de la liste sans condition
     return proxmox.get_vm(user_id=user_id)
 
 def get_vm_id(vmid):  # noqa: E501
@@ -162,8 +162,8 @@ def get_vm_id(vmid):  # noqa: E501
     ram = proxmox.get_vm_ram(vmid)
     cpu = proxmox.get_vm_cpu(vmid)
     disk = proxmox.get_vm_disk(vmid)
-    if user_id in ("seberus","zastava","lionofinterest") :
-        owner = get_vm_userid(vmid)
+    if user_id in ("seberus","zastava","lionofinterest") : # partie admin pour renvoyer l'owner en plus
+        owner = get_vm_userid(vmid) # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
         if status[0]["status"] != 'running':
             return {"name": name[0]["name"], "owner": owner, "ip": None, "status": status[0]["status"], "ram": ram[0]['ram']
                        ,"cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201

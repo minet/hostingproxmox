@@ -6,8 +6,8 @@ def get_user_id(user_id):
     return User.query.filter_by(id=user_id).first()
 
 
-def get_vm_list(user_id = 0):
-    if user_id != 0:
+def get_vm_list(user_id = ""): # user id est vide quand un admin veut voir la liste
+    if user_id != "": # dans ce cas on affiche ce qui est lié à l'user
         if User.query.filter_by(id=user_id).first() is None:
             return []
         else:
@@ -15,7 +15,7 @@ def get_vm_list(user_id = 0):
             for i in User.query.filter_by(id=user_id).first().vms:
                 list.append(i.id)
             return list
-    else:
+    else: # dans ce cas on affiche touuute la liste sans restriction
         list = []
         for i in User.query.first().vms:
             list.append(i.id)
