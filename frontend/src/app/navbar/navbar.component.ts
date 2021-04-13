@@ -10,7 +10,7 @@ import {timer} from 'rxjs';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent implements OnInit {
-
+  public admin;
   constructor(public user: User, private http: HttpClient, public userService: UserService) {
 
   }

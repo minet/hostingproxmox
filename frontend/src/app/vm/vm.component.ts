@@ -22,7 +22,6 @@ export class VmComponent implements OnInit, OnDestroy {
   deleting = false;
   intervals = new Set<Subscription>();
   newVm = new Vm();
-
   constructor(
     private activatedRoute: ActivatedRoute,
     private router: Router,
@@ -30,7 +29,7 @@ export class VmComponent implements OnInit, OnDestroy {
     public user: User,
     private userService: UserService,
     public authService: AuthService,
-    public slugifyPipe: SlugifyPipe
+    public slugifyPipe: SlugifyPipe,
   ) {
   }
 
@@ -117,6 +116,7 @@ export class VmComponent implements OnInit, OnDestroy {
           vm.ram = rep.body['ram'];
           vm.disk = rep.body['disk'];
           vm.cpu = rep.body['cpu'];
+          vm.user = rep.body['owner'];
           if (vm.status === 'running') {
             vm.ip = rep.body['ip'][0];
           }

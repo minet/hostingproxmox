@@ -7,6 +7,7 @@ from proxmox_api.models.dns_item import DnsItem  # noqa: E501
 from proxmox_api.models.vm_id_item import VmIdItem  # noqa: E501
 from proxmox_api.models.vm_item import VmItem  # noqa: E501
 from proxmox_api import util
+from proxmox_api.db.db_functions import *
 
 import proxmox_api.db.db_functions as dbfct
 
@@ -86,7 +87,8 @@ def delete_vm_id(vmid):  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-
+    if user_id in ("seberus","zastava","lionofinterest") :
+        return proxmox.delete_vm(vmid)
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
         return proxmox.delete_vm(vmid)
     else:
@@ -110,7 +112,6 @@ def get_dns():  # noqa: E501
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     return proxmox.get_user_dns(user_id)
 
-
 def get_vm():  # noqa: E501
     """get all user vms
 
@@ -119,17 +120,15 @@ def get_vm():  # noqa: E501
 
     :rtype: List[VmIdItem]
     """
-
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-
     if r.status_code != 200:
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-
+    if user_id in ("seberus","zastava","lionofinterest") :
+        return proxmox.get_vm() # affichage de la liste sans condition
     return proxmox.get_vm(user_id=user_id)
-
 
 def get_vm_id(vmid):  # noqa: E501
     """get a vm by id
@@ -141,6 +140,13 @@ def get_vm_id(vmid):  # noqa: E501
 
     :rtype: VmItem
     """
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     try:
         vmid = int(vmid)
@@ -156,24 +162,41 @@ def get_vm_id(vmid):  # noqa: E501
     ram = proxmox.get_vm_ram(vmid)
     cpu = proxmox.get_vm_cpu(vmid)
     disk = proxmox.get_vm_disk(vmid)
+    if user_id in ("seberus","zastava","lionofinterest") : # partie admin pour renvoyer l'owner en plus
+        owner = get_vm_userid(vmid) # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
+        if status[0]["status"] != 'running':
+            return {"name": name[0]["name"], "owner": owner, "ip": None, "status": status[0]["status"], "ram": ram[0]['ram']
+                       ,"cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
 
+        ip = proxmox.get_vm_ip(vmid)
 
-    if status[0]["status"] != 'running':
-        return {"name": name[0]["name"], "ip": None, "status": status[0]["status"], "ram": ram[0]['ram']
-                   ,"cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
-
-    ip = proxmox.get_vm_ip(vmid)
-
-    if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[1] == 201 and \
-            type[1] == 201:
-        return {"name": name[0]["name"], "ip": ip[0]["vm_ip"], "status": status[0]["status"], "ram": ram[0]['ram']
-                   , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
-    elif name[1] == 404 or ip[1] == 404 or status[1] == 404 or ram[1] == 404 or disk[1] == 404 or cpu[1] == 404 or type[
-        1] == 404:
-        return {"status": "vm not found"}, 404
+        if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[1] == 201 and \
+                type[1] == 201:
+            return {"name": name[0]["name"], "owner": owner, "ip": ip[0]["vm_ip"], "status": status[0]["status"], "ram": ram[0]['ram']
+                       , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
+        elif name[1] == 404 or ip[1] == 404 or status[1] == 404 or ram[1] == 404 or disk[1] == 404 or cpu[1] == 404 or type[
+            1] == 404:
+            return {"status": "vm not found"}, 404
+        else:
+            return {"status": "error"}, 500
     else:
-        return {"status": "error"}, 500
+        if status[0]["status"] != 'running':
+            return {"name": name[0]["name"], "ip": None, "status": status[0]["status"], "ram": ram[0]['ram']
+                       , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
 
+        ip = proxmox.get_vm_ip(vmid)
+
+        if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[
+            1] == 201 and \
+                type[1] == 201:
+            return {"name": name[0]["name"], "ip": ip[0]["vm_ip"], "status": status[0]["status"], "ram": ram[0]['ram']
+                       , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
+        elif name[1] == 404 or ip[1] == 404 or status[1] == 404 or ram[1] == 404 or disk[1] == 404 or cpu[1] == 404 or \
+                type[
+                    1] == 404:
+            return {"status": "vm not found"}, 404
+        else:
+            return {"status": "error"}, 500
 
 def delete_dns_id(dnsid):  # noqa: E501
     """delete dns entry by id
@@ -252,13 +275,12 @@ def patch_vm(vmid, body=None):  # noqa: E501
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-
     if r.status_code != 200:
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
-    if vmid in map(int, proxmox.get_vm(user_id)[0]):
+    if vmid in map(int, proxmox.get_vm(user_id)[0]) or user_id in ("seberus","zastava","lionofinterest") :
         if body.status == "start":
             return proxmox.start_vm(vmid)
         elif body.status == "stop":

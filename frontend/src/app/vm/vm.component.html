@@ -27,6 +27,7 @@
           <hr>
           <div class="text-left">
             <p><b>ID:</b>&nbsp; {{ user.vms[0].id }}</p>
+            <p *ngIf="user.admin"><b>Owner:</b> {{ user.vms[0].user }}</p>
             <p><b>Type:</b>&nbsp; {{ user.vms[0].type }}</p>
             <p><b>Status:</b>&nbsp; {{ user.vms[0].status }}</p>
             <p><b>Name:</b>&nbsp; {{ user.vms[0].name }}</p>
