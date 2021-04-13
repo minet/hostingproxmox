@@ -4,12 +4,15 @@ import { User } from '../../models/user';
 import { OAuthService} from 'angular-oauth2-oidc';
 import { JwksValidationHandler } from 'angular-oauth2-oidc-jwks';
 import { authCodeFlowConfig } from '../../sso.config';
+import {merge, Observable} from 'rxjs';
+import {fromPromise} from 'rxjs/internal-compatibility';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
+  private discoveryDocument$: Promise<boolean>;
   constructor(private user: User, private authService: AuthService, private oauthService: OAuthService) {
     this.configureSingleSignOn();
   }
@@ -18,8 +21,7 @@ export class UserService {
 
     this.oauthService.configure(authCodeFlowConfig);
     this.oauthService.tokenValidationHandler = new JwksValidationHandler();
-    this.oauthService.loadDiscoveryDocumentAndTryLogin();
-
+    this.discoveryDocument$ = this.oauthService.loadDiscoveryDocumentAndTryLogin();
   }
 
   login(): void {
@@ -32,11 +34,20 @@ export class UserService {
     this.oauthService.logOut();
   }
 
-  validToken(): boolean{
-    return this.oauthService.hasValidAccessToken();
+  validToken(): Observable<boolean> {
+    const tokenObservable$: Observable<boolean> = new Observable<boolean>((sub) => {
+      if (this.oauthService.hasValidAccessToken()) {
+        sub.next(true);
+      }
+    });
+    return merge(
+        this.discoveryDocument$.then((result) => this.oauthService.hasValidAccessToken()),
+        tokenObservable$
+    );
   }
 
-  getUser(): User {
+  getUser(): Observable<User> {
+    return fromPromise(this.discoveryDocument$.then((result) => {
     const user: any = this.oauthService.getIdentityClaims();
     if (user != null) {
       this.user.username = user.sub;
@@ -49,8 +60,8 @@ export class UserService {
     }
     else{
       return null;
-    }
+      }
+    }));
 
-  }
-
+   }
 }

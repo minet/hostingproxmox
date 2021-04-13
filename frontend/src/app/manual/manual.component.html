@@ -160,4 +160,154 @@
     </p>
     <div>
     </div>
+    <h2 class="toc-header" id="version-anglaise"> English Version</h2>
+    <div>
+    </div>
+    <h3 class="toc-header" id="hosting-cest-quoi"> What's Hosting ?</h3>
+    <div>
+    </div>
+    <p>
+        <strong>MiNET Hosting</strong> is a hosting service provided by the MiNET association, that allows its members to create Virtual Machines and to store it within the servers of the association.
+    </p>
+    <div>
+    </div>
+    <h3 class="toc-header" id="une-vm-cest-quoi"> What's a VM ?</h3>
+    <div>
+    </div>
+    <blockquote>
+        <p>
+            A Virtual Machine (VM), is "the client" created by an IT environment, "the host". Many virtual machines can coexist with the same host.
+            The main files that constitute a virtual machine are : a journal file,
+            a setting file for RAM, a virtual disk file and a configuration file. - <strong>VMware</strong>
+        </p>
+    </blockquote>
+    <div>
+    </div>
+    <h3 class="toc-header" id="une-vm-pourquoi"> Why would I use a VM ?</h3>
+    <div>
+    </div>
+    <p>
+        A VM can be used as a storage area, a sandbox to make development tests, a hosting platform for websites... <br>The only limit is your imagination.
+    </p>
+    <div>
+    </div>
+    <h3 class="toc-header" id="une-vm-comment"> How can I create a VM ?</h3>
+    <div>
+    </div>
+    <p>
+        The MiNET Hosting service allows you to create a VM in just a few clicks.
+        You must firstly enter your MiNET credentials in the "Login" tab.
+    </p>
+    <div>
+    </div>
+    <p>
+        In the "Your VMs" tab, you may start to create your VM, by entering the name of your VM,
+        choosing the possibility to configure an SSH Key-Based Authentication,
+        and credentials (username/password) for the user in your VM (avoid "root" as a username in order not to face conflicts).
+    </p>
+    <div>
+    </div>
+    <p>
+        The created VM has technicals aspects which depends of the template used. It's possible to change these characteristics
+        by contacting the MiNET team with justification.
+    </p>
+    <div>
+    </div>
+    <p>
+        The two avaiable templates are :
+    </p>
+    <div>
+    </div>
+    <ul>
+        <li>
+            <strong>Bare VM</strong> : creates a fully customizable VM. It's the default model, that contains openssh, fail2ban, and the class debian packages.
+        </li>
+    </ul>
+    <div>
+    </div>
+    <blockquote class="is-info">
+        <p>
+            This template is composed of <strong>2 Go RAM</strong>, <strong>2 virtual CPU hearts</strong> and <strong>10 Go for storage</strong>.
+        </p>
+    </blockquote>
+    <div>
+    </div>
+    <ul>
+        <li>
+            <strong>Static web server</strong> : creates a VM with a ready for use web server (Wordpress).
+        </li>
+    </ul>
+    <div>
+    </div>
+    <blockquote class="is-info">
+        <p>
+            This template is composed of <strong>1 Go RAM</strong>, <strong>1 virtual CPU hearts</strong> and <strong>3 Go for storage</strong>.
+        </p>
+    </blockquote>
+    <div>
+    </div>
+    <p>
+        Once your registration form is filled, <strong>you must wait a few minutes</strong>, depending on the template you've chose,
+        for your VM to be created.
+    </p>
+    <div>
+    </div>
+    <p>
+        You can access your VM through the "Your VMs" tab.<br>
+        Its IP will look like this address : "157.159.195.X".
+    </p>
+    <div>
+    </div>
+    <blockquote class="is-warning">
+        <p>Warning : you can't create more than 2 VMs.</p>
+    </blockquote>
+    <div>
+    </div>
+    <h3 class="toc-header" id="après-création-que-faire"> What should I do after my VM is up ?</h3>
+    <div>
+    </div>
+    <p>You can connect to your VM. There are two ways :</p>
+    <div>
+    </div>
+    <ul>
+        <li>via your shell, by executing the command <br>
+            <code>ssh &lt;nomd'utilisateur&gt;@&lt;ipdevotrevm&gt;</code><br>
+            and entering your password.
+        </li>
+        <li>via the openssh tool, that is directly incorporated on our website, that allows you to connect to the VM through your browser.
+            You'll then have to enter the IP address of your VM and its credentials.
+        </li>
+    </ul>
+    <div>
+    </div>
+    <h3 class="toc-header" id="une-entrée-dns-pour-quoi-faire"> Why would I use a DNS entry ?</h3>
+    <div>
+    </div>
+    <blockquote>
+        <p>
+            A DNS allows to associate a clear name to an IP address. - <strong>Nameshield</strong>
+        </p>
+    </blockquote>
+    <div>
+    </div>
+    <p>
+        In the "MiNET DNS entries" tab, you can choose to add an address to your website, it will look like :  <a class="is-external-link" href="http://yourwebsite.h.minet.net">yourwebsite.h.minet.net</a>
+    </p>
+    <div>
+    </div>
+    <p>
+        You simply have to write the name you want to use and the IP of your server.
+        You will therefore be allowed to access your site through the DNS entry.<br>
+        Exemple : <a class="is-external-link" href="http://toto.h.minet.net">toto.h.minet.net</a>
+    </p>
+    <div>
+    </div>
+    <hr>
+    <div>
+    </div>
+    <p>
+        If you have any follow-up questions or if you face a problem, you can contact us on <a class="is-external-link" href="https://tickets.minet.net">https://tickets.minet.net</a>
+    </p>
+    <div>
+    </div>
 </div>

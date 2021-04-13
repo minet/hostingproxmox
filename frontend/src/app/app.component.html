@@ -1,6 +1,7 @@
 <app-navbar></app-navbar>
 <div id="content" style="min-height: 100%" class="container mt-5">
-    <ng-container *ngIf="!validToken">
+    <router-outlet *ngIf="validToken$ | async as validToken; else landing"></router-outlet>
+    <ng-template #landing>
         <div class="text-center">
             <img id="logo" class="mb-3" style="height: 150px" src="assets/images/minet.png">
             <div class="alert alert-success" role="alert">
@@ -9,6 +10,7 @@
                 <p>This service is free if you already own a MiNET account. Otherwise, please use <a
                         href="https://payment.minet.net"> payment.minet.net </a> to get a subscription.
                 </p>
+                <a href="#" class="btn btn-primary" role="button" (click)="userService.login()">Get started</a>
             </div>
         </div>
         <hr>
@@ -38,7 +40,6 @@
                 </div>
             </div>
         </div>
-    </ng-container>
-    <router-outlet *ngIf="validToken"></router-outlet>
+    </ng-template>
 </div>
 <app-footer></app-footer>
