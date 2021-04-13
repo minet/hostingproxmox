@@ -172,7 +172,7 @@ def get_vm_id(vmid):  # noqa: E501
 
         if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[1] == 201 and \
                 type[1] == 201:
-            return {"name": name[0]["name"], "owner": owner, "ip": ip[0]["vm_ip"], "status": status[0]["status"], "ram": ram[0]['ram']
+            return {"name": name[0]["name"], "user": owner, "ip": ip[0]["vm_ip"], "status": status[0]["status"], "ram": ram[0]['ram']
                        , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
         elif name[1] == 404 or ip[1] == 404 or status[1] == 404 or ram[1] == 404 or disk[1] == 404 or cpu[1] == 404 or type[
             1] == 404:
