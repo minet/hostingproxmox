@@ -6,6 +6,8 @@ import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Vm} from '../models/vm';
 import {Router} from '@angular/router';
+import {timer} from 'rxjs';
+import {flatMap} from 'rxjs/internal/operators';
 
 @Component({
   selector: 'app-home',
@@ -23,6 +25,9 @@ export class HomeComponent implements OnInit {
   valide = false;
   url: string;
   sshAddress: string;
+  countvm: number;
+  countactivevm: number;
+  vmstate: string;
   interval;
   progress = 0;
 
@@ -34,7 +39,7 @@ export class HomeComponent implements OnInit {
 
   constructor(private http: HttpClient,
               private router: Router,
-              private user: User,
+              public user: User,
               private userService: UserService,
               private authService: AuthService,
               private slugifyPipe: SlugifyPipe) {
@@ -44,7 +49,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.userService.getUser().subscribe((user) => this.user = user);
-
+    this.count_vm();
   }
 
   progress_bar(): void{
@@ -105,5 +110,42 @@ export class HomeComponent implements OnInit {
         }
       });
   }
+  count_vm(): void {
+    let vmList: Array<string>;
+    this.countvm = 0;
+    this.countactivevm = 0;
+    this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
+      vmList = rep.body as Array<string>;
+      for (let i = 0; i < vmList.length; i++) {
+        const vmid = vmList[i];
+        this.countvm++;
+        this.get_vmstatus(vmid);
+      }
+    },
 
+    error => {
+      if (error.status === 404) {
+        window.alert('VM not found');
+        this.router.navigate(['']);
+      } else if (error.status === 403) {
+        window.alert('Session expired');
+        this.router.navigate(['']);
+      } else {
+        window.alert('Unknown error');
+        this.router.navigate(['']);
+      }
+
+    });
+  }
+  get_vmstatus(vmid: string): void {
+    const vm = new Vm();
+    vm.id = vmid;
+    this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {
+        this.vmstate = rep.body['status'];
+        if(rep.body['status'] === "running")
+          this.countactivevm++;
+        },
+        error => {
+    });
+  }
 }

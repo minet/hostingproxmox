@@ -68,7 +68,7 @@ export class VmsComponent implements OnInit, OnDestroy {
       .subscribe(rep => {
           vm.name = rep.body['name'];
           vm.status = rep.body['status'];
-          vm.user = rep.body['owner'];
+          vm.user = rep.body['user'];
           if (rep.body['type'] === 'nginx_vm') {
             vm.type = 'web server';
           } else if (rep.body['type'] === 'bare_vm') {
