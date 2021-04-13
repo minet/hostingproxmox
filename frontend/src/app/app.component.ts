@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import { UserService } from './common/services/user.service';
-import { timer } from 'rxjs';
+import {Observable, timer} from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -14,14 +14,10 @@ export class AppComponent implements OnInit{
   constructor(private userService: UserService) {
   }
 
-  validToken = this.userService.validToken();
+  public validToken$: Observable<boolean>;
   ngOnInit(): void {
-    timer(300).subscribe(x => {this.refreshToken(); });
+    this.validToken$ = this.userService.validToken();
+    this.validToken$.subscribe((next) => console.log(next));
   }
-
-  refreshToken(): void{
-    this.validToken = this.userService.validToken();
-  }
-
 
 }

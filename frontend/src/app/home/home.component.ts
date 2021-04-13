@@ -43,7 +43,7 @@ export class HomeComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.user = this.userService.getUser();
+    this.userService.getUser().subscribe((user) => this.user = user);
 
   }
 

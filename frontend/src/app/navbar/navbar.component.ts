@@ -16,15 +16,7 @@ export class NavbarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    timer(300).subscribe(x => {this.refreshUser(); });
-    this.user = this.userService.getUser();
+    this.userService.getUser().subscribe((user) => this.user = user);
   }
-
-  refreshUser(): void{
-    this.user = this.userService.getUser();
-  }
-
-
-
 
 }

@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
-import { OAuthModule } from 'angular-oauth2-oidc';
+import {OAuthModule, OAuthStorage} from 'angular-oauth2-oidc';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -19,6 +19,10 @@ import { SshComponent } from './ssh/ssh.component';
 import { RulesComponent } from './rules/rules.component';
 import { LegalComponent } from './legal/legal.component';
 import { ManualComponent } from './manual/manual.component';
+
+export function storageFactory() : OAuthStorage {
+  return localStorage;
+}
 
 @NgModule({
   declarations: [
@@ -49,7 +53,7 @@ import { ManualComponent } from './manual/manual.component';
     FormsModule,
 
   ],
-  providers: [AuthService, UserService, User, SlugifyPipe],
+  providers: [AuthService, UserService, User, SlugifyPipe, { provide: OAuthStorage, useFactory: storageFactory }],
   bootstrap: [AppComponent]
 })
 export class AppModule {
