@@ -130,7 +130,7 @@ def get_vm():  # noqa: E501
         return proxmox.get_vm()
     return proxmox.get_vm(user_id=user_id)
 
-def get_vm_id(vmid, admin = False):  # noqa: E501
+def get_vm_id(vmid):  # noqa: E501
     """get a vm by id
 
      # noqa: E501

@@ -6,14 +6,21 @@ def get_user_id(user_id):
     return User.query.filter_by(id=user_id).first()
 
 
-def get_vm_list(user_id):
-    if User.query.filter_by(id=user_id).first() is None:
-        return []
+def get_vm_list(user_id = 0):
+    if user_id != 0:
+        if User.query.filter_by(id=user_id).first() is None:
+            return []
+        else:
+            list = []
+            for i in User.query.filter_by(id=user_id).first().vms:
+                list.append(i.id)
+            return list
     else:
         list = []
-        for i in User.query.filter_by(id=user_id).first().vms:
+        for i in User.query.first().vms:
             list.append(i.id)
         return list
+
 
 
 def add_dns_entry(user, entry, ip):
@@ -72,6 +79,9 @@ def del_vm_list(del_vmid):
     Vm.query.filter_by(id=del_vmid).delete()
     db.session.commit()
 
+def get_vm_userid(vmid):
+    userid = Vm.query.filter_by(id=vmid).first().userId
+    return userid
 
 def get_vm_type(vmid):
     type = Vm.query.filter_by(id=vmid).first().type

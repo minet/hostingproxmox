@@ -12,6 +12,7 @@ export class Vm {
     public password?: string,
     public sshKey?: string,
     public ip?: string,
+    public userid?: bigint,
 
   ) { }
 
