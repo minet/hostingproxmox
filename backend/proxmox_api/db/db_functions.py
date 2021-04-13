@@ -17,7 +17,7 @@ def get_vm_list(user_id = ""): # user id est vide quand un admin veut voir la li
             return list
     else: # dans ce cas on affiche touuute la liste sans restriction
         list = []
-        for i in User.query.first().vms:
+        for i in User.query.vms:
             list.append(i.id)
         return list
 
