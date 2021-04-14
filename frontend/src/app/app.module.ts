@@ -19,7 +19,7 @@ import { SshComponent } from './ssh/ssh.component';
 import { RulesComponent } from './rules/rules.component';
 import { LegalComponent } from './legal/legal.component';
 import { ManualComponent } from './manual/manual.component';
-
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 export function storageFactory() : OAuthStorage {
   return localStorage;
 }
@@ -41,16 +41,18 @@ export function storageFactory() : OAuthStorage {
   ],
   imports: [
     BrowserModule,
+    NgbModule,
     AppRoutingModule,
     HttpClientModule,
     OAuthModule.forRoot({
       resourceServer: {
         // allowedUrls: [ 'http://localhost:8080' ],
-        allowedUrls: [ 'https://backprox.minet.net' ],
+        allowedUrls: ['https://backprox.minet.net'],
         sendAccessToken: true
       }
     }),
     FormsModule,
+    NgbModule,
 
   ],
   providers: [AuthService, UserService, User, SlugifyPipe, { provide: OAuthStorage, useFactory: storageFactory }],

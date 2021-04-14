@@ -7,7 +7,6 @@ import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {interval, Observable, Subscription, timer} from 'rxjs';
 import {flatMap} from 'rxjs/internal/operators';
-
 @Component({
   selector: 'app-vms',
   templateUrl: './vms.component.html',
@@ -17,7 +16,8 @@ export class VmsComponent implements OnInit, OnDestroy {
   loading = true;
   intervals = new Set<Subscription>();
   showSsh = false;
-
+  page = 1;
+  pageSize = 10;
   constructor(private http: HttpClient,
               public user: User,
               private userService: UserService,
@@ -25,11 +25,10 @@ export class VmsComponent implements OnInit, OnDestroy {
               public slugifyPipe: SlugifyPipe) {
   }
 
-  ngOnInit(): void {
+ngOnInit(): void {
     this.userService.getUser().subscribe((user) => this.user = user);
-    this.get_vms();
     this.user.vms = Array<Vm>();
-
+    this.get_vms();
   }
 
   ngOnDestroy(): void {
