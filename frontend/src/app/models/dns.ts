@@ -3,6 +3,7 @@ export class Dns {
     public id?: string,
     public entry?: string,
     public ip?: string,
+    public user?: string
 
   ) { }
 }

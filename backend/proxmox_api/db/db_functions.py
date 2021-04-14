@@ -35,14 +35,21 @@ def del_dns_entry(dnsid):
     db.session.commit()
 
 
-def get_dns_entries(user_id):
-    if User.query.filter_by(id=user_id).first() is None:
-        return []
-    else:
+def get_dns_entries(user_id = ""): #user_id vide quand un admin se connecte
+    if user_id != "" :
+        if User.query.filter_by(id=user_id).first() is None:
+            return []
+        else:
+            list = []
+            DnsList = User.query.filter_by(id=user_id).first().dnsEntries
+            for i in DnsList:
+                list.append(i.id)
+            return list
+    else :
         list = []
-        DnsList = User.query.filter_by(id=user_id).first().dnsEntries
-        for i in DnsList:
-            list.append(i.id)
+        for i in User.query.all():
+            for j in i.dnsEntries:
+                list.append(j.id)
         return list
 
 
@@ -63,6 +70,9 @@ def get_entry_host(id):
     else:
         return {"host": host}, 201
 
+def get_entry_userid(dnsid) :
+    userid = DomainName.query.filter_by(id=dnsid).first().userId
+    return userid
 
 def add_user(user):
     new_user = User(id=user)

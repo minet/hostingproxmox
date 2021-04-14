@@ -7,25 +7,28 @@
 </div>
 
 <div class="dns container" *ngIf="!loading">
-  <h1 class="text-center mb-2">DNS entries</h1>
+  <h1 class="text-center mb-2" *ngIf="!user.admin">DNS entries</h1>
+  <h1 class="text-center mb-2" *ngIf="user.admin">Admin DNS</h1>
   <ng-container *ngIf="user.dns.length == 0; else dnsEntries">
   <hr>
-  <h4 class="text-danger text-center">You currently have no DNS entries defined!</h4>
+  <h4 class="text-danger text-center" *ngIf="!user.admin">You currently have no DNS entries defined!</h4>
+  <h4 class="text-danger text-center" *ngIf="user.admin">There is currently no DNS entries!</h4>
   <hr>
   </ng-container>
   <ng-template #dnsEntries>
+    <ngb-pagination *ngIf="user.admin" [collectionSize]="user.dns.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
     <table class="table mt-5">
       <thead>
       <tr>
-        <th scope="col">#</th>
+        <th scope="col" *ngIf="user.admin">User</th>
         <th scope="col">Host</th>
         <th scope="col">Destination</th>
         <th scope="col">Manage</th>
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let dns of user.dns">
-        <th scope="row">{{dns.id}}</th>
+      <tr *ngFor="let dns of user.dns | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
+        <td *ngIf="user.admin">{{dns.user}}</td>
         <td><a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a></td>
         <td>{{dns.ip}}</td>
         <td><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">Delete</button></td>
@@ -37,7 +40,7 @@
   <div class="text-center">
     <button class="btn btn-primary" (click)="showForm = !showForm">Add new entry</button>
   </div>
-
+  <ngb-pagination *ngIf="user.admin" [collectionSize]="user.dns.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
   <div *ngIf="showForm" class="card text-white mb-3 mt-5">
     <div class="card-body">
       <div>

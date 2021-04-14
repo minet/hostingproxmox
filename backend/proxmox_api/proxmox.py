@@ -24,10 +24,13 @@ def add_user_dns(user_id, entry, ip):
     return rep_msg, rep_code
 
 
-def get_user_dns(user_id):
+def get_user_dns(user_id = ""):
     try:
-        dnsList = get_dns_entries(user_id)
-        return dnsList, 201
+        if user_id != "" :
+            dnsList = get_dns_entries(user_id)
+            return dnsList, 201
+        else :
+            return get_dns_entries(), 201
     except Exception as e:
         logging.error("Problem in get_user_dns: " + str(e))
         return {"dns": "error occured"}, 500
@@ -59,6 +62,11 @@ def load_balance_server():
 
     return {"server": server}, 201
 
+def is_admin(userid):
+    if userid in ("seberus","zastava","lionofinterest"):
+        return True
+    else:
+        return False
 
 def delete_vm(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
