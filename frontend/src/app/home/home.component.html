@@ -132,22 +132,24 @@
       Here you can manage all the VM and the DNS entry.</p>
     <h2>Statistics</h2>
     <br>
-    <div class="row">
-      <div class="col-sm-6">
+    <div class="card-deck mb-3">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Created VM</h5>
             <a class="btn btn-primary">{{ countvm }}</a>
           </div>
         </div>
-      </div>
-      <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Active VM</h5>
             <a class="btn btn-primary">{{ countactivevm }}</a>
           </div>
         </div>
-      </div>
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Created DNS entries</h5>
+            <a class="btn btn-primary">{{ countdns }}</a>
+          </div>
+        </div>
     </div>
   </div>

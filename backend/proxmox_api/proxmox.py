@@ -24,9 +24,9 @@ def add_user_dns(user_id, entry, ip):
     return rep_msg, rep_code
 
 
-def get_user_dns(user_id):
+def get_user_dns(user_id = ""):
     try:
-        if user_id != 0 :
+        if user_id != "" :
             dnsList = get_dns_entries(user_id)
             return dnsList, 201
         else :

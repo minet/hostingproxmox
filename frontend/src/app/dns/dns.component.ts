@@ -16,15 +16,14 @@ import {flatMap} from 'rxjs/internal/operators';
   styleUrls: ['./dns.component.css']
 })
 export class DnsComponent implements OnInit, OnDestroy {
-
-
   loading = true;
   newDns = new Dns();
   intervals = new Set<Subscription>();
   showForm = false;
   timer: Subscription;
   success = false;
-
+  page = 1;
+  pageSize = 10;
   constructor(private activatedRoute: ActivatedRoute,
               private http: HttpClient,
               private router: Router,
@@ -91,6 +90,7 @@ export class DnsComponent implements OnInit, OnDestroy {
       .subscribe(rep => {
           dns.entry = rep.body['entry'];
           dns.ip = rep.body['ip'];
+          dns.user = rep.body['user'];
           if (last) {
             this.loading = false;
           }

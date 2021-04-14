@@ -27,6 +27,7 @@ export class HomeComponent implements OnInit {
   sshAddress: string;
   countvm: number;
   countactivevm: number;
+  countdns: number;
   vmstate: string;
   interval;
   progress = 0;
@@ -50,6 +51,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.userService.getUser().subscribe((user) => this.user = user);
     this.count_vm();
+    this.count_dns();
   }
 
   progress_bar(): void{
@@ -109,6 +111,31 @@ export class HomeComponent implements OnInit {
           this.router.navigate(['']);
         }
       });
+  }
+  count_dns(): void {
+    let dns: Array<string>;
+    this.countdns = 0;
+    this.http.get(this.authService.SERVER_URL + '/dns', {observe: 'response'}).subscribe(rep => {
+          dns = rep.body as Array<string>;
+          for (let i = 0; i < dns.length; i++) {
+            const dnsid = dns[i];
+            this.countdns++;
+          }
+        },
+
+        error => {
+          if (error.status === 404) {
+            window.alert('VM not found');
+            this.router.navigate(['']);
+          } else if (error.status === 403) {
+            window.alert('Session expired');
+            this.router.navigate(['']);
+          } else {
+            window.alert('Unknown error');
+            this.router.navigate(['']);
+          }
+
+        });
   }
   count_vm(): void {
     let vmList: Array<string>;
