@@ -47,6 +47,11 @@ def random_server():
     node_number = len(proxmox.nodes.get())
     return proxmox.nodes.get()[random.randint(0, node_number - 1)]['node']
 
+def is_admin(userid):
+    if userid in ("seberus","zastava","lionofinterest"):
+        return True
+    else:
+        return False
 
 def delete_vm(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
