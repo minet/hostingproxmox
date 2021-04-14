@@ -5,11 +5,11 @@
     </div>
   </div>
 </div>
-
 <div class="vms container flex-fill" *ngIf="!loading">
 
   <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
   <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
+  <ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
   <hr>
   <div class="text-center">
     <ng-container *ngIf="user.vms.length == 0">
@@ -20,11 +20,11 @@
     </ng-container>
   </div>
   <hr>
-  <div class="flex-fill">
-    <div class="row" *ngFor="let vm of user.vms">
+  <div class="flnpm install --save @ng-bootstrap/ng-bootstrapex-fill">
+    <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
       <div class="col-12">
         <div class="card">
-          <div class="card-img-top" style='background-image: url("assets/images/vms/{{ vm.type }}.png"); height: 100px;
+          <div class="card-img-top" *ngIf="!user.admin" style='background-image: url("assets/images/vms/{{ vm.type }}.png"); height: 100px;
 background-position: 50% 50%; background-size: 100%; position: relative'>
             <small class="text-white m-2" style="position: absolute; right: 0; bottom: 0">{{ vm.type }}</small>
           </div>
@@ -53,4 +53,7 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
     <hr *ngIf="showSsh">
     <app-ssh *ngIf="showSsh"></app-ssh>
   </div>
-</div>
+</div><br />
+<ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
+<hr>
+

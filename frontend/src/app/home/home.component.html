@@ -4,7 +4,7 @@
   <div *ngIf="!user.admin" class="userhome">
     <div class="alert alert-info text-center" role="alert">
       <h3 class="alert-heading">
-        Here you can create a virtucdcdcdsal machine which will host your website or whichever service you want.
+        Here you can create a virtual machine which will host your website or whichever service you want.
       </h3>
       <hr>
       <p>
@@ -108,7 +108,7 @@
                 </div>
               </div>
               <div class="text-center">
-              <button *ngIf="vmForm.valid && rulesCheck" type="submit" class="btn btn-primary text-center">Submit</button>
+                <button *ngIf="vmForm.valid && rulesCheck" type="submit" class="btn btn-primary text-center">Submit</button>
               </div>
             </div>
           </form>
@@ -129,7 +129,7 @@
   </div>
   <div *ngIf="user.admin" class="adminmenu">
     <p>Welcom to the hosting administration panel.<br>
-    Here you can manage all the VM and the DNS entry.</p>
+      Here you can manage all the VM and the DNS entry.</p>
     <h2>Statistics</h2>
     <br>
     <div class="row">
@@ -137,7 +137,7 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Created VM</h5>
-            <a href="#" class="btn btn-primary">{{ countvm }}</a>
+            <a class="btn btn-primary">{{ countvm }}</a>
           </div>
         </div>
       </div>
@@ -145,9 +145,9 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Active VM</h5>
-            <a href="#" class="btn btn-primary">{{ countactivevm }}</a>
+            <a class="btn btn-primary">{{ countactivevm }}</a>
           </div>
         </div>
       </div>
     </div>
-</div>
+  </div>
