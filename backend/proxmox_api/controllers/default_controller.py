@@ -112,6 +112,10 @@ def get_dns():  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
+    
+    if user_id in ("seberus","zastava","lionofinterest") :
+        return proxmox.get_user_dns(user_id)    
+    
     return proxmox.get_user_dns(user_id)
 
 def get_vm():  # noqa: E501
@@ -206,6 +210,9 @@ def delete_dns_id(dnsid):  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
+    if user_id in ("seberus","zastava","lionofinterest") :
+        return proxmox.del_user_dns(dnsid)
+
     if dnsid in map(int, proxmox.get_user_dns(user_id)[0]):
         return proxmox.del_user_dns(dnsid)
     else:
@@ -222,6 +229,14 @@ def get_dns_id(dnsid):  # noqa: E501
 
     :rtype: DnsItem
     """
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    
     try:
         dnsid = int(dnsid)
     except:
@@ -229,9 +244,12 @@ def get_dns_id(dnsid):  # noqa: E501
 
     entry = dbfct.get_entry_host(dnsid)
     ip = dbfct.get_entry_ip(dnsid)
-
+    owner = dbfct.get_entry_userid(dnsid)
     if entry[1] == 201 and ip[1] == 201:
-        return {"ip": ip[0]['ip'], "entry": entry[0]['host']}, 201
+        if user_id in ("seberus", "zastava", "lionofinterest") :
+            return {"ip": ip[0]['ip'], "entry": entry[0]['host'], "user": owner}, 201
+        else :
+            return {"ip": ip[0]['ip'], "entry": entry[0]['host']}, 201
     elif entry[1] == 404 or ip[1] == 404:
         return {"status": "dns entry not found"}, 404
     else:

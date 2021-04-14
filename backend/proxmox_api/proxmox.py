@@ -26,8 +26,11 @@ def add_user_dns(user_id, entry, ip):
 
 def get_user_dns(user_id):
     try:
-        dnsList = get_dns_entries(user_id)
-        return dnsList, 201
+        if user_id != 0 :
+            dnsList = get_dns_entries(user_id)
+            return dnsList, 201
+        else :
+            return get_dns_entries(), 201
     except Exception as e:
         logging.error("Problem in get_user_dns: " + str(e))
         return {"dns": "error occured"}, 500
@@ -43,9 +46,21 @@ def del_user_dns(dnsid):
     return ddns_rep
 
 
-def random_server():
-    node_number = len(proxmox.nodes.get())
-    return proxmox.nodes.get()[random.randint(0, node_number - 1)]['node']
+def load_balance_server():
+    nodes_info = proxmox.nodes.get()
+    server = ""
+    perram_min = 100
+    for i in nodes_info:
+        perram = round(i["mem"] * 100 / i["maxmem"], 2)
+        percpu = round(i["cpu"] * 100, 2)
+        if i["status"] == "online" and perram < 90 and percpu < 70:
+            if perram < perram_min:
+                perram_min = perram
+                server = i["node"]
+    if server == "":
+        return {"server": "no server available"}, 500
+
+    return {"server": server}, 201
 
 def is_admin(userid):
     if userid in ("seberus","zastava","lionofinterest"):
@@ -77,7 +92,12 @@ def delete_vm(vmid):
 
 def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key="no"):
     next_vmid = int(proxmox.cluster.nextid.get())
-    server = random_server()
+    server = load_balance_server()
+
+    if server[1] != 201:
+        return server
+    else:
+        server = server[0]["server"]
 
     template_node = ""
 
