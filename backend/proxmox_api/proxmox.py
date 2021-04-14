@@ -26,8 +26,11 @@ def add_user_dns(user_id, entry, ip):
 
 def get_user_dns(user_id):
     try:
-        dnsList = get_dns_entries(user_id)
-        return dnsList, 201
+        if user_id != 0 :
+            dnsList = get_dns_entries(user_id)
+            return dnsList, 201
+        else :
+            return get_dns_entries(), 201
     except Exception as e:
         logging.error("Problem in get_user_dns: " + str(e))
         return {"dns": "error occured"}, 500
