@@ -20,6 +20,7 @@ def add_user_dns(user_id, entry, ip):
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
         add_dns_entry(user_id, entry, ip)
+        logging.info("DNS entry added: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
     return rep_msg, rep_code
 
 
@@ -42,6 +43,7 @@ def del_user_dns(dnsid):
     ddns_rep = ddns.delete_dns_record(entry)
     if ddns_rep[1] == 201:
         del_dns_entry(dnsid)
+        logging.info("DNS entry deleted: " + str(dnsid))
     return ddns_rep
 
 
@@ -62,7 +64,7 @@ def load_balance_server():
     return {"server": server}, 201
 
 def is_admin(userid):
-    if userid in ("seberus","zastava","lionofinterest"):
+    if userid in ("seberus", "zastava", "lionofinterest"):
         return True
     else:
         return False
@@ -70,7 +72,6 @@ def is_admin(userid):
 def delete_vm(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
         if vm['vmid'] == vmid:
-
             try:
                 if get_vm_status(vmid)[0]['status'] == 'stopped':
                     proxmox.nodes(vm["node"]).qemu(vmid).delete()
@@ -199,6 +200,7 @@ def start_vm(vmid):
         if vm["vmid"] == vmid:
             try:
                 proxmox.nodes(vm["node"]).qemu(vmid).status.start.create()
+                logging.info("VM " + str(vmid) + " started")
                 return {"state": "vm started"}, 201
             except Exception as e:
                 logging.error("Problem in start_vm(" + str(vmid) + ") when starting VM: " + str(e))
@@ -212,6 +214,7 @@ def stop_vm(vmid):
             try:
                 if get_vm_status(vmid)[0]['status'] != 'stopped':
                     proxmox.nodes(vm["node"]).qemu(vmid).status.stop.create()
+                    logging.info("VM " + str(vmid) + " stoped")
                     return {"state": "vm stopped"}, 201
                 else:
                     return {"state": "vm already stopped"}, 201
@@ -329,8 +332,8 @@ def get_vm_status(vmid):
     return {"status": "vm not found"}, 404
 
 
-def update_vm_ips_job(app):
-    with app.app_context():
+def update_vm_ips_job(app):    # Job to update VM ip
+    with app.app_context():    # Needs application context
         for i in get_vm_list():
             vm = Vm.query.filter_by(id=i).first()
             vm.ip = get_vm_ip(i)[0]['vm_ip']

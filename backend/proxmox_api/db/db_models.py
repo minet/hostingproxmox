@@ -3,13 +3,6 @@ from flask_sqlalchemy import event
 
 db = SQLAlchemy()
 
-func = db.DDL(
-"INSERT INTO history (userId, vmId, ip, date) "
-"VALUES (NEW.userId, NEW.id, NEW.ip, NOW());"
-)
-
-
-
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.String(254), primary_key=True)
@@ -40,7 +33,7 @@ class History(db.Model):
 
 
 
-### Trigger for logging
+### Trigger for ip tracking
 
 event.listen(
     Vm.__table__,
