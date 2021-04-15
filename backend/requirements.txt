@@ -10,3 +10,4 @@ Flask~=1.1.2
 six~=1.15.0
 proxmoxer
 dnspython~=2.1.0
+Flask-APScheduler

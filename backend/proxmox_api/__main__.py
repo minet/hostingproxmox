@@ -23,7 +23,7 @@ JOBS = [
             "func": "proxmox_api.proxmox:update_vm_ips_job",
             "args": (app.app,),
             "trigger": "interval",
-            "seconds": 5,
+            "seconds": 10,
         }
     ]
 
@@ -39,13 +39,12 @@ from proxmox_api.db.db_models import db
 
 db.init_app(app.app)
 with app.app.app_context():
-    db.drop_all()
+    # db.drop_all()
     db.create_all()
 
 scheduler.init_app(app.app)
-
+scheduler.start()
 
 if __name__ == '__main__':
-    scheduler.start()
     app.run(port=8080, debug=False)
 

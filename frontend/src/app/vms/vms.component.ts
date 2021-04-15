@@ -62,7 +62,7 @@ ngOnInit(): void {
     const vm = new Vm();
     vm.id = vmid;
     this.user.vms.push(vm);
-    const newTimer = timer(0, 1500).pipe(
+    const newTimer = timer(0, 3000).pipe(
       flatMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
       .subscribe(rep => {
           vm.name = rep.body['name'];

@@ -85,7 +85,7 @@ export class DnsComponent implements OnInit, OnDestroy {
     const dns = new Dns();
     dns.id = id;
     this.user.dns.push(dns);
-    const newTimer = timer(0, 3000).pipe(
+    const newTimer = timer(0, 5000).pipe(
       flatMap(() => this.http.get(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})))
       .subscribe(rep => {
           dns.entry = rep.body['entry'];
