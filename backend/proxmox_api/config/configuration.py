@@ -25,6 +25,7 @@ PROXMOX_API_KEY_NAME = os.environ.get('PROXMOX_API_KEY_NAME')
 
 
 # Database uri : "mysql://user:pass@dbhost/dbname"
+"""Be sure to set "set global log_bin_trust_function_creators=1"; in the database if mysql"""
 
 DATABASE_URI = os.environ.get('PROXMOX_BACK_DB')
 

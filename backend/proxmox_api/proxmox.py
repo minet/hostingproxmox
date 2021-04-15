@@ -1,4 +1,3 @@
-import random
 import urllib.parse
 from time import sleep
 import logging
@@ -232,6 +231,7 @@ def get_vm_ip(vmid):
                         for ip in int['ip-addresses']:
                             if ip['ip-address-type'] == "ipv4":
                                 ips.append(ip["ip-address"])
+                                break
 
                 return {"vm_ip": ips}, 201
             except Exception as e:
@@ -327,3 +327,11 @@ def get_vm_status(vmid):
                 return {"status": "error"}, 500
 
     return {"status": "vm not found"}, 404
+
+
+def update_vm_ips_job(app):
+    with app.app_context():
+        for i in get_vm_list():
+            vm = Vm.query.filter_by(id=i).first()
+            vm.ip = get_vm_ip(i)[0]['vm_ip']
+            db.session.commit()

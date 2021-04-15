@@ -1,6 +1,14 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import event
 
 db = SQLAlchemy()
+
+func = db.DDL(
+"INSERT INTO history (userId, vmId, ip, date) "
+"VALUES (NEW.userId, NEW.id, NEW.ip, NOW());"
+)
+
+
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -20,5 +28,32 @@ class Vm(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=False)
     userId = db.Column(db.String(254), db.ForeignKey("user.id"), nullable=True)
     type = db.Column(db.String(254), nullable=False)
+    ip = db.Column(db.String(15), nullable=True, unique=True)
 
+class History(db.Model):
+    __tablename__ = 'history'
+    id = db.Column(db.Integer, primary_key=True)
+    userId = db.Column(db.String(254), db.ForeignKey("user.id"), nullable=True)
+    vmId = db.Column(db.Integer, nullable=True)
+    ip = db.Column(db.String(15), nullable=True)
+    date = db.Column(db.TIMESTAMP, nullable=False)
+
+
+
+### Trigger for logging
+
+event.listen(
+    Vm.__table__,
+    "after_create",
+    db.DDL(
+        """
+        CREATE TRIGGER history_insert_vm AFTER UPDATE ON vm
+        FOR EACH ROW BEGIN
+            IF OLD.ip != NEW.ip THEN
+                INSERT INTO history (userId, vmId, ip, date) VALUES (NEW.userId, NEW.id, NEW.ip, NOW());
+            END IF;
+        END;
+        """
+    )
+)
 
