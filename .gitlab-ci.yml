@@ -1,6 +1,6 @@
 stages:
   - dependencies
-  - test
+#  - test
   - build
   - deploy
 
@@ -16,20 +16,20 @@ install_dependencies_angular:
       - frontend/node_modules
     expire_in: 1 days
 
-python_code_quality:
-  stage: test
-  image: python:3.7
-  before_script:
-    - cd backend/proxmox_api
-    - pip3 install pylint
-  script:
-    - pylint *.py > ../code_quality.txt
-  artifacts:
-    paths:
-      - backend/code_quality.txt
-    expire_in: 2 days
-    when: always
-  allow_failure: true
+#python_code_quality:
+#  stage: test
+#  image: python:3.7
+#  before_script:
+#    - cd backend/proxmox_api
+#    - pip3 install pylint
+#  script:
+#    - pylint *.py > ../code_quality.txt
+#  artifacts:
+#    paths:
+#      - backend/code_quality.txt
+#    expire_in: 2 days
+#    when: always
+#  allow_failure: true
 
 #python_code_test:
  # stage: test
@@ -40,22 +40,22 @@ python_code_quality:
   #script:
    # - pytest
 
-angular_code_quality:
-  stage: test
-  image: node
-  before_script:
-    - cd frontend
-    - NG_CLI_ANALYTICS=ci
-    - npm install -g @angular/cli
-  script:
-    - ls
-    - ng lint > code_quality.txt
-  artifacts:
-    paths:
-      - frontend/code_quality.txt
-    expire_in: 2 days
-    when: always
-  allow_failure: true
+#angular_code_quality:
+#  stage: test
+#  image: node
+#  before_script:
+#    - cd frontend
+#    - NG_CLI_ANALYTICS=ci
+#    - npm install -g @angular/cli
+#  script:
+#    - ls
+#    - ng lint > code_quality.txt
+#  artifacts:
+#    paths:
+#      - frontend/code_quality.txt
+#    expire_in: 2 days
+#    when: always
+#  allow_failure: true
 
 angular_build:
   stage: build

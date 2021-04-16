@@ -1,6 +1,6 @@
 <app-navbar></app-navbar>
 <div id="content" style="min-height: 100%" class="container mt-5">
-    <router-outlet *ngIf="validToken$ | async as validToken; else landing"></router-outlet>
+    <router-outlet *ngIf="(validToken$ | async)  || router.url === '/manual' || router.url === '/rules' || router.url === '/legal'; else landing"></router-outlet>
     <ng-template #landing>
         <div class="text-center">
             <img id="logo" class="mb-3" style="height: 150px" src="assets/images/minet.png">

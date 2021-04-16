@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { UserService } from './common/services/user.service';
 import {Observable, timer} from 'rxjs';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,7 @@ export class AppComponent implements OnInit{
   title = 'VPS MiNET';
 
 
-  constructor(public userService: UserService) {
+  constructor(public userService: UserService, public router: Router) {
   }
 
   public validToken$: Observable<boolean>;
