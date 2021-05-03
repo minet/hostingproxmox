@@ -15,14 +15,9 @@ PROXMOX_USER = "root@pam"
 # Proxmox host
 PROXMOX_API_KEY = os.environ.get('PROXMOX_API_KEY')
 
-
-
-
 # Proxmox host
 
 PROXMOX_API_KEY_NAME = os.environ.get('PROXMOX_API_KEY_NAME')
-
-
 
 # Database uri : "mysql://user:pass@dbhost/dbname"
 """Be sure to set "set global log_bin_trust_function_creators=1"; in the database if mysql"""
@@ -30,14 +25,14 @@ PROXMOX_API_KEY_NAME = os.environ.get('PROXMOX_API_KEY_NAME')
 DATABASE_URI = os.environ.get('PROXMOX_BACK_DB')
 
 
+
 # Not used for now
-MAX_USER_CPU = ""
-MAX_USER_DISK = ""
-MAX_USER_RAM = ""
+MAX_USER_VM = ""
 ##
 
 # DDNS keyring secret
 KEYRING_DNS_SECRET = os.environ.get('KEYRING_DNS_SECRET')
+
 
 
 # DDNS keyring name

@@ -117,6 +117,8 @@ export class VmComponent implements OnInit, OnDestroy {
           vm.disk = rep.body['disk'];
           vm.cpu = rep.body['cpu'];
           vm.user = rep.body['user'];
+          vm.ramUsage = rep.body['ram_usage'];
+          vm.cpuUsage = rep.body['cpu_usage'];
           if (vm.status === 'running') {
             vm.ip = rep.body['ip'][0];
           }

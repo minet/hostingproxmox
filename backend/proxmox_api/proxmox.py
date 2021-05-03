@@ -274,6 +274,18 @@ def get_vm_cpu(vmid):
                 return {"cpu": "error"}, 500
     return {"cpu": "Vm not found"}, 404
 
+def get_vm_cpu_usage(vmid):
+    for vm in proxmox.cluster.resources.get(type="vm"):
+        if vm["vmid"] == vmid:
+            try:
+                cpu_usage = round(float(proxmox.nodes(vm["node"]).qemu(vmid).status.current.get()['cpu'] * 100), 1)
+                return {"cpu_usage": cpu_usage}, 201
+            except Exception as e:
+                logging.error("Problem in get_vm_cpu_usage(" + str(vmid) + ") when getting VM cpu usage: " + str(e))
+                return {"cpu_usage": "error"}, 500
+    return {"cpu_usage": "Vm not found"}, 404
+
+
 
 def get_vm_disk(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
@@ -286,7 +298,6 @@ def get_vm_disk(vmid):
                 return {"disk": "error"}, 500
     return {"disk": "Vm not found"}, 404
 
-
 def get_vm_ram(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
         if vm["vmid"] == vmid:
@@ -296,6 +307,16 @@ def get_vm_ram(vmid):
             except:
                 return {"ram": "error"}, 500
     return {"ram": "Vm not found"}, 404
+
+def get_vm_ram_usage(vmid):
+    for vm in proxmox.cluster.resources.get(type="vm"):
+        if vm["vmid"] == vmid:
+            try:
+                ram_usage = round(float(proxmox.nodes(vm['node']).qemu(vmid).status.current.get()['mem'] * 100/proxmox.nodes(vm['node']).qemu(vmid).status.current.get()['maxmem']), 1)
+                return {"ram_usage": ram_usage}, 201
+            except:
+                return {"ram_usage": "error"}, 500
+    return {"ram_usage": "Vm not found"}, 404
 
 
 def get_vm_status(vmid):
@@ -336,5 +357,6 @@ def update_vm_ips_job(app):    # Job to update VM ip
     with app.app_context():    # Needs application context
         for i in get_vm_list():
             vm = Vm.query.filter_by(id=i).first()
-            vm.ip = get_vm_ip(i)[0]['vm_ip']
-            db.session.commit()
+            if get_vm_status(i)[0]['status'] == "running":
+                vm.ip = get_vm_ip(i)[0]['vm_ip']
+                db.session.commit()
