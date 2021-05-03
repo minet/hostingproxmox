@@ -12,6 +12,9 @@ export class Vm {
     public password?: string,
     public sshKey?: string,
     public ip?: string,
+    public ramUsage?: string,
+    public cpuUsage?: string,
+    public uptime?: string,
 
   ) { }
 

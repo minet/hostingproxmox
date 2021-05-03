@@ -14,7 +14,7 @@ class VmItem(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, name: str=None, type: str=None, user: str=None, password: str=None, ssh: bool=None, ssh_key: str=None, ip: str=None, status: str=None):  # noqa: E501
+    def __init__(self, name: str=None, type: str=None, user: str=None, password: str=None, ssh: bool=None, ssh_key: str=None, ip: str=None, cpu: float=None, ram: float=None, disk: float=None, status: str=None, cpu_usage: float=None, ram_usage: float=None):  # noqa: E501
         """VmItem - a model defined in Swagger
 
         :param name: The name of this VmItem.  # noqa: E501
@@ -31,8 +31,18 @@ class VmItem(Model):
         :type ssh_key: str
         :param ip: The ip of this VmItem.  # noqa: E501
         :type ip: str
+        :param cpu: The cpu of this VmItem.  # noqa: E501
+        :type cpu: float
+        :param ram: The ram of this VmItem.  # noqa: E501
+        :type ram: float
+        :param disk: The disk of this VmItem.  # noqa: E501
+        :type disk: float
         :param status: The status of this VmItem.  # noqa: E501
         :type status: str
+        :param cpu_usage: The cpu_usage of this VmItem.  # noqa: E501
+        :type cpu_usage: float
+        :param ram_usage: The ram_usage of this VmItem.  # noqa: E501
+        :type ram_usage: float
         """
         self.swagger_types = {
             'name': str,
@@ -42,7 +52,12 @@ class VmItem(Model):
             'ssh': bool,
             'ssh_key': str,
             'ip': str,
-            'status': str
+            'cpu': float,
+            'ram': float,
+            'disk': float,
+            'status': str,
+            'cpu_usage': float,
+            'ram_usage': float
         }
 
         self.attribute_map = {
@@ -53,7 +68,12 @@ class VmItem(Model):
             'ssh': 'ssh',
             'ssh_key': 'sshKey',
             'ip': 'ip',
-            'status': 'status'
+            'cpu': 'cpu',
+            'ram': 'ram',
+            'disk': 'disk',
+            'status': 'status',
+            'cpu_usage': 'cpu_usage',
+            'ram_usage': 'ram_usage'
         }
         self._name = name
         self._type = type
@@ -62,7 +82,12 @@ class VmItem(Model):
         self._ssh = ssh
         self._ssh_key = ssh_key
         self._ip = ip
+        self._cpu = cpu
+        self._ram = ram
+        self._disk = disk
         self._status = status
+        self._cpu_usage = cpu_usage
+        self._ram_usage = ram_usage
 
     @classmethod
     def from_dict(cls, dikt) -> 'VmItem':
@@ -237,6 +262,75 @@ class VmItem(Model):
         self._ip = ip
 
     @property
+    def cpu(self) -> float:
+        """Gets the cpu of this VmItem.
+
+        total VM's cpu  # noqa: E501
+
+        :return: The cpu of this VmItem.
+        :rtype: float
+        """
+        return self._cpu
+
+    @cpu.setter
+    def cpu(self, cpu: float):
+        """Sets the cpu of this VmItem.
+
+        total VM's cpu  # noqa: E501
+
+        :param cpu: The cpu of this VmItem.
+        :type cpu: float
+        """
+
+        self._cpu = cpu
+
+    @property
+    def ram(self) -> float:
+        """Gets the ram of this VmItem.
+
+        total VM's ram in MiO  # noqa: E501
+
+        :return: The ram of this VmItem.
+        :rtype: float
+        """
+        return self._ram
+
+    @ram.setter
+    def ram(self, ram: float):
+        """Sets the ram of this VmItem.
+
+        total VM's ram in MiO  # noqa: E501
+
+        :param ram: The ram of this VmItem.
+        :type ram: float
+        """
+
+        self._ram = ram
+
+    @property
+    def disk(self) -> float:
+        """Gets the disk of this VmItem.
+
+        total VM's disk size in GiO  # noqa: E501
+
+        :return: The disk of this VmItem.
+        :rtype: float
+        """
+        return self._disk
+
+    @disk.setter
+    def disk(self, disk: float):
+        """Sets the disk of this VmItem.
+
+        total VM's disk size in GiO  # noqa: E501
+
+        :param disk: The disk of this VmItem.
+        :type disk: float
+        """
+
+        self._disk = disk
+
+    @property
     def status(self) -> str:
         """Gets the status of this VmItem.
 
@@ -258,3 +352,49 @@ class VmItem(Model):
         """
 
         self._status = status
+
+    @property
+    def cpu_usage(self) -> float:
+        """Gets the cpu_usage of this VmItem.
+
+        cpu usage in percent  # noqa: E501
+
+        :return: The cpu_usage of this VmItem.
+        :rtype: float
+        """
+        return self._cpu_usage
+
+    @cpu_usage.setter
+    def cpu_usage(self, cpu_usage: float):
+        """Sets the cpu_usage of this VmItem.
+
+        cpu usage in percent  # noqa: E501
+
+        :param cpu_usage: The cpu_usage of this VmItem.
+        :type cpu_usage: float
+        """
+
+        self._cpu_usage = cpu_usage
+
+    @property
+    def ram_usage(self) -> float:
+        """Gets the ram_usage of this VmItem.
+
+        ram usage in percent  # noqa: E501
+
+        :return: The ram_usage of this VmItem.
+        :rtype: float
+        """
+        return self._ram_usage
+
+    @ram_usage.setter
+    def ram_usage(self, ram_usage: float):
+        """Sets the ram_usage of this VmItem.
+
+        ram usage in percent  # noqa: E501
+
+        :param ram_usage: The ram_usage of this VmItem.
+        :type ram_usage: float
+        """
+
+        self._ram_usage = ram_usage

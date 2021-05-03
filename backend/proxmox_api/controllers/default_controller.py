@@ -112,11 +112,12 @@ def get_dns():  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    
+
     if is_admin(user_id):
         return proxmox.get_user_dns()
-    
+
     return proxmox.get_user_dns(user_id)
+
 
 def get_vm():  # noqa: E501
     """get all user vms
@@ -133,8 +134,9 @@ def get_vm():  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if is_admin(user_id):
-        return proxmox.get_vm() # affichage de la liste sans condition
+        return proxmox.get_vm()  # affichage de la liste sans condition
     return proxmox.get_vm(user_id=user_id)
+
 
 def get_vm_id(vmid):  # noqa: E501
     """get a vm by id
@@ -168,25 +170,35 @@ def get_vm_id(vmid):  # noqa: E501
     ram = proxmox.get_vm_ram(vmid)
     cpu = proxmox.get_vm_cpu(vmid)
     disk = proxmox.get_vm_disk(vmid)
-    admin = False;
-    if is_admin(user_id): # partie admin pour renvoyer l'owner en plus
-        admin = True
-    owner = get_vm_userid(vmid) # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
-    if status[0]["status"] != 'running':
-        return {"name": name[0]["name"], "user": owner if admin else "", "ip": None, "status": status[0]["status"], "ram": ram[0]['ram']
-                   ,"cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
+    admin = False
 
-    ip = proxmox.get_vm_ip(vmid)
+    if is_admin(user_id):  # partie admin pour renvoyer l'owner en plus
+        admin = True
+    owner = get_vm_userid(
+        vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
+
+    if status[0]["status"] != 'running':
+        return {"name": name[0]["name"], "user": owner if admin else "", "ip": None, "status": status[0]["status"],
+                "ram": ram[0]['ram'], "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"], "ram_usage" : 0, "cpu_usage" : 0}, 201
+    else:
+        ip = proxmox.get_vm_ip(vmid)
+        cpu_usage = proxmox.get_vm_cpu_usage(vmid)
+        ram_usage = proxmox.get_vm_ram_usage(vmid)
 
     if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[1] == 201 and \
-            type[1] == 201:
-        return {"name": name[0]["name"], "user": owner if admin else "",  "ip": ip[0]["vm_ip"], "status": status[0]["status"], "ram": ram[0]['ram']
-                   , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]}, 201
-    elif name[1] == 404 or ip[1] == 404 or status[1] == 404 or ram[1] == 404 or disk[1] == 404 or cpu[1] == 404 or type[
-        1] == 404:
+            type[1] == 201 and ram_usage[1] == 201 and cpu_usage[1] == 201:
+        return {"name": name[0]["name"], "user": owner if admin else "", "ip": ip[0]["vm_ip"]
+                   , "status": status[0]["status"], "ram": ram[0]['ram']
+                   , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]
+                   , "ram_usage": ram_usage[0]["ram_usage"], "cpu_usage": cpu_usage[0]["cpu_usage"]}, 201
+
+    elif name[1] == 404 or ip[1] == 404 or status[1] == 404 or ram[1] == 404 or disk[1] == 404 or cpu[1] == 404 \
+            or type[1] == 404 or cpu_usage[1] == 404 or ram_usage == 404:
         return {"status": "vm not found"}, 404
     else:
         return {"status": "error"}, 500
+
+
 def delete_dns_id(dnsid):  # noqa: E501
     """delete dns entry by id
 
@@ -236,7 +248,7 @@ def get_dns_id(dnsid):  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    
+
     try:
         dnsid = int(dnsid)
     except:

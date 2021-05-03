@@ -271,18 +271,42 @@ components:
           type: string
           description: vm public ip
           example: 192.1.1.1
+        cpu:
+          type: number
+          description: total VM's cpu
+          example: 2
+        ram:
+          type: number
+          description: total VM's ram in MiO
+          example: 1024
+        disk:
+          type: number
+          description: total VM's disk size in GiO
+          example: 10
         status:
           type: string
           description: vm status
           example: running
+        cpu_usage:
+          type: number
+          description: cpu usage in percent
+        ram_usage:
+          type: number
+          description: ram usage in percent
+          example: 10
       example:
-        password: salut
-        sshKey: ssh-rsa ...
         ip: 192.1.1.1
-        name: vm
         ssh: true
+        cpu: 2
         type: "wordpress, bare_vm"
+        password: salut
+        disk: 10
+        sshKey: ssh-rsa ...
+        ram_usage: 10
+        name: vm
+        cpu_usage: 0.8008281904610115
         user: user1
+        ram: 1024
         status: running
   securitySchemes:
     OAuth2:
