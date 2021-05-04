@@ -137,19 +137,19 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Created VM</h5>
-            <a class="btn btn-primary">{{ countvm }}</a>
+            <a [routerLink]="['vms']" class="btn btn-primary">{{ countvm }}</a>
           </div>
         </div>
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Active VM</h5>
-            <a class="btn btn-primary">{{ countactivevm }}</a>
+            <a [routerLink]="['vms']" class="btn btn-primary">{{ countactivevm }}</a>
           </div>
         </div>
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Created DNS entries</h5>
-            <a class="btn btn-primary">{{ countdns }}</a>
+            <a [routerLink]="['dns']" class="btn btn-primary">{{ countdns }}</a>
           </div>
         </div>
     </div>
