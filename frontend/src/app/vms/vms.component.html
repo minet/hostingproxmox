@@ -1,35 +1,39 @@
 <div *ngIf="loading">
-  <div class="d-flex justify-content-center">
-    <div class="spinner-grow text-primary" role="status">
-      <span class="sr-only">Loading...</span>
+    <div class="d-flex justify-content-center">
+        <div class="spinner-grow text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
     </div>
-  </div>
 </div>
 <div class="vms container flex-fill" *ngIf="!loading">
 
-  <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
-  <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
-  <ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
-  <hr>
-  <div class="text-center">
-    <ng-container *ngIf="user.vms.length == 0">
-      <h4 class="text-danger">You currently have no VMs, create one first!</h4>
-    </ng-container>
-    <ng-container *ngIf="user.vms.length != 0">
-      <button *ngIf="!loading" class="btn btn-primary" (click)="showSsh = !showSsh">Show the web-based SSH interface</button>
-    </ng-container>
-  </div>
-  <hr>
-  <div class="flnpm install --save @ng-bootstrap/ng-bootstrapex-fill">
-    <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-img-top" *ngIf="!user.admin" style='background-image: url("assets/images/vms/{{ vm.type }}.png"); height: 100px;
+    <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
+    <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
+    <ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page"
+                    aria-label="Default pagination"></ngb-pagination>
+    <hr>
+    <div class="text-center">
+        <ng-container *ngIf="user.vms.length == 0">
+            <h4 class="text-danger">You currently have no VMs, create one first!</h4>
+        </ng-container>
+        <ng-container *ngIf="user.vms.length != 0">
+            <button *ngIf="!loading" class="btn btn-primary" (click)="scrollSsh(ssh)">Show the web-based SSH interface
+            </button>
+        </ng-container>
+    </div>
+    <hr>
+    <div class="flnpm install --save @ng-bootstrap/ng-bootstrapex-fill">
+        <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-img-top" *ngIf="!user.admin"
+                         style='background-image: url("assets/images/vms/{{ vm.type }}.png"); height: 100px;
 background-position: 50% 50%; background-size: 100%; position: relative'>
-            <small class="text-white m-2" style="position: absolute; right: 0; bottom: 0">{{ vm.type }}</small>
-          </div>
-          <div class="card-body">
-            <h4 class="card-title">
+                        <small class="text-white m-2"
+                               style="position: absolute; right: 0; bottom: 0">{{ vm.type }}</small>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title">
               <span class="badge badge-pill"
                     [ngClass]="{
                     'badge-danger': vm.status === 'stopped',
@@ -37,23 +41,27 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
                     'badge-warning': vm.status === 'booting',
                     'badge-success': vm.status === 'running'
                     }"
-              ><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" *ngIf="vm.status === 'booting'  || vm.status === 'creating'"></span>{{ vm.status }}</span>
-              &nbsp;{{ vm.name }}&nbsp;<small class="text-muted">(#{{ vm.id }})
-            </small>
-              <span class="float-right">{{ vm.ip }}</span>
-              <br *ngIf="user.admin" />
-              <br *ngIf="user.admin" />
-              <p *ngIf="user.admin">Created by {{ vm.user }}</p>
-            </h4>
-            <a href="#" [routerLink]="[vm.id]" class="stretched-link"></a>
-          </div>
+              ><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
+                     *ngIf="vm.status === 'booting'  || vm.status === 'creating'"></span>{{ vm.status }}</span>
+                            &nbsp;{{ vm.name }}&nbsp;<small class="text-muted">(#{{ vm.id }})
+                        </small>
+                            <span class="float-right">{{ vm.ip }}</span>
+                            <br *ngIf="user.admin"/>
+                            <br *ngIf="user.admin"/>
+                            <p *ngIf="user.admin">Created by {{ vm.user }}</p>
+                        </h4>
+                        <a href="#" [routerLink]="[vm.id]" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+        <div #ssh>
+            <hr *ngIf="showSsh">
+            <app-ssh *ngIf="showSsh"></app-ssh>
+        </div>
     </div>
-    <hr *ngIf="showSsh">
-    <app-ssh *ngIf="showSsh"></app-ssh>
-  </div>
-</div><br />
-<ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
+</div><br/>
+<ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page"
+                aria-label="Default pagination"></ngb-pagination>
 <hr>
 
