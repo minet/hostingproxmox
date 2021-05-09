@@ -54,7 +54,7 @@ export class UserService {
       this.user.sn = user.sn;
       this.user.name = user.given_name;
       this.user.admin = false;
-      if(['seberus', 'zastava', 'lionofinterest'].includes(user.sub)) {
+      if (['seberus', 'zastava', 'lionofinterest'].includes(user.sub)) {
         this.user.admin = true;
       }
       return this.user;

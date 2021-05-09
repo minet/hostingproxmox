@@ -10,34 +10,34 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a class="nav-link" href="#" [routerLink]="['/']" [routerLinkActive]="['is-active']">Home</a>
+        <a class="nav-link" href="#" [routerLink]="['/']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" *ngIf="user && !user.admin" [routerLink]="['vms']" [routerLinkActive]="['is-active']">My VMs</a>
-        <a class="nav-link" href="#" *ngIf="user && user.admin" [routerLink]="['vms']" [routerLinkActive]="['is-active']">VMs Admin</a>
+        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && !user.admin" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">My VMs</a>
+        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-info']">VMs Admin</a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" *ngIf="user && !user.admin" [routerLink]="['dns']" [routerLinkActive]="['is-active']" >MiNET DNS entries</a>
-        <a href="#" class="nav-link" *ngIf="user && user.admin" [routerLink]="['dns']" [routerLinkActive]="['is-active']" >DNS Admin</a>
+        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && !user.admin" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >MiNET DNS entries</a>
+        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >DNS Admin</a>
       </li>
 
     </ul>
     <ul class="navbar-nav">
       <li class="nav-item">
-        <a class="nav-link" *ngIf="user" href="https://adh6.minet.net">{{user.name}}</a>
+        <a class="nav-link" *ngIf="(validToken$ | async)" href="https://adh6.minet.net">{{user.name}}</a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" [routerLink]="['manual']" [routerLinkActive]="['is-active']" >User manual</a>
+        <a href="#" class="nav-link" [routerLink]="['manual']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >User manual</a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" [routerLink]="['rules']" [routerLinkActive]="['is-active']" >Rules</a>
+        <a href="#" class="nav-link" [routerLink]="['rules']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >Rules</a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" *ngIf="!user" (click)="userService.login()">Login</a>
+        <a href="#" class="nav-link" *ngIf="!(validToken$ | async)" (click)="userService.login()">Login</a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link" href="#" *ngIf="user" (click)="userService.logout()">Logout</a>
+        <a class="nav-link" href="#" *ngIf="(validToken$ | async)" (click)="userService.logout()">Logout</a>
       </li>
     </ul>
   </div>

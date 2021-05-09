@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import { UserService } from './common/services/user.service';
-import {Observable, timer} from 'rxjs';
+import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
 
 @Component({
@@ -18,7 +18,7 @@ export class AppComponent implements OnInit{
   public validToken$: Observable<boolean>;
   ngOnInit(): void {
     this.validToken$ = this.userService.validToken();
-    this.validToken$.subscribe((next) => console.log(next));
+    this.validToken$.subscribe();
   }
 
 }

@@ -5,9 +5,8 @@ import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
-import {interval, Observable, Subscription, timer} from 'rxjs';
+import {Subscription, timer} from 'rxjs';
 import {flatMap} from 'rxjs/internal/operators';
-import {ViewportScroller} from '@angular/common';
 
 @Component({
     selector: 'app-vms',
@@ -25,8 +24,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                 public user: User,
                 private userService: UserService,
                 public authService: AuthService,
-                public slugifyPipe: SlugifyPipe,
-                private vps: ViewportScroller) {
+                public slugifyPipe: SlugifyPipe,) {
     }
 
     ngOnInit(): void {

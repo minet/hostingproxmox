@@ -22,10 +22,10 @@
         </ng-container>
     </div>
     <hr>
-    <div class="flnpm install --save @ng-bootstrap/ng-bootstrapex-fill">
+    <div>
         <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
             <div class="col-12">
-                <div class="card">
+                <div class="card border-success border-1" style="margin-bottom: 2%">
                     <div class="card-img-top" *ngIf="!user.admin"
                          style='background-image: url("assets/images/vms/{{ vm.type }}.png"); height: 100px;
 background-position: 50% 50%; background-size: 100%; position: relative'>
