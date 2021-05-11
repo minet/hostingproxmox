@@ -13,12 +13,14 @@
                     aria-label="Default pagination"></ngb-pagination>
     <hr>
     <div class="text-center">
-        <ng-container *ngIf="user.vms.length == 0">
+        <ng-container *ngIf="user.vms.length == 0 && !user.admin">
             <h4 class="text-danger">You currently have no VMs, create one first!</h4>
         </ng-container>
-        <ng-container *ngIf="user.vms.length != 0">
-            <button *ngIf="!loading" class="btn btn-primary" (click)="scrollSsh(ssh)">Show the web-based SSH interface
-            </button>
+        <ng-container *ngIf="user.vms.length == 0 && user.admin">
+            <h4 class="text-danger">No VMs created</h4>
+        </ng-container>
+        <ng-container *ngIf="user.vms.length != 0 && !user.admin">
+            <button *ngIf="!loading" class="btn btn-primary" (click)="scrollSsh(ssh)">Show the web-based SSH interface</button>
         </ng-container>
     </div>
     <hr>
@@ -34,23 +36,33 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
                     </div>
                     <div class="card-body">
                         <h4 class="card-title">
-              <span class="badge badge-pill"
-                    [ngClass]="{
-                    'badge-danger': vm.status === 'stopped',
-                    'badge-info': vm.status === 'creating',
-                    'badge-warning': vm.status === 'booting',
-                    'badge-success': vm.status === 'running'
-                    }"
-              ><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
-                     *ngIf="vm.status === 'booting'  || vm.status === 'creating'"></span>{{ vm.status }}</span>
-                            &nbsp;{{ vm.name }}&nbsp;<small class="text-muted">(#{{ vm.id }})
-                        </small>
-                            <span class="float-right">{{ vm.ip }}</span>
-                            <br *ngIf="user.admin"/>
-                            <br *ngIf="user.admin"/>
-                            <p *ngIf="user.admin">Created by {{ vm.user }}</p>
+                            <div class="row">
+                                <div class="col-6">
+                                  <span class="badge badge-pill"
+                                        [ngClass]="{
+                                        'badge-danger': vm.status === 'stopped',
+                                        'badge-info': vm.status === 'creating',
+                                        'badge-warning': vm.status === 'booting',
+                                        'badge-success': vm.status === 'running'
+                                                }"
+                                  >
+                                      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
+                                            *ngIf="vm.status === 'booting'  || vm.status === 'creating'"></span>{{ vm.status }}</span>
+                                    &nbsp;{{ vm.name }}&nbsp;<small class="text-muted">(#{{ vm.id }})</small>&nbsp;<small *ngIf="user.admin" class="text-muted">by {{ vm.user }}</small>
+                                    <br/>
+                                    <br/>
+                                    <p>Created on: {{vm.createdOn}}</p>
+
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-right">{{ vm.ip }}</p>
+                                    <p class="text-right" *ngIf="vm.status == 'running'">Uptime: {{secondsToDhms(vm.uptime)}} </p>
+                                </div>
+
+                            </div>
                         </h4>
                         <a href="#" [routerLink]="[vm.id]" class="stretched-link"></a>
+
                     </div>
                 </div>
             </div>

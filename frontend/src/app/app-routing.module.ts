@@ -17,7 +17,7 @@ const routes: Routes = [
   {path: 'rules', component: RulesComponent},
   {path: 'legal', component: LegalComponent},
   {path: 'manual', component: ManualComponent},
-  {path: '**', component: HomeComponent},
+  {path: '**', redirectTo: ''},
 
 
 ];

@@ -24,7 +24,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                 public user: User,
                 private userService: UserService,
                 public authService: AuthService,
-                public slugifyPipe: SlugifyPipe,) {
+                public slugifyPipe: SlugifyPipe, ) {
     }
 
     ngOnInit(): void {
@@ -44,6 +44,20 @@ export class VmsComponent implements OnInit, OnDestroy {
         if (this.showSsh) {
             $element.scrollIntoView({behavior: 'auto', block: 'start', inline: 'start'});
         }
+    }
+
+    secondsToDhms(seconds): string {
+        seconds = Number(seconds);
+        const d = Math.floor(seconds / (3600 * 24));
+        const h = Math.floor(seconds % (3600 * 24) / 3600);
+        const m = Math.floor(seconds % 3600 / 60);
+        const s = Math.floor(seconds % 60);
+
+        const dDisplay = d > 0 ? d + 'd ' : '';
+        const hDisplay = h > 0 ? h + 'h ' : '';
+        const mDisplay = m > 0 ? m + 'min ' : '';
+        const sDisplay = s > 0 ? s + 's ' : '';
+        return dDisplay + hDisplay + mDisplay + sDisplay;
     }
 
     get_vms(): void {
@@ -74,19 +88,19 @@ export class VmsComponent implements OnInit, OnDestroy {
         const newTimer = timer(0, 3000).pipe(
             flatMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
+                    console.log(rep.body);
                     vm.name = rep.body['name'];
                     vm.status = rep.body['status'];
                     vm.user = rep.body['user'];
+                    vm.ip = rep.body['ip'][0];
+                    vm.uptime = rep.body['uptime'];
+                    vm.createdOn = rep.body['created_on'];
                     if (rep.body['type'] === 'nginx_vm') {
                         vm.type = 'web server';
                     } else if (rep.body['type'] === 'bare_vm') {
                         vm.type = 'bare vm';
                     } else {
                         vm.type = 'not defined';
-                    }
-
-                    if (vm.status === 'running') {
-                        vm.ip = rep.body['ip'][0];
                     }
 
                     if (last) {

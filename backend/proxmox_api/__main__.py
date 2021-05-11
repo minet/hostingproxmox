@@ -39,7 +39,7 @@ from proxmox_api.db.db_models import db
 
 db.init_app(app.app)
 with app.app.app_context():
-    # db.drop_all()
+    #db.drop_all()
     db.create_all()
 
 scheduler.init_app(app.app)
