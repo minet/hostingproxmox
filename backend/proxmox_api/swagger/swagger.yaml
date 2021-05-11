@@ -294,15 +294,25 @@ components:
           type: number
           description: ram usage in percent
           example: 10
+        uptime:
+          type: number
+          description: VM's uptime in sec
+          example: 87545
+        created_on:
+          type: string
+          description: creation date of the VM
+          example: 15-05-2021
       example:
         ip: 192.1.1.1
         ssh: true
         cpu: 2
         type: "wordpress, bare_vm"
+        uptime: 87545
         password: salut
         disk: 10
         sshKey: ssh-rsa ...
         ram_usage: 10
+        created_on: 15-05-2021
         name: vm
         cpu_usage: 0.8008281904610115
         user: user1

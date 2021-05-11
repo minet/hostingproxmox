@@ -14,7 +14,7 @@ class VmItem(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, name: str=None, type: str=None, user: str=None, password: str=None, ssh: bool=None, ssh_key: str=None, ip: str=None, cpu: float=None, ram: float=None, disk: float=None, status: str=None, cpu_usage: float=None, ram_usage: float=None):  # noqa: E501
+    def __init__(self, name: str=None, type: str=None, user: str=None, password: str=None, ssh: bool=None, ssh_key: str=None, ip: str=None, cpu: float=None, ram: float=None, disk: float=None, status: str=None, cpu_usage: float=None, ram_usage: float=None, uptime: float=None, created_on: str=None):  # noqa: E501
         """VmItem - a model defined in Swagger
 
         :param name: The name of this VmItem.  # noqa: E501
@@ -43,6 +43,10 @@ class VmItem(Model):
         :type cpu_usage: float
         :param ram_usage: The ram_usage of this VmItem.  # noqa: E501
         :type ram_usage: float
+        :param uptime: The uptime of this VmItem.  # noqa: E501
+        :type uptime: float
+        :param created_on: The created_on of this VmItem.  # noqa: E501
+        :type created_on: str
         """
         self.swagger_types = {
             'name': str,
@@ -57,7 +61,9 @@ class VmItem(Model):
             'disk': float,
             'status': str,
             'cpu_usage': float,
-            'ram_usage': float
+            'ram_usage': float,
+            'uptime': float,
+            'created_on': str
         }
 
         self.attribute_map = {
@@ -73,7 +79,9 @@ class VmItem(Model):
             'disk': 'disk',
             'status': 'status',
             'cpu_usage': 'cpu_usage',
-            'ram_usage': 'ram_usage'
+            'ram_usage': 'ram_usage',
+            'uptime': 'uptime',
+            'created_on': 'created_on'
         }
         self._name = name
         self._type = type
@@ -88,6 +96,8 @@ class VmItem(Model):
         self._status = status
         self._cpu_usage = cpu_usage
         self._ram_usage = ram_usage
+        self._uptime = uptime
+        self._created_on = created_on
 
     @classmethod
     def from_dict(cls, dikt) -> 'VmItem':
@@ -398,3 +408,49 @@ class VmItem(Model):
         """
 
         self._ram_usage = ram_usage
+
+    @property
+    def uptime(self) -> float:
+        """Gets the uptime of this VmItem.
+
+        VM's uptime in sec  # noqa: E501
+
+        :return: The uptime of this VmItem.
+        :rtype: float
+        """
+        return self._uptime
+
+    @uptime.setter
+    def uptime(self, uptime: float):
+        """Sets the uptime of this VmItem.
+
+        VM's uptime in sec  # noqa: E501
+
+        :param uptime: The uptime of this VmItem.
+        :type uptime: float
+        """
+
+        self._uptime = uptime
+
+    @property
+    def created_on(self) -> str:
+        """Gets the created_on of this VmItem.
+
+        creation date of the VM  # noqa: E501
+
+        :return: The created_on of this VmItem.
+        :rtype: str
+        """
+        return self._created_on
+
+    @created_on.setter
+    def created_on(self, created_on: str):
+        """Sets the created_on of this VmItem.
+
+        creation date of the VM  # noqa: E501
+
+        :param created_on: The created_on of this VmItem.
+        :type created_on: str
+        """
+
+        self._created_on = created_on
