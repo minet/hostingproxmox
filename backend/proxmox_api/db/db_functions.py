@@ -118,6 +118,14 @@ def get_vm_type(vmid):
     else:
         return {"type": "vm not found"}, 404
 
+def get_vm_created_on(vmid):
+    created_on = Vm.query.filter_by(id=vmid).first().created_on
+
+    if created_on is not None:
+        return {"created_on": created_on}, 201
+    else:
+        return {"created_on": "vm not found"}, 404
+
 
 
 

@@ -162,6 +162,7 @@ def get_vm_id(vmid):  # noqa: E501
         return {"status": "error not an integer"}, 500
     status = proxmox.get_vm_status(vmid)
     type = dbfct.get_vm_type(vmid)
+    created_on = get_vm_created_on(vmid)
 
     if status[0]["status"] == 'creating':
         return {"status": status[0]["status"], "type": type[0]["type"]}, 201
@@ -178,22 +179,25 @@ def get_vm_id(vmid):  # noqa: E501
         vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
 
     if status[0]["status"] != 'running':
-        return {"name": name[0]["name"], "user": owner if admin else "", "ip": None, "status": status[0]["status"],
-                "ram": ram[0]['ram'], "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"], "ram_usage" : 0, "cpu_usage" : 0}, 201
+        return {"name": name[0]["name"], "user": owner if admin else "", "ip": "", "status": status[0]["status"],
+                "ram": ram[0]['ram'], "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"],
+                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"]}, 201
     else:
         ip = proxmox.get_vm_ip(vmid)
         cpu_usage = proxmox.get_vm_cpu_usage(vmid)
         ram_usage = proxmox.get_vm_ram_usage(vmid)
+        uptime = proxmox.get_vm_uptime(vmid)
 
     if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[1] == 201 and \
-            type[1] == 201 and ram_usage[1] == 201 and cpu_usage[1] == 201:
+            type[1] == 201 and ram_usage[1] == 201 and cpu_usage[1] == 201 and uptime[1] == 201:
         return {"name": name[0]["name"], "user": owner if admin else "", "ip": ip[0]["vm_ip"]
                    , "status": status[0]["status"], "ram": ram[0]['ram']
                    , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]
-                   , "ram_usage": ram_usage[0]["ram_usage"], "cpu_usage": cpu_usage[0]["cpu_usage"]}, 201
+                   , "ram_usage": ram_usage[0]["ram_usage"], "cpu_usage": cpu_usage[0]["cpu_usage"]
+                   , "uptime": uptime[0]["uptime"], "created_on": created_on[0]["created_on"]}, 201
 
     elif name[1] == 404 or ip[1] == 404 or status[1] == 404 or ram[1] == 404 or disk[1] == 404 or cpu[1] == 404 \
-            or type[1] == 404 or cpu_usage[1] == 404 or ram_usage == 404:
+            or type[1] == 404 or cpu_usage[1] == 404 or ram_usage[1] == 404 or uptime[1] == 404:
         return {"status": "vm not found"}, 404
     else:
         return {"status": "error"}, 500

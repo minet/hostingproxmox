@@ -15,7 +15,6 @@ proxmox = ProxmoxAPI(host=config.PROXMOX_HOST, user=config.PROXMOX_USER
                      , token_value=config.PROXMOX_API_KEY, verify_ssl=False)
 
 
-
 def add_user_dns(user_id, entry, ip):
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
@@ -351,6 +350,18 @@ def get_vm_status(vmid):
                 return {"status": "error"}, 500
 
     return {"status": "vm not found"}, 404
+
+def get_vm_uptime(vmid):
+    for vm in proxmox.cluster.resources.get(type="vm"):
+        if vm["vmid"] == vmid:
+            try:
+                uptime = proxmox.nodes(vm["node"]).qemu(vmid).status.current.get()["uptime"]
+                return {"uptime": uptime}, 201
+            except Exception as e:
+                logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
+                return {"uptime": "error"}, 500
+    return {"uptime": "Vm not found"}, 404
+
 
 
 def update_vm_ips_job(app):    # Job to update VM ip
