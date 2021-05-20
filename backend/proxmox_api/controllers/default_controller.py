@@ -89,7 +89,7 @@ def delete_vm_id(vmid):  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    if is_admin(user_id):
+    if is_admin(r.json()["attributes"]["memberOf"]):
         return proxmox.delete_vm(vmid)
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
         return proxmox.delete_vm(vmid)
@@ -107,13 +107,12 @@ def get_dns():  # noqa: E501
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-
     if r.status_code != 200:
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
-    if is_admin(user_id):
+    if is_admin(r.json()["attributes"]["memberOf"]):
         return proxmox.get_user_dns()
 
     return proxmox.get_user_dns(user_id)
@@ -133,7 +132,7 @@ def get_vm():  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    if is_admin(user_id):
+    if is_admin(r.json()["attributes"]["memberOf"]):
         return proxmox.get_vm()  # affichage de la liste sans condition
     return proxmox.get_vm(user_id=user_id)
 
@@ -173,7 +172,7 @@ def get_vm_id(vmid):  # noqa: E501
     disk = proxmox.get_vm_disk(vmid)
     admin = False
 
-    if is_admin(user_id):  # partie admin pour renvoyer l'owner en plus
+    if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
         admin = True
     owner = get_vm_userid(
         vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
@@ -226,7 +225,7 @@ def delete_dns_id(dnsid):  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
-    if is_admin(user_id):
+    if is_admin(r.json()["attributes"]["memberOf"]):
         return proxmox.del_user_dns(dnsid)
 
     if dnsid in map(int, proxmox.get_user_dns(user_id)[0]):
@@ -262,7 +261,7 @@ def get_dns_id(dnsid):  # noqa: E501
     ip = dbfct.get_entry_ip(dnsid)
     owner = dbfct.get_entry_userid(dnsid)
     if entry[1] == 201 and ip[1] == 201:
-        return {"ip": ip[0]['ip'], "entry": entry[0]['host'], "user": owner if is_admin(user_id) else ""}, 201
+        return {"ip": ip[0]['ip'], "entry": entry[0]['host'], "user": owner if is_admin(r.json()["attributes"]["memberOf"]) else ""}, 201
     elif entry[1] == 404 or ip[1] == 404:
         return {"status": "dns entry not found"}, 404
     else:
@@ -296,7 +295,7 @@ def patch_vm(vmid, body=None):  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
-    if vmid in map(int, proxmox.get_vm(user_id)[0]) or is_admin(user_id):
+    if vmid in map(int, proxmox.get_vm(user_id)[0]) or is_admin(r.json()["attributes"]["memberOf"]):
         if body.status == "start":
             return proxmox.start_vm(vmid)
         elif body.status == "stop":
