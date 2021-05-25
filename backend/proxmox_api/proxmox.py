@@ -137,7 +137,11 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             add_user(user_id)
             add_vm(id=next_vmid, user_id=user_id, type=vm_type)
         else:
-            add_vm(id=next_vmid, user_id=user_id, type=vm_type)
+            if len(get_vm_list(user_id)) < config.LIMIT_BY_USER and len(get_vm_list()) < config.TOTAL_VM_LIMIT:
+                add_vm(id=next_vmid, user_id=user_id, type=vm_type)
+            else:
+                return {"status": "error, can not create more VMs"}, 500
+
 
     except Exception as e:
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
@@ -229,7 +233,8 @@ def get_vm_ip(vmid):
             try:
                 ips = []
                 for int in proxmox.nodes(vm["node"]).qemu(vmid).agent.get("network-get-interfaces")['result']:
-                    if int['name'] != 'lo':
+                    print(int['name'])
+                    if int['name'] == 'eth0':
                         for ip in int['ip-addresses']:
                             if ip['ip-address-type'] == "ipv4":
                                 ips.append(ip["ip-address"])
@@ -371,3 +376,5 @@ def update_vm_ips_job(app):    # Job to update VM ip
             if get_vm_status(i)[0]['status'] == "running":
                 vm.ip = get_vm_ip(i)[0]['vm_ip']
                 db.session.commit()
+
+get_vm_ip(106)
