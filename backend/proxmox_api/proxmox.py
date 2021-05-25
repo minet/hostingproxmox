@@ -23,12 +23,12 @@ def add_user_dns(user_id, entry, ip):
     return rep_msg, rep_code
 
 
-def get_user_dns(user_id=""):
+def get_user_dns(user_id = ""):
     try:
-        if user_id != "":
+        if user_id != "" :
             dnsList = get_dns_entries(user_id)
             return dnsList, 201
-        else:
+        else :
             return get_dns_entries(), 201
     except Exception as e:
         logging.error("Problem in get_user_dns: " + str(e))
@@ -62,13 +62,11 @@ def load_balance_server():
 
     return {"server": server}, 201
 
-
-def is_admin(memberOf):
-    if config.ADMIN_DN in memberOf:
+def is_admin(userid):
+    if userid in ("seberus", "zastava", "lionofinterest"):
         return True
     else:
         return False
-
 
 def delete_vm(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
@@ -139,10 +137,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             add_user(user_id)
             add_vm(id=next_vmid, user_id=user_id, type=vm_type)
         else:
-            if len(get_vm_list(user_id)) < config.LIMIT_BY_USER and len(get_vm_list()) < config.TOTAL_VM_LIMIT:
-                add_vm(id=next_vmid, user_id=user_id, type=vm_type)
-            else:
-                return {"status": "error, can not create more VMs"}, 500
+            add_vm(id=next_vmid, user_id=user_id, type=vm_type)
 
     except Exception as e:
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
@@ -152,7 +147,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
     sync = False
     while not sync:  # Synchronisation
         try:
-            if "lock" not in proxmox.nodes(server) \
+            if "lock" not in proxmox.nodes(server)\
                     .qemu(next_vmid).status.current.get():  # Si lockée, on attend
                 sync = True
             sleep(1)
@@ -259,7 +254,7 @@ def get_vm_name(vmid):
     return {"name": "Vm not found"}, 404
 
 
-def get_vm(user_id=0):
+def get_vm(user_id = 0):
     if user_id != 0:
         return get_vm_list(user_id), 201
     else:
@@ -278,7 +273,6 @@ def get_vm_cpu(vmid):
                 return {"cpu": "error"}, 500
     return {"cpu": "Vm not found"}, 404
 
-
 def get_vm_cpu_usage(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
         if vm["vmid"] == vmid:
@@ -289,6 +283,7 @@ def get_vm_cpu_usage(vmid):
                 logging.error("Problem in get_vm_cpu_usage(" + str(vmid) + ") when getting VM cpu usage: " + str(e))
                 return {"cpu_usage": "error"}, 500
     return {"cpu_usage": "Vm not found"}, 404
+
 
 
 def get_vm_disk(vmid):
@@ -302,7 +297,6 @@ def get_vm_disk(vmid):
                 return {"disk": "error"}, 500
     return {"disk": "Vm not found"}, 404
 
-
 def get_vm_ram(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
         if vm["vmid"] == vmid:
@@ -313,13 +307,11 @@ def get_vm_ram(vmid):
                 return {"ram": "error"}, 500
     return {"ram": "Vm not found"}, 404
 
-
 def get_vm_ram_usage(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
         if vm["vmid"] == vmid:
             try:
-                ram_usage = round(float(proxmox.nodes(vm['node']).qemu(vmid).status.current.get()['mem'] * 100 /
-                                        proxmox.nodes(vm['node']).qemu(vmid).status.current.get()['maxmem']), 1)
+                ram_usage = round(float(proxmox.nodes(vm['node']).qemu(vmid).status.current.get()['mem'] * 100/proxmox.nodes(vm['node']).qemu(vmid).status.current.get()['maxmem']), 1)
                 return {"ram_usage": ram_usage}, 201
             except:
                 return {"ram_usage": "error"}, 500
@@ -359,7 +351,6 @@ def get_vm_status(vmid):
 
     return {"status": "vm not found"}, 404
 
-
 def get_vm_uptime(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
         if vm["vmid"] == vmid:
@@ -372,8 +363,9 @@ def get_vm_uptime(vmid):
     return {"uptime": "Vm not found"}, 404
 
 
-def update_vm_ips_job(app):  # Job to update VM ip
-    with app.app_context():  # Needs application context
+
+def update_vm_ips_job(app):    # Job to update VM ip
+    with app.app_context():    # Needs application context
         for i in get_vm_list():
             vm = Vm.query.filter_by(id=i).first()
             if get_vm_status(i)[0]['status'] == "running":

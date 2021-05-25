@@ -2,12 +2,6 @@
 import os
 import logging
 
-
-
-# Ldap dn for hosting admin
-
-ADMIN_DN = 'cn=hosting,ou=groups,dc=minet,dc=net'
-
 # Logging info
 LOG_FILE_NAME = "backend.log"
 LOG_LEVEL = logging.DEBUG
@@ -20,6 +14,7 @@ PROXMOX_USER = "root@pam"
 
 # Proxmox host
 PROXMOX_API_KEY = os.environ.get('PROXMOX_API_KEY')
+
 
 
 
@@ -47,9 +42,6 @@ MAX_USER_RAM = ""
 KEYRING_DNS_SECRET = os.environ.get('KEYRING_DNS_SECRET')
 
 
-# VM number limit
-TOTAL_VM_LIMIT = 100
-LIMIT_BY_USER = 2
 
 # DDNS keyring name
 KEYRING_DNS_NAME = 'updateddns.'
