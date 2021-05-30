@@ -64,7 +64,6 @@ export class VmsComponent implements OnInit, OnDestroy {
         let vmList: Array<string>;
         this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
                 vmList = rep.body as Array<string>;
-                console.log(vmList);
                 if (vmList.length === 0) {
                     this.loading = false;
                 }
@@ -72,7 +71,6 @@ export class VmsComponent implements OnInit, OnDestroy {
                     const vmid = vmList[i];
                     const last = (i === vmList.length - 1);
                     this.get_vm(vmid, last);
-                    console.log(vmid);
                 }
             },
             error => {
@@ -88,7 +86,6 @@ export class VmsComponent implements OnInit, OnDestroy {
         const newTimer = timer(0, 3000).pipe(
             flatMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
-                    console.log(rep.body);
                     vm.name = rep.body['name'];
                     vm.status = rep.body['status'];
                     vm.user = rep.body['user'];
