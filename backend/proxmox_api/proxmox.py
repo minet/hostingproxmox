@@ -62,8 +62,8 @@ def load_balance_server():
 
     return {"server": server}, 201
 
-def is_admin(userid):
-    if userid in ("seberus", "zastava", "lionofinterest"):
+def is_admin(memberOf):
+    if config.ADMIN_DN in memberOf:
         return True
     else:
         return False

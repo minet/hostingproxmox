@@ -10,6 +10,7 @@ export class AuthService {
   }
 
   // public SERVER_URL = 'http://localhost:8080/api/1.0.0';
+  public adminDn = 'cn=hosting,ou=groups,dc=minet,dc=net';
   public SERVER_URL = 'https://backprox.minet.net/api/1.0.0';
 
 

@@ -89,8 +89,10 @@ def delete_vm_id(vmid):  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    if is_admin(user_id):
-        return proxmox.delete_vm(vmid)
+    if "attributes" in r.json():
+        if "memberOf" in r.json():
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                return proxmox.delete_vm(vmid)
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
         return proxmox.delete_vm(vmid)
     else:
@@ -113,8 +115,10 @@ def get_dns():  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
-    if is_admin(user_id):
-        return proxmox.get_user_dns()
+    if "attributes" in r.json():
+        if "memberOf" in r.json():
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                return proxmox.get_user_dns()
 
     return proxmox.get_user_dns(user_id)
 
@@ -133,8 +137,10 @@ def get_vm():  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    if is_admin(user_id):
-        return proxmox.get_vm()  # affichage de la liste sans condition
+    if "attributes" in r.json():
+        if "memberOf" in r.json():
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                return proxmox.get_vm()  # affichage de la liste sans condition
     return proxmox.get_vm(user_id=user_id)
 
 
@@ -173,8 +179,11 @@ def get_vm_id(vmid):  # noqa: E501
     disk = proxmox.get_vm_disk(vmid)
     admin = False
 
-    if is_admin(user_id):  # partie admin pour renvoyer l'owner en plus
-        admin = True
+    if "attributes" in r.json():
+        if "memberOf" in r.json():
+            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+
     owner = get_vm_userid(
         vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
 
@@ -226,8 +235,10 @@ def delete_dns_id(dnsid):  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
-    if is_admin(user_id):
-        return proxmox.del_user_dns(dnsid)
+    if "attributes" in r.json():
+        if "memberOf" in r.json():
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                return proxmox.del_user_dns(dnsid)
 
     if dnsid in map(int, proxmox.get_user_dns(user_id)[0]):
         return proxmox.del_user_dns(dnsid)
