@@ -90,7 +90,7 @@ def delete_vm_id(vmid):  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if "attributes" in r.json():
-        if "memberOf" in r.json():
+        if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
                 return proxmox.delete_vm(vmid)
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
@@ -116,7 +116,7 @@ def get_dns():  # noqa: E501
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if "attributes" in r.json():
-        if "memberOf" in r.json():
+        if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
                 return proxmox.get_user_dns()
 
@@ -138,7 +138,7 @@ def get_vm():  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if "attributes" in r.json():
-        if "memberOf" in r.json():
+        if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
                 return proxmox.get_vm()  # affichage de la liste sans condition
     return proxmox.get_vm(user_id=user_id)
@@ -180,7 +180,7 @@ def get_vm_id(vmid):  # noqa: E501
     admin = False
 
     if "attributes" in r.json():
-        if "memberOf" in r.json():
+        if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
@@ -236,7 +236,7 @@ def delete_dns_id(dnsid):  # noqa: E501
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if "attributes" in r.json():
-        if "memberOf" in r.json():
+        if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
                 return proxmox.del_user_dns(dnsid)
 
@@ -272,7 +272,7 @@ def get_dns_id(dnsid):  # noqa: E501
     admin = False
 
     if "attributes" in r.json():
-        if "memberOf" in r.json():
+        if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
@@ -315,7 +315,7 @@ def patch_vm(vmid, body=None):  # noqa: E501
     admin = False
 
     if "attributes" in r.json():
-        if "memberOf" in r.json():
+        if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
