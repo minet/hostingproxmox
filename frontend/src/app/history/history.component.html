@@ -1,0 +1,35 @@
+<div class="allowedpermission" *ngIf="user.admin">
+   <h4 class="text-center">Historique des attributions d'IP</h4>
+   <div class="row" style="margin-top: 20px;" *ngIf="this.user.admin">
+      <div class="col-12">
+         <div class="card">
+            <div class="card-body">
+               <hr>
+               <div class="text-center">Cet historique technique permet de retracer les éventuels changements d'IP d'une VM via le DHCP.</div>
+               <ngb-pagination *ngIf="user.admin" [collectionSize]="this.history.length" [pageSize]="pageSize" [(page)]="page"
+                               aria-label="Default pagination"></ngb-pagination>
+               <div class="md-form">
+                  <input class="form-control" type="text" name="search" [(ngModel)]="searchText" autocomplete="off" placeholder="Rechercher une IP / nom d'user">
+               </div>
+               <table style="margin-top: 20px" class="table table-striped">
+                  <thead>
+                  <th scope="col">IP</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Vm ID</th>
+                  <th scope="col">User ID</th>
+                  </thead>
+                  <tbody>
+                  <tr scope="row" *ngFor="let lign of this.history | filter: searchText | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
+                     <td *ngFor="let column of lign"> {{ column }}</td>
+                  </tr>
+                  </tbody>
+               </table>
+               <ngb-pagination *ngIf="user.admin" [collectionSize]="this.history.length" [pageSize]="pageSize" [(page)]="page"
+                               aria-label="Default pagination"></ngb-pagination>
+            </div>
+         </div>
+      </div>
+</div>
+<div class="alert alert-danger" role="alert" *ngIf="!user.admin">
+   Vous n'avez pas la permission nécessaire pour consulter cette page !
+</div>
