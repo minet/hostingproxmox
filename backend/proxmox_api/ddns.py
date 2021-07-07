@@ -25,7 +25,6 @@ def create_entry(entry, ip_add):
     update.absent(entry)
     update.add(entry, configuration.DNS_ENTRY_TTL, rdata)
     response = dns.query.tcp(update, configuration.MAIN_DNS_SERVER_IP, timeout=5)
-    print(response.rcode())
     if response.rcode() == 0:
         return {"dns": "entry created"}, 201
     if response.rcode() == 6:

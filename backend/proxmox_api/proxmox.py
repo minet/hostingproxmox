@@ -233,7 +233,6 @@ def get_vm_ip(vmid):
             try:
                 ips = []
                 for int in proxmox.nodes(vm["node"]).qemu(vmid).agent.get("network-get-interfaces")['result']:
-                    print(int['name'])
                     if int['name'] == 'eth0':
                         for ip in int['ip-addresses']:
                             if ip['ip-address-type'] == "ipv4":
