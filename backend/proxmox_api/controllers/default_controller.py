@@ -330,3 +330,43 @@ def patch_vm(vmid, body=None):  # noqa: E501
             return {"status": "error"}, 500
     else:
         return {"status": "error"}, 500
+
+def get_historyip(vmid):
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
+    admin = False
+
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    if admin == True:
+        return get_historyip_fromdb(vmid)
+    else:
+        return {"status": "error"}, 403
+
+def get_historyipall():
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
+    admin = False
+
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    if admin == True:
+        return get_historyip_fromdb()
+    else:
+        return {"status": "error"}, 403
+
+

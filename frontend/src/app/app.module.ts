@@ -20,6 +20,8 @@ import { RulesComponent } from './rules/rules.component';
 import { LegalComponent } from './legal/legal.component';
 import { ManualComponent } from './manual/manual.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { HistoryComponent } from './history/history.component';
+import {Ng2SearchPipeModule} from "ng2-search-filter";
 export function storageFactory() : OAuthStorage {
   return localStorage;
 }
@@ -38,15 +40,17 @@ export function storageFactory() : OAuthStorage {
     RulesComponent,
     LegalComponent,
     ManualComponent,
+    HistoryComponent,
   ],
   imports: [
     BrowserModule,
     NgbModule,
     AppRoutingModule,
     HttpClientModule,
+    Ng2SearchPipeModule,
     OAuthModule.forRoot({
       resourceServer: {
-        // allowedUrls: [ 'http://localhost:8080' ],
+        //allowedUrls: [ 'http://localhost:8080' ],
         allowedUrls: ['https://backprox.minet.net'],
         sendAccessToken: true
       }

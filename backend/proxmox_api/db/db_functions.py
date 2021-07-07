@@ -28,7 +28,6 @@ def get_vm_list(user_id=""):  # user id est vide quand un admin veut voir la lis
                 list.append(i.id)
             return list
     else:  # dans ce cas on affiche touuute la liste sans restriction
-        #  print(user_id)
         list = []
         for i in User.query.all():
             for j in i.vms:
@@ -40,7 +39,6 @@ def add_dns_entry(user, entry, ip):
     new_entry = DomainName(userId=user, entry=entry, ip=ip)
     db.session.add(new_entry)
     db.session.commit()
-
 
 def del_dns_entry(dnsid):
     DomainName.query.filter_by(id=dnsid).delete()
@@ -126,6 +124,15 @@ def get_vm_created_on(vmid):
     else:
         return {"created_on": "vm not found"}, 404
 
+def get_historyip_fromdb(vmid = ""): # vmid vide si on récupère tt l'historique
+    list = []
+    if vmid != "":
+        for i in History.query.filter_by(vmId=vmid).all():
+            list.append([i.ip,i.date,i.userId,i.vmId])
+    else:
+        for i in History.query.all():
+            list.append([i.ip,i.date,i.userId,i.vmId])
+    return list
 
 
 

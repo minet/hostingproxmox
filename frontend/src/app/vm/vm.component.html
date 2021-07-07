@@ -127,6 +127,30 @@
             </div>
         </div>
     </div>
+    <div class="row" style="margin-top: 20px;" *ngIf="this.user.admin">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                        <h4>Historique des IP</h4>
+                        <hr>
+                        <div class="text-center">Cet historique technique permet de retracer les éventuels changements d'IP d'une VM via le DHCP.</div>
+                        <table style="margin-top: px" class="table table-striped">
+                            <thead>
+                                <th scope="col">IP</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Vm ID</th>
+                                <th scope="col">User ID</th>
+                            </thead>
+                            <tbody>
+                                <tr scope="row" *ngFor="let lign of this.history; let i = index">
+                                    <td *ngFor="let column of this.history[i]"> {{ column }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 

@@ -152,6 +152,58 @@ paths:
         "409":
           description: a vm already exists
       x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /history/{vmid}:
+    get:
+      summary: get the ip history of a vm
+      operationId: get_historyip
+      parameters:
+        - name: vmid
+          in: path
+          description: vmid to get history
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "105"
+      responses:
+        "201":
+          description: get historyip for vmid
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistoryIdItem'
+                x-content-type: application/json
+        "400":
+          description: "invalid input, object invalid"
+        "403":
+          description: "not enough permissions"
+        "404":
+          description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /historyall:
+    get:
+      summary: get the ip history of all the vm
+      operationId: get_historyipall
+      responses:
+        "201":
+          description: get historyip for all vm
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistoryIdItem'
+                x-content-type: application/json
+        "400":
+          description: "invalid input, object invalid"
+        "403":
+          description: "not enough permissions"
+        "404":
+          description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
   /dns/{dnsid}:
     get:
       summary: get a dns entry by id
@@ -240,6 +292,33 @@ components:
       example:
         entry: host
         ip: 192.0.0.1
+    HistoryIdItem:
+      required:
+        - ip
+        - date
+      type: object
+      properties:
+        ip:
+          type: string
+          description: dns entry
+          example: 157.159.195.34
+        date:
+          type: string
+          description: entry to this ip
+          example: "18/07/2021 15:34:23"
+        userId:
+          type: number
+          description: userId
+          example: 3
+        VmId:
+          type: number
+          description: vmId
+          example: 3
+      example:
+        ip: 157.159.195.34
+        date: "18/07/2021 15:34:23"
+        userId: 1
+        vmId: 2
     VmItem:
       type: object
       properties:

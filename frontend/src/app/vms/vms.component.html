@@ -9,6 +9,8 @@
 
     <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
+    <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">IP History</button></div>
+
     <ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page"
                     aria-label="Default pagination"></ngb-pagination>
     <hr>

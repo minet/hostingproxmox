@@ -5,7 +5,7 @@ import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
-import {Subscription, timer} from 'rxjs';
+import {Observable, Subscription, timer} from 'rxjs';
 import {flatMap} from 'rxjs/internal/operators';
 
 @Component({
@@ -19,7 +19,7 @@ export class VmsComponent implements OnInit, OnDestroy {
     showSsh = false;
     page = 1;
     pageSize = 5;
-
+    public validToken$: Observable<boolean>;
     constructor(private http: HttpClient,
                 public user: User,
                 private userService: UserService,

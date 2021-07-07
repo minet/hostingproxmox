@@ -7,10 +7,10 @@ LOG_FILE_NAME = "backend.log"
 LOG_LEVEL = logging.DEBUG
 
 # Ldap dn for hosting admin
-ADMIN_DN = 'cn=hosting,ou=groups,dc=minet,dc=net'
+ADMIN_DN = 'cn=cluster-hosting,ou=groups,dc=minet,dc=net'
 
 # Proxmox host
-PROXMOX_HOST = "192.168.104.16"
+PROXMOX_HOST = "192.168.104.7"
 
 # Proxmox host
 PROXMOX_USER = "root@pam"

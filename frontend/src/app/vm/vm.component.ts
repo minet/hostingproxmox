@@ -22,6 +22,7 @@ export class VmComponent implements OnInit, OnDestroy {
     deleting = false;
     intervals = new Set<Subscription>();
     newVm = new Vm();
+    history: any;
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -128,6 +129,8 @@ export class VmComponent implements OnInit, OnDestroy {
         const newTimer = timer(0, 3000).pipe(
             flatMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
+                    if(this.user.admin)
+                        this.get_ip_history(vmid);
                     vm.name = rep.body['name'];
                     vm.status = rep.body['status'];
                     vm.ram = rep.body['ram'];
@@ -165,6 +168,27 @@ export class VmComponent implements OnInit, OnDestroy {
                 });
         this.intervals.add(newTimer);
 
+    }
+
+    get_ip_history(vmid): void {
+        this.http.get(this.authService.SERVER_URL + '/history/' + vmid, {observe: 'response'})
+        .subscribe(rep => {
+                this.history = rep.body;
+            },
+            error => {
+
+                if (error.status === 404) {
+                    window.alert('VM not found');
+                    this.router.navigate(['']);
+                } else if (error.status === 403) {
+                    window.alert('Session expired');
+                    this.router.navigate(['']);
+                } else {
+                    window.alert('Unknown error');
+                    this.router.navigate(['']);
+                }
+
+            });
     }
 
 }

@@ -7,6 +7,7 @@ import {DnsComponent} from './dns/dns.component';
 import {RulesComponent} from './rules/rules.component';
 import {LegalComponent} from './legal/legal.component';
 import {ManualComponent} from './manual/manual.component';
+import {HistoryComponent} from './history/history.component';
 
 
 const routes: Routes = [
@@ -17,6 +18,7 @@ const routes: Routes = [
   {path: 'rules', component: RulesComponent},
   {path: 'legal', component: LegalComponent},
   {path: 'manual', component: ManualComponent},
+  {path: 'history', component: HistoryComponent},
   {path: '**', redirectTo: ''},
 
 
