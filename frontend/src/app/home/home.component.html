@@ -12,8 +12,11 @@
                 to contact our <a href="mailto:webmaster@listes.minet.net"> webmaster</a> for any question.
             </p>
         </div>
-
-        <div class="card mb-3">
+        <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated">
+            <b>Unsigned charter !</b>
+            <p>To create VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+        </div>
+        <div class="card mb-3" *ngIf="this.user.chartevalidated">
             <h4 class="card-header">
                 Create your VM
             </h4>

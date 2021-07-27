@@ -36,7 +36,8 @@ export class DnsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userService.getUser().subscribe((user) => this.user = user);
-    this.get_dns_list();
+    if(this.user.admin || this.user.chartevalidated)
+      this.get_dns_list();
     this.user.dns = Array<Dns>();
     this.newDns.entry = 'YourEntry';
     this.newDns.ip = '157.159.195.x';
@@ -70,7 +71,7 @@ export class DnsComponent implements OnInit, OnDestroy {
             window.alert('Not found');
             this.router.navigate(['']);
           } else if (error.status === 403) {
-            window.alert('Session expired');
+            window.alert('Session expired or not enough permissions');
             this.router.navigate(['']);
           } else {
             window.alert('Unknown error');
@@ -100,7 +101,7 @@ export class DnsComponent implements OnInit, OnDestroy {
             window.alert('DNS not found');
             this.router.navigate(['']);
           } else if (error.status === 403) {
-            window.alert('Session expired');
+            window.alert('Session expired or not enough permissions');
             this.router.navigate(['']);
           } else {
             window.alert('Unknown error');
@@ -114,44 +115,46 @@ export class DnsComponent implements OnInit, OnDestroy {
 
 
   create_dns(dns: Dns): void {
-
-    let data = {};
-    data = {entry: this.slugifyPipe.transform(dns.entry), ip: dns.ip};
-    this.http.post(this.authService.SERVER_URL + '/dns', data, {observe: 'response'}).subscribe(rep => {
-        if (rep.status === 201) {
-          this.success = true;
-        }
-        window.location.reload();
-      },
-      error => {
-        if (error.status === 405) {
-          window.alert('DNS already exists');
-        } else if (error.status === 403) {
-          window.alert('Session expired');
-        } else {
-          window.alert('Unknown error');
-        }
-      });
-
+    if(this.user.chartevalidated) {
+      let data = {};
+      data = {entry: this.slugifyPipe.transform(dns.entry), ip: dns.ip};
+      this.http.post(this.authService.SERVER_URL + '/dns', data, {observe: 'response'}).subscribe(rep => {
+            if (rep.status === 201) {
+              this.success = true;
+            }
+            window.location.reload();
+          },
+          error => {
+            if (error.status === 405) {
+              window.alert('DNS already exists');
+            } else if (error.status === 403) {
+              window.alert('Session expired or not enough permissions');
+            } else {
+              window.alert('Unknown error');
+            }
+          });
+    }
   }
 
   delete_entry(id): void {
-    this.http.delete(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})
-      .subscribe(
-        rep => {
-          window.location.reload();
-        },
-        error => {
-          if (error.status === 409) {
-            window.alert('Dns entry already exists');
-            window.location.reload();
-          } else if (error.status === 403) {
-            window.alert('Session expired');
-            window.location.reload();
-          } else {
-            window.alert('Unknown error');
-            window.location.reload();
-          }
-        });
+    if(this.user.chartevalidated || this.user.admin) {
+      this.http.delete(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})
+          .subscribe(
+              rep => {
+                window.location.reload();
+              },
+              error => {
+                if (error.status === 409) {
+                  window.alert('Dns entry already exists');
+                  window.location.reload();
+                } else if (error.status === 403) {
+                  window.alert('Session expired or not enough permissions');
+                  window.location.reload();
+                } else {
+                  window.alert('Unknown error');
+                  window.location.reload();
+                }
+              });
+    }
   }
 }

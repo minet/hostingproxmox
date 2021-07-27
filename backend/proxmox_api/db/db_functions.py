@@ -92,8 +92,8 @@ def add_user(user):
     db.session.commit()
 
 
-def add_vm(id, user_id, type):
-    new_vm = Vm(id=id, userId=user_id, type=type)
+def add_vm(id, user_id, type, mac, ip):
+    new_vm = Vm(id=id, userId=user_id, type=type, mac=mac, ip=ip)
     db.session.add(new_vm)
     db.session.commit()
 
@@ -134,6 +134,11 @@ def get_historyip_fromdb(vmid = ""): # vmid vide si on récupère tt l'historiqu
             list.append([i.ip,i.date,i.userId,i.vmId])
     return list
 
+def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
+    if Vm.query.filter_by(ip=ip).first():
+        return False
+    else:
+        return True;
 
 
 #######

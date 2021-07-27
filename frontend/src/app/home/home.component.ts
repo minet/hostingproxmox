@@ -50,8 +50,10 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.userService.getUser().subscribe((user) => this.user = user);
-    this.count_vm();
-    this.count_dns();
+    if(this.user.admin) {
+      this.count_vm();
+      this.count_dns();
+    }
   }
 
   progress_bar(): void{
@@ -104,7 +106,7 @@ export class HomeComponent implements OnInit {
           window.alert('VM already exists');
           this.router.navigate(['']);
         } else if (error.status === 403) {
-          window.alert('Session expired');
+          window.alert('Session expired or not enough permissions');
           this.router.navigate(['']);
         } else {
           window.alert('Unknown error');
@@ -128,7 +130,7 @@ export class HomeComponent implements OnInit {
             window.alert('VM not found');
             this.router.navigate(['']);
           } else if (error.status === 403) {
-            window.alert('Session expired');
+            window.alert('Session expired or not enough permissions');
             this.router.navigate(['']);
           } else {
             window.alert('Unknown error');
@@ -155,7 +157,7 @@ export class HomeComponent implements OnInit {
         window.alert('VM not found');
         this.router.navigate(['']);
       } else if (error.status === 403) {
-        window.alert('Session expired');
+        window.alert('Session expired or not enough permissions');
         this.router.navigate(['']);
       } else {
         window.alert('Unknown error');

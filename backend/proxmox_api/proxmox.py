@@ -6,6 +6,7 @@ from proxmoxer import ResourceException
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration as config
 from proxmox_api.db.db_functions import *
+from ipaddress import IPv4Network
 
 logging.basicConfig(filename=config.LOG_FILE_NAME, filemode="a", level=logging.DEBUG
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -51,12 +52,13 @@ def load_balance_server():
     server = ""
     perram_min = 100
     for i in nodes_info:
-        perram = round(i["mem"] * 100 / i["maxmem"], 2)
-        percpu = round(i["cpu"] * 100, 2)
-        if i["status"] == "online" and perram < 90 and percpu < 70:
-            if perram < perram_min:
-                perram_min = perram
-                server = i["node"]
+        if i['node'] != "aomine": # on veut rien sur aomine
+            perram = round(i["mem"] * 100 / i["maxmem"], 2)
+            percpu = round(i["cpu"] * 100, 2)
+            if i["status"] == "online" and perram < 90 and percpu < 70:
+                if perram < perram_min:
+                    perram_min = perram
+                    server = i["node"]
     if server == "":
         return {"server": "no server available"}, 500
 
@@ -99,7 +101,6 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
         server = server[0]["server"]
 
     template_node = ""
-
     try:
         if vm_type == "bare_vm":
 
@@ -138,7 +139,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             add_vm(id=next_vmid, user_id=user_id, type=vm_type)
         else:
             if len(get_vm_list(user_id)) < config.LIMIT_BY_USER and len(get_vm_list()) < config.TOTAL_VM_LIMIT:
-                add_vm(id=next_vmid, user_id=user_id, type=vm_type)
+                add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
             else:
                 return {"status": "error, can not create more VMs"}, 500
 
@@ -245,6 +246,8 @@ def get_vm_ip(vmid):
                 return {"vm_ip": "error"}, 500
     return {"vm_ip": "Vm not found"}, 404
 
+def get_vm_hardware_address(vmid, node):
+    return proxmox.nodes(node).qemu(vmid).agent.get("network-get-interfaces")['result'][1]['hardware-address']  # récupération de l'adresse mac de la nouvelle vm
 
 def get_vm_name(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
@@ -372,8 +375,22 @@ def update_vm_ips_job(app):    # Job to update VM ip
     with app.app_context():    # Needs application context
         for i in get_vm_list():
             vm = Vm.query.filter_by(id=i).first()
-            if get_vm_status(i)[0]['status'] == "running":
-                vm.ip = get_vm_ip(i)[0]['vm_ip']
-                db.session.commit()
-
-get_vm_ip(106)
+            if vm.ip == "En attente":
+                network = IPv4Network('157.159.195.0/24')
+                reserved = {'157.159.195.1', '157.159.195.2', '157.159.195.3', '157.159.195.4', '157.159.195.5',
+                            '157.159.195.6', '157.159.195.7', '157.159.195.8', '157.159.195.9',
+                            '157.159.195.10'}
+                hosts_iterator = (host for host in network.hosts() if str(host) not in reserved)
+                for host in hosts_iterator:
+                    if is_ip_available(host) == True:
+                        vm.ip = host
+                        db.session.commit()
+                        break
+                if vm.ip == "En attente":
+                    return {"status": "No ip available"}, 500
+            if vm.mac == "En attente":
+                for j in proxmox.cluster.resources.get(type="vm"):
+                    if j["vmid"] == i:
+                        vm.mac = get_vm_hardware_address(vm.id, j['node'])
+                        db.session.commit()
+                        break

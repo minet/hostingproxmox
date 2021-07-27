@@ -1,12 +1,11 @@
-<div *ngIf="loading">
+<div *ngIf="loading && (user.chartevalidated || user.admin)">
     <div class="d-flex justify-content-center">
         <div class="spinner-grow text-primary" role="status">
             <span class="sr-only">Loading...</span>
         </div>
     </div>
 </div>
-<div class="vms container flex-fill" *ngIf="!loading">
-
+<div class="vms container flex-fill" *ngIf="!loading && (this.user.chartevalidated || this.user.admin)" >
     <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
     <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">IP History</button></div>
@@ -75,6 +74,10 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
         </div>
     </div>
 </div><br/>
+<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin">
+    <b>Unsigned charter !</b>
+    <p>To create VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+</div>
 <ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page"
                 aria-label="Default pagination"></ngb-pagination>
 <hr>

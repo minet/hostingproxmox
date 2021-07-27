@@ -7,6 +7,7 @@ import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Observable, Subscription, timer} from 'rxjs';
 import {flatMap} from 'rxjs/internal/operators';
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
     selector: 'app-vms',
@@ -21,6 +22,8 @@ export class VmsComponent implements OnInit, OnDestroy {
     pageSize = 5;
     public validToken$: Observable<boolean>;
     constructor(private http: HttpClient,
+                private activatedRoute: ActivatedRoute,
+                private router: Router,
                 public user: User,
                 private userService: UserService,
                 public authService: AuthService,
@@ -61,22 +64,23 @@ export class VmsComponent implements OnInit, OnDestroy {
     }
 
     get_vms(): void {
-        let vmList: Array<string>;
-        this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
-                vmList = rep.body as Array<string>;
-                if (vmList.length === 0) {
-                    this.loading = false;
-                }
-                for (let i = 0; i < vmList.length; i++) {
-                    const vmid = vmList[i];
-                    const last = (i === vmList.length - 1);
-                    this.get_vm(vmid, last);
-                }
-            },
-            error => {
+        if(this.user.chartevalidated || this.user.admin) {
+            let vmList: Array<string>;
+            this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
+                    vmList = rep.body as Array<string>;
+                    if (vmList.length === 0) {
+                        this.loading = false;
+                    }
+                    for (let i = 0; i < vmList.length; i++) {
+                        const vmid = vmList[i];
+                        const last = (i === vmList.length - 1);
+                        this.get_vm(vmid, last);
+                    }
+                },
+                error => {
 
-            });
-
+                });
+        }
     }
 
     get_vm(vmid: string, last: boolean): void {
@@ -105,7 +109,13 @@ export class VmsComponent implements OnInit, OnDestroy {
                     }
                 },
                 error => {
-
+                    if (error.status === 403) {
+                        window.alert('Session expired or not enough permissions');
+                        this.router.navigate(['']);
+                    } else {
+                        window.alert('Unknown error');
+                        this.router.navigate(['']);
+                    }
                 });
         this.intervals.add(newTimer);
     }

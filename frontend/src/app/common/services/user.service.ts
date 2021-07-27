@@ -46,7 +46,6 @@ export class UserService {
 
     getUser(): Observable<User> {
         return fromPromise(this.discoveryDocument$.then((result) => {
-
             const user: any = this.oauthService.getIdentityClaims();
             if (user != null) {
                 this.user.username = user.sub;
@@ -59,6 +58,8 @@ export class UserService {
                             this.user.admin = true;
                         }
                     }
+                    if(r.attributes['signedhosting'] === "1")
+                        this.user.chartevalidated = true;
                 });
 
                 return this.user;

@@ -21,7 +21,8 @@ class Vm(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=False)
     userId = db.Column(db.String(254), db.ForeignKey("user.id"), nullable=True)
     type = db.Column(db.String(254), nullable=False)
-    ip = db.Column(db.String(15), nullable=True, unique=True)
+    ip = db.Column(db.String(15), nullable=True)
+    mac = db.Column(db.String(20), nullable=True, unique=True)
     created_on = db.Column(db.Date, nullable=False, default=db.func.date(db.func.now()))
 
 class History(db.Model):

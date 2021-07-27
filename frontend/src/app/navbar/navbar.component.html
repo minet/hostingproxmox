@@ -13,11 +13,11 @@
         <a class="nav-link" href="#" [routerLink]="['/']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && !user.admin" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">My VMs</a>
+        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">My VMs</a>
         <a class="nav-link" href="#" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">VMs Admin</a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && !user.admin" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >MiNET DNS entries</a>
+        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >MiNET DNS entries</a>
         <a href="#" class="nav-link" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >DNS Admin</a>
       </li>
 
@@ -28,9 +28,6 @@
       </li>
       <li class="nav-item">
         <a href="#" class="nav-link" [routerLink]="['manual']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >User manual</a>
-      </li>
-      <li class="nav-item">
-        <a href="#" class="nav-link" [routerLink]="['rules']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >Rules</a>
       </li>
       <li class="nav-item">
         <a href="#" class="nav-link" *ngIf="!(validToken$ | async)" (click)="userService.login()">Login</a>

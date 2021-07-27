@@ -181,7 +181,7 @@ export class VmComponent implements OnInit, OnDestroy {
                     window.alert('VM not found');
                     this.router.navigate(['']);
                 } else if (error.status === 403) {
-                    window.alert('Session expired');
+                    window.alert('Session expired or not enough permissions');
                     this.router.navigate(['']);
                 } else {
                     window.alert('Unknown error');

@@ -7,7 +7,8 @@ export class User {
     public username: string;
     public lastname: string;
     public name: string;
-    public admin: boolean;
+    public admin = false;
+    public chartevalidated = false;
     public vms?: Array<Vm>;
     public dns?: Array<Dns>;
 }
