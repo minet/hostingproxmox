@@ -23,7 +23,7 @@ JOBS = [
             "func": "proxmox_api.proxmox:update_vm_ips_job",
             "args": (app.app,),
             "trigger": "interval",
-            "seconds": 10,
+            "seconds": 20,
         }
     ]
 

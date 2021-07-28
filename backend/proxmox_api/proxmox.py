@@ -7,15 +7,15 @@ import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration as config
 from proxmox_api.db.db_functions import *
 from ipaddress import IPv4Network
-
-logging.basicConfig(filename=config.LOG_FILE_NAME, filemode="a", level=logging.DEBUG
+import time
+logging.basicConfig(filename="log", filemode="a", level=logging.INFO
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 proxmox = ProxmoxAPI(host=config.PROXMOX_HOST, user=config.PROXMOX_USER
                      , token_name=config.PROXMOX_API_KEY_NAME
                      , token_value=config.PROXMOX_API_KEY, verify_ssl=False)
 
-
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(name)s: %(message)s')
 def add_user_dns(user_id, entry, ip):
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
@@ -373,9 +373,10 @@ def get_vm_uptime(vmid):
 
 def update_vm_ips_job(app):    # Job to update VM ip
     with app.app_context():    # Needs application context
-        for i in get_vm_list():
-            vm = Vm.query.filter_by(id=i).first()
-            if vm.ip == "En attente":
+        for j in proxmox.cluster.resources.get(type="vm"):
+            vm = Vm.query.filter_by(id=j['vmid']).first()
+            if vm is not None and (vm.ip == "En attente" or vm.mac == "En attente"):
+                vm.mac = get_vm_hardware_address(vm.id, j['node'])
                 network = IPv4Network('157.159.195.0/24')
                 reserved = {'157.159.195.1', '157.159.195.2', '157.159.195.3', '157.159.195.4', '157.159.195.5',
                             '157.159.195.6', '157.159.195.7', '157.159.195.8', '157.159.195.9',
@@ -384,13 +385,12 @@ def update_vm_ips_job(app):    # Job to update VM ip
                 for host in hosts_iterator:
                     if is_ip_available(host) == True:
                         vm.ip = host
-                        db.session.commit()
                         break
                 if vm.ip == "En attente":
                     return {"status": "No ip available"}, 500
-            if vm.mac == "En attente":
-                for j in proxmox.cluster.resources.get(type="vm"):
-                    if j["vmid"] == i:
-                        vm.mac = get_vm_hardware_address(vm.id, j['node'])
-                        db.session.commit()
-                        break
+
+                for k in proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").get():  # on vire d'abord toutes les ip set
+                    cidr = k['cidr']
+                    proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").delete(cidr)
+                proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").create(cidr=vm.ip)  # on met l'ipset à jour
+                db.session.commit()
