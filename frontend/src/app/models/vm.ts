@@ -8,6 +8,7 @@ export class Vm {
     public ssh?: string,
     public type?: string,
     public status?: string,
+    public autoreboot?: string,
     public id?: string,
     public password?: string,
     public sshKey?: string,

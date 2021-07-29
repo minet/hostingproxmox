@@ -177,6 +177,7 @@ def get_vm_id(vmid):  # noqa: E501
     ram = proxmox.get_vm_ram(vmid)
     cpu = proxmox.get_vm_cpu(vmid)
     disk = proxmox.get_vm_disk(vmid)
+    autoreboot = proxmox.get_vm_autoreboot(vmid)
     admin = False
 
     if "attributes" in r.json():
@@ -188,7 +189,7 @@ def get_vm_id(vmid):  # noqa: E501
         vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
 
     if status[0]["status"] != 'running':
-        return {"name": name[0]["name"], "user": owner if admin else "", "ip": "", "status": status[0]["status"],
+        return {"name": name[0]["name"], "autoreboot": autoreboot[0]["autoreboot"], "user": owner if admin else "", "ip": "", "status": status[0]["status"],
                 "ram": ram[0]['ram'], "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"],
                 "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"]}, 201
     else:
@@ -199,7 +200,7 @@ def get_vm_id(vmid):  # noqa: E501
 
     if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[1] == 201 and \
             type[1] == 201 and ram_usage[1] == 201 and cpu_usage[1] == 201 and uptime[1] == 201:
-        return {"name": name[0]["name"], "user": owner if admin else "", "ip": ip[0]["vm_ip"]
+        return {"name": name[0]["name"], "autoreboot": autoreboot[0]["autoreboot"], "user": owner if admin else "", "ip": ip[0]["vm_ip"]
                    , "status": status[0]["status"], "ram": ram[0]['ram']
                    , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]
                    , "ram_usage": ram_usage[0]["ram_usage"], "cpu_usage": cpu_usage[0]["cpu_usage"]
@@ -326,6 +327,8 @@ def patch_vm(vmid, body=None):  # noqa: E501
             return proxmox.start_vm(vmid)
         elif body.status == "stop":
             return proxmox.stop_vm(vmid)
+        elif body.status == "switch_autoreboot":
+            return proxmox.switch_autoreboot(vmid)
         else:
             return {"status": "error"}, 500
     else:

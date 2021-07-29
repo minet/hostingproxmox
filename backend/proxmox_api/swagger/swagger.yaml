@@ -362,6 +362,10 @@ components:
           type: number
           description: total VM's disk size in GiO
           example: 10
+        autoreboot:
+          type: boolean
+          description: vm autoreboot value
+          example: true
         status:
           type: string
           description: vm status

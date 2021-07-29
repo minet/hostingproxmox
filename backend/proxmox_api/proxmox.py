@@ -249,6 +249,23 @@ def get_vm_ip(vmid):
 def get_vm_hardware_address(vmid, node):
     return proxmox.nodes(node).qemu(vmid).agent.get("network-get-interfaces")['result'][1]['hardware-address']  # récupération de l'adresse mac de la nouvelle vm
 
+def get_vm_autoreboot(vmid): # renvoie si la VM est en mode reboot auto au démarrage du noeud
+    for vm in proxmox.cluster.resources.get(type="vm"):
+        if vm["vmid"] == vmid:
+            try:
+                if "onboot" in proxmox.nodes(vm["node"]).qemu(vmid).config.get():
+                    if proxmox.nodes(vm["node"]).qemu(vmid).config.get()['onboot'] == 1:
+                        autoreboot = 1
+                    else:
+                        autoreboot = 0
+                else:
+                    autoreboot = 0
+                return {"autoreboot": autoreboot}, 201
+            except Exception as e:
+                logging.error("Problem in get_vm_name(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
+                return {"name": "error"}, 500
+    return {"name": "Vm not found"}, 404
+
 def get_vm_name(vmid):
     for vm in proxmox.cluster.resources.get(type="vm"):
         if vm["vmid"] == vmid:
@@ -394,3 +411,18 @@ def update_vm_ips_job(app):    # Job to update VM ip
                     proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").delete(cidr)
                 proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").create(cidr=vm.ip)  # on met l'ipset à jour
                 db.session.commit()
+
+def switch_autoreboot(vmid):
+    for vm in proxmox.cluster.resources.get(type="vm"):
+        if vm["vmid"] == vmid:
+            try:
+               if get_vm_autoreboot(vmid) == 1:
+                   proxmox.nodes(vm["node"]).qemu(vmid).config.post(onboot=0)
+                   return {"status": "changed"}, 201
+               else:
+                   proxmox.nodes(vm["node"]).qemu(vmid).config.post(onboot=1)
+                   return {"status": "changed"}, 201
+            except Exception as e:
+                logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
+                return {"uptime": "error"}, 500
+    return {"uptime": "Vm not found"}, 404
