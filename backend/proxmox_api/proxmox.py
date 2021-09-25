@@ -103,7 +103,17 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
     template_node = ""
     try:
         if vm_type == "bare_vm":
+            user = get_user_id(user_id=user_id)
 
+            if user is None:
+                add_user(user_id)
+                add_vm(id=next_vmid, user_id=user_id, type=vm_type)
+            else:
+                if len(get_vm_list(user_id)) < config.LIMIT_BY_USER and len(get_vm_list()) < config.TOTAL_VM_LIMIT:
+                    add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
+                else:
+                    return {"status": "error, can not create more VMs"}, 500
+                
             for vm in proxmox.cluster.resources.get(type="vm"):
                 if vm["vmid"] == 10000:
                     template_node = vm["node"]
@@ -116,6 +126,16 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             )
 
         elif vm_type == "nginx_vm":
+            user = get_user_id(user_id=user_id)
+
+            if user is None:
+                add_user(user_id)
+                add_vm(id=next_vmid, user_id=user_id, type=vm_type)
+            else:
+                if len(get_vm_list(user_id)) < config.LIMIT_BY_USER and len(get_vm_list()) < config.TOTAL_VM_LIMIT:
+                    add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
+                else:
+                    return {"status": "error, can not create more VMs"}, 500
 
             for vm in proxmox.cluster.resources.get(type="vm"):
                 if vm["vmid"] == 10001:
@@ -131,17 +151,6 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
 
         else:
             return {"status": "vm type not defines"}, 500
-
-        user = get_user_id(user_id=user_id)
-
-        if user is None:
-            add_user(user_id)
-            add_vm(id=next_vmid, user_id=user_id, type=vm_type)
-        else:
-            if len(get_vm_list(user_id)) < config.LIMIT_BY_USER and len(get_vm_list()) < config.TOTAL_VM_LIMIT:
-                add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
-            else:
-                return {"status": "error, can not create more VMs"}, 500
 
 
     except Exception as e:
