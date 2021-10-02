@@ -36,9 +36,7 @@ export class VmComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.userService.getUser().subscribe((user) => {
-            this.user = user;
-        });
+        setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user); }, 1000);
         this.user.vms = Array<Vm>();
         this.vmid = this.activatedRoute.snapshot.params.vmid;
         this.get_vm(this.vmid);

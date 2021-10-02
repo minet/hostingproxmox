@@ -8,6 +8,7 @@ import {Vm} from '../models/vm';
 import {Router} from '@angular/router';
 import {timer} from 'rxjs';
 import {flatMap} from 'rxjs/internal/operators';
+import {Dns} from "../models/dns";
 
 @Component({
   selector: 'app-home',
@@ -49,11 +50,13 @@ export class HomeComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.userService.getUser().subscribe((user) => this.user = user);
-    if(this.user.admin) {
-      this.count_vm();
-      this.count_dns();
-    }
+    setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
+      if(this.user.admin) {
+        this.count_vm();
+        this.count_dns();
+      }
+    }, 1000);
+
   }
 
   progress_bar(): void{
