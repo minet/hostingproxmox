@@ -91,7 +91,7 @@ export class VmComponent implements OnInit, OnDestroy {
             } /*else {
                 window.alert('Unknown error');
                 this.router.navigate(['']);
-            */}
+            }*/
 
         });
 
