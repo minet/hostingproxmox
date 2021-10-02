@@ -113,10 +113,11 @@ export class VmsComponent implements OnInit, OnDestroy {
                     if (error.status === 403) {
                         window.alert('Session expired or not enough permissions');
                         this.router.navigate(['']);
-                    } else {
+                    }
+                    /*else {
                         window.alert('Unknown error');
                         this.router.navigate(['']);
-                    }
+                    }*/
                 });
         this.intervals.add(newTimer);
     }

@@ -88,10 +88,10 @@ export class VmComponent implements OnInit, OnDestroy {
             } else if (error.status === 403) {
                 window.alert('Session expired');
                 this.router.navigate(['']);
-            } else {
+            } /*else {
                 window.alert('Unknown error');
                 this.router.navigate(['']);
-            }
+            */}
 
         });
 
