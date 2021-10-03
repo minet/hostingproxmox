@@ -119,7 +119,7 @@ export class DnsComponent implements OnInit, OnDestroy {
   create_dns(dns: Dns): void {
     if(this.user.chartevalidated) {
       let data = {};
-      data = {entry: this.slugifyPipe.transform(dns.entry), ip: dns.ip};
+      data = {entry: dns.entry, ip: dns.ip};
       this.http.post(this.authService.SERVER_URL + '/dns', data, {observe: 'response'}).subscribe(rep => {
             if (rep.status === 201) {
               this.success = true;
