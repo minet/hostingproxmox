@@ -19,7 +19,7 @@ export class VmsComponent implements OnInit, OnDestroy {
     intervals = new Set<Subscription>();
     showSsh = false;
     page = 1;
-    pageSize = 5;
+    pageSize = 10;
     public validToken$: Observable<boolean>;
     constructor(private http: HttpClient,
                 private activatedRoute: ActivatedRoute,
