@@ -16,7 +16,7 @@
   <hr>
   </ng-container>
   <ng-template #dnsEntries>
-    <ngb-pagination *ngIf="user.admin" [collectionSize]="user.dns.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
+    <ngb-pagination [collectionSize]="user.dns.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
     <table class="table mt-5">
       <thead>
       <tr>
@@ -40,7 +40,7 @@
   <div class="text-center">
     <button class="btn btn-primary" (click)="showForm = !showForm">Add new entry</button>
   </div>
-  <ngb-pagination *ngIf="user.admin" [collectionSize]="user.dns.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
+  <ngb-pagination [collectionSize]="user.dns.length" [pageSize]="pageSize" [(page)]="page" aria-label="Default pagination"></ngb-pagination>
   <div *ngIf="showForm" class="card text-white mb-3 mt-5">
     <div class="card-body">
       <div>
