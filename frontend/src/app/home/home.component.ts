@@ -111,10 +111,11 @@ export class HomeComponent implements OnInit {
         } else if (error.status === 403) {
           window.alert('Session expired or not enough permissions');
           this.router.navigate(['']);
-        } else {
+        }
+        /*else {
           window.alert('Unknown error');
           this.router.navigate(['']);
-        }
+        }*/
       });
   }
   count_dns(): void {
@@ -135,10 +136,11 @@ export class HomeComponent implements OnInit {
           } else if (error.status === 403) {
             window.alert('Session expired or not enough permissions');
             this.router.navigate(['']);
-          } else {
+          }
+          /*else {
             window.alert('Unknown error');
             this.router.navigate(['']);
-          }
+          }*/
 
         });
   }
