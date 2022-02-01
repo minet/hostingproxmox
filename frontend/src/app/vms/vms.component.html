@@ -5,6 +5,7 @@
         </div>
     </div>
 </div>
+
 <div class="vms container flex-fill" *ngIf="!loading && (this.user.chartevalidated || this.user.admin)" >
     <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
@@ -12,7 +13,6 @@
 
     <ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page"
                     aria-label="Default pagination"></ngb-pagination>
-    <hr>
     <div class="text-center">
         <ng-container *ngIf="user.vms.length == 0 && !user.admin">
             <h4 class="text-danger">You currently have no VMs, create one first!</h4>

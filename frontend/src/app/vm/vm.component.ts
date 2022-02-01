@@ -15,10 +15,10 @@ import {flatMap} from 'rxjs/internal/operators';
     styleUrls: ['./vm.component.css']
 })
 export class VmComponent implements OnInit, OnDestroy {
-
     vmid: number;
     loading = true;
     editing = false;
+    errorcode = 201;
     deleting = false;
     intervals = new Set<Subscription>();
     newVm = new Vm();
@@ -81,18 +81,7 @@ export class VmComponent implements OnInit, OnDestroy {
         this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(rep => {
             this.loading = true;
         }, error => {
-
-            if (error.status === 404) {
-                window.alert('VM not found');
-                this.router.navigate(['']);
-            } else if (error.status === 403) {
-                window.alert('Session expired');
-                this.router.navigate(['']);
-            } /*else {
-                window.alert('Unknown error');
-                this.router.navigate(['']);
-            }*/
-
+            this.errorcode = error.status;
         });
 
     }
@@ -105,17 +94,7 @@ export class VmComponent implements OnInit, OnDestroy {
             },
 
             error => {
-                if (error.status === 404) {
-                    window.alert('VM not found');
-                    this.router.navigate(['']);
-                } else if (error.status === 403) {
-                    window.alert('Session expired');
-                    this.router.navigate(['']);
-                } else {
-                    window.alert('Unknown error');
-                    this.router.navigate(['']);
-                }
-
+                this.errorcode = error.status;
             });
     }
 
@@ -152,18 +131,7 @@ export class VmComponent implements OnInit, OnDestroy {
                     this.loading = false;
                 },
                 error => {
-
-                    if (error.status === 404) {
-                        window.alert('VM not found');
-                        this.router.navigate(['']);
-                    } else if (error.status === 403) {
-                        window.alert('Session expired');
-                        this.router.navigate(['']);
-                    } else {
-                        window.alert('Unknown error');
-                        this.router.navigate(['']);
-                    }
-
+                    this.errorcode = error.status;
                 });
         this.intervals.add(newTimer);
 
@@ -175,19 +143,23 @@ export class VmComponent implements OnInit, OnDestroy {
                 this.history = rep.body;
             },
             error => {
-
-                if (error.status === 404) {
-                    window.alert('VM not found');
-                    this.router.navigate(['']);
-                } else if (error.status === 403) {
-                    window.alert('Session expired or not enough permissions');
-                    this.router.navigate(['']);
-                } else {
-                    window.alert('Unknown error');
-                    this.router.navigate(['']);
-                }
-
+                this.errorcode = error.status;
             });
+    }
+
+    displayError(errorcode): String {
+        this.loading = false; // de toute manière on va pas charger pendant 106 ans
+        switch(errorcode) {
+            case 500:
+                return "Internal error, please contact our webmaster ! (webmaster@minet.net)";
+                break;
+            case 404:
+                return "VM not found !";
+                break;
+            case 403:
+                return "Session expired !";
+                break;
+        }
     }
 
 }

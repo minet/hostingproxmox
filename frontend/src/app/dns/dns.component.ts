@@ -20,6 +20,7 @@ export class DnsComponent implements OnInit, OnDestroy {
   newDns = new Dns();
   intervals = new Set<Subscription>();
   showForm = false;
+  errorcode = 201;
   timer: Subscription;
   success = false;
   page = 1;
@@ -69,17 +70,7 @@ export class DnsComponent implements OnInit, OnDestroy {
           }
         },
         error => {
-          if (error.status === 404) {
-            window.alert('Not found');
-            this.router.navigate(['']);
-          } else if (error.status === 403) {
-            window.alert('Session expired or not enough permissions');
-            this.router.navigate(['']);
-          } else {
-            window.alert('Unknown error');
-            this.router.navigate(['']);
-          }
-
+            this.errorcode = error.status;
         });
 
   }
@@ -99,17 +90,7 @@ export class DnsComponent implements OnInit, OnDestroy {
           }
         },
         error => {
-          if (error.status === 404) {
-            window.alert('DNS not found');
-            this.router.navigate(['']);
-          } else if (error.status === 403) {
-            window.alert('Session expired or not enough permissions');
-            this.router.navigate(['']);
-          } else {
-            window.alert('Unknown error');
-            this.router.navigate(['']);
-          }
-
+            this.errorcode = error.status;
         });
 
     this.intervals.add(newTimer);
@@ -127,13 +108,7 @@ export class DnsComponent implements OnInit, OnDestroy {
             window.location.reload();
           },
           error => {
-            if (error.status === 405) {
-              window.alert('DNS already exists');
-            } else if (error.status === 403) {
-              window.alert('Session expired or not enough permissions');
-            } else {
-              window.alert('Unknown error');
-            }
+              this.errorcode = error.status;
           });
     }
   }
@@ -146,16 +121,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                 window.location.reload();
               },
               error => {
-                if (error.status === 409) {
-                  window.alert('Dns entry already exists');
-                  window.location.reload();
-                } else if (error.status === 403) {
-                  window.alert('Session expired or not enough permissions');
-                  window.location.reload();
-                } else {
-                  window.alert('Unknown error');
-                  window.location.reload();
-                }
+                  this.errorcode = error.status;
               });
     }
   }

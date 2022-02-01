@@ -18,6 +18,7 @@ export class VmsComponent implements OnInit, OnDestroy {
     loading = true;
     intervals = new Set<Subscription>();
     showSsh = false;
+    errorcode = 201;
     page = 1;
     pageSize = 10;
     public validToken$: Observable<boolean>;
@@ -79,7 +80,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                     }
                 },
                 error => {
-
+                    this.errorcode = error.status;
                 });
         }
     }
@@ -88,7 +89,7 @@ export class VmsComponent implements OnInit, OnDestroy {
         const vm = new Vm();
         vm.id = vmid;
         this.user.vms.push(vm);
-        const newTimer = timer(0, 3000).pipe(
+        const newTimer = timer(0, 15000).pipe(
             flatMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
                     vm.name = rep.body['name'];
@@ -110,14 +111,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                     }
                 },
                 error => {
-                    if (error.status === 403) {
-                        window.alert('Session expired or not enough permissions');
-                        this.router.navigate(['']);
-                    }
-                    /*else {
-                        window.alert('Unknown error');
-                        this.router.navigate(['']);
-                    }*/
+                    this.errorcode = error.status;
                 });
         this.intervals.add(newTimer);
     }

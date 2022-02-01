@@ -58,8 +58,8 @@ export class UserService {
                             this.user.admin = true;
                         }
                     }
-                    if(r.attributes['signedhosting'] === "true")
-                        this.user.chartevalidated = true;
+                    if(r.attributes['signedhosting'] === "false")
+                        this.user.chartevalidated = false;
                 });
 
                 return this.user;

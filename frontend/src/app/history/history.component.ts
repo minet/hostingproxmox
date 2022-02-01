@@ -16,6 +16,7 @@ import {flatMap} from "rxjs/internal/operators";
 export class HistoryComponent implements OnInit {
   history: any;
   page = 1;
+  errorcode = 201;
   pageSize = 200;
   searchText;
   constructor(
@@ -43,14 +44,7 @@ export class HistoryComponent implements OnInit {
               this.history = rep.body;
             },
             error => {
-              if (error.status === 403) {
-                window.alert('Session expired or not enough permissions');
-                this.router.navigate(['']);
-              } else {
-                window.alert('Unknown error');
-                this.router.navigate(['']);
-              }
-
+              this.errorcode = error.status;
             });
   }
 

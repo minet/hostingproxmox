@@ -24,6 +24,7 @@ export class HomeComponent implements OnInit {
   prefix: string;
   loading = false;
   valide = false;
+  errorcode = 201;
   url: string;
   sshAddress: string;
   countvm: number;
@@ -105,17 +106,7 @@ export class HomeComponent implements OnInit {
       error => {
         this.progress = 0;
         clearInterval(this.interval);
-        if (error.status === 409) {
-          window.alert('VM already exists');
-          this.router.navigate(['']);
-        } else if (error.status === 403) {
-          window.alert('Session expired or not enough permissions');
-          this.router.navigate(['']);
-        }
-        /*else {
-          window.alert('Unknown error');
-          this.router.navigate(['']);
-        }*/
+        this.errorcode = error.status;
       });
   }
   count_dns(): void {
@@ -128,20 +119,8 @@ export class HomeComponent implements OnInit {
             this.countdns++;
           }
         },
-
         error => {
-          if (error.status === 404) {
-            window.alert('VM not found');
-            this.router.navigate(['']);
-          } else if (error.status === 403) {
-            window.alert('Session expired or not enough permissions');
-            this.router.navigate(['']);
-          }
-          /*else {
-            window.alert('Unknown error');
-            this.router.navigate(['']);
-          }*/
-
+          this.errorcode = error.status;
         });
   }
   count_vm(): void {
@@ -158,18 +137,7 @@ export class HomeComponent implements OnInit {
     },
 
     error => {
-      if (error.status === 404) {
-        window.alert('VM not found');
-        this.router.navigate(['']);
-      } else if (error.status === 403) {
-        window.alert('Session expired or not enough permissions');
-        this.router.navigate(['']);
-      }
-      /*else {
-        window.alert('Unknown error');
-        this.router.navigate(['']);
-      }*/
-
+      this.errorcode = error.status;
     });
   }
   get_vmstatus(vmid: string): void {
@@ -181,6 +149,7 @@ export class HomeComponent implements OnInit {
           this.countactivevm++;
         },
         error => {
+          this.errorcode = error.status;
     });
   }
 }

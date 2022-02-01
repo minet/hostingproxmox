@@ -5,8 +5,12 @@
         </div>
     </div>
 </div>
-
-<div class="container text-center" *ngIf="!loading && !deleting && (user.chartevalidated || user.admin)">
+<div *ngIf="errorcode !== 201" class="alert alert-danger text-center" role="alert">
+    <b>Oups...</b><br>
+    {{ displayError(errorcode) }}
+    <br><a [routerLink]="['/']">Go back to home</a>
+</div>
+<div class="container text-center" *ngIf="!loading && !deleting && errorcode === 201 && (user.chartevalidated || user.admin)">
     <h1 class="text-center mb-2">VM: {{ user.vms[0].name }}</h1>
     <hr>
     <div class="alert"
