@@ -11,4 +11,5 @@ export const authCodeFlowConfig: AuthConfig = {
   dummyClientSecret: 'thisisneededforApereoCAS',
   responseType: 'code',
   showDebugInformation: false,
+  logoutUrl: 'https://cas.minet.net/logout',
 };

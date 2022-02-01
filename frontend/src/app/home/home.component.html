@@ -16,7 +16,14 @@
             <b>Unsigned charter !</b>
             <p>To create VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
         </div>
-        <div class="card mb-3" *ngIf="this.user.chartevalidated">
+        <div class="alert alert-warning text-center" *ngIf="this.user.chartevalidated && countvm >= maxVmPerUser">
+            <b>You reach the maximum VM possible (3 VMs) because you have currently {{ countvm }} vm created.</b>
+            <p>If you want to create a new VM you have to delete enough other.
+        </div>
+        <div class="alert alert-secondary text-center" *ngIf="this.user.chartevalidated && countvm < maxVmPerUser">
+            <b>You can create {{ maxVmPerUser - countvm}} more VM !</b>
+        </div>
+        <div class="card mb-3" *ngIf="this.user.chartevalidated && countvm < maxVmPerUser">
             <h4 class="card-header">
                 Create your VM
             </h4>

@@ -19,7 +19,7 @@ import {Dns} from "../models/dns";
 export class HomeComponent implements OnInit {
 
   vm = new Vm('bob', 'phobos', '1', '10', 'stopped', 'No', '', '', '', 'Secret');
-
+  maxVmPerUser = 3;
   rulesCheck = false;
   prefix: string;
   loading = false;
@@ -51,12 +51,11 @@ export class HomeComponent implements OnInit {
 
 
   ngOnInit(): void {
-    setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
-      if(this.user.admin) {
-        this.count_vm();
-        this.count_dns();
-      }
-    }, 1000);
+    setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user); }, 1000);
+    this.count_vm();
+    if(this.user.admin) {
+      this.count_dns();
+    }
 
   }
 

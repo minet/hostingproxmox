@@ -30,6 +30,7 @@ export class UserService {
 
     logout(): void {
         this.oauthService.logOut();
+        window.location.href = this.oauthService.logoutUrl;
     }
 
     validToken(): Observable<boolean> {
