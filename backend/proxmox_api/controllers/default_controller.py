@@ -87,14 +87,16 @@ def delete_vm_id(vmid):  # noqa: E501
 
     if r.status_code != 200:
         return {"status": "error"}, 403
-
+    node = proxmox.get_node_from_vm(vmid)
+    if not node:
+        return {"status": "vm not exists"}, 404
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
-                return proxmox.delete_vm(vmid)
+                return proxmox.delete_vm(vmid, node)
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
-        return proxmox.delete_vm(vmid)
+        return proxmox.delete_vm(vmid, node)
     else:
         return {"status": "error"}, 500
 
@@ -166,18 +168,23 @@ def get_vm_id(vmid):  # noqa: E501
         vmid = int(vmid)
     except:
         return {"status": "error not an integer"}, 500
-    status = proxmox.get_vm_status(vmid)
+    node = proxmox.get_node_from_vm(vmid)
+
+    if not node:
+        return {"status": "vm not exists"}, 404
+
+    status = proxmox.get_vm_status(vmid, node)
     type = dbfct.get_vm_type(vmid)
     created_on = get_vm_created_on(vmid)
 
     if status[0]["status"] == 'creating':
         return {"status": status[0]["status"], "type": type[0]["type"]}, 201
 
-    name = proxmox.get_vm_name(vmid)
-    ram = proxmox.get_vm_ram(vmid)
-    cpu = proxmox.get_vm_cpu(vmid)
-    disk = proxmox.get_vm_disk(vmid)
-    autoreboot = proxmox.get_vm_autoreboot(vmid)
+    name = proxmox.get_vm_name(vmid, node)
+    ram = proxmox.get_vm_ram(vmid, node)
+    cpu = proxmox.get_vm_cpu(vmid, node)
+    disk = proxmox.get_vm_disk(vmid, node)
+    autoreboot = proxmox.get_vm_autoreboot(vmid, node)
     admin = False
 
     if "attributes" in r.json():
@@ -193,10 +200,10 @@ def get_vm_id(vmid):  # noqa: E501
                 "ram": ram[0]['ram'], "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"],
                 "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"]}, 201
     else:
-        ip = proxmox.get_vm_ip(vmid)
-        cpu_usage = proxmox.get_vm_cpu_usage(vmid)
-        ram_usage = proxmox.get_vm_ram_usage(vmid)
-        uptime = proxmox.get_vm_uptime(vmid)
+        ip = proxmox.get_vm_ip(vmid, node)
+        cpu_usage = proxmox.get_vm_cpu_usage(vmid, node)
+        ram_usage = proxmox.get_vm_ram_usage(vmid, node)
+        uptime = proxmox.get_vm_uptime(vmid, node)
 
     if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[1] == 201 and \
             type[1] == 201 and ram_usage[1] == 201 and cpu_usage[1] == 201 and uptime[1] == 201:
@@ -323,12 +330,15 @@ def patch_vm(vmid, body=None):  # noqa: E501
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if vmid in map(int, proxmox.get_vm(user_id)[0]) or admin:
+        node = proxmox.get_node_from_vm(vmid)
+        if not node:
+            return {"status": "vm not exists"}, 404
         if body.status == "start":
-            return proxmox.start_vm(vmid)
+            return proxmox.start_vm(vmid, node)
         elif body.status == "stop":
-            return proxmox.stop_vm(vmid)
+            return proxmox.stop_vm(vmid, node)
         elif body.status == "switch_autoreboot":
-            return proxmox.switch_autoreboot(vmid)
+            return proxmox.switch_autoreboot(vmid, node)
         else:
             return {"status": "error"}, 500
     else:

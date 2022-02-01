@@ -1,0 +1,4 @@
+{
+ "packageName": "proxmox_api",
+  "defaultController": "proxmox_api"
+}

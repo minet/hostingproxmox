@@ -70,25 +70,22 @@ def is_admin(memberOf):
     else:
         return False
 
-def delete_vm(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm['vmid'] == vmid:
-            try:
-                if get_vm_status(vmid)[0]['status'] == 'stopped':
-                    proxmox.nodes(vm["node"]).qemu(vmid).delete()
-                    del_vm_list(vmid)
-                    return {"state": "vm deleted"}, 201
-                else:
-                    stop_vm(vmid)
-                    while get_vm_status(vmid)[0]['status'] != 'stopped':
-                        sleep(1)
-                    proxmox.nodes(vm["node"]).qemu(vmid).delete()
-                    del_vm_list(vmid)
-                    return {"state": "vm deleted"}, 201
-            except Exception as e:
-                logging.error("Problem in delete_vm: " + str(e))
-                return {"state": "error"}, 500
-    return {"state": "vm not found"}, 404
+def delete_vm(vmid, node):
+    try:
+        if get_vm_status(vmid, node)[0]['status'] == 'stopped':
+            proxmox.nodes(node).qemu(vmid).delete()
+            del_vm_list(vmid)
+            return {"state": "vm deleted"}, 201
+        else:
+            stop_vm(vmid, node)
+            while get_vm_status(vmid, node)[0]['status'] != 'stopped':
+                sleep(1)
+            proxmox.nodes(node).qemu(vmid).delete()
+            del_vm_list(vmid)
+            return {"state": "vm deleted"}, 201
+    except Exception as e:
+        logging.error("Problem in delete_vm: " + str(e))
+        return {"state": "error"}, 500
 
 
 def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key="no"):
@@ -208,83 +205,71 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
     return {"status": "Vm created"}, 201
 
 
-def start_vm(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                proxmox.nodes(vm["node"]).qemu(vmid).status.start.create()
-                logging.info("VM " + str(vmid) + " started")
-                return {"state": "vm started"}, 201
-            except Exception as e:
-                logging.error("Problem in start_vm(" + str(vmid) + ") when starting VM: " + str(e))
-                return {"status": "error"}, 500
-    return {"state": "vm not found"}, 404
+def start_vm(vmid, node):
+    try:
+        if get_vm_status(vmid, node)[0]['status'] == 'stopped':
+            proxmox.nodes(node).qemu(vmid).status.start.create()
+            logging.info("VM " + str(vmid) + " started")
+            return {"state": "vm started"}, 201
+        else:
+            return {"state": "vm already started"}, 201
+    except Exception as e:
+        logging.error("Problem in start_vm(" + str(vmid) + ") when starting VM: " + str(e))
+        return {"status": "error"}, 500
 
 
-def stop_vm(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                if get_vm_status(vmid)[0]['status'] != 'stopped':
-                    proxmox.nodes(vm["node"]).qemu(vmid).status.stop.create()
-                    logging.info("VM " + str(vmid) + " stoped")
-                    return {"state": "vm stopped"}, 201
-                else:
-                    return {"state": "vm already stopped"}, 201
-            except Exception as e:
-                logging.error("Problem in stop_vm(" + str(vmid) + ") when stopping VM: " + str(e))
-                return {"state": "error"}, 500
-    return {"state": "vm not found"}, 404
+def stop_vm(vmid, node):
+    try:
+        if get_vm_status(vmid, node)[0]['status'] != 'stopped':
+            proxmox.nodes(node).qemu(vmid).status.stop.create()
+            logging.info("VM " + str(vmid) + " stoped")
+            return {"state": "vm stopped"}, 201
+        else:
+            return {"state": "vm already stopped"}, 201
+    except Exception as e:
+        logging.error("Problem in stop_vm(" + str(vmid) + ") when stopping VM: " + str(e))
+        return {"state": "error"}, 500
 
 
-def get_vm_ip(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                ips = []
-                for int in proxmox.nodes(vm["node"]).qemu(vmid).agent.get("network-get-interfaces")['result']:
-                    if int['name'] == 'eth0':
-                        for ip in int['ip-addresses']:
-                            if ip['ip-address-type'] == "ipv4":
-                                ips.append(ip["ip-address"])
-                                break
+def get_vm_ip(vmid, node):
+    try:
+        ips = []
+        for int in proxmox.nodes(node).qemu(vmid).agent.get("network-get-interfaces")['result']:
+            if int['name'] == 'eth0':
+                for ip in int['ip-addresses']:
+                    if ip['ip-address-type'] == "ipv4":
+                        ips.append(ip["ip-address"])
+                        break
 
-                return {"vm_ip": ips}, 201
-            except Exception as e:
-                logging.error("Problem in get_vm_ip(" + str(vmid) + ") when getting VM infos: " + str(e))
-                return {"vm_ip": "error"}, 500
-    return {"vm_ip": "Vm not found"}, 404
+        return {"vm_ip": ips}, 201
+    except Exception as e:
+        logging.error("Problem in get_vm_ip(" + str(vmid) + ") when getting VM infos: " + str(e))
+        return {"vm_ip": "error"}, 500
 
 def get_vm_hardware_address(vmid, node):
     return proxmox.nodes(node).qemu(vmid).agent.get("network-get-interfaces")['result'][1]['hardware-address']  # récupération de l'adresse mac de la nouvelle vm
 
-def get_vm_autoreboot(vmid): # renvoie si la VM est en mode reboot auto au démarrage du noeud
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                if "onboot" in proxmox.nodes(vm["node"]).qemu(vmid).config.get():
-                    if proxmox.nodes(vm["node"]).qemu(vmid).config.get()['onboot'] == 1:
-                        autoreboot = 1
-                    else:
-                        autoreboot = 0
-                else:
-                    autoreboot = 0
-                return {"autoreboot": autoreboot}, 201
-            except Exception as e:
-                logging.error("Problem in get_vm_name(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
-                return {"name": "error"}, 500
-    return {"name": "Vm not found"}, 404
+def get_vm_autoreboot(vmid, node): # renvoie si la VM est en mode reboot auto au démarrage du noeud
+    try:
+        if "onboot" in proxmox.nodes(node).qemu(vmid).config.get():
+            if proxmox.nodes(node).qemu(vmid).config.get()['onboot'] == 1:
+                autoreboot = 1
+            else:
+                autoreboot = 0
+        else:
+            autoreboot = 0
+        return {"autoreboot": autoreboot}, 201
+    except Exception as e:
+        logging.error("Problem in get_vm_name(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
+        return {"name": "error"}, 500
 
-def get_vm_name(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                name = proxmox.nodes(vm["node"]).qemu(vmid).config.get()['name']
-                return {"name": name}, 201
-            except Exception as e:
-                logging.error("Problem in get_vm_name(" + str(vmid) + ") when getting VM name: " + str(e))
-                return {"name": "error"}, 500
-    return {"name": "Vm not found"}, 404
+def get_vm_name(vmid, node):
+    try:
+        name = proxmox.nodes(node).qemu(vmid).config.get()['name']
+        return {"name": name}, 201
+    except Exception as e:
+        logging.error("Problem in get_vm_name(" + str(vmid) + ") when getting VM name: " + str(e))
+        return {"name": "error"}, 500
 
 
 def get_vm(user_id = 0):
@@ -293,109 +278,96 @@ def get_vm(user_id = 0):
     else:
         return get_vm_list(), 201
 
+def get_node_from_vm(vmid):
+    if vmid:
+        for vm in proxmox.cluster.resources.get(type="vm"):
+            if vm["vmid"] == vmid:
+                try:
+                    return vm['node']
+                except Exception as e:
+                    logging.error("Problem in get_node_from_vm(" + str(vmid) + ") when getting VM node: " + str(e))
+                    return {"cpu": "error"}, 500
+    else:
+        return {"get_node": "Vm not found"}, 404
 
-def get_vm_cpu(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                cpu = proxmox.nodes(vm["node"]).qemu(vmid).config.get()['sockets'] * \
-                      proxmox.nodes(vm["node"]).qemu(vmid).config.get()['cores']
-                return {"cpu": cpu}, 201
-            except Exception as e:
-                logging.error("Problem in get_vm_cpu(" + str(vmid) + ") when getting VM cpu: " + str(e))
-                return {"cpu": "error"}, 500
-    return {"cpu": "Vm not found"}, 404
+def get_vm_cpu(vmid, node):
+    try:
+        cpu = proxmox.nodes(node).qemu(vmid).config.get()['sockets'] * \
+              proxmox.nodes(node).qemu(vmid).config.get()['cores']
+        return {"cpu": cpu}, 201
+    except Exception as e:
+        logging.error("Problem in get_vm_cpu(" + str(vmid) + ") when getting VM cpu: " + str(e))
+        return {"cpu": "error"}, 500
 
-def get_vm_cpu_usage(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                cpu_usage = round(float(proxmox.nodes(vm["node"]).qemu(vmid).status.current.get()['cpu'] * 100), 1)
-                return {"cpu_usage": cpu_usage}, 201
-            except Exception as e:
-                logging.error("Problem in get_vm_cpu_usage(" + str(vmid) + ") when getting VM cpu usage: " + str(e))
-                return {"cpu_usage": "error"}, 500
-    return {"cpu_usage": "Vm not found"}, 404
-
-
-
-def get_vm_disk(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                disk = int(proxmox.nodes(vm["node"]).qemu(vmid).config.get()['scsi0'].split('=')[-1].replace('G', ''))
-                return {"disk": disk}, 201
-            except Exception as e:
-                logging.error("Problem in get_vm_disk(" + str(vmid) + ") when getting VM disk size: " + str(e))
-                return {"disk": "error"}, 500
-    return {"disk": "Vm not found"}, 404
-
-def get_vm_ram(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                ram = proxmox.nodes(vm["node"]).qemu(vmid).config.get()['memory']
-                return {"ram": ram}, 201
-            except:
-                return {"ram": "error"}, 500
-    return {"ram": "Vm not found"}, 404
-
-def get_vm_ram_usage(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                ram_usage = round(float(proxmox.nodes(vm['node']).qemu(vmid).status.current.get()['mem'] * 100/proxmox.nodes(vm['node']).qemu(vmid).status.current.get()['maxmem']), 1)
-                return {"ram_usage": ram_usage}, 201
-            except:
-                return {"ram_usage": "error"}, 500
-    return {"ram_usage": "Vm not found"}, 404
+def get_vm_cpu_usage(vmid, node):
+    try:
+        cpu_usage = round(float(proxmox.nodes(node).qemu(vmid).status.current.get()['cpu'] * 100), 1)
+        return {"cpu_usage": cpu_usage}, 201
+    except Exception as e:
+        logging.error("Problem in get_vm_cpu_usage(" + str(vmid) + ") when getting VM cpu usage: " + str(e))
+        return {"cpu_usage": "error"}, 500
 
 
-def get_vm_status(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            qemu_status = proxmox.nodes(vm["node"]).qemu(vmid).status.current.get()
-            if "lock" in qemu_status:
-                return {"status": "creating"}, 201
-            try:
-                qemu_agent_status = proxmox.nodes(vm["node"]).qemu(vmid).agent.ping.create()
 
-                if qemu_agent_status:
-                    qemu_agent_status = True
-                else:
-                    qemu_agent_status = False
+def get_vm_disk(vmid, node):
+    try:
+        disk = int(proxmox.nodes(node).qemu(vmid).config.get()['scsi0'].split('=')[-1].replace('G', ''))
+        return {"disk": disk}, 201
+    except Exception as e:
+        logging.error("Problem in get_vm_disk(" + str(vmid) + ") when getting VM disk size: " + str(e))
+        return {"disk": "error"}, 500
 
-                if (qemu_status['status'] == 'running') & qemu_agent_status:
-                    return {"status": "running"}, 201
-                if (qemu_status['status'] == 'running') & (not qemu_agent_status):
-                    return {"status": "booting"}, 201
-                return {"status": "stopped"}, 201
+def get_vm_ram(vmid, node):
+    try:
+        ram = proxmox.nodes(node).qemu(vmid).config.get()['memory']
+        return {"ram": ram}, 201
+    except:
+        return {"ram": "error"}, 500
 
-            except ResourceException:  # qemu_agent error
-                if qemu_status['status'] == 'running':
-                    return {"status": "booting"}, 201
-
-                else:
-                    return {"status": "stopped"}, 201
-
-            except Exception as e:
-                logging.error("Problem in get_vm_status(" + str(vmid) + ") when getting VM status: " + str(e))
-                return {"status": "error"}, 500
-
-    return {"status": "vm not found"}, 404
-
-def get_vm_uptime(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-                uptime = proxmox.nodes(vm["node"]).qemu(vmid).status.current.get()["uptime"]
-                return {"uptime": uptime}, 201
-            except Exception as e:
-                logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
-                return {"uptime": "error"}, 500
-    return {"uptime": "Vm not found"}, 404
+def get_vm_ram_usage(vmid, node):
+    try:
+        ram_usage = round(float(proxmox.nodes(node).qemu(vmid).status.current.get()['mem'] * 100/proxmox.nodes(node).qemu(vmid).status.current.get()['maxmem']), 1)
+        return {"ram_usage": ram_usage}, 201
+    except:
+        return {"ram_usage": "error"}, 500
 
 
+def get_vm_status(vmid, node):
+    qemu_status = proxmox.nodes(node).qemu(vmid).status.current.get()
+    if "lock" in qemu_status:
+        return {"status": "creating"}, 201
+    try:
+        qemu_agent_status = proxmox.nodes(node).qemu(vmid).agent.ping.create()
+
+        if qemu_agent_status:
+            qemu_agent_status = True
+        else:
+            qemu_agent_status = False
+
+        if (qemu_status['status'] == 'running') & qemu_agent_status:
+            return {"status": "running"}, 201
+        if (qemu_status['status'] == 'running') & (not qemu_agent_status):
+            return {"status": "booting"}, 201
+        return {"status": "stopped"}, 201
+
+    except ResourceException:  # qemu_agent error
+        if qemu_status['status'] == 'running':
+            return {"status": "booting"}, 201
+
+        else:
+            return {"status": "stopped"}, 201
+
+    except Exception as e:
+        logging.error("Problem in get_vm_status(" + str(vmid) + ") when getting VM status: " + str(e))
+        return {"status": "error"}, 500
+
+def get_vm_uptime(vmid, node):
+    try:
+        uptime = proxmox.nodes(node).qemu(vmid).status.current.get()["uptime"]
+        return {"uptime": uptime}, 201
+    except Exception as e:
+        logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
+        return {"uptime": "error"}, 500
 
 def update_vm_ips_job(app):    # Job to update VM ip
     with app.app_context():    # Needs application context
@@ -422,16 +394,13 @@ def update_vm_ips_job(app):    # Job to update VM ip
                 db.session.commit()
 
 def switch_autoreboot(vmid):
-    for vm in proxmox.cluster.resources.get(type="vm"):
-        if vm["vmid"] == vmid:
-            try:
-               if get_vm_autoreboot(vmid) == 1:
-                   proxmox.nodes(vm["node"]).qemu(vmid).config.post(onboot=0)
-                   return {"status": "changed"}, 201
-               else:
-                   proxmox.nodes(vm["node"]).qemu(vmid).config.post(onboot=1)
-                   return {"status": "changed"}, 201
-            except Exception as e:
-                logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
-                return {"uptime": "error"}, 500
-    return {"uptime": "Vm not found"}, 404
+    try:
+       if get_vm_autoreboot(vmid) == 1:
+           proxmox.nodes(vm["node"]).qemu(vmid).config.post(onboot=0)
+           return {"status": "changed"}, 201
+       else:
+           proxmox.nodes(vm["node"]).qemu(vmid).config.post(onboot=1)
+           return {"status": "changed"}, 201
+    except Exception as e:
+        logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
+        return {"uptime": "error"}, 500
