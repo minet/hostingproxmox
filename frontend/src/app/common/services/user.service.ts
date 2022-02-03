@@ -5,15 +5,16 @@ import {OAuthService} from 'angular-oauth2-oidc';
 import {authCodeFlowConfig} from '../../sso.config';
 import {merge, Observable} from 'rxjs';
 import {fromPromise} from 'rxjs/internal-compatibility';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable({
     providedIn: 'root'
 })
 export class UserService {
-
+    private errorcode;
     private discoveryDocument$: Promise<boolean>;
 
-    constructor(private user: User, private authService: AuthService, private oauthService: OAuthService) {
+    constructor(private http: HttpClient, private user: User, private authService: AuthService, private oauthService: OAuthService) {
         this.configureSingleSignOn();
     }
 
@@ -45,6 +46,15 @@ export class UserService {
         );
     }
 
+    check_cotisation(): void {
+        this.http.get(this.authService.SERVER_URL + '/cotisation', {observe: 'response'}).subscribe(rep => {
+                this.user.cotisation = rep.body['uptodate'];
+            },
+            error => {
+                this.errorcode = error.status;
+            });
+    }
+
     getUser(): Observable<User> {
         return fromPromise(this.discoveryDocument$.then((result) => {
             const user: any = this.oauthService.getIdentityClaims();
@@ -59,10 +69,13 @@ export class UserService {
                             this.user.admin = true;
                         }
                     }
+                    if(this.user.admin == false)
+                        this.check_cotisation();
                     if(r.attributes['signedhosting'] === "false")
                         this.user.chartevalidated = false;
+                    else
+                        this.user.chartevalidated = true;
                 });
-
                 return this.user;
             } else {
                 return null;

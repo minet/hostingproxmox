@@ -51,11 +51,13 @@ export class HomeComponent implements OnInit {
 
 
   ngOnInit(): void {
-    setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user); }, 1000);
-    this.count_vm();
-    if(this.user.admin) {
-      this.count_dns();
-    }
+    setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
+      if ((this.user.chartevalidated && this.user.cotisation) || this.user.admin) {
+        this.count_vm();
+      }
+      if(this.user.admin) {
+        this.count_dns();
+      }}, 1000);
 
   }
 
@@ -122,6 +124,7 @@ export class HomeComponent implements OnInit {
           this.errorcode = error.status;
         });
   }
+
   count_vm(): void {
     let vmList: Array<string>;
     this.countvm = 0;
@@ -139,6 +142,7 @@ export class HomeComponent implements OnInit {
       this.errorcode = error.status;
     });
   }
+
   get_vmstatus(vmid: string): void {
     const vm = new Vm();
     vm.id = vmid;

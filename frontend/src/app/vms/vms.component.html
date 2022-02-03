@@ -6,7 +6,7 @@
     </div>
 </div>
 
-<div class="vms container flex-fill" *ngIf="!loading && (this.user.chartevalidated || this.user.admin)" >
+<div class="vms container flex-fill" *ngIf="!loading && ((this.user.chartevalidated && this.user.cotisation === 1) || this.user.admin)" >
     <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
     <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">IP History</button></div>
@@ -74,9 +74,14 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
         </div>
     </div>
 </div><br/>
-<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin">
+<div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
+    <b>Expired subscription</b>
+    <p>To manage your VMs you have to renew your subscription ! <a href="https://payment.minet.net/">click here</a> to renew your subscription</p>
+</div>
+
+<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.cotisation ===1">
     <b>Unsigned charter !</b>
-    <p>To create VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+    <p>To manage your VMs you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
 </div>
 <ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page"
                 aria-label="Default pagination"></ngb-pagination>

@@ -1,4 +1,4 @@
-<div *ngIf="loading && (user.chartevalidated || user.admin)">
+<div *ngIf="loading && ((user.chartevalidated && user.cotisation===1) || user.admin)">
   <div class="d-flex justify-content-center">
     <div class="spinner-grow text-primary" role="status">
       <span class="sr-only">Loading...</span>
@@ -6,9 +6,9 @@
   </div>
 </div>
 
-<div class="dns container" *ngIf="!loading && (user.chartevalidated || user.admin)">
-  <h1 class="text-center mb-2" *ngIf="!user.admin">DNS entries</h1>
-  <h1 class="text-center mb-2" *ngIf="user.admin">Admin DNS</h1>
+<h1 class="text-center mb-2" *ngIf="!user.admin">DNS entries</h1>
+<h1 class="text-center mb-2" *ngIf="user.admin">Admin DNS</h1>
+<div class="dns container" *ngIf="!loading && ((user.chartevalidated && user.cotisation===1) || user.admin)">
   <ng-container *ngIf="user.dns.length == 0; else dnsEntries">
   <hr>
   <h4 class="text-danger text-center" *ngIf="!user.admin">You currently have no DNS entries defined!</h4>
@@ -91,9 +91,15 @@
         </form>
       </div>
     </div>
+  </div>
 </div>
-<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin">
+<div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
+  <b>Expired subscription</b>
+  <p>To create a DNS entry you have to renew your subscription ! <a href="https://payment.minet.net/">click here</a> to renew your subscription</p>
+</div>
+
+<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.cotisation ===1">
   <b>Unsigned charter !</b>
-  <p>To create VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+  <p>To create a DNS entry you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
 </div>
 

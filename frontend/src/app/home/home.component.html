@@ -12,134 +12,138 @@
                 to contact our <a href="mailto:webmaster@listes.minet.net"> webmaster</a> for any question.
             </p>
         </div>
-        <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated">
+        <div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
+            <b>Expired subscription</b>
+            <p>To create VM you have to renew your subscription ! <a href="https://payment.minet.net/">click here</a> to renew your subscription</p>
+        </div>
+        <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && this.user.cotisation === 0">
             <b>Unsigned charter !</b>
             <p>To create VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
         </div>
-        <div class="alert alert-warning text-center" *ngIf="this.user.chartevalidated && countvm >= maxVmPerUser">
-            <b>You reach the maximum VM possible (3 VMs) because you have currently {{ countvm }} vm created.</b>
-            <p>If you want to create a new VM you have to delete enough other.
-        </div>
-        <div class="alert alert-secondary text-center" *ngIf="this.user.chartevalidated && countvm < maxVmPerUser">
-            <b>You can create {{ maxVmPerUser - countvm}} more VM !</b>
-        </div>
-        <div class="card mb-3" *ngIf="this.user.chartevalidated && countvm < maxVmPerUser">
-            <h4 class="card-header">
-                Create your VM
-            </h4>
-            <div class="card-body">
-                <p class="lead">Overview of the available machine types</p>
-                <dl>
-                    <dt>Bare VM</dt>
-                    <dd>Bare Debian 10 VM, use it as storage, compute machine or test machine.</dd>
-                    <dt>Simple web server</dt>
-                    <dd>Wordpress ready to use with ftps server.</dd>
-                </dl>
-                <hr>
-                <div>
-                    <form (ngSubmit)="create_vm(vm)" #vmForm="ngForm">
-                        <div *ngIf="!vmForm.submitted">
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="type-select-prepend">Type</span>
-                                </div>
-                                <select class="form-control" id="type"
-                                        aria-label="Type"
-                                        aria-describedby="type-select-prepend"
-                                        required
-                                        [(ngModel)]="vm.type" name="type"
-                                        #type="ngModel">
-                                    <option *ngFor="let image of images" [value]="image.id">{{image.name}}</option>
-                                </select>
-                            </div>
-                            <div [hidden]="type.valid || type.pristine" class="alert alert-danger">
-                                Type is required
-                            </div>
-
-                            <div *ngIf="!type.pristine">
-                                <div class="form-group">
-                                    <label for="name">VM name</label>
-                                    <input type="text" class="form-control" id="name"
-                                           required
-                                           [(ngModel)]="vm.name" name="name"
-                                           #name="ngModel">
-
-                                </div>
-                                <div [hidden]="name.valid || name.pristine"
-                                     class="alert alert-danger">
-                                    Name is required
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="ssh">SSH key auth</label>
-                                    <select class="form-control" id="ssh"
+        <div class="userok" *ngIf="this.user.cotisation === 1 && this.user.chartevalidated">
+            <div class="alert alert-warning text-center" *ngIf="countvm >= maxVmPerUser">
+                <b>You reach the maximum VM possible (3 VMs) because you have currently {{ countvm }} vm created.</b>
+                <p>If you want to create a new VM you have to delete enough other.
+            </div>
+            <div class="alert alert-secondary text-center" *ngIf="countvm < maxVmPerUser">
+                <b>You can create {{ maxVmPerUser - countvm}} more VM !</b>
+            </div>
+            <div class="card mb-3" *ngIf="countvm < maxVmPerUser">
+                <h4 class="card-header">
+                    Create your VM
+                </h4>
+                <div class="card-body">
+                    <p class="lead">Overview of the available machine types</p>
+                    <dl>
+                        <dt>Bare VM</dt>
+                        <dd>Bare Debian 10 VM, use it as storage, compute machine or test machine.</dd>
+                        <dt>Simple web server</dt>
+                        <dd>Wordpress ready to use with ftps server.</dd>
+                    </dl>
+                    <hr>
+                    <div>
+                        <form (ngSubmit)="create_vm(vm)" #vmForm="ngForm">
+                            <div *ngIf="!vmForm.submitted">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="type-select-prepend">Type</span>
+                                    </div>
+                                    <select class="form-control" id="type"
+                                            aria-label="Type"
+                                            aria-describedby="type-select-prepend"
                                             required
-                                            [(ngModel)]="vm.ssh" name="ssh"
-                                            #type="ngModel" #ssh="ngModel">
-                                        <option>Yes</option>
-                                        <option>No</option>
+                                            [(ngModel)]="vm.type" name="type"
+                                            #type="ngModel">
+                                        <option *ngFor="let image of images" [value]="image.id">{{image.name}}</option>
                                     </select>
-                                    <div [hidden]="type.valid || type.pristine" class="alert alert-danger">
-                                        SSH key auth is required
+                                </div>
+                                <div [hidden]="type.valid || type.pristine" class="alert alert-danger">
+                                    Type is required
+                                </div>
+
+                                <div *ngIf="!type.pristine">
+                                    <div class="form-group">
+                                        <label for="name">VM name</label>
+                                        <input type="text" class="form-control" id="name"
+                                               required
+                                               [(ngModel)]="vm.name" name="name"
+                                               #name="ngModel">
+
+                                    </div>
+                                    <div [hidden]="name.valid || name.pristine"
+                                         class="alert alert-danger">
+                                        Name is required
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="ssh">SSH key auth</label>
+                                        <select class="form-control" id="ssh"
+                                                required
+                                                [(ngModel)]="vm.ssh" name="ssh"
+                                                #type="ngModel" #ssh="ngModel">
+                                            <option>Yes</option>
+                                            <option>No</option>
+                                        </select>
+                                        <div [hidden]="type.valid || type.pristine" class="alert alert-danger">
+                                            SSH key auth is required
+                                        </div>
+                                    </div>
+
+                                    <div *ngIf="ssh.value == 'Yes'" class="form-group">
+                                        <label for="sshKey">SSH key</label>
+                                        <input type="text" class="form-control" id="sshKey"
+                                               [(ngModel)]="vm.sshKey" name="sshKey"
+                                               #sshKey="ngModel">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="user">VM user</label>
+                                        <input type="text" class="form-control" id="user"
+                                               [(ngModel)]="vm.user" name="user"
+                                               required="required"
+                                               #user="ngModel">
+                                    </div>
+                                    <div [hidden]="user.valid || user.pristine" class="alert alert-danger">
+                                        User is required
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="password">Password</label>
+                                        <input type="password" class="form-control" id="password"
+                                               [(ngModel)]="vm.password" name="password"
+                                               #password="ngModel"
+                                               required="required">
+                                    </div>
+                                    <div [hidden]="password.valid || password.pristine" class="alert alert-danger">
+                                        Password is required
+                                    </div>
+
+                                    <div class="form-check mb-2 text-center m-3">
+                                        <input (click)="rules_checked()" [checked]="rulesCheck" id="checkbox"
+                                               type="checkbox" class="form-check-input">
+                                        <label class="form-check-label" for="checkbox">I agree with MiNET's and MiNET's
+                                            Hosting service <a [routerLink]="['rules']">rules</a>.</label>
                                     </div>
                                 </div>
-
-                                <div *ngIf="ssh.value == 'Yes'" class="form-group">
-                                    <label for="sshKey">SSH key</label>
-                                    <input type="text" class="form-control" id="sshKey"
-                                           [(ngModel)]="vm.sshKey" name="sshKey"
-                                           #sshKey="ngModel">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="user">VM user</label>
-                                    <input type="text" class="form-control" id="user"
-                                           [(ngModel)]="vm.user" name="user"
-                                           required="required"
-                                           #user="ngModel">
-                                </div>
-                                <div [hidden]="user.valid || user.pristine" class="alert alert-danger">
-                                    User is required
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="password">Password</label>
-                                    <input type="password" class="form-control" id="password"
-                                           [(ngModel)]="vm.password" name="password"
-                                           #password="ngModel"
-                                           required="required">
-                                </div>
-                                <div [hidden]="password.valid || password.pristine" class="alert alert-danger">
-                                    Password is required
-                                </div>
-
-                                <div class="form-check mb-2 text-center m-3">
-                                    <input (click)="rules_checked()" [checked]="rulesCheck" id="checkbox"
-                                           type="checkbox" class="form-check-input">
-                                    <label class="form-check-label" for="checkbox">I agree with MiNET's and MiNET's
-                                        Hosting service <a [routerLink]="['rules']">rules</a>.</label>
+                                <div class="text-center">
+                                    <button *ngIf="vmForm.valid && rulesCheck" type="submit"
+                                            class="btn btn-primary text-center">Submit
+                                    </button>
                                 </div>
                             </div>
-                            <div class="text-center">
-                                <button *ngIf="vmForm.valid && rulesCheck" type="submit"
-                                        class="btn btn-primary text-center">Submit
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                        </form>
 
+                    </div>
+                    <div class="text-center" *ngIf="vmForm.submitted && loading">
+                        Your VM is being created, please wait
+                        <p *ngIf="progress == 100">Your VM has been created, click <a [routerLink]="['vms']">here</a></p>
+                    </div>
+
+                    <div class="progress" *ngIf="vmForm.submitted && loading">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                             aria-valuemin="0" aria-valuemax="100" style="width: {{progress}}%"></div>
+                    </div>
                 </div>
-                <div class="text-center" *ngIf="vmForm.submitted && loading">
-                    Your VM is being created, please wait
-                    <p *ngIf="progress == 100">Your VM has been created, click <a [routerLink]="['vms']">here</a></p>
-                </div>
-
-                <div class="progress" *ngIf="vmForm.submitted && loading">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                         aria-valuemin="0" aria-valuemax="100" style="width: {{progress}}%"></div>
-                </div>
-
-
             </div>
         </div>
     </div>

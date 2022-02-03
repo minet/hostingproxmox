@@ -8,7 +8,8 @@ export class User {
     public lastname: string;
     public name: string;
     public admin = false;
-    public chartevalidated = true;
+    public chartevalidated;
+    public cotisation;
     public vms?: Array<Vm>;
     public dns?: Array<Dns>;
 }
