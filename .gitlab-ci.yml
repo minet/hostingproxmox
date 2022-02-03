@@ -63,6 +63,7 @@ angular_build:
   before_script:
     - cd frontend
     - NG_CLI_ANALYTICS=ci
+    - export NODE_OPTIONS=--openssl-legacy-provider
     - npm install -g @angular/cli
   script:
     - ng build --prod
