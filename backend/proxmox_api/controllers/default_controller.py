@@ -1,5 +1,6 @@
 import connexion
 import requests
+import json
 from slugify import slugify
 from proxmox_api import proxmox
 from proxmox_api.models.dns_entry_item import DnsEntryItem  # noqa: E501
@@ -8,7 +9,7 @@ from proxmox_api.models.vm_id_item import VmIdItem  # noqa: E501
 from proxmox_api.models.vm_item import VmItem  # noqa: E501
 from proxmox_api import util
 from proxmox_api.db.db_functions import *
-
+from datetime import datetime
 import proxmox_api.db.db_functions as dbfct
 from proxmox_api.proxmox import is_admin
 
@@ -28,6 +29,14 @@ def create_dns(body=None):  # noqa: E501
 
     if r.status_code != 200:
         return {"status": "error"}, 403
+
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
@@ -55,8 +64,13 @@ def create_vm(body=None):  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
-    if r.status_code != 200:
-        return {"status": "error"}, 403
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
 
     if connexion.request.is_json:
         body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
@@ -87,6 +101,15 @@ def delete_vm_id(vmid):  # noqa: E501
 
     if r.status_code != 200:
         return {"status": "error"}, 403
+
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
+
     node = proxmox.get_node_from_vm(vmid)
     if not node:
         return {"status": "vm not exists"}, 404
@@ -100,9 +123,32 @@ def delete_vm_id(vmid):  # noqa: E501
     else:
         return {"status": "error"}, 500
 
+def is_cotisation_uptodate():
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                return {"status": "function denied for admin"}, 403
+
+    id = r.json()['attributes']['id']
+
+    r = requests.get("https://adh6.minet.net/api/member/" + id, headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
+    strdate = r.json()['departureDate']
+    date = datetime.strptime(strdate, '%Y-%m-%d')
+    if date > datetime.today():
+        return {"uptodate": 1}, 201;
+    else:
+        return {"uptodate": 0}, 201;
 
 def get_dns():  # noqa: E501
-    """get all user&#x27;s dns entries
+    """check if a user has signed the hosting charter
 
      # noqa: E501
 
@@ -114,6 +160,14 @@ def get_dns():  # noqa: E501
 
     if r.status_code != 200:
         return {"status": "error"}, 403
+
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
@@ -137,6 +191,14 @@ def get_vm():  # noqa: E501
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
     if r.status_code != 200:
         return {"status": "error"}, 403
+
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if "attributes" in r.json():
@@ -192,6 +254,9 @@ def get_vm_id(vmid):  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
+
     owner = get_vm_userid(
         vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
 
@@ -241,6 +306,14 @@ def delete_dns_id(dnsid):  # noqa: E501
     if r.status_code != 200:
         return {"status": "error"}, 403
 
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if "attributes" in r.json():
@@ -269,6 +342,14 @@ def get_dns_id(dnsid):  # noqa: E501
 
     if r.status_code != 200:
         return {"status": "error"}, 403
+
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
@@ -327,6 +408,9 @@ def patch_vm(vmid, body=None):  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if vmid in map(int, proxmox.get_vm(user_id)[0]) or admin:
@@ -357,6 +441,9 @@ def get_historyip(vmid):
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if admin == True:
         return get_historyip_fromdb(vmid)
@@ -375,6 +462,9 @@ def get_historyipall():
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
+
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"status": "cotisation expired"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if admin == True:
