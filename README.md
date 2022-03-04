@@ -2,8 +2,8 @@
 
 ## Prérequis
 
-- Avoir installé `angular` et `flask`
-- Lancer la commande `pip3 install -r requirement.txt` dans le dépot pour installer les packages requis.
+- Avoir installé `mysql`, `angular` et `flask`
+- Lancer la commande `pip3 install -r requirements.txt` dans le dépot pour installer les packages requis.
 
 ## Lancer le site en local 
 
