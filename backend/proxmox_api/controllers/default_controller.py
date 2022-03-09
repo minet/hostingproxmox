@@ -226,10 +226,21 @@ def get_vm_id(vmid):  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
+    admin = False
+
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+
+    if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
+        return {"status": "error"}, 500
+
     try:
         vmid = int(vmid)
     except:
         return {"status": "error not an integer"}, 500
+
     node = proxmox.get_node_from_vm(vmid)
 
     if not node:
@@ -247,12 +258,6 @@ def get_vm_id(vmid):  # noqa: E501
     cpu = proxmox.get_vm_cpu(vmid, node)
     disk = proxmox.get_vm_disk(vmid, node)
     autoreboot = proxmox.get_vm_autoreboot(vmid, node)
-    admin = False
-
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
-                admin = True
 
     if is_cotisation_uptodate() == 0 and not admin:
         return {"status": "cotisation expired"}, 403
