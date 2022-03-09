@@ -225,7 +225,6 @@ def get_vm_id(vmid):  # noqa: E501
         return {"status": "error"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-
     admin = False
 
     if "attributes" in r.json():
