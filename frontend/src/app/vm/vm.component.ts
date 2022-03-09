@@ -157,7 +157,7 @@ export class VmComponent implements OnInit, OnDestroy {
                 return "VM not found !";
                 break;
             case 403:
-                return "Session expired !";
+                return "Session expired or wrong permission !";
                 break;
         }
     }
