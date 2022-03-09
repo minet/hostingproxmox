@@ -241,7 +241,6 @@ def get_vm_id(vmid):  # noqa: E501
         return {"status": "wrong permission"}, 403
 
     node = proxmox.get_node_from_vm(vmid)
-
     if not node:
         return {"status": "vm not exists"}, 404
 
