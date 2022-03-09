@@ -78,6 +78,8 @@ angular_build:
 deploy_backend:
   stage: deploy
   before_script:
+    - export http_proxy="http://192.168.104.61:82/"
+    - export https_proxy="http://192.168.104.61:82/"
     - cd backend
     - pip3 install -r requirements.txt
     - sudo /bin/systemctl stop proxmox_api
