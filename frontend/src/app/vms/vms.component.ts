@@ -21,6 +21,8 @@ export class VmsComponent implements OnInit, OnDestroy {
     errorcode = 201;
     page = 1;
     pageSize = 10;
+    totalVm = 0;
+    pagesAlreadyLoaded = new Array<number>();
     public validToken$: Observable<boolean>;
     constructor(private http: HttpClient,
                 private activatedRoute: ActivatedRoute,
@@ -38,6 +40,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                 this.get_vms(); // on laisse une seconde pour charger l'user avant de check si il a validé
             }
         }, 1000);
+        this.pagesAlreadyLoaded.push(1);
     }
 
     ngOnDestroy(): void {
@@ -67,31 +70,64 @@ export class VmsComponent implements OnInit, OnDestroy {
         return dDisplay + hDisplay + mDisplay + sDisplay;
     }
 
+    /**
+    * 
+    * Get the vm id list and call get_vm with the related id
+    *
+    */
+
     get_vms(): void {
         if(this.user.chartevalidated || this.user.admin) {
             let vmList: Array<string>;
+
+
+
             this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
                     vmList = rep.body as Array<string>;
+
+                    // Initiate the list to construct all the pages if there aren't already
+                    for(let i=0; i<vmList.length; i++){
+                        const vm = new Vm();
+                        vm.id = vmList[i];
+                        this.user.vms.push(vm);
+                    }
+
                     if (vmList.length === 0) {
                         this.loading = false;
                     }
-                    for (let i = 0; i < vmList.length; i++) {
-                        const vmid = vmList[i];
-                        const last = (i === vmList.length - 1);
-                        this.get_vm(vmid, last);
+                    
+                    this.totalVm = vmList.length;
+                    var lastVmDisplayedOnPage = vmList.length
+
+                    if (this.pageSize*this.page < vmList.length){
+                        lastVmDisplayedOnPage = this.page*this.pageSize
+                    } 
+                    for (let i = (this.page-1)*this.pageSize; i < lastVmDisplayedOnPage; i++) {
+                        const last = (i === lastVmDisplayedOnPage - 1);
+                        this.get_vm(i, last);
                     }
                 },
                 error => {
                     this.errorcode = error.status;
                 });
+                
         }
     }
 
-    get_vm(vmid: string, last: boolean): void {
-        const vm = new Vm();
-        vm.id = vmid;
-        this.user.vms.push(vm);
-        const newTimer = timer(0, 15000).pipe(
+    /**
+     *  Call the API in order to retrieve the vm infos related to the id in the list, initiated with vmid in user.vms list
+     * 
+     * It waits for response before updating vm info 
+     * 
+     * Every 30s, a new call is made to update vm info
+     */
+
+
+
+    get_vm(id: number, last: boolean): void {
+        let vm = this.user.vms[id]
+        const vmid = vm.id;
+        const newTimer = timer(0, 30000).pipe(
             flatMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
                     vm.name = rep.body['name'];
@@ -116,6 +152,28 @@ export class VmsComponent implements OnInit, OnDestroy {
                     this.errorcode = error.status;
                 });
         this.intervals.add(newTimer);
+    }
+
+
+    /**
+     *  Click on a new page in ngb-pagination
+     *  VM's infos are loaded if it's not already done 
+     */
+
+    loadPage(){
+        if (!this.pagesAlreadyLoaded.includes(this.page)){
+            this.loading = true;
+            this.totalVm = this.user.vms.length;
+            var lastVmDisplayedOnPage = this.user.vms.length
+            if (this.pageSize*this.page < this.user.vms.length){
+                lastVmDisplayedOnPage = this.page*this.pageSize
+            } 
+            for (let i = (this.page-1)*this.pageSize; i < lastVmDisplayedOnPage; i++) {
+                const last = (i === lastVmDisplayedOnPage - 1);
+                this.get_vm(i, last);
+            }
+            this.pagesAlreadyLoaded.push(this.page);
+        }
     }
 
 }

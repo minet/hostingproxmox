@@ -3,21 +3,23 @@
         <div class="spinner-grow text-primary" role="status">
             <span class="sr-only">Loading...</span>
         </div>
+        
     </div>
 </div>
 
-<div class="vms container flex-fill" *ngIf="!loading && ((this.user.chartevalidated && this.user.cotisation === 1) || this.user.admin)" >
+<div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.cotisation === 1) || this.user.admin)" >
     <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
     <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">IP History</button></div>
 
-    <ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page"
-                    aria-label="Default pagination"></ngb-pagination>
+    <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
+                    aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
+    <div class="comment" style="color:gray; font-style: italic;margin-bottom:-10px;"><span>VM's information are refreshed every 30s</span></div>
     <div class="text-center">
-        <ng-container *ngIf="user.vms.length == 0 && !user.admin">
+        <ng-container *ngIf="user.vms.length == 0 && !user.admin && !loading">
             <h4 class="text-danger">You currently have no VMs, create one first!</h4>
         </ng-container>
-        <ng-container *ngIf="user.vms.length == 0 && user.admin">
+        <ng-container *ngIf="user.vms.length == 0 && user.admin && !loading">
             <h4 class="text-danger">No VMs created</h4>
         </ng-container>
         <ng-container *ngIf="user.vms.length != 0 && !user.admin">
@@ -27,8 +29,8 @@
     <hr>
     <div>
         <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
-            <div class="col-12">
-                <div class="card border-success border-1" style="margin-bottom: 2%">
+            <div class="col-12" >
+                <div class="card border-success border-1" style="margin-bottom: 2%" >
                     <div class="card-img-top" *ngIf="!user.admin"
                          style='background-image: url("assets/images/vms/{{ vm.type }}.png"); height: 100px;
 background-position: 50% 50%; background-size: 100%; position: relative'>
@@ -56,6 +58,9 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
 
                                 </div>
                                 <div class="col-6">
+                                    <div class="spinner-grow text-primary" role="status" *ngIf="vm.ip == null">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
                                     <p class="text-right">{{ vm.ip }}</p>
                                     <p class="text-right" *ngIf="vm.status == 'running'">Uptime: {{secondsToDhms(vm.uptime)}} </p>
                                 </div>
@@ -83,7 +88,7 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
     <b>Unsigned charter !</b>
     <p>To manage your VMs you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
 </div>
-<ngb-pagination *ngIf="user.admin" [collectionSize]="user.vms.length" [pageSize]="pageSize" [(page)]="page"
+<ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
                 aria-label="Default pagination"></ngb-pagination>
 <hr>
 
