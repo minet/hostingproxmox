@@ -29,8 +29,9 @@
     </div>
     <hr>
     <div>
+        <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf="!loading && user.vms.length !=0 "><span>VM's information are refreshed every 30s</span></div>
         <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
-            <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf="!loading && user.vms.length !=0 "><span>VM's information are refreshed every 30s</span></div>
+            
             <div class="col-12" >
                 <div class="card border-success border-1" style="margin-bottom: 2%" >
                     <div class="card-img-top" *ngIf="!user.admin"
