@@ -79,9 +79,6 @@ export class VmsComponent implements OnInit, OnDestroy {
     get_vms(): void {
         if(this.user.chartevalidated || this.user.admin) {
             let vmList: Array<string>;
-
-
-
             this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
                     vmList = rep.body as Array<string>;
 
@@ -95,7 +92,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                     if (vmList.length === 0) {
                         this.loading = false;
                     }
-                    
+
                     this.totalVm = vmList.length;
                     var lastVmDisplayedOnPage = vmList.length
 

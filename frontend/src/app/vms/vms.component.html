@@ -14,8 +14,9 @@
 
     <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
                     aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
-    <div class="comment" style="color:gray; font-style: italic;margin-bottom:-10px;"><span>VM's information are refreshed every 30s</span></div>
+    
     <div class="text-center">
+        
         <ng-container *ngIf="user.vms.length == 0 && !user.admin && !loading">
             <h4 class="text-danger">You currently have no VMs, create one first!</h4>
         </ng-container>
@@ -29,6 +30,7 @@
     <hr>
     <div>
         <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
+            <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf="!loading && user.vms.length !=0 "><span>VM's information are refreshed every 30s</span></div>
             <div class="col-12" >
                 <div class="card border-success border-1" style="margin-bottom: 2%" >
                     <div class="card-img-top" *ngIf="!user.admin"
