@@ -217,7 +217,6 @@ def get_vm_id(vmid):  # noqa: E501
 
     :rtype: VmItem
     """
-    print(time.ctime(), " start CAS (",vmid,")")
     start = time.time()
 
 
@@ -240,13 +239,11 @@ def get_vm_id(vmid):  # noqa: E501
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    print(time.ctime(), " OK CAS (",vmid,"). Took ", time.time() -start, " s")
 
     if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
         return {"status": "wrong permission"}, 403
 
 
-    print(time.ctime(), " start get all VM info (",vmid,")")
     start = time.time()
 
 
@@ -263,7 +260,6 @@ def get_vm_id(vmid):  # noqa: E501
 
 
     (vmConfig, response) = proxmox.get_vm_config(vmid, node)
-    print(vmConfig)
     if response == 500:
         return vmConfig, 500
     elif response == 404:
@@ -279,7 +275,6 @@ def get_vm_id(vmid):  # noqa: E501
     except:
         return {"status": "error while getting config"}, 500
 
-    print(time.ctime(), " Ok about get all VM info (",vmid,"). Took ", time.time() -start, " s")
 
     if is_cotisation_uptodate() == 0 and not admin:
         return {"status": "cotisation expired"}, 403

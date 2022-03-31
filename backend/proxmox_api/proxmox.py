@@ -272,7 +272,6 @@ def get_vm_autoreboot(vmid, node): # renvoie si la VM est en mode reboot auto au
 
 def get_vm_name(vmid, node):
     try:
-        print(proxmox.nodes(node).qemu(vmid).config.get())
         name = proxmox.nodes(node).qemu(vmid).config.get()['name']
         return {"name": name}, 201
     except Exception as e:
