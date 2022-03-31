@@ -249,6 +249,11 @@ def get_vm_ip(vmid, node):
 def get_vm_hardware_address(vmid, node):
     return proxmox.nodes(node).qemu(vmid).agent.get("network-get-interfaces")['result'][1]['hardware-address']  # récupération de l'adresse mac de la nouvelle vm
 
+
+
+##########################
+####### DEPRECATED #######
+##########################
 def get_vm_autoreboot(vmid, node): # renvoie si la VM est en mode reboot auto au démarrage du noeud
     try:
         if "onboot" in proxmox.nodes(node).qemu(vmid).config.get():
@@ -263,8 +268,11 @@ def get_vm_autoreboot(vmid, node): # renvoie si la VM est en mode reboot auto au
         logging.error("Problem in get_vm_name(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
         return {"name": "error"}, 500
 
+
+
 def get_vm_name(vmid, node):
     try:
+        print(proxmox.nodes(node).qemu(vmid).config.get())
         name = proxmox.nodes(node).qemu(vmid).config.get()['name']
         return {"name": name}, 201
     except Exception as e:
@@ -290,6 +298,106 @@ def get_node_from_vm(vmid):
     else:
         return {"get_node": "Vm not found"}, 404
 
+"""Return all the configuration info related to a VM, it combines name,  cpu, disk, ram and autoreboot
+"""
+
+def get_vm_config(vmid, node):
+    try:
+        config = proxmox.nodes(node).qemu(vmid).config.get()
+    except Exception as e :
+        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM config: " + str(e))
+        return {"config": "error"}, 500
+    
+    # CPU : 
+    try:
+        cpu = config['sockets']* config['cores']
+    except Exception as e :
+        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM cpu: " + str(e))
+        return {"cpu": "error"}, 500
+
+
+    
+    # DISK 
+    try :
+        disk = int(config['scsi0'].split('=')[-1].replace('G', '')) 
+    except Exception as e:
+        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM disk size: " + str(e))
+        return {"disk": "error"}, 500
+    
+
+    # RAM : 
+    try:
+        ram =config['memory']
+    except:
+        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM ram " + str(e))
+        return {"memory": "error"}, 500
+
+
+    # NAME : 
+    try : 
+        name = config['name']
+    except Exception as e:
+        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM name: " + str(e))
+        return {"name": "error"}, 500
+
+
+    try:
+        if "onboot" in config:
+            if config['onboot'] == 1:
+                autoreboot = 1
+            else:
+                autoreboot = 0
+        else:
+            autoreboot = 0
+    except Exception as e:
+        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
+        return {"autoreboot": "error"}, 500
+
+    return {"name": name, "cpu":cpu, "ram":ram, "disk":disk, "autoreboot":autoreboot}, 201
+
+
+
+"""Return all the CURRENT status info related to a VM, it combines cpu usage, ram usage and uptime
+"""
+
+def get_vm_current_status(vmid, node):
+    try:
+        current_status = proxmox.nodes(node).qemu(vmid).status.current.get()
+    except Exception as e:
+        logging.error("Problem in get_vm_current_status(" + str(vmid) + ") when getting VM global status: " + str(e))
+        return {"get_vm_current_status": "error"}, 500
+
+
+    # CPU usage
+
+    try : 
+        cpu_usage = round(float(current_status['cpu'] * 100), 1)
+    except Exception as e:
+        logging.error("Problem in get_vm_current_status(" + str(vmid) + ") when getting VM cpu usage: " + str(e))
+        return {"cpu_usage": "error"}, 500
+
+    # RAM usage 
+    try:
+        ram_usage = round(float(current_status['mem'] * 100/current_status['maxmem']), 1)
+    except:
+        logging.error("Problem in get_vm_current_status(" + str(vmid) + ") when getting VM ram usage: " + str(e))
+        return {"ram_usage": "error"}, 500
+    
+
+    # uptime 
+    try:
+        uptime = current_status["uptime"]
+    except Exception as e:
+        logging.error("Problem in get_vm_current_status(" + str(vmid) + ") when getting VM uptime: " + str(e))
+        return {"uptime": "error"}, 500
+
+    return {"cpu_usage": cpu_usage, "ram_usage":ram_usage, "uptime":uptime},201
+    
+
+
+##########################
+####### DEPRECATED #######
+##########################
 def get_vm_cpu(vmid, node):
     try:
         cpu = proxmox.nodes(node).qemu(vmid).config.get()['sockets'] * \
@@ -299,6 +407,10 @@ def get_vm_cpu(vmid, node):
         logging.error("Problem in get_vm_cpu(" + str(vmid) + ") when getting VM cpu: " + str(e))
         return {"cpu": "error"}, 500
 
+
+##########################
+####### DEPRECATED #######
+##########################
 def get_vm_cpu_usage(vmid, node):
     try:
         cpu_usage = round(float(proxmox.nodes(node).qemu(vmid).status.current.get()['cpu'] * 100), 1)
@@ -308,7 +420,9 @@ def get_vm_cpu_usage(vmid, node):
         return {"cpu_usage": "error"}, 500
 
 
-
+##########################
+####### DEPRECATED #######
+##########################
 def get_vm_disk(vmid, node):
     try:
         disk = int(proxmox.nodes(node).qemu(vmid).config.get()['scsi0'].split('=')[-1].replace('G', ''))
@@ -317,6 +431,9 @@ def get_vm_disk(vmid, node):
         logging.error("Problem in get_vm_disk(" + str(vmid) + ") when getting VM disk size: " + str(e))
         return {"disk": "error"}, 500
 
+##########################
+####### DEPRECATED #######
+##########################
 def get_vm_ram(vmid, node):
     try:
         ram = proxmox.nodes(node).qemu(vmid).config.get()['memory']
@@ -324,12 +441,18 @@ def get_vm_ram(vmid, node):
     except:
         return {"ram": "error"}, 500
 
+
+##########################
+####### DEPRECATED #######
+##########################
 def get_vm_ram_usage(vmid, node):
     try:
         ram_usage = round(float(proxmox.nodes(node).qemu(vmid).status.current.get()['mem'] * 100/proxmox.nodes(node).qemu(vmid).status.current.get()['maxmem']), 1)
         return {"ram_usage": ram_usage}, 201
     except:
         return {"ram_usage": "error"}, 500
+
+
 
 
 def get_vm_status(vmid, node):
@@ -361,6 +484,10 @@ def get_vm_status(vmid, node):
         logging.error("Problem in get_vm_status(" + str(vmid) + ") when getting VM status: " + str(e))
         return {"status": "error"}, 500
 
+
+##########################
+####### DEPRECATED #######
+##########################
 def get_vm_uptime(vmid, node):
     try:
         uptime = proxmox.nodes(node).qemu(vmid).status.current.get()["uptime"]
@@ -369,6 +496,11 @@ def get_vm_uptime(vmid, node):
         logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
         return {"uptime": "error"}, 500
 
+
+
+##########################
+####### DEPRECATED #######
+##########################
 def update_vm_ips_job(app):    # Job to update VM ip
     with app.app_context():    # Needs application context
         for j in proxmox.cluster.resources.get(type="vm"):
@@ -392,6 +524,8 @@ def update_vm_ips_job(app):    # Job to update VM ip
                     proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").delete(cidr)
                 proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").create(cidr=vm.ip)  # on met l'ipset à jour
                 db.session.commit()
+
+
 
 def switch_autoreboot(vmid):
     try:

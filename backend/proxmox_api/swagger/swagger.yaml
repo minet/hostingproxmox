@@ -422,5 +422,6 @@ components:
           scopes:
             profile: "The user's basic information, including groups they are a part\
               \ of"
+            admin: "Scope for admin users"
       x-tokenInfoFunc: proxmox_api.controllers.authorization_controller.check_OAuth2
       x-scopeValidateFunc: proxmox_api.controllers.authorization_controller.validate_scope_OAuth2

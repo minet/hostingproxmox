@@ -1,3 +1,4 @@
+from logging import error
 import connexion
 import requests
 import json
@@ -191,7 +192,6 @@ def get_vm():  # noqa: E501
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
     if r.status_code != 200:
         return {"status": "error"}, 403
-
     admin = False
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
@@ -199,7 +199,6 @@ def get_vm():  # noqa: E501
                 admin = True;
     if is_cotisation_uptodate() == 0 and not admin:
         return {"status": "cotisation expired"}, 403
-
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
@@ -218,6 +217,11 @@ def get_vm_id(vmid):  # noqa: E501
 
     :rtype: VmItem
     """
+    print(time.ctime(), " start CAS (",vmid,")")
+    start = time.time()
+
+
+
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
 
@@ -236,9 +240,15 @@ def get_vm_id(vmid):  # noqa: E501
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
+    print(time.ctime(), " OK CAS (",vmid,"). Took ", time.time() -start, " s")
 
     if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
         return {"status": "wrong permission"}, 403
+
+
+    print(time.ctime(), " start get all VM info (",vmid,")")
+    start = time.time()
+
 
     node = proxmox.get_node_from_vm(vmid)
     if not node:
@@ -251,38 +261,63 @@ def get_vm_id(vmid):  # noqa: E501
     if status[0]["status"] == 'creating':
         return {"status": status[0]["status"], "type": type[0]["type"]}, 201
 
-    name = proxmox.get_vm_name(vmid, node)
-    ram = proxmox.get_vm_ram(vmid, node)
-    cpu = proxmox.get_vm_cpu(vmid, node)
-    disk = proxmox.get_vm_disk(vmid, node)
-    autoreboot = proxmox.get_vm_autoreboot(vmid, node)
+
+    (vmConfig, response) = proxmox.get_vm_config(vmid, node)
+    print(vmConfig)
+    if response == 500:
+        return vmConfig, 500
+    elif response == 404:
+        return {"error": "VM not found"},404
+    elif response != 201:
+        return {"error": "API unkonwn response"},500
+    try:
+        name = vmConfig["name"]
+        ram = vmConfig["ram"]
+        cpu = vmConfig["cpu"]
+        disk = vmConfig["disk"]
+        autoreboot = vmConfig["autoreboot"]
+    except:
+        return {"status": "error while getting config"}, 500
+
+    print(time.ctime(), " Ok about get all VM info (",vmid,"). Took ", time.time() -start, " s")
 
     if is_cotisation_uptodate() == 0 and not admin:
         return {"status": "cotisation expired"}, 403
 
-    owner = get_vm_userid(
-        vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
+    owner = get_vm_userid(vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
 
     if status[0]["status"] != 'running':
-        return {"name": name[0]["name"], "autoreboot": autoreboot[0]["autoreboot"], "user": owner if admin else "", "ip": "", "status": status[0]["status"],
-                "ram": ram[0]['ram'], "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"],
+        return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": "", "status": status[0]["status"],
+                "ram": ram, "cpu": cpu, "disk": disk, "type": type[0]["type"],
                 "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"]}, 201
     else:
         ip = proxmox.get_vm_ip(vmid, node)
-        cpu_usage = proxmox.get_vm_cpu_usage(vmid, node)
-        ram_usage = proxmox.get_vm_ram_usage(vmid, node)
-        uptime = proxmox.get_vm_uptime(vmid, node)
+        current_status,response = proxmox.get_vm_current_status(vmid, node)
 
-    if name[1] == 201 and ip[1] == 201 and status[1] == 201 and ram[1] == 201 and cpu[1] == 201 and disk[1] == 201 and \
-            type[1] == 201 and ram_usage[1] == 201 and cpu_usage[1] == 201 and uptime[1] == 201:
-        return {"name": name[0]["name"], "autoreboot": autoreboot[0]["autoreboot"], "user": owner if admin else "", "ip": ip[0]["vm_ip"]
-                   , "status": status[0]["status"], "ram": ram[0]['ram']
-                   , "cpu": cpu[0]["cpu"], "disk": disk[0]["disk"], "type": type[0]["type"]
-                   , "ram_usage": ram_usage[0]["ram_usage"], "cpu_usage": cpu_usage[0]["cpu_usage"]
-                   , "uptime": uptime[0]["uptime"], "created_on": created_on[0]["created_on"]}, 201
 
-    elif name[1] == 404 or ip[1] == 404 or status[1] == 404 or ram[1] == 404 or disk[1] == 404 or cpu[1] == 404 \
-            or type[1] == 404 or cpu_usage[1] == 404 or ram_usage[1] == 404 or uptime[1] == 404:
+
+        if response == 500:
+            return vmConfig, 500
+        elif response == 404:
+            return {"error": "VM not found"},404
+        elif response != 201:
+            return {"error": "API unkonwn response"},500
+        try:
+            cpu_usage = current_status["cpu_usage"]
+            ram_usage = current_status["ram_usage"]
+            uptime = current_status["uptime"]
+        except:
+            return {"status": "error while getting current status"}, 500
+
+
+    if  status[1] == 201 and type[1] == 201 and ip[1] == 201:
+        return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": ip[0]["vm_ip"]
+                   , "status": status[0]["status"], "ram": ram
+                   , "cpu": cpu, "disk": disk, "type": type[0]["type"]
+                   , "ram_usage": ram_usage, "cpu_usage": cpu_usage
+                   , "uptime": uptime, "created_on": created_on[0]["created_on"]}, 201
+
+    elif   status[1] == 404 or type[1] == 404 or ip[1] == 404 :
         return {"status": "vm not found"}, 404
     else:
         return {"status": "error"}, 500
