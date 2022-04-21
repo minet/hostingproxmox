@@ -92,6 +92,8 @@ paths:
           description: "invalid input, object invalid"
         "404":
           description: vm not found
+        "500":
+          description: An internal error occured
       x-openapi-router-controller: proxmox_api.controllers.default_controller
     patch:
       summary: update a vm

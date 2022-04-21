@@ -92,6 +92,8 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
     next_vmid = int(proxmox.cluster.nextid.get())
     server = load_balance_server()
 
+    print("first_next_vmid = ", next_vmid)
+
     if server[1] != 201:
         return server
     else:
@@ -114,7 +116,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             for vm in proxmox.cluster.resources.get(type="vm"):
                 if vm["vmid"] == 10000:
                     template_node = vm["node"]
-
+            print("next_vmid = " ,next_vmid)
             proxmox.nodes(template_node).qemu(10000).clone.create(
                 name=name,
                 newid=next_vmid,
@@ -152,7 +154,8 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
 
     except Exception as e:
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
-        delete_vm(next_vmid)
+        print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
+        delete_vm(next_vmid, node)
         return {"status": "error"}, 500
 
     sync = False
@@ -301,6 +304,8 @@ def get_node_from_vm(vmid):
 """
 
 def get_vm_config(vmid, node):
+    start = time.time()
+    print("Start get config " , vmid)
     try:
         config = proxmox.nodes(node).qemu(vmid).config.get()
     except Exception as e :
@@ -352,6 +357,7 @@ def get_vm_config(vmid, node):
         logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
         return {"autoreboot": "error"}, 500
 
+    print("Config (" ,vmid ,") ok. Took" , str(time.time() - start))
     return {"name": name, "cpu":cpu, "ram":ram, "disk":disk, "autoreboot":autoreboot}, 201
 
 

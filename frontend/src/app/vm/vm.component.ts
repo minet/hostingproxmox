@@ -19,6 +19,7 @@ export class VmComponent implements OnInit, OnDestroy {
     loading = true;
     editing = false;
     errorcode = 201;
+    errorDescription = "";
     deleting = false;
     intervals = new Set<Subscription>();
     newVm = new Vm();
@@ -81,6 +82,7 @@ export class VmComponent implements OnInit, OnDestroy {
         this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(rep => {
             this.loading = true;
         }, error => {
+            this.loading = false;
             this.errorcode = error.status;
         });
 
@@ -94,7 +96,10 @@ export class VmComponent implements OnInit, OnDestroy {
             },
 
             error => {
+                this.loading = false;
+                this.deleting = false;
                 this.errorcode = error.status;
+                this.errorDescription = error.statusText;
             });
     }
 

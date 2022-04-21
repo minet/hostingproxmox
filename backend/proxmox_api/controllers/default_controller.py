@@ -198,7 +198,12 @@ def get_vm():  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
     if is_cotisation_uptodate() == 0 and not admin:
+
+        
         return {"status": "cotisation expired"}, 403
+
+
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
@@ -218,7 +223,7 @@ def get_vm_id(vmid):  # noqa: E501
     :rtype: VmItem
     """
     start = time.time()
-
+    print("backend api called " , vmid)
 
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
@@ -244,7 +249,7 @@ def get_vm_id(vmid):  # noqa: E501
         return {"status": "wrong permission"}, 403
 
 
-    start = time.time()
+    
 
 
     node = proxmox.get_node_from_vm(vmid)
@@ -259,7 +264,10 @@ def get_vm_id(vmid):  # noqa: E501
         return {"status": status[0]["status"], "type": type[0]["type"]}, 201
 
 
+    proxmoxStart = time.time()
     (vmConfig, response) = proxmox.get_vm_config(vmid, node)
+    print("get_vm_config for " , vmid , " took ")
+
     if response == 500:
         return vmConfig, 500
     elif response == 404:
@@ -279,6 +287,8 @@ def get_vm_id(vmid):  # noqa: E501
     if is_cotisation_uptodate() == 0 and not admin:
         return {"status": "cotisation expired"}, 403
 
+    print("recieved config response (" ,vmid ,") ok. Took" , str(time.time() - start))
+
     owner = get_vm_userid(vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
 
     if status[0]["status"] != 'running':
@@ -289,7 +299,7 @@ def get_vm_id(vmid):  # noqa: E501
         ip = proxmox.get_vm_ip(vmid, node)
         current_status,response = proxmox.get_vm_current_status(vmid, node)
 
-
+        print("recieved status response (" ,vmid ,") ok. Took" , str(time.time() - start))
 
         if response == 500:
             return vmConfig, 500
@@ -305,6 +315,7 @@ def get_vm_id(vmid):  # noqa: E501
             return {"status": "error while getting current status"}, 500
 
 
+    print("backend api vm (" ,vmid ,") ok. Took" , str(time.time() - start))
     if  status[1] == 201 and type[1] == 201 and ip[1] == 201:
         return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": ip[0]["vm_ip"]
                    , "status": status[0]["status"], "ram": ram
