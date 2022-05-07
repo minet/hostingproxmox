@@ -112,10 +112,11 @@
                                         <input type="password" class="form-control" id="password"
                                                [(ngModel)]="vm.password" name="password"
                                                #password="ngModel"
-                                               required="required">
+                                               required="required" 
+                                               ng-model="password" ng-change="check_password(vm)">
                                     </div>
-                                    <div [hidden]="password.valid || password.pristine" class="alert alert-danger">
-                                        Password is required
+                                    <div *ngIf="passwordErrorMessage != ''" class="alert alert-danger" [innerHTML]="passwordErrorMessage">
+                                        
                                     </div>
 
                                     <div class="form-check mb-2 text-center m-3">
@@ -126,7 +127,7 @@
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <button *ngIf="vmForm.valid && rulesCheck" type="submit"
+                                    <button *ngIf="vmForm.valid  && rulesCheck && check_password(vm)" type="submit"
                                             class="btn btn-primary text-center">Submit
                                     </button>
                                 </div>

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, Input, SimpleChange, OnChanges, SimpleChanges} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
@@ -16,11 +16,16 @@ import {Dns} from "../models/dns";
   styleUrls: ['./home.component.css']
 })
 
+
+
 export class HomeComponent implements OnInit {
+
+  
 
   vm = new Vm('bob', 'phobos', '1', '10', 'stopped', 'No', '', '', '', 'Secret');
   maxVmPerUser = 3;
   rulesCheck = false;
+  passwordErrorMessage = "";
   prefix: string;
   loading = false;
   valide = false;
@@ -61,6 +66,7 @@ export class HomeComponent implements OnInit {
 
   }
 
+
   progress_bar(): void{
     this.interval = setInterval(() => {
       if (this.progress < 100){
@@ -70,6 +76,8 @@ export class HomeComponent implements OnInit {
 
   }
 
+
+
   rules_checked(): void {
     if (this.rulesCheck === false) {
       this.rulesCheck = true;
@@ -78,37 +86,72 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  create_vm(vm: Vm): void {
-    this.loading = true;
-    this.progress_bar();
-    let data = {};
-    if (vm.ssh === 'No') {
-      data = {
-        name: this.slugifyPipe.transform(vm.name),
-        ssh: false,
-        type: vm.type,
-        password: vm.password,
-        user: this.slugifyPipe.transform(vm.user)
-      };
-    } else {
-      data = {
-        name: this.slugifyPipe.transform(vm.name),
-        type: vm.type,
-        password: vm.password,
-        sshKey: vm.sshKey,
-        user: this.slugifyPipe.transform(vm.user),
-        ssh: true,
-
-      };
+  check_password(vm):boolean{
+    console.log("check password calles")
+    var special = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    var upper = /[A-Z]/;
+    var number = /[0-9]/;
+    this.passwordErrorMessage = "";
+    var isOk = true;
+    
+    if (!upper.test(vm.password)){
+      this.passwordErrorMessage += "● Your password must contains a least one uppercase letter.<br/>";
+      isOk = false;
     }
-    this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).subscribe(rep => {
-        this.progress = 100;
-      },
-      error => {
-        this.progress = 0;
-        clearInterval(this.interval);
-        this.errorcode = error.status;
-      });
+    if (!special.test(vm.password)){
+      this.passwordErrorMessage += "● Your password must contains a least one special character.<br/>";
+      isOk = false;
+    }
+
+    if (vm.password.length<=11){
+      this.passwordErrorMessage += "● Your password must be a least 12 characters.<br/>";
+      isOk = false;
+    }
+
+    if(!number.test(vm.password)){
+      this.passwordErrorMessage += "● Your password must contains at least 1 number.<br/>";
+      isOk = false;
+    }
+    
+    return isOk;
+    
+  }
+
+  create_vm(vm: Vm): void {
+    // first of all check parameter : 
+    const isPasswordOk = this.check_password(this.vm)
+    if (isPasswordOk) {
+       
+      this.loading = true;
+      this.progress_bar();
+      let data = {};
+      if (vm.ssh === 'No') {
+        data = {
+          name: this.slugifyPipe.transform(vm.name),
+          ssh: false,
+          type: vm.type,
+          password: vm.password,
+          user: this.slugifyPipe.transform(vm.user)
+        };
+      } else {
+        data = {
+          name: this.slugifyPipe.transform(vm.name),
+          type: vm.type,
+          password: vm.password,
+          sshKey: vm.sshKey,
+          user: this.slugifyPipe.transform(vm.user),
+          ssh: true,
+
+        };
+      }
+      this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).   subscribe(rep => {
+          this.progress = 100;
+        },
+        error => {
+          clearInterval(this.interval);
+          this.errorcode = error.status;
+        });
+      }
   }
   count_dns(): void {
     let dns: Array<string>;
@@ -126,21 +169,24 @@ export class HomeComponent implements OnInit {
   }
 
   count_vm(): void {
-    let vmList: Array<string>;
-    this.countvm = 0;
-    this.countactivevm = 0;
-    this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
-      vmList = rep.body as Array<string>;
-      for (let i = 0; i < vmList.length; i++) {
-        const vmid = vmList[i];
-        this.countvm++;
-        this.get_vmstatus(vmid);
-      }
-    },
+   
 
-    error => {
-      this.errorcode = error.status;
-    });
+
+      let vmList: Array<string>;
+      this.countvm = 0;
+       this.countactivevm = 0;
+      this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
+        vmList = rep.body as Array<string>;
+        for (let i = 0; i < vmList.length; i++) {
+          const vmid = vmList[i];
+          this.countvm++;
+          this.get_vmstatus(vmid);
+        }
+      },
+
+      error => {
+        this.errorcode = error.status;
+      });
   }
 
   get_vmstatus(vmid: string): void {
@@ -156,3 +202,4 @@ export class HomeComponent implements OnInit {
     });
   }
 }
+
