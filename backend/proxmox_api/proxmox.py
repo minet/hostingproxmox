@@ -389,12 +389,13 @@ def get_vm_current_status(vmid, node):
         return {"ram_usage": "error"}, 500
     
 
+    print(node)
     # uptime 
     try:
         uptime = current_status["uptime"]
     except Exception as e:
         logging.error("Problem in get_vm_current_status(" + str(vmid) + ") when getting VM uptime: " + str(e))
-        return {"uptime": "error"}, 500
+        return {"error": "Impossible to retrieve the parameter : uptime"}, 500
 
     return {"cpu_usage": cpu_usage, "ram_usage":ram_usage, "uptime":uptime},201
     
@@ -499,7 +500,7 @@ def get_vm_uptime(vmid, node):
         return {"uptime": uptime}, 201
     except Exception as e:
         logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
-        return {"uptime": "error"}, 500
+        return {"error": "Impossible to retrieve uptime "}, 500
 
 
 
@@ -532,14 +533,23 @@ def update_vm_ips_job(app):    # Job to update VM ip
 
 
 
-def switch_autoreboot(vmid):
+def switch_autoreboot(vmid,node):
+    print(get_vm_autoreboot(vmid, node))
+    (config, status) = get_vm_autoreboot(vmid, node)
+    if status != 201 :
+        return {"error" : "Impossible to retrieve onboot status"}, 500
     try:
-       if get_vm_autoreboot(vmid) == 1:
-           proxmox.nodes(vm["node"]).qemu(vmid).config.post(onboot=0)
-           return {"status": "changed"}, 201
+       if config["autoreboot"] == 1:
+           request = proxmox.nodes(node).qemu(vmid).config.post(onboot=0)
+           status = get_vm_autoreboot(vmid, node)
+           return {"status": "changed to 0"}, 201
        else:
-           proxmox.nodes(vm["node"]).qemu(vmid).config.post(onboot=1)
-           return {"status": "changed"}, 201
+           request = proxmox.nodes(node).qemu(vmid).config.post(onboot=1)
+           print(request)
+           status = get_vm_autoreboot(vmid, node)
+           print(status)
+           return {"status": "changed to 1"}, 201
     except Exception as e:
         logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
-        return {"uptime": "error"}, 500
+        print("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
+        return {"error": "Impossible to update the uptime"}, 500
