@@ -93,24 +93,30 @@ export class HomeComponent implements OnInit {
     var number = /[0-9]/;
     this.passwordErrorMessage = "";
     var isOk = true;
+
+    if (vm.password.length<=11){
+      this.passwordErrorMessage += "● 12 characters.<br/>";
+      isOk = false;
+    }
     
     if (!upper.test(vm.password)){
-      this.passwordErrorMessage += "● Your password must contains a least one uppercase letter.<br/>";
+      this.passwordErrorMessage += "● 1 uppercase letter.<br/>";
       isOk = false;
     }
     if (!special.test(vm.password)){
-      this.passwordErrorMessage += "● Your password must contains a least one special character.<br/>";
+      this.passwordErrorMessage += "● 1 special character.<br/>";
       isOk = false;
     }
 
-    if (vm.password.length<=11){
-      this.passwordErrorMessage += "● Your password must be a least 12 characters.<br/>";
-      isOk = false;
-    }
+    
 
     if(!number.test(vm.password)){
-      this.passwordErrorMessage += "● Your password must contains at least 1 number.<br/>";
+      this.passwordErrorMessage += "●  1 number.<br/>";
       isOk = false;
+    }
+
+    if (!isOk){
+      this.passwordErrorMessage = "Your password must contains at least <br/>" + this.passwordErrorMessage
     }
     
     return isOk;
