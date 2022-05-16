@@ -5,7 +5,6 @@ export class Vm {
     public ram?: string,
     public disk?: string,
     public cpu?: string,
-    public ssh?: string,
     public type?: string,
     public status?: string,
     public autoreboot?: string,
