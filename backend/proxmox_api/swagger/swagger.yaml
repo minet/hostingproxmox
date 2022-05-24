@@ -352,10 +352,6 @@ components:
           type: string
           description: password of vm
           example: salut
-        ssh:
-          type: boolean
-          description: ssh key auth
-          example: true
         sshKey:
           type: string
           description: ssh pub key for auth
@@ -401,7 +397,6 @@ components:
           example: 15-05-2021
       example:
         ip: 192.1.1.1
-        ssh: true
         cpu: 2
         type: "wordpress, bare_vm"
         uptime: 87545
