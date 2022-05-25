@@ -102,3 +102,32 @@ deploy_frontend:
     - hosting-proxmox
   only:
     - master
+
+
+deploy_backend_dev:
+  stage: deploy
+  before_script:
+    - export http_proxy="http://192.168.104.61:82/"
+    - export https_proxy="http://192.168.104.61:82/"
+    - cd backend
+    - pip3 install -r requirements.txt
+    - sudo /bin/systemctl stop proxmox_api
+    - rm -rf /var/www/proxmox_api
+  script:
+    - cp -r proxmox_api /var/www/proxmox_api
+    - cd /var/www/proxmox_api
+    - sudo /bin/systemctl start proxmox_api
+  tags:
+    - hosting-dev 
+  only:
+    - development
+
+deploy_frontend_dev:
+  stage: deploy
+  script:
+    - rm -rf /var/www/proxmox_dashboard
+    - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
+  tags:
+    - hosting-dev
+  only:
+    - development
