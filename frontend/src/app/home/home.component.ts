@@ -29,7 +29,8 @@ export class HomeComponent implements OnInit {
   prefix: string;
   loading = false;
   valide = false;
-  errorcode = 201;
+  errorcode = 0;
+  errorMessage = ""
   url: string;
   sshAddress: string;
   countvm: number;
@@ -73,7 +74,6 @@ export class HomeComponent implements OnInit {
         this.progress = this.progress + 100000 / 180000;
       }
     }, 1000);
-
   }
 
 
@@ -157,12 +157,17 @@ export class HomeComponent implements OnInit {
         };
       this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).   subscribe(rep => {
           this.progress = 100;
+          this.loading = false;
         },
         error => {
+          this.loading = false
           clearInterval(this.interval);
           this.errorcode = error.status;
+          this.errorMessage = error.error["error"];
+          console.log(error)
         });
       }
+      //this.loading = false
   }
   count_dns(): void {
     let dns: Array<string>;

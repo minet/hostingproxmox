@@ -28,6 +28,7 @@
             <div class="alert alert-secondary text-center" *ngIf="countvm < maxVmPerUser">
                 <b>You can create {{ maxVmPerUser - countvm}} more VM !</b>
             </div>
+            
             <div class="card mb-3" *ngIf="countvm < maxVmPerUser">
                 <h4 class="card-header">
                     Create your VM
@@ -41,9 +42,13 @@
                         <dd>Wordpress ready to use with ftps server.</dd>
                     </dl>
                     <hr>
-                    <div>
+                    <div> 
+                        <div class="alert alert-danger text-center" *ngIf="errorcode != 201 && errorcode != 0">
+                            <b>Impossible to create your VM ! </b><br/>
+                            {{ errorMessage }}
+                        </div>
                         <form (ngSubmit)="create_vm(vm)" #vmForm="ngForm">
-                            <div *ngIf="!vmForm.submitted">
+                            <div *ngIf="!loading && errorcode !=201">
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text" id="type-select-prepend">Type</span>
@@ -131,12 +136,12 @@
                         </form>
 
                     </div>
-                    <div class="text-center" *ngIf="vmForm.submitted && loading">
+                    <div class="text-center" *ngIf="loading">
                         Your VM is being created, please wait
                         <p *ngIf="progress == 100">Your VM has been created, click <a [routerLink]="['vms']">here</a></p>
                     </div>
 
-                    <div class="progress" *ngIf="vmForm.submitted && loading">
+                    <div class="progress" *ngIf="loading">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                              aria-valuemin="0" aria-valuemax="100" style="width: {{progress}}%"></div>
                     </div>
