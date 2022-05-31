@@ -3,6 +3,7 @@ from time import sleep
 import logging
 from proxmoxer import ProxmoxAPI
 from proxmoxer import ResourceException
+from proxmox_api.util import check_password_strength, check_ssh_key, check_username
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration as config
 from proxmox_api.db.db_functions import *
@@ -88,12 +89,22 @@ def delete_vm(vmid, node):
         return {"state": "error"}, 500
 
 
-def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key="no"):
+def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="no"):
+    
+    print(check_password_strength(password))
+    if not check_password_strength(password):
+        return {"error" : "Incorrect password format"}, 400
+    if not check_ssh_key(main_ssh_key):
+        return {"error" : "Incorrect ssh key format"}, 400
+    if not check_username(vm_user):
+        return {"error" : "Incorrect vm user format"}, 400
+
     next_vmid = int(proxmox.cluster.nextid.get())
     server = load_balance_server()
 
     print("first_next_vmid = ", next_vmid)
 
+    
     if server[1] != 201:
         return server
     else:
@@ -134,7 +145,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
                 if len(get_vm_list(user_id)) < config.LIMIT_BY_USER and len(get_vm_list()) < config.TOTAL_VM_LIMIT:
                     add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
                 else:
-                    return {"status": "error, can not create more VMs"}, 500
+                    return {"error": "Impossible to create more VMs"}, 403
 
             for vm in proxmox.cluster.resources.get(type="vm"):
                 if vm["vmid"] == 10001:
@@ -149,14 +160,14 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
             )
 
         else:
-            return {"status": "vm type not defines"}, 500
+            return {"error": "vm type not defines"}, 400
 
 
     except Exception as e:
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         delete_vm(next_vmid, node)
-        return {"status": "error"}, 500
+        return {"error": "Impossible to create the VM (cloning)"}, 500
 
     sync = False
     while not sync:  # Synchronisation
@@ -168,35 +179,32 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
         except ResourceException:  # Exception si pas encore synchronisés
             sleep(1)
 
-    if password != "no":
-        try:
-            proxmox.nodes(server).qemu(next_vmid).config.create(
-                cipassword=password
-            )
-        except Exception as e:
-            logging.error("Problem in create_vm(" + str(next_vmid) + ") when setting password: " + str(e))
-            delete_vm(next_vmid)
-            return {"status": "error"}, 500
+    try:
+        proxmox.nodes(server).qemu(next_vmid).config.create(
+            cipassword=password
+        )
+    except Exception as e:
+        logging.error("Problem in create_vm(" + str(next_vmid) + ") when setting password: " + str(e))
+        delete_vm(next_vmid)
+        return {"error": "An error occured while creating the VM (password)"}, 500
 
-    if vm_user != "no":
-        try:
-            proxmox.nodes(server).qemu(next_vmid).config.create(
-                ciuser=vm_user
-            )
-        except Exception as e:
-            logging.error("Problem in create_vm(" + str(next_vmid) + ") when setting user: " + str(e))
-            delete_vm(next_vmid)
-            return {"status": "error"}, 500
+    try:
+        proxmox.nodes(server).qemu(next_vmid).config.create(
+            ciuser=vm_user
+        )
+    except Exception as e:
+        logging.error("Problem in create_vm(" + str(next_vmid) + ") when setting user: " + str(e))
+        delete_vm(next_vmid)
+        return {"error": "An error occured while creating the VM (user)"}, 500
 
-    if main_ssh_key != "no":
-        try:
-            proxmox.nodes(server).qemu(next_vmid).config.create(
-                sshkeys=urllib.parse.quote(main_ssh_key, safe='')
-            )
-        except Exception as e:
-            logging.error("Problem in create_vm(" + str(next_vmid) + ") when setting ssh key: " + str(e))
-            delete_vm(next_vmid)
-            return {"status": "error"}, 500
+    try:
+        proxmox.nodes(server).qemu(next_vmid).config.create(
+            sshkeys=urllib.parse.quote(main_ssh_key, safe='')
+        )
+    except Exception as e:
+        logging.error("Problem in create_vm(" + str(next_vmid) + ") when setting ssh key: " + str(e))
+        delete_vm(next_vmid)
+        return {"error": "An error occured while creating the VM (ssh key)"}, 500
 
     try:
         proxmox.nodes(server).qemu(next_vmid).status.start.create()
@@ -204,7 +212,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="no", main_ssh_key=
     except Exception as e:
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when sarting VM: " + str(e))
         delete_vm(next_vmid)
-        return {"status": "error"}, 500
+        return {"error": "An error occured while starting the VM"}, 500
     return {"status": "Vm created"}, 201
 
 

@@ -2,6 +2,7 @@ import datetime
 
 import six
 import typing
+import re
 
 
 def _deserialize(data, klass):
@@ -139,3 +140,41 @@ def _deserialize_dict(data, boxed_type):
     """
     return {k: _deserialize(v, boxed_type)
             for k, v in six.iteritems(data)}
+
+
+"""Check if the user password is strong enough to be used
+
+    :param password: the password to check
+
+    :return: True if the password is strong enough, false if not
+    :rtype: bool
+"""
+def check_password_strength(password:str) -> bool:
+    special = "[`!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~]";
+    upper = "[A-Z]";
+    number = "[0-9]";
+    # Return true if and only if there are at least 12 char, 1 spec char, 1 uppercase letter and 1 lowercase letter
+    return len(password) >= 12 and re.search(special, password) is not  None  and re.search(upper, password) is not None and  re.search(number, password) is not None
+
+
+"""Check if the user ssh key has a correct format
+
+    :param key: the ssh key to check
+
+    :return: True if the ssh key has a correct format
+    :rtype: bool
+"""
+def check_ssh_key(key:str) -> bool:
+    return not not re.search("^ssh.[a-zA-Z0-9]* [a-zA-Z0-9[()[\]{}+*\/%$&#@=:?]*", key)
+
+
+
+"""Check if the username is acceptable
+
+    :param username: the username to check
+
+    :return: True if the username is acceptable
+    :rtype: bool
+"""
+def check_username(username:str) -> bool:
+    return "username" != "root" and "username" != ""

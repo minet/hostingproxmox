@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy import event
 
+
 db = SQLAlchemy()
 
 class User(db.Model):
