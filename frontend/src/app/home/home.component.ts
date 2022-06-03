@@ -13,10 +13,11 @@ import {Dns} from "../models/dns";
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
 })
 
 
+  
 
 export class HomeComponent implements OnInit {
 
@@ -71,7 +72,8 @@ export class HomeComponent implements OnInit {
   progress_bar(): void{
     this.interval = setInterval(() => {
       if (this.progress < 100){
-        this.progress = this.progress + 100000 / 180000;
+        console.log(this.progress)
+        this.progress = this.progress + 10 / 18;
       }
     }, 1000);
   }

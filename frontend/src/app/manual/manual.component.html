@@ -111,6 +111,20 @@
     </blockquote>
     <div>
     </div>
+    <h3 class="toc-header" id="sshKeyGenerationFr">Comment générer des clés ssh</h3>
+    <div>
+    </div>
+    <p>La connexion en SSH à votre VM se fait obligatoirement grâce à une clé SSH. Elles sont bien plus sécurisées que des mots de passes.</p>
+    <p>Sur votre machine exécutez : </p>
+    <ul>
+        <li><code>ssh-keygen -t ecdsa</code></li>
+        <li>Suivez les instructions. <strong>Nous vous conseillons de les protéger par un mot de passe comme suggérer par l'invite de commande !</strong></li>
+        <li>Copier la clé qui est enregistrée dans le fichier <code>~/.ssh/id_[typeClé].pub</code></li>
+        <li>Collez votre clés publiques dans le champ de hosting !</li>
+    </ul>
+    <blockquote class="is-warning">
+        <p>Attention : Sélectionnez bien la clé en <code>.pub</code> ! L'autre est votre clé privée. Elle doit le rester ! </p>
+    </blockquote>
     <h3 class="toc-header" id="après-création-que-faire"> Après la création, que faire ?</h3>
     <div>
     </div>
@@ -268,9 +282,25 @@
     </blockquote>
     <div>
     </div>
-    <h3 class="toc-header" id="après-création-que-faire"> What should I do after my VM is up ?</h3>
+    <h3 class="toc-header" id="sshKeyGenerationEn">How can I generate ssh keys ? </h3>
+
+   
     <div>
     </div>
+    <p>The ssh connection with keys is mandatory. It is far more safe than using password.</p>
+    <p>On your laptop execute : </p>
+    <ul>
+        <li><code>ssh-keygen -t ecdsa</code></li>
+        <li>Follow the instructions. <strong>We strongly advice you to protect your keys with a passphrase, as suggested by the command prompt</strong>.</li>
+        <li>Copy the key which is saved in the file <code>~/.ssh/id_[keyType].pub</code></li>
+        <li>Paste your public key in the VM creation form on hosting.</li>
+    </ul>
+    <blockquote class="is-warning">
+        <p>WARNING : Be sure to select the key ending with <code>.pub</code> ! The other is your private key. It must remains private ! </p>
+    </blockquote>
+    <div>
+    </div>
+    <h3 class="toc-header" id="après-création-que-faire"> What should I do after my VM is up ?</h3>
     <p>You can connect to your VM. There are two ways :</p>
     <div>
     </div>
