@@ -6,7 +6,7 @@ import {AuthService} from '../common/services/auth.service';
 import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Observable, Subscription, timer} from 'rxjs';
-import {flatMap} from 'rxjs/internal/operators';
+import {mergeMap} from 'rxjs/operators';
 import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
@@ -125,7 +125,7 @@ export class VmsComponent implements OnInit, OnDestroy {
         let vm = this.user.vms[id]
         const vmid = vm.id;
         const newTimer = timer(0, 30000).pipe(
-            flatMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
+            mergeMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
                     vm.name = rep.body['name'];
                     vm.status = rep.body['status'];
