@@ -7,7 +7,7 @@ import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Vm} from '../models/vm';
 import {Router} from '@angular/router';
 import {timer} from 'rxjs';
-import {flatMap} from 'rxjs/internal/operators';
+import {mergeMap} from 'rxjs/operators';
 import {Dns} from "../models/dns";
 
 @Component({

@@ -7,7 +7,7 @@ import {AuthService} from '../common/services/auth.service';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Dns} from '../models/dns';
 import {timer, Subscription} from 'rxjs';
-import {flatMap} from 'rxjs/internal/operators';
+import {mergeMap} from 'rxjs/operators';
 
 
 @Component({
@@ -80,7 +80,7 @@ export class DnsComponent implements OnInit, OnDestroy {
     dns.id = id;
     this.user.dns.push(dns);
     const newTimer = timer(0, 5000).pipe(
-      flatMap(() => this.http.get(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})))
+      mergeMap(() => this.http.get(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})))
       .subscribe(rep => {
           dns.entry = rep.body['entry'];
           dns.ip = rep.body['ip'];
