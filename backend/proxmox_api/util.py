@@ -177,4 +177,4 @@ def check_ssh_key(key:str) -> bool:
     :rtype: bool
 """
 def check_username(username:str) -> bool:
-    return "username" != "root" and "username" != ""
+    return username != "root" and username != ""
