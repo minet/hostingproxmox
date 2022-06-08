@@ -66,7 +66,7 @@
                                     Type is required
                                 </div>
 
-                                <div *ngIf="!type.pristine">
+                                <div *ngIf="type.valid">
                                     <div class="form-group">
                                         <label for="name">VM name</label>
                                         <input type="text" class="form-control" id="name"
@@ -138,7 +138,7 @@
 
                     </div>
                     <div class="text-center" *ngIf="loading">
-                        Your VM is being created, please wait
+                        Your VM is being created, please wait. It can take few minutes.
                         <p *ngIf="progress == 100">Your VM has been created, click <a [routerLink]="['vms']">here</a></p>
                     </div>
 

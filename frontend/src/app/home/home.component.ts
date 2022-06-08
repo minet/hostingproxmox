@@ -71,11 +71,13 @@ export class HomeComponent implements OnInit {
 
   progress_bar(): void{
     this.interval = setInterval(() => {
-      if (this.progress < 100){
+      if (this.progress < 95){
         console.log(this.progress)
-        this.progress = this.progress + 10 / 18;
+        const max = 5
+        const min = 1
+        this.progress = this.progress +  (Math.random() * (max - min) + min) / 18;
       }
-    }, 1000);
+    }, 300);
   }
 
 
@@ -140,7 +142,15 @@ export class HomeComponent implements OnInit {
     return vm.user == "root"
   }
 
+  /*
+  Create a vm.
+  The first step is to check if the password is strong enough. The other arg are check while typing and by the backend 
+
+  Then the request is send to the backend. It answers when the vm is cloning. 
+  After, we check every second if the vm is up and started. It means it is well configurated. Else we wait. If there is no vm anymore then a error occured
+  */
   create_vm(vm: Vm): void {
+    this.errorMessage = ""
     // first of all check parameter : 
     const isPasswordOk = this.check_password(this.vm)
     if (isPasswordOk) {
@@ -158,19 +168,38 @@ export class HomeComponent implements OnInit {
 
         };
       this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).   subscribe(rep => {
+
+          var id = rep.body["vmId"]
+          var isStarted = false;
+          (async () => { 
+            while (!isStarted && this.loading){ 
+              isStarted = this.is_vm_booting(id);
+              await delay(2000);
+          }
           this.progress = 100;
-          this.loading = false;
+          this.router.navigate(['/vms/' + id]);
+        }
+        )();
         },
         error => {
-          this.loading = false
-          clearInterval(this.interval);
-          this.errorcode = error.status;
-          this.errorMessage = error.error["error"];
-          console.log(error)
+          // If it's system error, it most come from the user. Then we send him to the vms page.
+          if (error.status != 404){
+            this.router.navigate(['/vms']);
+          } else {
+            this.errorcode = error.status;
+            this.loading = false
+            clearInterval(this.interval);
+            
+            this.errorMessage = error.error["error"];
+            console.log(error)
+          }
         });
       }
-      //this.loading = false
   }
+
+
+
+
   count_dns(): void {
     let dns: Array<string>;
     this.countdns = 0;
@@ -182,7 +211,9 @@ export class HomeComponent implements OnInit {
           }
         },
         error => {
+          this.loading = false
           this.errorcode = error.status;
+          this.errorMessage = error.error["error"];
         });
   }
 
@@ -198,16 +229,21 @@ export class HomeComponent implements OnInit {
         for (let i = 0; i < vmList.length; i++) {
           const vmid = vmList[i];
           this.countvm++;
-          this.get_vmstatus(vmid);
+          this.new_vmstatus(vmid);
         }
       },
 
       error => {
+        this.loading = false
         this.errorcode = error.status;
+        this.errorMessage = error.error["error"];
       });
   }
 
-  get_vmstatus(vmid: string): void {
+  /*
+    Check the vm status (vmid). If it's started, the number of active vm is added to 1
+  */
+  new_vmstatus(vmid: string): void {
     const vm = new Vm();
     vm.id = vmid;
     this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {
@@ -216,8 +252,38 @@ export class HomeComponent implements OnInit {
           this.countactivevm++;
         },
         error => {
+          this.loading = false
           this.errorcode = error.status;
+          this.errorMessage = error.error["error"];
     });
   }
+
+/*Return true if the vm is booting and false if not
+*/
+is_vm_booting(vmid: string) : boolean {
+  const vm = new Vm();
+  vm.id = vmid;
+  this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {
+      this.vmstate = rep.body['status'];
+      return rep.body['status'] == "booting"
+    },
+      error => {
+        if (error.status == 404){
+          this.loading = false;
+          this.errorcode = error.status;
+          this.errorMessage = "An error occured while creating the VM. Please, try again";
+          
+        } else {
+          this.loading = false;
+        this.errorcode = error.status;
+        this.errorMessage = error.error["error"];
+        }
+        
+  });
+  return false
+}
 }
 
+function delay(ms: number) {
+  return new Promise( resolve => setTimeout(resolve, ms) );
+}
