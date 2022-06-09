@@ -40,6 +40,7 @@ export class HomeComponent implements OnInit {
   vmstate: string;
   interval;
   progress = 0;
+  nb_error_resquest = 0; // Count the number of SUCCESSIVE error returned by a same request
 
   images = [
     {name: 'Bare VM', id: 'bare_vm'},
@@ -173,7 +174,27 @@ export class HomeComponent implements OnInit {
           var isStarted = false;
           (async () => { 
             while (!isStarted && this.loading){ 
-              isStarted = this.is_vm_booting(id);
+              this.http.get(this.authService.SERVER_URL + '/vm/' + id, {observe: 'response'}).subscribe(rep => {
+                this.nb_error_resquest =0;
+                  this.vmstate = rep.body['status'];
+                  isStarted = rep.body['status'] == "booting" || rep.body['status'] == "running"
+                },
+                  error => {
+                    this.nb_error_resquest ++;
+                    if (this.nb_error_resquest >= 5){
+                      if (error.status == 404){
+                        this.loading = false;
+                        this.errorcode = error.status;
+                        this.errorMessage = "An error occured while creating  the VM. Please, try again";
+            
+                      } else {
+                        this.loading = false;
+                      this.errorcode = error.status;
+                      this.errorMessage = error.error["error"];
+                      }
+                    }
+                    
+              });
               await delay(2000);
           }
           this.progress = 100;
@@ -259,24 +280,29 @@ export class HomeComponent implements OnInit {
   }
 
 /*Return true if the vm is booting and false if not
+vmid is the id of the vm researched 
+
+While the number of consecutive error throws by the backend is under 5, we consider it is just some request who failed and not a global file. It should sustain the up to 10s/15s of errors
 */
 is_vm_booting(vmid: string) : boolean {
-  const vm = new Vm();
-  vm.id = vmid;
   this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {
+    this.nb_error_resquest =0;
       this.vmstate = rep.body['status'];
-      return rep.body['status'] == "booting"
+      return rep.body['status'] == "booting" || rep.body['status'] == "running"
     },
       error => {
-        if (error.status == 404){
-          this.loading = false;
+        this.nb_error_resquest ++;
+        if (this.nb_error_resquest >= 5){
+          if (error.status == 404){
+            this.loading = false;
+            this.errorcode = error.status;
+            this.errorMessage = "An error occured while creating  the VM. Please, try again";
+
+          } else {
+            this.loading = false;
           this.errorcode = error.status;
-          this.errorMessage = "An error occured while creating the VM. Please, try again";
-          
-        } else {
-          this.loading = false;
-        this.errorcode = error.status;
-        this.errorMessage = error.error["error"];
+          this.errorMessage = error.error["error"];
+          }
         }
         
   });
