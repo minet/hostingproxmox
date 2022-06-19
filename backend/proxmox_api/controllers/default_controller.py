@@ -2,6 +2,7 @@ from logging import error
 import connexion
 import requests
 import json
+from requests.api import head
 from slugify import slugify
 from proxmox_api import proxmox
 from proxmox_api.models.dns_entry_item import DnsEntryItem  # noqa: E501
@@ -130,9 +131,10 @@ def delete_vm_id(vmid):  # noqa: E501
 
 def is_cotisation_uptodate():
     headers = {"Authorization": connexion.request.headers["Authorization"]}
+    print(headers)
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
     if r.status_code != 200:
-        return {"status": "error"}, 403
+        return {"Error": "You are UNAUTHORIZED to connect to CAS"}, 403
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
@@ -143,7 +145,7 @@ def is_cotisation_uptodate():
     r = requests.get("https://adh6.minet.net/api/member/" + id, headers=headers)
 
     if r.status_code != 200:
-        return {"status": "error"}, 403
+        return {"Error": "You are UNAUTHORIZED to connect to adh6"}, 403
 
     strdate = r.json()['departureDate']
     date = datetime.strptime(strdate, '%Y-%m-%d')

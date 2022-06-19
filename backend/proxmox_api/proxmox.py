@@ -13,9 +13,13 @@ import time
 logging.basicConfig(filename="log", filemode="a", level=logging.INFO
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-proxmox = ProxmoxAPI(host=config.PROXMOX_HOST, user=config.PROXMOX_USER
+
+if bool(config.PROXMOX_HOST) and bool(config.PROXMOX_USER) and bool(config.PROXMOX_API_KEY_NAME) and bool(config.PROXMOX_API_KEY) :
+    proxmox = ProxmoxAPI(host=config.PROXMOX_HOST, user=config.PROXMOX_USER
                      , token_name=config.PROXMOX_API_KEY_NAME
                      , token_value=config.PROXMOX_API_KEY, verify_ssl=False)
+else:
+    raise Exception("Environnement variables are not exported.")
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(name)s: %(message)s')
 def add_user_dns(user_id, entry, ip):
@@ -95,15 +99,15 @@ def delete_vm(vmid, node):
 
     The first step is to clone the right VM.
 
-    When it's done (and it can be long), the password, username, and ssh key are set up. 
+    When it's done (and it can be long), the password, username, and ssh key are set up.
 
-    The policy is to : 
+    The policy is to :
         initiate the VM creation.
         Return 201 status code and continue to wait for the vm to be up.
-        When it's up the VM is configurate. if there is an error while configurating, the 
+        When it's up the VM is configurate. if there is an error while configurating, the
     """
 def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="no"):
-    
+
     print(check_password_strength(main_ssh_key))
     if not check_password_strength(password):
         return {"error" : "Incorrect password format"}, 400
@@ -117,7 +121,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 
     print("first_next_vmid = ", next_vmid, "on", node)
 
-    
+
     if node[1] != 201:
         return node
     else:
@@ -136,7 +140,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
                     add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
                 else:
                     return {"error": "error, can not create more VMs"}, 500
-                
+
             for vm in proxmox.cluster.resources.get(type="vm"):
                 if vm["vmid"] == 10000:
                     template_node = vm["node"]
@@ -174,7 +178,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 
         else:
             return {"error": "vm type not defines"}, 400
-   
+
 
 
     except Exception as e:
@@ -182,13 +186,13 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         delete_vm(next_vmid, node)
         return {"error": "Impossible to create the VM (cloning)"}, 500
-    
+
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key, )).start()
     return {"vmId": next_vmid}, 201
 
 
 
-    """After the vm creation (ie the vm clone) we wait for it to be up to config it 
+    """After the vm creation (ie the vm clone) we wait for it to be up to config it
     When the VM is up, the password, vm user name and ssh key are set up
     """
 def config_vm(vmid, node, password, vm_user,main_ssh_key):
@@ -196,7 +200,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
     while not sync:  # Synchronisation
         try:
             if "lock" not in proxmox.nodes(node).qemu(vmid).status.current.get():  # Si lockée, on attend
-                
+
                 sync = True
             sleep(1)
         except ResourceException:  # Exception si pas encore synchronisés
@@ -209,7 +213,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
     except Exception as e:
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
         delete_vm(vmid, node)
-       
+
 
     try:
         proxmox.nodes(node).qemu(vmid).config.create(
@@ -226,7 +230,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
     except Exception as e:
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
         delete_vm(vmid, node)
-        
+
 
     try:
         proxmox.nodes(node).qemu(vmid).status.start.create()
@@ -339,8 +343,8 @@ def get_vm_config(vmid, node):
     except Exception as e :
         logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM config: " + str(e))
         return {"config": "error"}, 500
-    
-    # CPU : 
+
+    # CPU :
     try:
         cpu = config['sockets']* config['cores']
     except Exception as e :
@@ -348,16 +352,16 @@ def get_vm_config(vmid, node):
         return {"cpu": "error"}, 500
 
 
-    
-    # DISK 
+
+    # DISK
     try :
-        disk = int(config['scsi0'].split('=')[-1].replace('G', '')) 
+        disk = int(config['scsi0'].split('=')[-1].replace('G', ''))
     except Exception as e:
         logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM disk size: " + str(e))
         return {"disk": "error"}, 500
-    
 
-    # RAM : 
+
+    # RAM :
     try:
         ram =config['memory']
     except:
@@ -365,8 +369,8 @@ def get_vm_config(vmid, node):
         return {"memory": "error"}, 500
 
 
-    # NAME : 
-    try : 
+    # NAME :
+    try :
         name = config['name']
     except Exception as e:
         logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM name: " + str(e))
@@ -403,22 +407,22 @@ def get_vm_current_status(vmid, node):
 
     # CPU usage
 
-    try : 
+    try :
         cpu_usage = round(float(current_status['cpu'] * 100), 1)
     except Exception as e:
         logging.error("Problem in get_vm_current_status(" + str(vmid) + ") when getting VM cpu usage: " + str(e))
         return {"cpu_usage": "error"}, 500
 
-    # RAM usage 
+    # RAM usage
     try:
         ram_usage = round(float(current_status['mem'] * 100/current_status['maxmem']), 1)
     except:
         logging.error("Problem in get_vm_current_status(" + str(vmid) + ") when getting VM ram usage: " + str(e))
         return {"ram_usage": "error"}, 500
-    
+
 
     print(node)
-    # uptime 
+    # uptime
     try:
         uptime = current_status["uptime"]
     except Exception as e:
@@ -426,7 +430,7 @@ def get_vm_current_status(vmid, node):
         return {"error": "Impossible to retrieve the parameter : uptime"}, 500
 
     return {"cpu_usage": cpu_usage, "ram_usage":ram_usage, "uptime":uptime},201
-    
+
 
 
 ##########################
