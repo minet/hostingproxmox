@@ -18,7 +18,7 @@ export class AppComponent implements OnInit{
     this.title = "Hosting";
     
     switch(url){
-      case "hotsing-dev.minet.net" : {
+      case "hosting-dev.minet.net" : {
         this.title = "Hosting Dev";
         break;
       }

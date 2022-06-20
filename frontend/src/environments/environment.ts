@@ -6,7 +6,7 @@ function getBackendURL(){
   var backendURL = "https://backprox.minet.net";
     
     switch(url){
-      case "hotsing-dev.minet.net" : {
+      case "hosting-dev.minet.net" : {
         backendURL = "https://backprox-dev.minet.net";
         break;
       }
