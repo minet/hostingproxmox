@@ -169,7 +169,7 @@ export class HomeComponent implements OnInit {
 
         };
       this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).   subscribe(rep => {
-
+        this.errorMessage = ""
           var id = rep.body["vmId"]
           var isStarted = false;
           (async () => { 
@@ -181,30 +181,32 @@ export class HomeComponent implements OnInit {
                 },
                   error => {
                     this.nb_error_resquest ++;
-                    if (this.nb_error_resquest >= 5){
-                      if (error.status == 404){
-                        this.loading = false;
+                      if (this.nb_error_resquest >= 5){
+                        if (error.status == 404){
+                          this.loading = false;
+                          this.errorcode = error.status;
+                          this.errorMessage = "An error occured while   creating  the VM. Please, try again";
+                        
+                        } else {
+                          this.loading = false;
                         this.errorcode = error.status;
-                        this.errorMessage = "An error occured while creating  the VM. Please, try again";
-            
-                      } else {
-                        this.loading = false;
-                      this.errorcode = error.status;
-                      this.errorMessage = error.error["error"];
+                        this.errorMessage = error.error["error"];
+                        }
                       }
-                    }
                     
               });
               await delay(2000);
           }
-          this.progress = 100;
-          this.router.navigate(['/vms/' + id]);
+            this.progress = 100;
+            this.router.navigate(['/vms/' + id]);
         }
         )();
         },
         error => {
           // If it's system error, it most come from the user. Then we send him to the vms page.
-          if (error.status != 404){
+          if (error.status >= 500){
+            this.loading = false
+            clearInterval(this.interval);
             this.router.navigate(['/vms']);
           } else {
             this.errorcode = error.status;
