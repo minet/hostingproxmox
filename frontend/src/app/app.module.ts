@@ -22,6 +22,7 @@ import { ManualComponent } from './manual/manual.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HistoryComponent } from './history/history.component';
 import {Ng2SearchPipeModule} from "ng2-search-filter";
+import { environment } from './../environments/environment';
 export function storageFactory() : OAuthStorage {
   return localStorage;
 }
@@ -50,14 +51,12 @@ export function storageFactory() : OAuthStorage {
     Ng2SearchPipeModule,
     OAuthModule.forRoot({
       resourceServer: {
-        //allowedUrls: [ 'http://localhost:8080' ],
-        allowedUrls: ['https://backprox.minet.net'],
+        allowedUrls: [ environment.backendURL ],
         sendAccessToken: true
       }
     }),
     FormsModule,
     NgbModule,
-
   ],
   providers: [AuthService, UserService, User, SlugifyPipe, { provide: OAuthStorage, useFactory: storageFactory }],
   bootstrap: [AppComponent]
