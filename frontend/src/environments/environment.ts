@@ -1,9 +1,31 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-
+function getBackendURL(){
+  var url = window.location.hostname;
+  var backendURL = "https://backprox.minet.net";
+    
+    switch(url){
+      case "hotsing-dev.minet.net" : {
+        backendURL = "https://backprox-dev.minet.net";
+        break;
+      }
+      case "hosting-local.minet.net" :{
+        backendURL = "http://localhost:8080";
+         break;
+      }
+      default: {
+        backendURL = "https://backprox.minet.net";
+        break;
+      } 
+    }
+    return backendURL;
+}
 export const environment = {
-  production: false
+  production: false,
+  
+  backendURL: getBackendURL(),
+  
 };
 
 /*
