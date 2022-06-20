@@ -10,28 +10,28 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit{
-  title = 'VPS MiNET';
+  title = 'Hosting';
 
 
   constructor(public userService: UserService, public router: Router, private titleService: Title) {
     var url = window.location.hostname;
-    var title = "Hosting";
+    this.title = "Hosting";
     
     switch(url){
       case "hotsing-dev.minet.net" : {
-        title = "Hosting Dev";
+        this.title = "Hosting Dev";
         break;
       }
       case "hosting-local.minet.net" :{
-         title = "Hosting local";
+        this.title = "Hosting local";
          break;
       }
       default: {
-        title = "Hosting";
+        this.title = "Hosting";
         break;
       } 
     }
-    this.titleService.setTitle(title)
+    this.titleService.setTitle(this.title)
   }
 
   public validToken$: Observable<boolean>;
