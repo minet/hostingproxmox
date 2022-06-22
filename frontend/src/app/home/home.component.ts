@@ -152,6 +152,7 @@ export class HomeComponent implements OnInit {
   */
   create_vm(vm: Vm): void {
     this.errorMessage = ""
+    this.errorcode = 0
     // first of all check parameter : 
     const isPasswordOk = this.check_password(this.vm)
     if (isPasswordOk) {

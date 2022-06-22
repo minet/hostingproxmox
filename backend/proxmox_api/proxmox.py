@@ -19,7 +19,7 @@ if bool(config.PROXMOX_HOST) and bool(config.PROXMOX_USER) and bool(config.PROXM
                      , token_name=config.PROXMOX_API_KEY_NAME
                      , token_value=config.PROXMOX_API_KEY, verify_ssl=False)
 else:
-    raise Exception("Environnement variables are not exporte")
+    raise Exception("Environnement variables are not exported")
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(name)s: %(message)s')
 def add_user_dns(user_id, entry, ip):
