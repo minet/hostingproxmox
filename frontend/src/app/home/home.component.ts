@@ -7,29 +7,31 @@ import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Vm} from '../models/vm';
 import {Router} from '@angular/router';
 import {timer} from 'rxjs';
-import {flatMap} from 'rxjs/internal/operators';
+import {mergeMap} from 'rxjs/operators';
 import {Dns} from "../models/dns";
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./home.component.css'],
 })
 
 
+  
 
 export class HomeComponent implements OnInit {
 
   
 
-  vm = new Vm('bob', 'phobos', '1', '10', 'stopped', 'No', '', '', '', 'Secret');
+  vm = new Vm('', '', '1', '10', 'stopped', 'No', '', '', '', '');
   maxVmPerUser = 3;
   rulesCheck = false;
   passwordErrorMessage = "";
   prefix: string;
   loading = false;
   valide = false;
-  errorcode = 201;
+  errorcode = 0;
+  errorMessage = ""
   url: string;
   sshAddress: string;
   countvm: number;
@@ -38,6 +40,7 @@ export class HomeComponent implements OnInit {
   vmstate: string;
   interval;
   progress = 0;
+  nb_error_resquest = 0; // Count the number of SUCCESSIVE error returned by a same request
 
   images = [
     {name: 'Bare VM', id: 'bare_vm'},
@@ -69,11 +72,13 @@ export class HomeComponent implements OnInit {
 
   progress_bar(): void{
     this.interval = setInterval(() => {
-      if (this.progress < 100){
-        this.progress = this.progress + 100000 / 180000;
+      if (this.progress < 95){
+        console.log(this.progress)
+        const max = 5
+        const min = 1
+        this.progress = this.progress +  (Math.random() * (max - min) + min) / 18;
       }
-    }, 1000);
-
+    }, 300);
   }
 
 
@@ -84,10 +89,13 @@ export class HomeComponent implements OnInit {
     } else {
       this.rulesCheck = false;
     }
+    this.check_password(this.vm)
+    this.checkSSHkey(this.vm)
   }
 
+  
+  // check if the password respect the CNIL specs It is check after the box check and after that, after each new char modification
   check_password(vm):boolean{
-    console.log("check password calles")
     var special = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
     var upper = /[A-Z]/;
     var number = /[0-9]/;
@@ -123,7 +131,28 @@ export class HomeComponent implements OnInit {
     
   }
 
+  // check with a regex if the ssh key has a correct format. It is check after the box check and after that, after each new char modification
+  checkSSHkey(vm: Vm):boolean{
+    var rule = /ssh.[a-zA-Z0-9]* [a-zA-Z0-9[()[\]{}+*\/%$&#@=:?]*/
+    return rule.test(vm.sshKey)
+  }
+
+  // a username different of 'root' is mandatory
+  checkUser(vm:Vm):boolean{
+    console.log("check user")
+    return vm.user == "root"
+  }
+
+  /*
+  Create a vm.
+  The first step is to check if the password is strong enough. The other arg are check while typing and by the backend 
+
+  Then the request is send to the backend. It answers when the vm is cloning. 
+  After, we check every second if the vm is up and started. It means it is well configurated. Else we wait. If there is no vm anymore then a error occured
+  */
   create_vm(vm: Vm): void {
+    this.errorMessage = ""
+    this.errorcode = 0
     // first of all check parameter : 
     const isPasswordOk = this.check_password(this.vm)
     if (isPasswordOk) {
@@ -131,15 +160,6 @@ export class HomeComponent implements OnInit {
       this.loading = true;
       this.progress_bar();
       let data = {};
-      if (vm.ssh === 'No') {
-        data = {
-          name: this.slugifyPipe.transform(vm.name),
-          ssh: false,
-          type: vm.type,
-          password: vm.password,
-          user: this.slugifyPipe.transform(vm.user)
-        };
-      } else {
         data = {
           name: this.slugifyPipe.transform(vm.name),
           type: vm.type,
@@ -149,16 +169,61 @@ export class HomeComponent implements OnInit {
           ssh: true,
 
         };
-      }
       this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).   subscribe(rep => {
-          this.progress = 100;
+        this.errorMessage = ""
+          var id = rep.body["vmId"]
+          var isStarted = false;
+          (async () => { 
+            while (!isStarted && this.loading){ 
+              this.http.get(this.authService.SERVER_URL + '/vm/' + id, {observe: 'response'}).subscribe(rep => {
+                this.nb_error_resquest =0;
+                  this.vmstate = rep.body['status'];
+                  isStarted = rep.body['status'] == "booting" || rep.body['status'] == "running"
+                },
+                  error => {
+                    this.nb_error_resquest ++;
+                      if (this.nb_error_resquest >= 5){
+                        if (error.status == 404){
+                          this.loading = false;
+                          this.errorcode = error.status;
+                          this.errorMessage = "An error occured while   creating  the VM. Please, try again";
+                        
+                        } else {
+                          this.loading = false;
+                        this.errorcode = error.status;
+                        this.errorMessage = error.error["error"];
+                        }
+                      }
+                    
+              });
+              await delay(2000);
+          }
+            this.progress = 100;
+            this.router.navigate(['/vms/' + id]);
+        }
+        )();
         },
         error => {
-          clearInterval(this.interval);
-          this.errorcode = error.status;
+          // If it's system error, it most come from the user. Then we send him to the vms page.
+          if (error.status >= 500){
+            this.loading = false
+            clearInterval(this.interval);
+            this.router.navigate(['/vms']);
+          } else {
+            this.errorcode = error.status;
+            this.loading = false
+            clearInterval(this.interval);
+            
+            this.errorMessage = error.error["error"];
+            console.log(error)
+          }
         });
       }
   }
+
+
+
+
   count_dns(): void {
     let dns: Array<string>;
     this.countdns = 0;
@@ -170,7 +235,9 @@ export class HomeComponent implements OnInit {
           }
         },
         error => {
+          this.loading = false
           this.errorcode = error.status;
+          this.errorMessage = error.error["error"];
         });
   }
 
@@ -186,16 +253,21 @@ export class HomeComponent implements OnInit {
         for (let i = 0; i < vmList.length; i++) {
           const vmid = vmList[i];
           this.countvm++;
-          this.get_vmstatus(vmid);
+          this.new_vmstatus(vmid);
         }
       },
 
       error => {
+        this.loading = false
         this.errorcode = error.status;
+        this.errorMessage = error.error["error"];
       });
   }
 
-  get_vmstatus(vmid: string): void {
+  /*
+    Check the vm status (vmid). If it's started, the number of active vm is added to 1
+  */
+  new_vmstatus(vmid: string): void {
     const vm = new Vm();
     vm.id = vmid;
     this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {
@@ -204,8 +276,43 @@ export class HomeComponent implements OnInit {
           this.countactivevm++;
         },
         error => {
+          this.loading = false
           this.errorcode = error.status;
+          this.errorMessage = error.error["error"];
     });
   }
+
+/*Return true if the vm is booting and false if not
+vmid is the id of the vm researched 
+
+While the number of consecutive error throws by the backend is under 5, we consider it is just some request who failed and not a global file. It should sustain the up to 10s/15s of errors
+*/
+is_vm_booting(vmid: string) : boolean {
+  this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {
+    this.nb_error_resquest =0;
+      this.vmstate = rep.body['status'];
+      return rep.body['status'] == "booting" || rep.body['status'] == "running"
+    },
+      error => {
+        this.nb_error_resquest ++;
+        if (this.nb_error_resquest >= 5){
+          if (error.status == 404){
+            this.loading = false;
+            this.errorcode = error.status;
+            this.errorMessage = "An error occured while creating  the VM. Please, try again";
+
+          } else {
+            this.loading = false;
+          this.errorcode = error.status;
+          this.errorMessage = error.error["error"];
+          }
+        }
+        
+  });
+  return false
+}
 }
 
+function delay(ms: number) {
+  return new Promise( resolve => setTimeout(resolve, ms) );
+}

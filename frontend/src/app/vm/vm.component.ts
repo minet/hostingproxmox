@@ -7,7 +7,7 @@ import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {interval, Subscription, timer} from 'rxjs';
-import {flatMap} from 'rxjs/internal/operators';
+import {mergeMap} from 'rxjs/operators';
 
 @Component({
     selector: 'app-vm',
@@ -109,7 +109,7 @@ export class VmComponent implements OnInit, OnDestroy {
         this.user.vms.push(vm);
 
         const newTimer = timer(0, 3000).pipe(
-            flatMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
+            mergeMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
                     if(this.user.admin)
                         this.get_ip_history(vmid);

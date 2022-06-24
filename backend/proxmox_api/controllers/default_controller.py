@@ -2,6 +2,7 @@ from logging import error
 import connexion
 import requests
 import json
+from requests.api import head
 from slugify import slugify
 from proxmox_api import proxmox
 from proxmox_api.models.dns_entry_item import DnsEntryItem  # noqa: E501
@@ -61,7 +62,7 @@ def create_vm(body=None):  # noqa: E501
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
 
     if r.status_code != 200:
-        return {"status": "error"}, 403
+        return {"error": "Your are not allowed to be here"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
@@ -71,15 +72,19 @@ def create_vm(body=None):  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
     if is_cotisation_uptodate() == 0 and not admin:
-        return {"status": "cotisation expired"}, 403
+        return {"error": "Your cotisation has expired"}, 403
 
     if connexion.request.is_json:
         body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
 
-    if body.ssh:
-        return proxmox.create_vm(body.name, body.type, user_id, body.password, body.user, body.ssh_key)
-    else:
-        return proxmox.create_vm(body.name, body.type, user_id, body.password, body.user)
+    if not util.check_password_strength(body.password):
+        return {"error" : "Incorrect password format"}, 400
+    if not util.check_ssh_key(body.ssh_key):
+        return {"error" : "Incorrect ssh key format"}, 400
+    if not util.check_username(body.user):
+        return {"error" : "Incorrect vm user format"}, 400
+
+    return proxmox.create_vm(body.name, body.type, user_id, body.password, body.user, body.ssh_key)
 
 
 def delete_vm_id(vmid):  # noqa: E501
@@ -126,9 +131,10 @@ def delete_vm_id(vmid):  # noqa: E501
 
 def is_cotisation_uptodate():
     headers = {"Authorization": connexion.request.headers["Authorization"]}
+    print(headers)
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
     if r.status_code != 200:
-        return {"status": "error"}, 403
+        return {"Error": "You are UNAUTHORIZED to connect to CAS"}, 403
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
@@ -139,7 +145,7 @@ def is_cotisation_uptodate():
     r = requests.get("https://adh6.minet.net/api/member/" + id, headers=headers)
 
     if r.status_code != 200:
-        return {"status": "error"}, 403
+        return {"Error": "You are UNAUTHORIZED to connect to adh6"}, 403
 
     strdate = r.json()['departureDate']
     date = datetime.strptime(strdate, '%Y-%m-%d')

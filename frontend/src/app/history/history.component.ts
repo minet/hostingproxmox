@@ -6,7 +6,7 @@ import {UserService} from "../common/services/user.service";
 import {AuthService} from "../common/services/auth.service";
 import {SlugifyPipe} from "../pipes/slugify.pipe";
 import {timer} from "rxjs";
-import {flatMap} from "rxjs/internal/operators";
+import {mergeMap} from "rxjs/operators";
 
 @Component({
   selector: 'app-history',
@@ -39,7 +39,7 @@ export class HistoryComponent implements OnInit {
 
   get_ip_history(): void {
     const newTimer = timer(0, 3000).pipe(
-        flatMap(() => this.http.get(this.authService.SERVER_URL + '/historyall', {observe: 'response'})))
+      mergeMap(() => this.http.get(this.authService.SERVER_URL + '/historyall', {observe: 'response'})))
         .subscribe(rep => {
               this.history = rep.body;
             },

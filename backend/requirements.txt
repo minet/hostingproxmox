@@ -1,14 +1,7 @@
-configparser
-mysqlclient
-flask_sqlalchemy
-connexion~=2.7.0
-python_dateutil == 2.6.0
+certifi >= 14.05.14
+six >= 1.10
+python_dateutil >= 2.5.3
 setuptools >= 21.0.0
+urllib3 >= 1.15.1
+connexion
 python-slugify
-markupsafe==2.0.1
-flask-cors
-Flask~=1.1.2
-six~=1.15.0
-proxmoxer
-dnspython~=2.1.0
-Flask-APScheduler
