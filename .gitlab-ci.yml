@@ -68,7 +68,7 @@ angular_build:
     - export NODE_OPTIONS=--openssl-legacy-provider
     - npm install -g @angular/cli
   script:
-    - yarn ng build --configuration=prod
+    - yarn ng build --configuration=production
   environment:
     name: production
     url: https://proxmox.minet.net/
