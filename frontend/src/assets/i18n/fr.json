@@ -1,0 +1,9 @@
+{
+  "navbar.vms.user": "Mes VMs",
+  "navbar.vms.admin": "Admin VMs",
+  "navbar.dns.user": "Mon DNS",
+  "navbar.dns.admin": "Admin DNS",
+  "navbar.guide": "Guide",
+  "navbar.logout": "Déconnexion",
+  "navbar.login": "Connexion"
+}

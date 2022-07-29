@@ -5,10 +5,12 @@ import {AuthService} from '../common/services/auth.service';
 import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Vm} from '../models/vm';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {timer} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 import {Dns} from "../models/dns";
+import {TranslateService} from "@ngx-translate/core";
+import {CookieService} from "ngx-cookie-service";
 
 @Component({
   selector: 'app-home',
@@ -53,8 +55,12 @@ export class HomeComponent implements OnInit {
               public user: User,
               private userService: UserService,
               private authService: AuthService,
-              private slugifyPipe: SlugifyPipe) {
-
+              private slugifyPipe: SlugifyPipe,
+              private route: ActivatedRoute,
+              private translate: TranslateService,
+              private cookie: CookieService
+              ) {
+    this.route.snapshot.paramMap.get('lang') == 'en' ? this.translate.use('en') && this.cookie.set('lang','en') : this.translate.use('fr') && this.cookie.set('lang','fr');
   }
 
 
