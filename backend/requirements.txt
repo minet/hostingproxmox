@@ -9,5 +9,5 @@ gunicorn
 flask_cors
 Flask-APScheduler
 flask_sqlalchemy
-dnspython3
+dnspython
 mysqlclient
