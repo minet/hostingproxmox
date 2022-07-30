@@ -1,4 +1,5 @@
 {
+  "global.noPermission": "Vous don't have the permission to access to this element !",
   "navbar.vms.user": "Mes VMs",
   "navbar.vms.admin": "Admin VMs",
   "navbar.dns.user": "Mon DNS",
@@ -33,5 +34,12 @@
   "dns.charter.notsigned_3": "cliquez-ici",
   "dns.charter.notsigned_4": "pour signer la charte",
   "dns.footer.powered": "Propulsé par",
-  "dns.footer.legal": "Aspect légal"
+  "dns.footer.legal": "Aspect légal",
+  "history.title": "Historique des attributions d'IP",
+  "history.description": "Cet historique technique permet de retracer les éventuels changements d'IP d'une VM via le DHCP.",
+  "history.search.placeholder": "Rechercher une IP / nom d'utilisateur",
+  "history.table.ip": "IP",
+  "history.table.date": "Date",
+  "history.table.vmId": "ID de la VM",
+  "history.table.userId": "ID Utilisateur"
 }
