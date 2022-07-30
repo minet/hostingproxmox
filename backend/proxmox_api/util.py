@@ -178,3 +178,19 @@ def check_ssh_key(key:str) -> bool:
 """
 def check_username(username:str) -> bool:
     return username != "root" and username != ""
+
+
+
+"""Check if the dns entry is acceptable
+
+    :param entry: the entry to check
+
+    :return: True if the entry is acceptable
+    :rtype: bool
+"""
+def check_dns_entry(entry:str) -> bool:
+    forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"]
+    allowed = "^[a-zA-Z0-9]*$"; 
+    return entry != "" and re.search(allowed, entry) and entry not in forbidden_entries
+
+
