@@ -5,3 +5,9 @@ setuptools >= 21.0.0
 urllib3 >= 1.15.1
 connexion
 python-slugify
+gunicorn
+flask_cors
+flask_apscheduleri
+flask_sqlalchemy
+dnspythoni
+mysqlclient
