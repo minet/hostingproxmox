@@ -43,7 +43,7 @@
                         <dd>{{'home.createVm.form.form.overview.web_2' | translate}}</dd>
                     </dl>
                     <hr>
-                    <div> 
+                    <div>
                         <div class="alert alert-danger text-center" *ngIf="errorcode != 201 && errorcode != 0">
                             <b>{{'home.createVm.form.error' | translate}} </b><br/>
                             {{ errorMessage }}
@@ -112,17 +112,17 @@
                                         <input type="password" class="form-control" id="password"
                                                [(ngModel)]="vm.password" name="password"
                                                #password="ngModel"
-                                               required="required" 
+                                               required="required"
                                                ng-model="password" ng-change="check_password(vm)">
                                     </div>
                                     <div *ngIf="passwordErrorMessage != ''" class="alert alert-danger" [innerHTML]="passwordErrorMessage">
-                                        
+
                                     </div>
 
                                     <div class="form-check mb-2 text-center m-3">
                                         <input (click)="rules_checked()" [checked]="rulesCheck" id="checkbox"
                                                type="checkbox" class="form-check-input">
-                                        <label class="form-check-label" for="checkbox">{{'home.createVm.form.agree_1' | translate}} <a [routerLink]="['rules']">{{'home.createVm.form.agree_2' | translate}}</a>.</label>
+                                        <label class="form-check-label" for="checkbox">{{'home.createVm.form.agree_1' | translate}} <a target="_blank" href="https://chartes.minet.net/{{ this.cookie.get('lang') }}/chartehosting">{{'home.createVm.form.agree_2' | translate}}</a>.</label>
                                     </div>
                                 </div>
                                 <div class="text-center">
@@ -172,3 +172,4 @@
             </div>
         </div>
     </div>
+</div>

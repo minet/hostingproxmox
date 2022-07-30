@@ -15,7 +15,6 @@ import { VmsComponent } from './vms/vms.component';
 import { VmComponent } from './vm/vm.component';
 import { DnsComponent } from './dns/dns.component';
 import { SshComponent } from './ssh/ssh.component';
-import { RulesComponent } from './rules/rules.component';
 import { LegalComponent } from './legal/legal.component';
 import { ManualComponent } from './manual/manual.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -45,7 +44,6 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     VmComponent,
     DnsComponent,
     SshComponent,
-    RulesComponent,
     LegalComponent,
     ManualComponent,
     HistoryComponent,
