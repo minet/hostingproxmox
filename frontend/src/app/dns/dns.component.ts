@@ -8,6 +8,8 @@ import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Dns} from '../models/dns';
 import {timer, Subscription} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
+import {TranslateService} from "@ngx-translate/core";
+import {CookieService} from "ngx-cookie-service";
 
 
 @Component({
@@ -31,7 +33,9 @@ export class DnsComponent implements OnInit, OnDestroy {
               public user: User,
               private userService: UserService,
               private authService: AuthService,
-              private slugifyPipe: SlugifyPipe) {
+              private slugifyPipe: SlugifyPipe,
+              private translate: TranslateService,
+              private cookie: CookieService) {
   }
 
 

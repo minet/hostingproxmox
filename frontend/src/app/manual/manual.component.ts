@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import {TranslateService} from "@ngx-translate/core";
+import {CookieService} from "ngx-cookie-service";
 
 
 @Component({
@@ -8,7 +10,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ManualComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+      private translate: TranslateService,
+      private cookie: CookieService
+  ) { }
 
   ngOnInit(): void {
   }

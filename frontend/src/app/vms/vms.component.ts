@@ -8,12 +8,15 @@ import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Observable, Subscription, timer} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 import {ActivatedRoute, Router} from "@angular/router";
+import {TranslateService} from "@ngx-translate/core";
+import {CookieService} from "ngx-cookie-service";
 
 @Component({
     selector: 'app-vms',
     templateUrl: './vms.component.html',
     styleUrls: ['./vms.component.css']
 })
+
 export class VmsComponent implements OnInit, OnDestroy {
     loading = true;
     intervals = new Set<Subscription>();
@@ -24,13 +27,16 @@ export class VmsComponent implements OnInit, OnDestroy {
     totalVm = 0;
     pagesAlreadyLoaded = new Array<number>();
     public validToken$: Observable<boolean>;
+
     constructor(private http: HttpClient,
                 private activatedRoute: ActivatedRoute,
                 private router: Router,
                 public user: User,
                 private userService: UserService,
                 public authService: AuthService,
-                public slugifyPipe: SlugifyPipe, ) {
+                public slugifyPipe: SlugifyPipe,
+                private translate: TranslateService,
+                private cookie: CookieService) {
     }
 
     ngOnInit(): void {

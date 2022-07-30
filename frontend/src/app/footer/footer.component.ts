@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import {TranslateService} from "@ngx-translate/core";
+import {CookieService} from "ngx-cookie-service";
 
 
 @Component({
@@ -9,7 +11,10 @@ import { Component, OnInit } from '@angular/core';
 export class FooterComponent implements OnInit {
   date: Date = new Date();
 
-  constructor() {
+  constructor(
+      private translate: TranslateService,
+      private cookie: CookieService
+  ) {
 
   }
 
