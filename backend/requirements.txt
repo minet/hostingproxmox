@@ -7,7 +7,7 @@ connexion
 python-slugify
 gunicorn
 flask_cors
-flask_apscheduleri
+Flask-APScheduler
 flask_sqlalchemy
-dnspythoni
+dnspython3
 mysqlclient
