@@ -31,5 +31,7 @@
   "dns.charter.notsigned_1": "Charte non signée !",
   "dns.charter.notsigned_2": "Pour créer une entrée DNS vous devez signer la charte de fonctionnement de Hosting !",
   "dns.charter.notsigned_3": "cliquez-ici",
-  "dns.charter.notsigned_4": "pour signer la charte"
+  "dns.charter.notsigned_4": "pour signer la charte",
+  "dns.footer.powered": "Propulsé par",
+  "dns.footer.legal": "Aspect légal"
 }
