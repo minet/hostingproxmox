@@ -112,7 +112,7 @@ deploy_backend_dev:
     - export http_proxy="http://192.168.104.61:82/"
     - export https_proxy="http://192.168.104.61:82/"
     - cd backend
-    - pip3 install -r requirements.txt
+    - pip3 install -r requirements.txt --update
     - sudo /bin/systemctl stop proxmox_api
     - rm -rf /var/www/proxmox_api
   script:
