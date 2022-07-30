@@ -13,7 +13,7 @@ export class FooterComponent implements OnInit {
 
   constructor(
       private translate: TranslateService,
-      private cookie: CookieService
+      public cookie: CookieService
   ) {
 
   }

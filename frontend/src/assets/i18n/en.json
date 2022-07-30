@@ -93,5 +93,27 @@
   "home.admin.stats.title": "Statistics",
   "home.admin.stats.createdVm": "Created VM",
   "home.admin.stats.activeVm": "Active VM",
-  "home.admin.stats.dns": "DNS entries"
+  "home.admin.stats.dns": "DNS entries",
+  "legal.title": "Legal Notice",
+  "legal.presentation_1": "The website",
+  "legal.presentation_2": "has been made by and for MiNET, Association Act 1901."
+  "legal.contact.title": "Contact",
+  "legal.contact.address": "Address : 9 rue Charles Fourier, 91000 Evry-Courcouronnes, France",
+  "legal.contact.email_1": "E-mail :",
+  "legal.contact.email_2": "minet@imtbs-tsp.eu",
+  "legal.director.title": "Publication director",
+  "legal.director.contact": "Contact: MiNET's webmaster",
+  "legal.director.email_1": "E-mail :",
+  "legal.director.email_2": "webmaster@listes.minet.net",
+  "legal.application.title": "Hosting",
+  "legal.application.description": "This website is hosted by MiNET on it's servers in France.",
+  "legal.contributors.title": "Contributors",
+  "legal.contributors.name": "Name :",
+  "legal.contributors.mail": "E-mail :",
+  "legal.contributors.1.name": "CINDRAK Dzenan",
+  "legal.contributors.1.email": "dzenan.cindrak@minet.net",
+  "legal.contributors.2.name": "GONZALES Jules",
+  "legal.contributors.2.email": "jules.gonzales@minet.net",
+  "legal.contributors.3.name": "STCHEPINSKY Nathan",
+  "legal.contributors.3.email": "nathan.stchepinsky@minet.net"
 }
