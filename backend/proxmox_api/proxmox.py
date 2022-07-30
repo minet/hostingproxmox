@@ -5,7 +5,7 @@ from proxmoxer import ProxmoxAPI
 from proxmoxer import ResourceException
 from proxmox_api.util import check_password_strength, check_ssh_key, check_username
 import proxmox_api.ddns as ddns
-from proxmox_api.config import configuration as config
+from proxmox_api.config import configuration  
 from proxmox_api.db.db_functions import *
 from ipaddress import IPv4Network
 from threading import Thread
@@ -15,10 +15,10 @@ logging.basicConfig(filename="log", filemode="a", level=logging.INFO
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 
-if bool(config.PROXMOX_HOST) and bool(config.PROXMOX_USER) and bool(config.PROXMOX_API_KEY_NAME) and bool(config.PROXMOX_API_KEY) :
-    proxmox = ProxmoxAPI(host=config.PROXMOX_HOST, user=config.PROXMOX_USER
-                     , token_name=config.PROXMOX_API_KEY_NAME
-                     , token_value=config.PROXMOX_API_KEY, verify_ssl=False)
+if bool(configuration.PROXMOX_HOST) and bool(configuration.PROXMOX_USER) and bool(configuration.PROXMOX_API_KEY_NAME) and bool(configuration.PROXMOX_API_KEY) :
+    proxmox = ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER
+                     , token_name=configuration.PROXMOX_API_KEY_NAME
+                     , token_value=configuration.PROXMOX_API_KEY, verify_ssl=False)
 else:
     raise Exception("Environnement variables are not exported")
 
@@ -85,7 +85,7 @@ def load_balance_server():
     return {"server": server}, 201
 
 def is_admin(memberOf):
-    if config.ADMIN_DN in memberOf:
+    if configuration.ADMIN_DN in memberOf:
         return True
     else:
         return False
@@ -147,7 +147,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
                 add_user(user_id)
                 add_vm(id=next_vmid, user_id=user_id, type=vm_type)
             else:
-                if len(get_vm_list(user_id)) < config.LIMIT_BY_USER and len(get_vm_list()) < config.TOTAL_VM_LIMIT:
+                if len(get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(get_vm_list()) < configuration.TOTAL_VM_LIMIT:
                     add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
                 else:
                     return {"error": "error, can not create more VMs"}, 500
@@ -169,7 +169,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
                 add_user(user_id)
                 add_vm(id=next_vmid, user_id=user_id, type=vm_type)
             else:
-                if len(get_vm_list(user_id)) < config.LIMIT_BY_USER and len(get_vm_list()) < config.TOTAL_VM_LIMIT:
+                if len(get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(get_vm_list()) < configuration.TOTAL_VM_LIMIT:
                     add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
                 else:
                     return {"error": "Impossible to create more VMs"}, 403
@@ -199,7 +199,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     
 
     updateVmStatus(next_vmid, "creating")
-    print("status dict = ", config.VM_CREATION_STATUS)
+    print("status dict = ", configuration.VM_CREATION_STATUS)
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key, )).start()
     return {"vmId": next_vmid}, 201
 
@@ -332,11 +332,11 @@ def get_vm_hardware_address(vmid, node):
 def updateVmStatus(vmid, message, errorCode = 0):
     try : 
         if not errorCode: # not 0 = 1 = True
-                config.VM_CREATION_STATUS[vmid] = message
+                configuration.VM_CREATION_STATUS[vmid] = message
         else: 
-            config.VM_CREATION_STATUS[vmid] = "##ERROR##,"+ str(errorCode) + "," + message # ##ERROR## is a key 
+            configuration.VM_CREATION_STATUS[vmid] = "##ERROR##,"+ str(errorCode) + "," + message # ##ERROR## is a key 
     except Exception as e: 
-        config.VM_CREATION_STATUS[vmid] = "##ERROR##,404,the vm creation status is unknown. Please check if the vm is created and contact the webmaster"
+        configuration.VM_CREATION_STATUS[vmid] = "##ERROR##,404,the vm creation status is unknown. Please check if the vm is created and contact the webmaster"
         print("An error occured while updating the vm creation status dict : " , e)
 
 
@@ -394,12 +394,12 @@ Return all the configuration info related to a VM, it combines name,  cpu, disk,
 
 def get_vm_config(vmid, node):
     # first we check the vm creation status : 
-    print("before status = ", config.VM_CREATION_STATUS , "for " , vmid, node)
-    if vmid in config.VM_CREATION_STATUS.keys(): 
-        status = config.VM_CREATION_STATUS[vmid]
+    print("before status = ", configuration.VM_CREATION_STATUS , "for " , vmid, node)
+    if vmid in configuration.VM_CREATION_STATUS.keys(): 
+        status = configuration.VM_CREATION_STATUS[vmid]
         print(status)
         if "##ERROR##" in status:
-            config.VM_CREATION_STATUS.pop(vmid) # We send to the user and delete here
+            configuration.VM_CREATION_STATUS.pop(vmid) # We send to the user and delete here
             try : 
                 error = status.split(",")
                 errorCode = error[1].stripe()
@@ -410,7 +410,7 @@ def get_vm_config(vmid, node):
         elif "creating" in status: 
             return {"status" : "creating"}, 200
         elif "created" in status : 
-            config.VM_CREATION_STATUS.pop(vmid) # We send to the user and delete here
+            configuration.VM_CREATION_STATUS.pop(vmid) # We send to the user and delete here
             return {"status": "created"}, 201
         else :
             return {"error": "Unknown vm status"}, 400
