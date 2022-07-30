@@ -29,8 +29,6 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(nam
 
 
 
-vm_creation_status = {} # dictionary of all vm creating and there status. If an error occur during the creation, the vm is deleted and the error code is kepts until the user get it. This is a informationnal dictionnary and cannot be trust at 100%.
-
 def add_user_dns(user_id, entry, ip):
     # First we check if the user own the ip
     isOk = check_dns_ip_entry(user_id, ip)
@@ -201,6 +199,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     
 
     updateVmStatus(next_vmid, "creating")
+    print("status dict = ", config.VM_CREATION_STATUS)
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key, )).start()
     return {"vmId": next_vmid}, 201
 
@@ -333,11 +332,11 @@ def get_vm_hardware_address(vmid, node):
 def updateVmStatus(vmid, message, errorCode = 0):
     try : 
         if not errorCode: # not 0 = 1 = True
-                vm_creation_status[vmid] = message
+                config.VM_CREATION_STATUS[vmid] = message
         else: 
-            vm_creation_status[vmid] = "##ERROR##,"+ str(errorCode) + "," + message # ##ERROR## is a key 
+            config.VM_CREATION_STATUS[vmid] = "##ERROR##,"+ str(errorCode) + "," + message # ##ERROR## is a key 
     except Exception as e: 
-        vm_creation_status[vmid] = "##ERROR##,404,the vm creation status is unknown. Please check if the vm is created and contact the webmaster"
+        config.VM_CREATION_STATUS[vmid] = "##ERROR##,404,the vm creation status is unknown. Please check if the vm is created and contact the webmaster"
         print("An error occured while updating the vm creation status dict : " , e)
 
 
@@ -395,11 +394,12 @@ Return all the configuration info related to a VM, it combines name,  cpu, disk,
 
 def get_vm_config(vmid, node):
     # first we check the vm creation status : 
-    if vmid in vm_creation_status.keys(): 
-        status = vm_creation_status[vmid]
+    print("before status = ", status, "for " , vmid, node)
+    if vmid in config.VM_CREATION_STATUS.keys(): 
+        status = config.VM_CREATION_STATUS[vmid]
         print(status)
         if "##ERROR##" in status:
-            vm_creation_status.pop(vmid) # We send to the user and delete here
+            config.VM_CREATION_STATUS.pop(vmid) # We send to the user and delete here
             try : 
                 error = status.split(",")
                 errorCode = error[1].stripe()
@@ -410,7 +410,7 @@ def get_vm_config(vmid, node):
         elif "creating" in status: 
             return {"status" : "creating"}, 200
         elif "created" in status : 
-            vm_creation_status.pop(vmid) # We send to the user and delete here
+            config.VM_CREATION_STATUS.pop(vmid) # We send to the user and delete here
             return {"status": "created"}, 201
         else :
             return {"error": "Unknown vm status"}, 400
@@ -421,6 +421,7 @@ def get_vm_config(vmid, node):
             config = proxmox.nodes(node).qemu(vmid).config.get()
         except Exception as e :
             logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM config: " + str(e))
+            print("Problem in get_vm_config(" + str(vmid) + ") when getting VM config: " + str(e))
             return {"error": "An error occured while configuring your vm" + str(e)}, 500
 
         # CPU :
@@ -428,6 +429,7 @@ def get_vm_config(vmid, node):
             cpu = config['sockets']* config['cores']
         except Exception as e :
             logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM cpu: " + str(e))
+            print("Problem in get_vm_config(" + str(vmid) + ") when getting VM cpu: " + str(e))
             return {"error": "An error occured while setting the VM CPU"}, 500
 
 
@@ -437,6 +439,7 @@ def get_vm_config(vmid, node):
             disk = int(config['scsi0'].split('=')[-1].replace('G', ''))
         except Exception as e:
             logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM disk size: " + str(e))
+            print("Problem in get_vm_config(" + str(vmid) + ") when getting VM disk size: " + str(e))
             return {"error": "An error occured while setting the VM disk"}, 500
 
 
@@ -444,6 +447,7 @@ def get_vm_config(vmid, node):
         try:
             ram =config['memory']
         except:
+            print("Problem in get_vm_config(" + str(vmid) + ") when getting VM ram " + str(e))
             logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM ram " + str(e))
             return {"error": "An error occured while setting the VM RAM"}, 500
 
@@ -452,6 +456,7 @@ def get_vm_config(vmid, node):
             name = config['name']
         except Exception as e:
             logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM name: " + str(e))
+            print("Problem in get_vm_config(" + str(vmid) + ") when getting VM name: " + str(e))
             return {"error": "An error occured while setting the VM name"}, 500
 
 
@@ -464,6 +469,7 @@ def get_vm_config(vmid, node):
             else:
                 autoreboot = 0
         except Exception as e:
+            print("Problem in get_vm_config(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
             logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
             return {"error": "An error occured while setting setting the autoreboot option"}, 500
         return {"name": name, "cpu":cpu, "ram":ram, "disk":disk, "autoreboot":autoreboot}, 201
