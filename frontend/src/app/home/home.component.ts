@@ -41,6 +41,7 @@ export class HomeComponent implements OnInit {
   interval;
   progress = 0;
   nb_error_resquest = 0; // Count the number of SUCCESSIVE error returned by a same request
+  isVmCreated = false; // true doesn't mean the VM is started 
 
   images = [
     {name: 'Bare VM', id: 'bare_vm'},
@@ -72,7 +73,7 @@ export class HomeComponent implements OnInit {
 
   progress_bar(): void{
     this.interval = setInterval(() => {
-      if (this.progress < 95){
+      if (this.progress < 95) {
         console.log(this.progress)
         const max = 5
         const min = 1
@@ -173,50 +174,42 @@ export class HomeComponent implements OnInit {
         this.errorMessage = ""
           var id = rep.body["vmId"]
           var isStarted = false;
+
+
+          // The vm is creating we check if it is up and started
           (async () => { 
             while (!isStarted && this.loading){ 
               this.http.get(this.authService.SERVER_URL + '/vm/' + id, {observe: 'response'}).subscribe(rep => {
-                this.nb_error_resquest =0;
                   this.vmstate = rep.body['status'];
-                  isStarted = rep.body['status'] == "booting" || rep.body['status'] == "running"
+                  isStarted = this.vmstate == "created" || this.vmstate == "booting" || this.vmstate == "running" || this.vmstate == "stoped";
                 },
                   error => {
-                    this.nb_error_resquest ++;
-                      if (this.nb_error_resquest >= 5){
-                        if (error.status == 404){
-                          this.loading = false;
-                          this.errorcode = error.status;
-                          this.errorMessage = "An error occured while   creating  the VM. Please, try again";
-                        
-                        } else {
                           this.loading = false;
                         this.errorcode = error.status;
                         this.errorMessage = error.error["error"];
-                        }
-                      }
+                        clearInterval(this.interval);
                     
               });
               await delay(2000);
           }
+          if (isStarted){ // There were no errors, we show the vm
             this.progress = 100;
             this.router.navigate(['/vms/' + id]);
+          } else { // There was an error, we show the form for a new submit
+            clearInterval(this.interval);
+          }
+            
         }
         )();
         },
         error => {
           // If it's system error, it most come from the user. Then we send him to the vms page.
-          if (error.status >= 500){
-            this.loading = false
-            clearInterval(this.interval);
-            this.router.navigate(['/vms']);
-          } else {
             this.errorcode = error.status;
             this.loading = false
             clearInterval(this.interval);
             
             this.errorMessage = error.error["error"];
             console.log(error)
-          }
         });
       }
   }

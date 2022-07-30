@@ -10,6 +10,7 @@ from proxmox_api.db.db_functions import *
 from ipaddress import IPv4Network
 from threading import Thread
 import time
+import connexion
 logging.basicConfig(filename="log", filemode="a", level=logging.INFO
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
@@ -22,7 +23,22 @@ else:
     raise Exception("Environnement variables are not exported")
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(name)s: %(message)s')
+
+
+
+
+
+
+vm_creation_status = {} # dictionary of all vm creating and there status. If an error occur during the creation, the vm is deleted and the error code is kepts until the user get it. This is a informationnal dictionnary and cannot be trust at 100%.
+
 def add_user_dns(user_id, entry, ip):
+    # First we check if the user own the ip
+    isOk = check_dns_ip_entry(user_id, ip)
+    if isOk == None :
+        return {"error": "An error occured while checking your ip addresses. Please try again."}, 500
+    elif not isOk : 
+         return {"error": "This ip address isn't associated to one of your vms. This is illegal. This incident will be reported."}, 403
+
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
         add_dns_entry(user_id, entry, ip)
@@ -90,6 +106,7 @@ def delete_vm(vmid, node):
             del_vm_list(vmid)
             return {"state": "vm deleted"}, 201
     except Exception as e:
+        print("Problem in delete_vm: " + str(e))
         logging.error("Problem in delete_vm: " + str(e))
         return {"state": "error"}, 500
 
@@ -107,8 +124,6 @@ def delete_vm(vmid, node):
         When it's up the VM is configurate. if there is an error while configurating, the
     """
 def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="no"):
-
-    print(check_password_strength(main_ssh_key))
     if not check_password_strength(password):
         return {"error" : "Incorrect password format"}, 400
     if not check_ssh_key(main_ssh_key):
@@ -118,8 +133,6 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 
     next_vmid = int(proxmox.cluster.nextid.get())
     node = load_balance_server()
-
-    print("first_next_vmid = ", next_vmid, "on", node)
 
 
     if node[1] != 201:
@@ -144,7 +157,6 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
             for vm in proxmox.cluster.resources.get(type="vm"):
                 if vm["vmid"] == 10000:
                     template_node = vm["node"]
-            print("next_vmid = " ,next_vmid)
             proxmox.nodes(template_node).qemu(10000).clone.create(
                 name=name,
                 newid=next_vmid,
@@ -186,7 +198,9 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         delete_vm(next_vmid, node)
         return {"error": "Impossible to create the VM (cloning)"}, 500
+    
 
+    updateVmStatus(next_vmid, "creating")
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key, )).start()
     return {"vmId": next_vmid}, 201
 
@@ -197,47 +211,77 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     """
 def config_vm(vmid, node, password, vm_user,main_ssh_key):
     sync = False
+    vm = proxmox.nodes(node).qemu(vmid)
     while not sync:  # Synchronisation
         try:
-            if "lock" not in proxmox.nodes(node).qemu(vmid).status.current.get():  # Si lockée, on attend
+            if "lock" not in vm.status.current.get():  # Si lockée, on attend
 
                 sync = True
             sleep(1)
         except ResourceException:  # Exception si pas encore synchronisés
             sleep(1)
 
+   
+
     try:
-        proxmox.nodes(node).qemu(vmid).config.create(
+        vm.config.create(
             cipassword=password
         )
     except Exception as e:
+        updateVmStatus(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
-        delete_vm(vmid, node)
+        return delete_vm(vmid, node)
 
 
     try:
-        proxmox.nodes(node).qemu(vmid).config.create(
+        vm.config.create(
             ciuser=vm_user
         )
     except Exception as e:
+        updateVmStatus(vmid,"An error occured while creating the user  (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting user: " + str(e))
-        delete_vm(vmid, node)
+        return delete_vm(vmid, node)
+        
 
     try:
-        proxmox.nodes(node).qemu(vmid).config.create(
+        vm.config.create(
             sshkeys=urllib.parse.quote(main_ssh_key, safe='')
         )
     except Exception as e:
+        updateVmStatus(vmid,"An error occured while setting your ssh key (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
-        delete_vm(vmid, node)
+        return delete_vm(vmid, node)
 
+    # We give an ip to the VM before it starts 
+    #try : 
+    #        dbVM = get_vm_db_info()
+    #        print("dbVM = " , dbVM)
+    #        (body, status) = update_vm_ip_address(dbVM, node, debug=True)
+    #        if status != 201:
+    #            updateVmStatus(vmid,"An error" + str(status) + " occured while setting your ip #address (vmid ="+str(vmid) +")", errorCode=500)
+    #            logging.error("Problem in create_vm(" + str(vmid) + ") when updating ips")
+    #            print("Problem in create_vm(" + str(vmid) + ") when updating ips: " ,body, status )
+    #            return delete_vm(vmid, node)
+    #       
+    #except Exception as e: 
+    #    updateVmStatus(vmid,"An unkonwn error occured while setting your ip address (vmid ="+str#(vmid) +")", errorCode=500)
+    #    logging.error("Problem in create_vm(" + str(vmid) + ") when updating ips." )
+    #    print("Problem in create_vm(" + str(vmid) + ") when updating ips: ", e )
+    #    #return delete_vm(vmid, node)
+    #    return 1
 
     try:
-        proxmox.nodes(node).qemu(vmid).status.start.create()
+        vm.status.start.create()
 
     except Exception as e:
+        updateVmStatus(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
-        delete_vm(vmid, node)
+        return delete_vm(vmid, node)
+
+
+    # if we are here then the VM is well created
+    updateVmStatus(vmid, "created")
+    
 
 
 def start_vm(vmid, node):
@@ -276,14 +320,25 @@ def get_vm_ip(vmid, node):
                         ips.append(ip["ip-address"])
                         break
 
-        return {"vm_ip": ips}, 201
+        return {"vm_ip": ips}, 200
     except Exception as e:
         logging.error("Problem in get_vm_ip(" + str(vmid) + ") when getting VM infos: " + str(e))
-        return {"vm_ip": "error"}, 500
+        return {"error ": "Impossible to get info about your vm"}, 500
 
 def get_vm_hardware_address(vmid, node):
     return proxmox.nodes(node).qemu(vmid).agent.get("network-get-interfaces")['result'][1]['hardware-address']  # récupération de l'adresse mac de la nouvelle vm
 
+
+# A very simple function that update the vm creation status
+def updateVmStatus(vmid, message, errorCode = 0):
+    try : 
+        if not errorCode: # not 0 = 1 = True
+                vm_creation_status[vmid] = message
+        else: 
+            vm_creation_status[vmid] = "##ERROR##,"+ str(errorCode) + "," + message # ##ERROR## is a key 
+    except Exception as e: 
+        vm_creation_status[vmid] = "##ERROR##,404,the vm creation status is unknown. Please check if the vm is created and contact the webmaster"
+        print("An error occured while updating the vm creation status dict : " , e)
 
 
 ##########################
@@ -332,65 +387,86 @@ def get_node_from_vm(vmid):
     else:
         return {"get_node": "Vm not found"}, 404
 
-"""Return all the configuration info related to a VM, it combines name,  cpu, disk, ram and autoreboot
+"""
+If the vm is creating then we return its state if not : 
+
+Return all the configuration info related to a VM, it combines name,  cpu, disk, ram and autoreboot if created 
 """
 
 def get_vm_config(vmid, node):
-    start = time.time()
-    print("Start get config " , vmid)
-    try:
-        config = proxmox.nodes(node).qemu(vmid).config.get()
-    except Exception as e :
-        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM config: " + str(e))
-        return {"config": "error"}, 500
+    # first we check the vm creation status : 
+    if vmid in vm_creation_status.keys(): 
+        status = vm_creation_status[vmid]
+        print(status)
+        if "##ERROR##" in status:
+            vm_creation_status.pop(vmid) # We send to the user and delete here
+            try : 
+                error = status.split(",")
+                errorCode = error[1].stripe()
+                errorMessage = error[2].stripe()
+                return {"error", errorMessage}, errorCode
+            except: 
+                return {"error", "An unknown error occured"}, 500
+        elif "creating" in status: 
+            return {"status" : "creating"}, 200
+        elif "created" in status : 
+            vm_creation_status.pop(vmid) # We send to the user and delete here
+            return {"status": "created"}, 201
+        else :
+            return {"error": "Unknown vm status"}, 400
+            
+    else : 
+        start = time.time()
+        try:
+            config = proxmox.nodes(node).qemu(vmid).config.get()
+        except Exception as e :
+            logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM config: " + str(e))
+            return {"error": "An error occured while configuring your vm" + str(e)}, 500
 
-    # CPU :
-    try:
-        cpu = config['sockets']* config['cores']
-    except Exception as e :
-        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM cpu: " + str(e))
-        return {"cpu": "error"}, 500
-
-
-
-    # DISK
-    try :
-        disk = int(config['scsi0'].split('=')[-1].replace('G', ''))
-    except Exception as e:
-        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM disk size: " + str(e))
-        return {"disk": "error"}, 500
-
-
-    # RAM :
-    try:
-        ram =config['memory']
-    except:
-        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM ram " + str(e))
-        return {"memory": "error"}, 500
-
-
-    # NAME :
-    try :
-        name = config['name']
-    except Exception as e:
-        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM name: " + str(e))
-        return {"name": "error"}, 500
+        # CPU :
+        try:
+            cpu = config['sockets']* config['cores']
+        except Exception as e :
+            logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM cpu: " + str(e))
+            return {"error": "An error occured while setting the VM CPU"}, 500
 
 
-    try:
-        if "onboot" in config:
-            if config['onboot'] == 1:
-                autoreboot = 1
+
+        # DISK
+        try :
+            disk = int(config['scsi0'].split('=')[-1].replace('G', ''))
+        except Exception as e:
+            logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM disk size: " + str(e))
+            return {"error": "An error occured while setting the VM disk"}, 500
+
+
+        # RAM :
+        try:
+            ram =config['memory']
+        except:
+            logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM ram " + str(e))
+            return {"error": "An error occured while setting the VM RAM"}, 500
+
+        # NAME :
+        try :
+            name = config['name']
+        except Exception as e:
+            logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM name: " + str(e))
+            return {"error": "An error occured while setting the VM name"}, 500
+
+
+        try:
+            if "onboot" in config:
+                if config['onboot'] == 1:
+                    autoreboot = 1
+                else:
+                    autoreboot = 0
             else:
                 autoreboot = 0
-        else:
-            autoreboot = 0
-    except Exception as e:
-        logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
-        return {"autoreboot": "error"}, 500
-
-    print("Config (" ,vmid ,") ok. Took" , str(time.time() - start))
-    return {"name": name, "cpu":cpu, "ram":ram, "disk":disk, "autoreboot":autoreboot}, 201
+        except Exception as e:
+            logging.error("Problem in get_vm_config(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
+            return {"error": "An error occured while setting setting the autoreboot option"}, 500
+        return {"name": name, "cpu":cpu, "ram":ram, "disk":disk, "autoreboot":autoreboot}, 201
 
 
 
@@ -419,9 +495,6 @@ def get_vm_current_status(vmid, node):
     except:
         logging.error("Problem in get_vm_current_status(" + str(vmid) + ") when getting VM ram usage: " + str(e))
         return {"ram_usage": "error"}, 500
-
-
-    print(node)
     # uptime
     try:
         uptime = current_status["uptime"]
@@ -536,33 +609,60 @@ def get_vm_uptime(vmid, node):
 
 
 
-##########################
-####### DEPRECATED #######
-##########################
-def update_vm_ips_job(app):    # Job to update VM ip
+def update_vm_ips_job(app):    # Job (schedules each 10s) to update all VMs' ip
+    #start = time.time()
+    #
+    # print("test")
     with app.app_context():    # Needs application context
         for j in proxmox.cluster.resources.get(type="vm"):
+            #print("j=", j)
             vm = Vm.query.filter_by(id=j['vmid']).first()
-            if vm is not None and (vm.ip == "En attente" or vm.mac == "En attente"):
-                vm.mac = get_vm_hardware_address(vm.id, j['node'])
-                network = IPv4Network('157.159.195.0/24')
-                reserved = {'157.159.195.1', '157.159.195.2', '157.159.195.3', '157.159.195.4', '157.159.195.5',
-                            '157.159.195.6', '157.159.195.7', '157.159.195.8', '157.159.195.9',
-                            '157.159.195.10'}
-                hosts_iterator = (host for host in network.hosts() if str(host) not in reserved)
-                for host in hosts_iterator:
-                    if is_ip_available(host) == True:
-                        vm.ip = host
-                        break
-                if vm.ip == "En attente":
-                    return {"status": "No ip available"}, 500
+            if vm != None:
+                #print("vm =", vm)
+                node = j["node"]
+                #print("ip updating ...")
+                try:
+                    update_vm_ip_address(vm, node)
+                except Exception as e:
+                    print("Impossible to update the ip of  vm " , j['vmid'] , e)
+                #print("ip updated")
+            
+   #print("update vm finish, took", time.time() - start , "s")
+   
 
-                for k in proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").get():  # on vire d'abord toutes les ip set
-                    cidr = k['cidr']
-                    proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").delete(cidr)
-                proxmox.nodes(j['node']).qemu(j['vmid']).firewall.ipset("hosting").create(cidr=vm.ip)  # on met l'ipset à jour
-                db.session.commit()
-
+# Update the VM ip address
+# The debug mode is optionnal and test if a ip was well updated
+def update_vm_ip_address(vm, node, debug=False):
+    #print("update vm ip", vm, node, debug)
+    if vm is not None and (vm.ip == "En attente" or vm.mac == "En attente"):
+        vm.mac = get_vm_hardware_address(vm.id, node)
+        network = IPv4Network('157.159.195.0/24')
+        reserved = {'157.159.195.1', '157.159.195.2', '157.159.195.3', '157.159.195.4', '157.159.195.5',
+                    '157.159.195.6', '157.159.195.7', '157.159.195.8', '157.159.195.9',
+                    '157.159.195.10'}
+        hosts_iterator = (host for host in network.hosts() if str(host) not in reserved)
+        for host in hosts_iterator:
+            if is_ip_available(host) == True:
+                vm.ip = host
+                if debug:
+                    print("DEBUG : attribution of " + host + "for vm" + vm.id )
+                break
+        if vm.ip == "En attente":
+            print("WARNING : THERE IS NO IP AVAILABLE")
+            return {"error": "No ip available"}, 500
+        for k in proxmox.nodes(node).qemu(vm.id).firewall.ipset("hosting").get():  # on vire d'abord toutes leip set
+            cidr = k['cidr']
+            proxmox.nodes(node).qemu(vm.id).firewall.ipset("hosting").delete(cidr)
+        proxmox.nodes(node).qemu(vm.id).firewall.ipset("hosting").create(cidr=vm.ip)  # on met l'ipset à jour
+        db.session.commit()
+        return {"status": "Success"}, 201
+    else : 
+        if vm is None :
+            if debug:
+                print("DEBUG : Error while updating a VM. vm = None. This error must be investigate and lead to unable a VM to get an ip address.")
+            return {"error": "Impossible to set the vm ip address"}, 500
+    return {"error": "Impossible to set the vm ip address (no info)"}, 500
+           
 
 
 def switch_autoreboot(vmid,node):
@@ -577,11 +677,48 @@ def switch_autoreboot(vmid,node):
            return {"status": "changed to 0"}, 201
        else:
            request = proxmox.nodes(node).qemu(vmid).config.post(onboot=1)
-           print(request)
            status = get_vm_autoreboot(vmid, node)
-           print(status)
            return {"status": "changed to 1"}, 201
     except Exception as e:
         logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
         print("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
         return {"error": "Impossible to update the uptime"}, 500
+
+
+
+"""Check if the dns ip entry is acceptable, ie if the user own the ip. The availability of its ip address if check by ddns.py
+
+    :param entry: the ip to check
+
+    :return: True if the ip is acceptable 
+    :rtype: bool
+"""
+def check_dns_ip_entry(user_id, ip:str) -> bool:
+    try : 
+        ip_list = get_user_ip_list(user_id)
+        if ip_list == None: 
+            print("ERROR : the vm list of user " , user_id, " failed to be retrieved : " , e)
+            return None 
+        isOk = ip in ip_list
+        if not isOk :
+            print("INCIDENT REPORT : the user", user_id, " tried to set up a DNS entry for ip", ip, "he doesn't own.")
+        return isOk
+    except Exception as e: 
+        print("ERROR : the vm list of user " , user_id, " failed to be retrieved : " , e)
+        return None 
+
+
+
+def get_user_ip_list(user_id) :
+    try : 
+        vm_id_list = get_vm_list(user_id)
+        ip_list = [] # ip of the user
+        for vmid in vm_id_list:
+            node = get_node_from_vm(vmid)
+            vm_ip, status = get_vm_ip(vmid, node)
+            if status == 200:
+                ip_list += vm_ip["vm_ip"]
+        return ip_list
+    except Exception as e: 
+        print("ERROR : the vm list of user " , user_id, " failed to be retrieved : " , e)
+        return None 

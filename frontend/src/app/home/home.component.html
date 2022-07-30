@@ -43,7 +43,7 @@
                     </dl>
                     <hr>
                     <div> 
-                        <div class="alert alert-danger text-center" *ngIf="errorcode != 201 && errorcode != 0">
+                        <div class="alert alert-danger text-center" *ngIf="errorMessage != ''">
                             <b>Impossible to create your VM ! </b><br/>
                             {{ errorMessage }}
                         </div>
