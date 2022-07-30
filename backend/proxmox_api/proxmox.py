@@ -394,7 +394,7 @@ Return all the configuration info related to a VM, it combines name,  cpu, disk,
 
 def get_vm_config(vmid, node):
     # first we check the vm creation status : 
-    print("before status = ", status, "for " , vmid, node)
+    print("before status = ", config.VM_CREATION_STATUS , "for " , vmid, node)
     if vmid in config.VM_CREATION_STATUS.keys(): 
         status = config.VM_CREATION_STATUS[vmid]
         print(status)
