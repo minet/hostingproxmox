@@ -3,7 +3,7 @@ from time import sleep
 import logging
 from proxmoxer import ProxmoxAPI
 from proxmoxer import ResourceException
-from proxmox_api.util import check_password_strength, check_ssh_key, check_username
+from proxmox_api.util import check_password_strength, check_ssh_key, check_username, update_vm_status, vm_creation_status
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration  
 from proxmox_api.db.db_functions import *
@@ -198,8 +198,10 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         return {"error": "Impossible to create the VM (cloning)"}, 500
     
 
-    updateVmStatus(next_vmid, "creating")
-    print("status dict = ", configuration.VM_CREATION_STATUS)
+    if not update_vm_status(next_vmid, "creating"):
+        print("Problem while updating the vm status")
+        delete_vm(next_vmid, node)
+        return {"error": "Impossible to update the VM status"}, 500
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key, )).start()
     return {"vmId": next_vmid}, 201
 
@@ -227,7 +229,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
             cipassword=password
         )
     except Exception as e:
-        updateVmStatus(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
+        update_vm_status(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
         return delete_vm(vmid, node)
 
@@ -237,7 +239,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
             ciuser=vm_user
         )
     except Exception as e:
-        updateVmStatus(vmid,"An error occured while creating the user  (vmid ="+str(vmid) +")", errorCode=500)
+        update_vm_status(vmid,"An error occured while creating the user  (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting user: " + str(e))
         return delete_vm(vmid, node)
         
@@ -247,7 +249,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
             sshkeys=urllib.parse.quote(main_ssh_key, safe='')
         )
     except Exception as e:
-        updateVmStatus(vmid,"An error occured while setting your ssh key (vmid ="+str(vmid) +")", errorCode=500)
+        update_vm_status(vmid,"An error occured while setting your ssh key (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
         return delete_vm(vmid, node)
 
@@ -257,13 +259,13 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
     #        print("dbVM = " , dbVM)
     #        (body, status) = update_vm_ip_address(dbVM, node, debug=True)
     #        if status != 201:
-    #            updateVmStatus(vmid,"An error" + str(status) + " occured while setting your ip #address (vmid ="+str(vmid) +")", errorCode=500)
+    #            update_vm_status(vmid,"An error" + str(status) + " occured while setting your ip #address (vmid ="+str(vmid) +")", errorCode=500)
     #            logging.error("Problem in create_vm(" + str(vmid) + ") when updating ips")
     #            print("Problem in create_vm(" + str(vmid) + ") when updating ips: " ,body, status )
     #            return delete_vm(vmid, node)
     #       
     #except Exception as e: 
-    #    updateVmStatus(vmid,"An unkonwn error occured while setting your ip address (vmid ="+str#(vmid) +")", errorCode=500)
+    #    update_vm_status(vmid,"An unkonwn error occured while setting your ip address (vmid ="+str#(vmid) +")", errorCode=500)
     #    logging.error("Problem in create_vm(" + str(vmid) + ") when updating ips." )
     #    print("Problem in create_vm(" + str(vmid) + ") when updating ips: ", e )
     #    #return delete_vm(vmid, node)
@@ -273,13 +275,13 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
         vm.status.start.create()
 
     except Exception as e:
-        updateVmStatus(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
+        update_vm_status(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
         return delete_vm(vmid, node)
 
 
     # if we are here then the VM is well created
-    updateVmStatus(vmid, "created")
+    update_vm_status(vmid, "created")
     
 
 
@@ -328,16 +330,6 @@ def get_vm_hardware_address(vmid, node):
     return proxmox.nodes(node).qemu(vmid).agent.get("network-get-interfaces")['result'][1]['hardware-address']  # récupération de l'adresse mac de la nouvelle vm
 
 
-# A very simple function that update the vm creation status
-def updateVmStatus(vmid, message, errorCode = 0):
-    try : 
-        if not errorCode: # not 0 = 1 = True
-                configuration.VM_CREATION_STATUS[vmid] = message
-        else: 
-            configuration.VM_CREATION_STATUS[vmid] = "##ERROR##,"+ str(errorCode) + "," + message # ##ERROR## is a key 
-    except Exception as e: 
-        configuration.VM_CREATION_STATUS[vmid] = "##ERROR##,404,the vm creation status is unknown. Please check if the vm is created and contact the webmaster"
-        print("An error occured while updating the vm creation status dict : " , e)
 
 
 ##########################
@@ -394,23 +386,19 @@ Return all the configuration info related to a VM, it combines name,  cpu, disk,
 
 def get_vm_config(vmid, node):
     # first we check the vm creation status : 
-    print("before status = ", configuration.VM_CREATION_STATUS , "for " , vmid, node)
-    if vmid in configuration.VM_CREATION_STATUS.keys(): 
-        status = configuration.VM_CREATION_STATUS[vmid]
-        print(status)
-        if "##ERROR##" in status:
-            configuration.VM_CREATION_STATUS.pop(vmid) # We send to the user and delete here
+    vm_creation = vm_creation_status(vmid)
+    if vm_creation != None : # if not then the vm is created of not found
+        (status, httpErrorCode, errorMessage) = vm_creation 
+        if status == "error":
+            update_vm_status(vmid, "delete", deleteEntry= True) # We send to the user and delete here
             try : 
-                error = status.split(",")
-                errorCode = error[1].stripe()
-                errorMessage = error[2].stripe()
-                return {"error", errorMessage}, errorCode
+                return {"error", errorMessage}, httpErrorCode
             except: 
                 return {"error", "An unknown error occured"}, 500
-        elif "creating" in status: 
+        elif status == "creating" : 
             return {"status" : "creating"}, 200
-        elif "created" in status : 
-            configuration.VM_CREATION_STATUS.pop(vmid) # We send to the user and delete here
+        elif  status == "created" : 
+            update_vm_status(vmid, "delete", deleteEntry= True) # We send to the user and delete here
             return {"status": "created"}, 201
         else :
             return {"error": "Unknown vm status"}, 400
