@@ -8,6 +8,7 @@ import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Dns} from '../models/dns';
 import {timer, Subscription} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
+import { stringify } from 'querystring';
 
 
 @Component({
@@ -18,9 +19,12 @@ import {mergeMap} from 'rxjs/operators';
 export class DnsComponent implements OnInit, OnDestroy {
   loading = true;
   newDns = new Dns();
+  ipList = Array<string>();
   intervals = new Set<Subscription>();
   showForm = false;
   errorcode = 201;
+  httpErrorMessage = "";
+  errorMessage = ""
   timer: Subscription;
   success = false;
   page = 1;
@@ -40,10 +44,12 @@ export class DnsComponent implements OnInit, OnDestroy {
         if(this.user.admin || (this.user.chartevalidated && this.user.cotisation)) {
             this.get_dns_list();
             this.user.dns = Array<Dns>();
+            this.get_ips_list();
+            console.log("ips :", this.user.ips);
         }
     }, 1000);
     this.newDns.entry = 'YourEntry';
-    this.newDns.ip = '157.159.195.x';
+
   }
 
   ngOnDestroy(): void {
@@ -71,6 +77,20 @@ export class DnsComponent implements OnInit, OnDestroy {
         },
         error => {
             this.errorcode = error.status;
+            this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+        });
+
+  }
+
+  get_ips_list(): void {
+    this.http.get(this.authService.SERVER_URL + '/ips', {observe: 'response'})
+      .subscribe(rep => {
+          this.ipList =rep.body["ip_list"];
+          console.log(this.ipList)
+        },
+        error => {
+            this.errorcode = error.status;
+            this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
         });
 
   }
@@ -91,6 +111,7 @@ export class DnsComponent implements OnInit, OnDestroy {
         },
         error => {
             this.errorcode = error.status;
+            this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
         });
 
     this.intervals.add(newTimer);
@@ -98,19 +119,52 @@ export class DnsComponent implements OnInit, OnDestroy {
 
 
   create_dns(dns: Dns): void {
+    this.errorMessage = ""
     if(this.user.chartevalidated) {
-      let data = {};
-      data = {entry: dns.entry, ip: dns.ip};
-      this.http.post(this.authService.SERVER_URL + '/dns', data, {observe: 'response'}).subscribe(rep => {
-            if (rep.status === 201) {
-              this.success = true;
-            }
-            window.location.reload();
-          },
-          error => {
-              this.errorcode = error.status;
-          });
+      if(!this.check_dns_entry(dns.entry)){
+        this.errorcode = 401
+        this.errorMessage = "This dns entry isn't valid or is forbidden. The submission of this entry will be reported."
+        this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+      } else if (!this.check_dns_ip(dns.ip)){
+        this.errorcode = 401
+        this.errorMessage = "This ip isn't valid or is forbidden. Only try with the ip of one of your vm."
+        this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+      } else {
+        let data = {};
+        data = {entry: dns.entry, ip: dns.ip};
+        this.http.post(this.authService.SERVER_URL + '/dns', data, {observe: 'response'}).subscribe(
+          (rep) => {
+              if (rep.status === 201) {
+                this.success = true;
+                window.location.reload();
+              }  else {
+                this.errorcode = rep.status;
+              }
+              
+            },
+            (error_rep) => {
+                this.errorcode = error_rep.status;
+                this.errorMessage = error_rep.error["error"]
+                this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+            });
+        }
+      }
     }
+
+
+  // Check if the DNS entry is correct and respect minet rules 
+  // TO DO : make a manual validation
+  check_dns_entry(entry):Boolean{
+    let forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"];
+    let authorized_entry = /^[a-zA-Z0-9]*$/; 
+    return authorized_entry.test(entry) && !(entry in forbidden_entries);
+  }
+
+ // Check if the ip is for hosting 
+  // TO DO : make a local check if the user owns the ip
+  check_dns_ip(ip):Boolean{
+    let authorized_ip = /^157\.159\.195\.([1-9][0-9]|1[0-9][0-9]|2[0-5][0-5])$/; // At least 157.159.40.xxx > 10 < 255. The backend then checks if the user own the ip
+    return authorized_ip.test(ip.trim())
   }
 
   delete_entry(id): void {
@@ -122,6 +176,7 @@ export class DnsComponent implements OnInit, OnDestroy {
               },
               error => {
                   this.errorcode = error.status;
+                  this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
               });
     }
   }

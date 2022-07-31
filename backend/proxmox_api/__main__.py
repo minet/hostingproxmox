@@ -9,6 +9,7 @@ from proxmox_api import encoder
 app = connexion.App(__name__, specification_dir='./swagger/')
 
 app.app.json_encoder = encoder.JSONEncoder
+
 app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
 
 CORS(app.app)
@@ -23,7 +24,7 @@ JOBS = [
             "func": "proxmox_api.proxmox:update_vm_ips_job",
             "args": (app.app,),
             "trigger": "interval",
-            "seconds": 10,
+            "seconds": 120,
         }
     ]
 

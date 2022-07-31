@@ -3,7 +3,8 @@ import datetime
 import six
 import typing
 import re
-
+import json
+import proxmox_api.config.configuration as  config 
 
 def _deserialize(data, klass):
     """Deserializes dict, list, str into an object.
@@ -178,3 +179,85 @@ def check_ssh_key(key:str) -> bool:
 """
 def check_username(username:str) -> bool:
     return username != "root" and username != ""
+
+
+
+"""Check if the dns entry is acceptable
+
+    :param entry: the entry to check
+
+    :return: True if the entry is acceptable
+    :rtype: bool
+"""
+def check_dns_entry(entry:str) -> bool:
+    forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"]
+    allowed = "^[a-zA-Z0-9]*$"; 
+    return entry != "" and re.search(allowed, entry) and entry not in forbidden_entries
+
+
+
+"""Return the vm creation status retrieved in the json file
+    Possible status are created, creating and error
+    If status == error,  error code and errorMessage explain the error
+    If not, its are None
+
+    :param entry: vmid of the vm creating
+
+    :return: (status, httpErrorCode, errorMessage)
+    :rtype:  Tuple[str, str, str]
+"""
+def vm_creation_status(vmid) :
+    with open(config.VM_CREATION_STATUS_JSON) as jsonFile:
+        jsonObject = json.load(jsonFile)
+        jsonFile.close()
+    try : 
+        vm = jsonObject[str(vmid)]
+        if vm == None : 
+            return None 
+        else: 
+            status = vm["status"]
+            if status == "error":
+                return (status, vm["httpErrorCode"], vm["errorMessage"])
+            elif status == "creating" or status == "created": 
+                return (status, None, None)
+            else: 
+                return ("error", 500, "Impossible to retrieve the status of the vm")
+    except : 
+        return None
+
+
+
+
+"""Update the vm creation status json file
+
+    :param entry: 
+        - vmid : the id of the vm creating
+        - message : message associated to the creation
+        - errorCode (optionnal): httpError code if relevant 
+        - deleteEntry (optionnal): if True, the entry is deleted
+
+    :return: True if success else False
+    :rtype: bool
+"""
+def update_vm_status(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
+    with open(config.VM_CREATION_STATUS_JSON) as jsonFile:
+        jsonObject = json.load(jsonFile)
+        jsonFile.close()
+    
+    try : 
+        if deleteEntry :
+            jsonObject.pop(str(vmid))
+        else : 
+           jsonObject[vmid] = {}
+           if not errorCode: # not 0 = 1 = True
+                   jsonObject[vmid]["status"] = message
+           else: 
+               jsonObject[vmid]["status"] = "error"
+               jsonObject[vmid]["httpErrorCode"] = str(errorCode) 
+               jsonObject[vmid]["errorMessage"] = message
+        with open(config.VM_CREATION_STATUS_JSON, "w") as outfile:
+            json.dump(jsonObject, outfile)
+        return True 
+    except Exception as e: 
+        print("An error occured while updating the vm creation status dict : " , e)
+        return False

@@ -45,15 +45,19 @@
     <div class="card-body">
       <div>
         <form (ngSubmit)="create_dns(newDns)" #vmForm="ngForm">
-          <div *ngIf="vmForm.submitted">
+          <div *ngIf="vmForm.submitted && errorMessage == ''">
             Request submitted...
+          </div>
+          <div [hidden]="errorMessage == ''" class="alert alert-danger">
+            <strong style="text-align: center;">Error {{errorcode}} : {{httpErrorMessage}}</strong><br><br>
+            {{errorMessage}}
           </div>
 
           <div class="alert-success" *ngIf="success">
             You entry has been created
           </div>
 
-          <ng-container *ngIf="!vmForm.submitted">
+          <ng-container>
             <div>
               <div class="input-group">
                 <div class="input-group-prepend">
@@ -74,12 +78,22 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text" id="ip-address-prepend">IP Address</span>
                 </div>
-                <input type="text" class="form-control" id="ip" aria-label="IP Address"
+                <!--<input type="text" class="form-control" id="ip" aria-label="IP Address"
                        aria-describedby="ip-address-prepend"
                        [(ngModel)]="newDns.ip" name="ip"
                        required="required"
-                       #ip="ngModel">
+                       #ip="ngModel">-->
+                       <select class="form-control" id="ip"
+                                            aria-label="IP Address"
+                                            aria-describedby="ip-address-prepend"
+                                            required="required"
+                                            [(ngModel)]="newDns.ip" name="ip"
+                                            #ip="ngModel">
+                      <option *ngFor="let myip of ipList" [value]="myip">{{myip}}</option>
+                                        
+                  </select>
               </div>
+              
               <div [hidden]="ip.valid || ip.pristine" class="alert alert-danger">
                 IP is required
               </div>
