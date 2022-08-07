@@ -19,12 +19,19 @@ scheduler = APScheduler()
 app.add_api('swagger.yaml', arguments={'title': 'Proxmox'}, pythonic_params=True)
 
 JOBS = [
-        {
+        { # update all vm ips 
             "id": "update_vm_ips",
             "func": "proxmox_api.proxmox:update_vm_ips_job",
             "args": (app.app,),
             "trigger": "interval",
             "seconds": 120,
+        }, 
+        { # Check all cotisation to uodate endCotisationDate and send email if needed
+            "id" : "check_cotisation",
+            "func" : "proxmox_api.proxmox:check_cotisation_job",
+            "trigger" : "interval",
+            "args": (app.app,),
+            "seconds": 60,
         }
     ]
 

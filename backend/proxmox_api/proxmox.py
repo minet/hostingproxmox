@@ -122,6 +122,7 @@ def delete_vm(vmid, node):
         When it's up the VM is configurate. if there is an error while configurating, the
     """
 def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="no"):
+    print("create vm" , name, vm,vm_type, user_id, vm_user)
     if not check_password_strength(password):
         return {"error" : "Incorrect password format"}, 400
     if not check_ssh_key(main_ssh_key):
@@ -367,6 +368,7 @@ def get_vm(user_id = 0):
         return get_vm_list(), 201
 
 def get_node_from_vm(vmid):
+    print("get node for ", vmid)
     if vmid:
         for vm in proxmox.cluster.resources.get(type="vm"):
             if vm["vmid"] == vmid:
@@ -374,8 +376,10 @@ def get_node_from_vm(vmid):
                     return vm['node']
                 except Exception as e:
                     logging.error("Problem in get_node_from_vm(" + str(vmid) + ") when getting VM node: " + str(e))
-                    return {"cpu": "error"}, 500
+                    print("Problem in get_node_from_vm(" + str(vmid) + ") when getting VM node: " + str(e))
+                    return {"error": "Impossible to retrieve the vm node"}, 500
     else:
+        print("Error : vmid is null")
         return {"get_node": "Vm not found"}, 404
 
 """
@@ -716,3 +720,32 @@ def get_user_ip_list(user_id) :
     except Exception as e: 
         print("ERROR : the vm list of user " , user_id, " failed to be retrieved : " , e)
         return None 
+
+
+"""func called by jobs. For all user, it calls a function to check if the user has a cotisation. 
+
+    :param entry: None
+
+    :return: None
+    :rtype: None
+"""
+def check_cotisation_job(app):
+     with app.app_context():    # Needs application context
+        print("check cotisation job")
+        users = get_active_users()
+        for user in users:
+            print(user)
+            #check_cotisation(user)
+        db.session.commit()
+        return None
+
+
+"""func called by jobs. For a userId it checks thecotisation, update the date if needed in the database and send an email to the user if the cotisation is expired (according to the frozen level (see wiki.minet.net))
+
+    :param entry: userId : string
+
+    :return: None
+    :rtype: None
+"""
+#def check_cotisation(userId):
+
