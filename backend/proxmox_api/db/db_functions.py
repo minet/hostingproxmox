@@ -145,4 +145,11 @@ def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
         return True;
 
 
+def get_active_users(): # return actives users (ie those who have a vm)
+    list = []
+    for user in User.query.all():
+        if user.vms:
+            list.append(user.id)
+    return list
+
 #######
