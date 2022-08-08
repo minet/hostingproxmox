@@ -144,5 +144,12 @@ def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
     else:
         return True;
 
+def getNextVmID(min = 110): # get the next vmid available. The minimum whould not be less than 110
+    if min <110 : 
+        min = 110
+    for vmid in (range(min, 999)): # should not exceed 999, if not, we have a problem
+        if Vm.query.filter_by(id=vmid).first() is None:
+            return vmid 
+        
 
 #######
