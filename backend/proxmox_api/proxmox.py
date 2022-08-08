@@ -129,7 +129,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     if not check_username(vm_user):
         return {"error" : "Incorrect vm user format"}, 400
 
-    next_vmid = int(proxmox.cluster.nextid.get())
+    next_vmid = int(next_available_vmid())
     node = load_balance_server()
 
 
@@ -365,6 +365,30 @@ def get_vm(user_id = 0):
         return get_vm_list(user_id), 201
     else:
         return get_vm_list(), 201
+
+def is_vmid_available_cluster(vmid): # Checks if a vmid is available on the cluster for a new vm to be created
+    kars, wammu = False, False
+    try : 
+        proxmox.nodes("kars").qemu(vmid).status.get()
+        kars = True 
+    except : 
+        try : 
+            proxmox.nodes("kars").lxc(vmid).status.get() # We have to check CT too
+            kars = True
+        except:
+            kars = False
+    try :
+        proxmox.nodes("wammu").qemu(vmid).config.get()['name']
+        wammu = True
+    except : 
+        try : 
+            proxmox.nodes("wammu").lxc(vmid).status.get() # We have to check CT too
+            wammu = True
+        except:
+            wammu = False
+    return not kars and not wammu 
+
+
 
 def get_node_from_vm(vmid):
     if vmid:
@@ -716,3 +740,13 @@ def get_user_ip_list(user_id) :
     except Exception as e: 
         print("ERROR : the vm list of user " , user_id, " failed to be retrieved : " , e)
         return None 
+
+def next_available_vmid():# determine the next available vmid from both db and proxmox
+    next_vmid_db = 110
+    is_vmid_available_prox = False 
+    while next_vmid_db != None and not is_vmid_available_prox : # if next_vmid_db is None then there is no next vmid available and if is_vmid_available_prox = True then the next vmid is available in proxmox and in db
+        next_vmid_db += 1
+        next_vmid_db = getNextVmID(next_vmid_db)
+       
+        is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
+    return next_vmid_db
