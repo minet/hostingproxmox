@@ -1,3 +1,8 @@
+# [Beta 1.2.1] 09-08-2022
+## Fixed 
+
+- [The nextvmid available used to create a VM depends now on its proxmox availability and db availability](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/8e37521dfd9a6e4f012772f0663c67954f4a5571) - *Issue #22. The bug caused the link of a foreign vm to a user account after a vm fail and a db and proxmox desynchronization*
+
 # [Beta 1.2] 31-07-2022
 ## Fixed 
 
