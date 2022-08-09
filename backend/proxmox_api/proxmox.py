@@ -1,3 +1,4 @@
+from email import header
 import urllib.parse
 from time import sleep
 import logging
@@ -11,6 +12,7 @@ from ipaddress import IPv4Network
 from threading import Thread
 import time
 import connexion
+import requests
 logging.basicConfig(filename="log", filemode="a", level=logging.INFO
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
@@ -722,6 +724,8 @@ def get_user_ip_list(user_id) :
         return None 
 
 
+
+
 """func called by jobs. For all user, it calls a function to check if the user has a cotisation. 
 
     :param entry: None
@@ -730,14 +734,19 @@ def get_user_ip_list(user_id) :
     :rtype: None
 """
 def check_cotisation_job(app):
+     print("check_cotisation_job")
      with app.app_context():    # Needs application context
-        print("check cotisation job")
         users = get_active_users()
+        
+        
         for user in users:
-            print(user)
-            #check_cotisation(user)
+            try :
+                check_cotisation(user)
+            except Exception as e:
+                print(e)
+                pass
         db.session.commit()
-        return None
+
 
 
 """func called by jobs. For a userId it checks thecotisation, update the date if needed in the database and send an email to the user if the cotisation is expired (according to the frozen level (see wiki.minet.net))
@@ -747,5 +756,14 @@ def check_cotisation_job(app):
     :return: None
     :rtype: None
 """
-#def check_cotisation(userId):
+def check_cotisation(userId):
+        print("check cotisation for " + userId)
+        #headers = {"Authorization": req_headers}
+        headers = {"X-API-KEY": config.ADH6_API_KEY}
+        id = requests.get("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(userId)+"&only=id,username", headers=headers)
+        if id == None : 
+            print("ERROR : the user " + userId + " failed to be retrieved")
+            return None
+        
+        print(id.json())
 
