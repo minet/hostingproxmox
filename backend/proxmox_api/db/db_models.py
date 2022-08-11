@@ -7,7 +7,7 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.String(254), primary_key=True)
-    endCotisationDate = db.Column(db.String(254), nullable=True, default=None)
+    freezeState = db.Column(db.String(10), nullable=True, default=None)
     vms = db.relationship('Vm', backref="owner", lazy=True)
     dnsEntries = db.relationship('DomainName', backref="owner", lazy=True)
 

@@ -147,9 +147,20 @@ def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
 
 def get_active_users(): # return actives users (ie those who have a vm)
     list = []
-    for user in User.query.all():
-        if user.vms:
-            list.append(user.id)
+    for vm in Vm.query.all():
+        if vm.userId:
+            list.append(vm.userId)
     return list
+
+
+def updateFreezeState(username, freezeState):
+    user = User.query.filter_by(id=username).first()
+    user.freezeState = freezeState
+    print("update freeze state", user, username, freezeState)
+    db.session.commit()
+
+def getFreezeState(username):
+    user = User.query.filter_by(id=username).first()
+    return user.freezeState
 
 #######

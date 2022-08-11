@@ -1,16 +1,18 @@
 from email import header
+from operator import truediv
 import urllib.parse
 from time import sleep
 import logging
 from proxmoxer import ProxmoxAPI
 from proxmoxer import ResourceException
-from proxmox_api.util import check_password_strength, check_ssh_key, check_username, update_vm_status, vm_creation_status
+from proxmox_api.util import check_password_strength, check_ssh_key, check_username, update_vm_status, vm_creation_status, freezeStateCalcultor
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration  
 from proxmox_api.db.db_functions import *
 from ipaddress import IPv4Network
 from threading import Thread
 import time
+from datetime import datetime
 import connexion
 import requests
 logging.basicConfig(filename="log", filemode="a", level=logging.INFO
@@ -756,14 +758,59 @@ def check_cotisation_job(app):
     :return: None
     :rtype: None
 """
-def check_cotisation(userId):
-        print("check cotisation for " + userId)
+def check_cotisation(username):
+        
         #headers = {"Authorization": req_headers}
         headers = {"X-API-KEY": config.ADH6_API_KEY}
-        id = requests.get("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(userId)+"&only=id,username", headers=headers)
-        if id == None : 
-            print("ERROR : the user " + userId + " failed to be retrieved")
-            return None
+        #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
+        userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username", headers=headers) # [id,username], from ADH6 
         
-        print(id.json())
+        if userInfo == None or  userInfo.json() == []: # not found
+            if "-" in username:
+                #print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+                new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
+                #print("'"+new_username+"'")
+                return check_cotisation(new_username)
+                
+            elif "_" in username: # same
+                #print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+                new_username = username.replace("_",".").strip() # hosting replace by default _ with -. So we try if not found
+                #print("'"+new_username+"'")
+                return check_cotisation(new_username)
+            else :
+                print("ERROR : the user " , username , " failed to be retrieved :" , userInfo.json())
+                print("ERROR : the user " , username , " failed to be retrieved")
+                return None
+        else : 
+            isCotisationUpToDate = None
+            userId = userInfo.json()[0]["id"]
+            membership = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
+            membership_dict = membership.json()
+
+            if "ip" not in membership_dict:
+                #print(username , "cotisation expired", membership.json())
+                print(username , "cotisation expired")
+                departureDate = datetime.strptime(membership.json()["departureDate"], "%Y-%m-%d")
+                mainFreezeState, nbNotificationName = freezeStateCalcultor(departureDate)
+                oldFreezeState = getFreezeState(username)
+                updatedState = str(mainFreezeState) + "." +str(nbNotificationName)
+                updateFreezeState(username, updatedState)
+                isCotisationUpToDate = False
+            else : 
+                #print(membership.json()["ip"])
+                #print(membership.json()["departureDate"], end='\n\n')
+                departureDate = datetime.strptime(membership.json()["departureDate"], "%Y-%m-%d")
+                mainFreezeState, nbNotificationName = freezeStateCalcultor(departureDate)
+                oldFreezeState = getFreezeState(username)
+                updatedState = str(mainFreezeState) + "." +str(nbNotificationName)
+                updateFreezeState(username, updatedState)
+
+            
+
+            
+
+
+        
+        
+        
 

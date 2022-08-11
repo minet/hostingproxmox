@@ -1,4 +1,5 @@
-import datetime
+from ast import Tuple
+from datetime  import datetime
 
 import six
 import typing
@@ -261,3 +262,21 @@ def update_vm_status(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
     except Exception as e: 
         print("An error occured while updating the vm creation status dict : " , e)
         return False
+
+"""generate the main freeze state (0,1,2 or 3) and the nb of  notification sent  based on the departure date. 
+
+    :param entry: 
+        - departure date as a datetime object
+
+    :return: freeze state (0,1,2 or 3), ont
+    :rtype: tuple
+"""
+def freezeStateCalcultor(departurDate: datetime) :# return the freeze state of the user based on the departure date
+    delta = departurDate - datetime.now()
+    if delta.days >= 0:# update to date
+        return (0, 0)
+    else : 
+        days = abs(delta.days)
+        return (days//30+1, (days%30)//7+1) # return the freeze state (updated each months) and the number of notification sent (sent each weeks)
+
+    
