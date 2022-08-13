@@ -185,6 +185,28 @@ paths:
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /ips:
+    get:
+      summary: get the list of a users ip addresses
+      operationId: get_ip_list
+      responses:
+        "200":
+          description: The list is returned with success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistoryIdItem'
+                x-content-type: application/json
+        "400":
+          description: "invalid input, object invalid"
+        "403":
+          description: "not enough permissions"
+        "404":
+          description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+      
   /cotisation:
     get:
       summary: check is the cotisation is up to date for a user

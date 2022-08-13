@@ -26,10 +26,10 @@ def create_entry(entry, ip_add):
     update.add(entry, configuration.DNS_ENTRY_TTL, rdata)
     response = dns.query.tcp(update, configuration.MAIN_DNS_SERVER_IP, timeout=5)
     if response.rcode() == 0:
-        return {"dns": "entry created"}, 201
+        return {"status": "entry created"}, 201
     if response.rcode() == 6:
-        return {"dns": "entry already exists"}, 405
-    return {"dns": "error occured"}, 500
+        return {"error": "This entry already exists"}, 400
+    return {"error": "An unknown error occured while setting the DNS entry"}, 500
 
 
 

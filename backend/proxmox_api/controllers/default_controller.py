@@ -20,6 +20,7 @@ def create_dns(body=None):  # noqa: E501
     """create dns entry
 
      # noqa: E501
+     The entry checks is made by util.py here, the dns ip ownership by proxmox.py and ip availability by ddns.py
 
     :param body: Dns entry to add
     :type body: dict | bytes
@@ -30,7 +31,7 @@ def create_dns(body=None):  # noqa: E501
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
 
     if r.status_code != 200:
-        return {"status": "error"}, 403
+        return {"error": "You seem to be not connected."}, 403
 
     admin = False
     if "attributes" in r.json():
@@ -38,12 +39,17 @@ def create_dns(body=None):  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
     if is_cotisation_uptodate() == 0 and not admin:
-        return {"status": "cotisation expired"}, 403
+        return {"error": "Your cotisation has expired"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
 
     if connexion.request.is_json:
         body = DnsItem.from_dict(connexion.request.get_json())  # noqa: E501
+
+   # finally we have to check if the entry is correct : 
+    if not util.check_dns_entry(body.entry):
+        print("INCIDENT REPORT : The user ( id " , str(user_id) , ") overrided frontend security to submit a forbidden DNS entry : " , body.entry, "for ip", body.ip  )
+        return {"error" : "This DNS entry is forbidden. This incident will be reported."}, 403
 
     return proxmox.add_user_dns(user_id, body.entry, body.ip)
 
@@ -131,7 +137,6 @@ def delete_vm_id(vmid):  # noqa: E501
 
 def is_cotisation_uptodate():
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    print(headers)
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
     if r.status_code != 200:
         return {"Error": "You are UNAUTHORIZED to connect to CAS"}, 403
@@ -191,7 +196,6 @@ def get_vm():  # noqa: E501
 
      # noqa: E501
 
-
     :rtype: List[VmIdItem]
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
@@ -206,7 +210,7 @@ def get_vm():  # noqa: E501
     if is_cotisation_uptodate() == 0 and not admin:
 
         
-        return {"status": "cotisation expired"}, 403
+        return {"error": "cotisation expired"}, 403
 
 
 
@@ -234,9 +238,9 @@ def get_vm_id(vmid):  # noqa: E501
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-
+    
     if r.status_code != 200:
-        return {"status": "error"}, 403
+        return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     admin = False
@@ -244,7 +248,7 @@ def get_vm_id(vmid):  # noqa: E501
     try:
         vmid = int(vmid)
     except:
-        return {"status": "error not an integer"}, 500
+        return {"error": "The request contains errors"}, 400
 
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
@@ -252,33 +256,32 @@ def get_vm_id(vmid):  # noqa: E501
                 admin = True
 
     if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
-        return {"status": "wrong permission"}, 403
-
-
-    
-
+        return {"error": "You don't have the right permissions"}, 403
 
     node = proxmox.get_node_from_vm(vmid)
     if not node:
-        return {"status": "vm not exists"}, 404
+        return {"error": "Impossible to retrieve the vm"}, 404
 
     status = proxmox.get_vm_status(vmid, node)
     type = dbfct.get_vm_type(vmid)
     created_on = get_vm_created_on(vmid)
 
-    if status[0]["status"] == 'creating':
-        return {"status": status[0]["status"], "type": type[0]["type"]}, 201
-
 
     proxmoxStart = time.time()
     (vmConfig, response) = proxmox.get_vm_config(vmid, node)
-    print("get_vm_config for " , vmid , " took ")
+    #print("get_vm_config for " , vmid , " took ")
+
+    print("(vmConfig, response) = ", (vmConfig, response))
 
     if response == 500:
+        print("500 error, vmConfig = ", vmConfig)
         return vmConfig, 500
+        print("500 ended")
     elif response == 404:
         return {"error": "VM not found"},404
-    elif response != 201:
+    elif response == 200 or( response == 201 and 'status' in vmConfig.keys()): # If the returned code is 201 and the vm is just created
+        return vmConfig, response
+    elif response != 201 :
         return {"error": "API unkonwn response"},500
     try:
         name = vmConfig["name"]
@@ -286,14 +289,14 @@ def get_vm_id(vmid):  # noqa: E501
         cpu = vmConfig["cpu"]
         disk = vmConfig["disk"]
         autoreboot = vmConfig["autoreboot"]
-    except:
-        return {"status": "error while getting config"}, 500
-
+    except Exception as e:
+        print("error while getting config : " + str(e))
+        return {"error": "error while getting config : " + str(e)}, 500
 
     if is_cotisation_uptodate() == 0 and not admin:
-        return {"status": "cotisation expired"}, 403
+        return {"error": "cotisation expired"}, 403
 
-    print("recieved config response (" ,vmid ,") ok. Took" , str(time.time() - start))
+   # print("recieved config response (" ,vmid ,") ok. Took" , str(time.time() - start))
 
     owner = get_vm_userid(vmid)  # on renvoie l'owner pour que les admins puissent savoir à quel user appartient quelle vm
 
@@ -305,7 +308,7 @@ def get_vm_id(vmid):  # noqa: E501
         ip = proxmox.get_vm_ip(vmid, node)
         current_status,response = proxmox.get_vm_current_status(vmid, node)
 
-        print("recieved status response (" ,vmid ,") ok. Took" , str(time.time() - start))
+        #print("recieved status response (" ,vmid ,") ok. Took" , str(time.time() - start))
 
         if response == 500:
             return vmConfig, 500
@@ -321,8 +324,8 @@ def get_vm_id(vmid):  # noqa: E501
             return {"status": "error while getting current status"}, 500
 
 
-    print("backend api vm (" ,vmid ,") ok. Took" , str(time.time() - start))
-    if  status[1] == 201 and type[1] == 201 and ip[1] == 201:
+    #print("backend api vm (" ,vmid ,") ok. Took" , str(time.time() - start))
+    if  (status[1] == 201 or status[1] == 200) and (type[1] == 201 or type[1] == 200) and (ip[1] == 201 or ip[1] == 200):
         return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": ip[0]["vm_ip"]
                    , "status": status[0]["status"], "ram": ram
                    , "cpu": cpu, "disk": disk, "type": type[0]["type"]
@@ -330,9 +333,10 @@ def get_vm_id(vmid):  # noqa: E501
                    , "uptime": uptime, "created_on": created_on[0]["created_on"]}, 201
 
     elif   status[1] == 404 or type[1] == 404 or ip[1] == 404 :
-        return {"status": "vm not found"}, 404
+        return {"error": "vm not found"}, 404
     else:
-        return {"status": "error"}, 500
+        print("datal error for vm ", vmid, "Unknown error one of the status, type or ip doesn't exists : ", status, type, ip)
+        return {"error": "Unknown error one of the status, type or ip doesn't exists."}, 500
 
 
 def delete_dns_id(dnsid):  # noqa: E501
@@ -389,7 +393,6 @@ def get_dns_id(dnsid):  # noqa: E501
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-
     if r.status_code != 200:
         return {"status": "error"}, 403
 
@@ -523,3 +526,19 @@ def get_historyipall():
         return {"status": "error"}, 403
 
 
+# Return the list of all ips of a user
+
+def get_ip_list():
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    if r.status_code != 200:
+        return {"status": "This is forbidden"}, 403
+
+    if not is_cotisation_uptodate() :
+        return {"status": "cotisation expired"}, 403
+
+    list = proxmox.get_user_ip_list(r.json()["id"])
+    if list == None:
+        return {"status": "Impossible to retrieve the list of your ip addresses. Please make juste you have at least one."}, 500
+    else : 
+        return {"ip_list": list}, 200

@@ -1,3 +1,29 @@
+# [Beta 1.2] 31-07-2022
+## Fixed 
+
+- [User can no longer create any DNS entry ](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/aca9c8ce893c374d1aefbdde68cba2e62c01df1f) -  *Issue #15. It must be a DNS entry with alphanumeric char. It is tested by both  backend and frontend.*
+
+- [User can no longer create any DNS entry for an ip they don't own](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/aca9c8ce893c374d1aefbdde68cba2e62c01df1f) -  *Issue #19. It is tested by both  backend and frontend.*
+
+- [Fix of ALL error message with a http error code clear and accurate and an error message explicit](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/aca9c8ce893c374d1aefbdde68cba2e62c01df1f) -  *Issue #18. All error messages have been rewritten and the error display pop up embed now new fields*.
+
+- [Fix an issue causing the stop of all the ip attribution if one of them fail](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/92b6464dc37d388a0ae5a908d11ec451f8949d2c) - *The job updating the ip is now error-resiliant and doesn't fail for all when fails for one.*
+
+## Added 
+- [Add a util method able to translate an http code to a http message](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/cee3c93c36506f5818ed55839ea0860424456229)
+
+- [The api endpoint /ips to retrieve the list of ips of a user.](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/aca9c8ce893c374d1aefbdde68cba2e62c01df1f) 
+
+- [A json file to store the vm status](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/82189f7139cae0b56bea7941a81a60c2d84f01d2) - *Indeed, a global variable cannot be used threw the different gunicorn instances*
+
+- [Force reinstall python packages](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/84fdc27f336e88c7f659dcd523d985c21c66e435) - *Some of the packages where deprecated and caused run time error*
+## Changed
+
+- [The job in charge of updating all the ips address is now executed each 2 min](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/cee3c93c36506f5818ed55839ea0860424456229) - *Instead of each 10s before. It doesn't fix the slow ip attribution issue.*
+
+- [The vm creation processus is now more error-resiliant](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/92b6464dc37d388a0ae5a908d11ec451f8949d2c) - *When a vm is created, its state is saved in a json until an error or an success. When one of them happens, the backend waits for a call by the user, throw the final result and delete the json entry. This attributes is now displayed when /vm/vmid is called, instead of the frontend guess of the vm status (it also brings a very important feature : the display of very accurate error messages)*
+
+- [README to stick with the new backend URL automatic calculation](https://gitlab.minet.net/zastava/hosting-proxmox/-/commit/f457f845e6b4a468425c487cb2c27e4e581990bf)
 # [Beta 1.1] 24-06-2022
 ## Fixed 
 

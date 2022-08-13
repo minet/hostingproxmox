@@ -14,6 +14,9 @@ def update_vm_ip(vmid, vmip):
     db.session.commit()
 
 
+def get_vm_db_info(vmid):
+    return  Vm.query.filter_by(id=vmid).first()
+
 def get_user_id(user_id):
     return User.query.filter_by(id=user_id).first()
 
@@ -24,8 +27,8 @@ def get_vm_list(user_id=""):  # user id est vide quand un admin veut voir la lis
             return []
         else:
             list = []
-            for i in User.query.filter_by(id=user_id).first().vms:
-                list.append(i.id)
+            for vm in User.query.filter_by(id=user_id).first().vms:
+                list.append(vm.id)
             return list
     else:  # dans ce cas on affiche touuute la liste sans restriction
         list = []
@@ -99,6 +102,7 @@ def add_vm(id, user_id, type, mac, ip):
 
 
 def del_vm_list(del_vmid):
+    print("del vm list")
     Vm.query.filter_by(id=del_vmid).delete()
     db.session.commit()
 
@@ -140,5 +144,12 @@ def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
     else:
         return True;
 
+def getNextVmID(min = 110): # get the next vmid available. The minimum whould not be less than 110
+    if min <110 : 
+        min = 110
+    for vmid in (range(min, 999)): # should not exceed 999, if not, we have a problem
+        if Vm.query.filter_by(id=vmid).first() is None:
+            return vmid 
+        
 
 #######

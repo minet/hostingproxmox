@@ -12,4 +12,5 @@ export class User {
     public cotisation;
     public vms?: Array<Vm>;
     public dns?: Array<Dns>;
+    public ips?: Array<string>;
 }
