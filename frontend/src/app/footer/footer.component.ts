@@ -12,7 +12,6 @@ export class FooterComponent implements OnInit {
   date: Date = new Date();
 
   constructor(
-      private translate: TranslateService,
       public cookie: CookieService
   ) {
 

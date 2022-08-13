@@ -10,8 +10,6 @@ import {CookieService} from "ngx-cookie-service";
 export class LegalComponent implements OnInit {
 
   constructor(
-      private translate: TranslateService,
-      private cookie: CookieService
   ) { }
 
   ngOnInit(): void {

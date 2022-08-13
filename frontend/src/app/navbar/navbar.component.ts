@@ -3,7 +3,7 @@ import { UserService } from '../common/services/user.service';
 import { User } from '../models/user';
 import {CookieService} from 'ngx-cookie-service';
 import {Observable} from 'rxjs';
-import {TranslateModule, TranslateLoader, TranslateService} from '@ngx-translate/core';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-navbar',

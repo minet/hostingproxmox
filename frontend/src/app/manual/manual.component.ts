@@ -10,10 +10,7 @@ import {CookieService} from "ngx-cookie-service";
 })
 export class ManualComponent implements OnInit {
 
-  constructor(
-      private translate: TranslateService,
-      private cookie: CookieService
-  ) { }
+  constructor() { }
 
   ngOnInit(): void {
   }

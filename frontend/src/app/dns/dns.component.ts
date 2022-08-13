@@ -32,10 +32,7 @@ export class DnsComponent implements OnInit, OnDestroy {
               private router: Router,
               public user: User,
               private userService: UserService,
-              private authService: AuthService,
-              private slugifyPipe: SlugifyPipe,
-              private translate: TranslateService,
-              private cookie: CookieService) {
+              private authService: AuthService) {
   }
 
 

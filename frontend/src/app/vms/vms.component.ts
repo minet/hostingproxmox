@@ -8,8 +8,6 @@ import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Observable, Subscription, timer} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 import {ActivatedRoute, Router} from "@angular/router";
-import {TranslateService} from "@ngx-translate/core";
-import {CookieService} from "ngx-cookie-service";
 
 @Component({
     selector: 'app-vms',
@@ -34,9 +32,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                 public user: User,
                 private userService: UserService,
                 public authService: AuthService,
-                public slugifyPipe: SlugifyPipe,
-                private translate: TranslateService,
-                private cookie: CookieService) {
+                public slugifyPipe: SlugifyPipe) {
     }
 
     ngOnInit(): void {
