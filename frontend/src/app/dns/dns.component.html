@@ -45,9 +45,14 @@
     <div class="card-body">
       <div>
         <form (ngSubmit)="create_dns(newDns)" #vmForm="ngForm">
-          <div *ngIf="vmForm.submitted">
+          <div *ngIf="vmForm.submitted && errorMessage == ''">
             {{'dns.create.request' | translate}}
           </div>
+          <div [hidden]="errorMessage == ''" class="alert alert-danger">
+            <strong style="text-align: center;">{{'dns.create.error' | translate}} {{errorcode}} : {{httpErrorMessage}}</strong><br><br>
+            {{errorMessage}}
+          </div>
+
 
           <div class="alert-success" *ngIf="success">
             {{'dns.create.successful' | translate}}
@@ -80,8 +85,9 @@
                        required="required"
                        #ip="ngModel">
               </div>
+
               <div [hidden]="ip.valid || ip.pristine" class="alert alert-danger">
-                {{'dns.form.error.ip' | translate}}IP is required
+                {{'dns.form.error.ip' | translate}}
               </div>
             </div>
             <div class="text-center mt-3">

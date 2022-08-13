@@ -17,6 +17,7 @@
   "dns.item.destination": "Destination",
   "dns.item.manage": "Manage",
   "dns.item.delete": "Delete",
+  "dns.create.error": "Error",
   "dns.addEntry": "Add new entry",
   "dns.create.request": "Request submitted",
   "dns.create.successful": "Your entry has been created",
