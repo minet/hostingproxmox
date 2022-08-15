@@ -1,3 +1,4 @@
+from email import header
 from logging import error
 import connexion
 import requests
@@ -14,6 +15,7 @@ from proxmox_api.db.db_functions import *
 from datetime import datetime
 import proxmox_api.db.db_functions as dbfct
 from proxmox_api.proxmox import is_admin
+from threading import Thread
 
 
 def create_dns(body=None):  # noqa: E501
@@ -259,6 +261,7 @@ def get_vm_id(vmid):  # noqa: E501
         return {"error": "You don't have the right permissions"}, 403
 
     node = proxmox.get_node_from_vm(vmid)
+    print("node recieved :", node)
     if not node:
         return {"error": "Impossible to retrieve the vm"}, 404
 
@@ -542,3 +545,22 @@ def get_ip_list():
         return {"status": "Impossible to retrieve the list of your ip addresses. Please make juste you have at least one."}, 500
     else : 
         return {"ip_list": list}, 200
+
+
+def get_account_state(username):
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    
+    if r.status_code != 200:
+        return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
+
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    admin = False
+
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+    if not admin and user_id != username:
+        return {"error": "You are not allowed to check this account"}, 403
+    return proxmox.get_freeze_state(username)
