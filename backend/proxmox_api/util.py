@@ -1,5 +1,5 @@
 from ast import Tuple
-from datetime  import datetime
+from datetime  import datetime, date
 
 import six
 import typing
@@ -267,16 +267,22 @@ def update_vm_status(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
 
     :param entry: 
         - departure date as a datetime object
+        -lastNotificationDate : date of the last notification (None if no relevant)
+        - Old freeze state : string
 
     :return: freeze state (0,1,2 or 3), ont
     :rtype: tuple
 """
-def freezeStateCalcultor(departurDate: datetime) :# return the freeze state of the user based on the departure date
-    delta = departurDate - datetime.now()
-    if delta.days >= 0:# update to date
-        return (0, 0)
-    else : 
-        days = abs(delta.days)
-        return (days//30+1, (days%30)//7+1) # return the freeze state (updated each months) and the number of notification sent (sent each weeks)
+def generateNewFreezeState(freezeState) :# return the freeze state of the user based on the last notification date and departure date
+    if freezeState == None : 
+        return (1,1)
+    status, nbNotif = int(freezeState.split(".")[0]), int(freezeState.split(".")[1])
+    if status == 0 :
+        return (1, 1)
+    else :
+        newFreezeStatus = status + nbNotif//5 # while we don't have send 4 notifications, we don't change the status
+        nbNotif %= 5
+        return (newFreezeStatus, nbNotif)
+
 
     
