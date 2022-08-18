@@ -4,6 +4,7 @@ import {HttpClient} from '@angular/common/http';
 import {User} from '../models/user';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
+import {Utils} from '../common/utils';
 import {Dns} from '../models/dns';
 import {timer, Subscription} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
@@ -31,6 +32,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                 private http: HttpClient,
                 private router: Router,
                 public user: User,
+                private utils : Utils,
                 private userService: UserService,
                 private authService: AuthService) {
     }
@@ -45,7 +47,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                 console.log("ips :", this.user.ips);
             }
         }, 1000);
-        this.newDns.entry = 'YourEntry';
+        this.newDns.entry =  "";
 
     }
 
@@ -74,7 +76,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                 },
                 error => {
                     this.errorcode = error.status;
-                    this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
                 });
 
     }
@@ -87,7 +89,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                 },
                 error => {
                     this.errorcode = error.status;
-                    this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
                 });
 
     }
@@ -108,7 +110,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                 },
                 error => {
                     this.errorcode = error.status;
-                    this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
                 });
 
         this.intervals.add(newTimer);
@@ -117,15 +119,19 @@ export class DnsComponent implements OnInit, OnDestroy {
 
     create_dns(dns: Dns): void {
         this.errorMessage = ""
-        if(this.user.chartevalidated) {
+        if (dns.ip == null){
+            this.errorcode = 400
+                this.errorMessage =  this.utils.getTranslation("dns.entry.errorMessage.required")
+                this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+        } else if(this.user.chartevalidated) {
             if(!this.check_dns_entry(dns.entry)){
                 this.errorcode = 401
-                this.errorMessage = "This dns entry isn't valid or is forbidden. The submission of this entry will be reported."
-                this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+                this.errorMessage =  this.utils.getTranslation("dns.entry.errorMessage.forbidden")
+                this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
             } else if (!this.check_dns_ip(dns.ip)){
                 this.errorcode = 401
-                this.errorMessage = "This ip isn't valid or is forbidden. Only try with the ip of one of your vm."
-                this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+                this.errorMessage = this.errorMessage =  this.utils.getTranslation("dns.ip.errorMessage.forbidden")
+                this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
             } else {
                 let data = {};
                 data = {entry: dns.entry, ip: dns.ip};
@@ -142,7 +148,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                     (error_rep) => {
                         this.errorcode = error_rep.status;
                         this.errorMessage = error_rep.error["error"]
-                        this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+                        this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
                     });
             }
         }
@@ -173,7 +179,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                     },
                     error => {
                         this.errorcode = error.status;
-                        this.httpErrorMessage = this.userService.getHttpErrorMessage(this.errorcode)
+                        this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
                     });
         }
     }

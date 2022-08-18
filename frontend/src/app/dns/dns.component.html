@@ -58,13 +58,13 @@
             {{'dns.create.successful' | translate}}
           </div>
 
-          <ng-container *ngIf="!vmForm.submitted">
+          <ng-container>
             <div>
               <div class="input-group">
                 <div class="input-group-prepend">
                   <span class="input-group-text" id="entry-name-prepend">{{'dns.form.subdomain' | translate}}</span>
                 </div>
-                <input type="text" class="form-control" id="dnsEntry" aria-label="Entry"
+                <input type="text" class="form-control" id="dnsEntry" aria-label="Entry" placeholder="{{'dns.entry.placeholder' | translate}}"
                        aria-describedby="entry-name-prepend"
                        [(ngModel)]="newDns.entry" name="dnsEntry"
                        required="required"
@@ -79,11 +79,16 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text" id="ip-address-prepend">{{'dns.form.ip' | translate}}</span>
                 </div>
-                <input type="text" class="form-control" id="ip" aria-label="{{'dns.form.ip' | translate}}"
-                       aria-describedby="ip-address-prepend"
-                       [(ngModel)]="newDns.ip" name="ip"
-                       required="required"
-                       #ip="ngModel">
+                <select class="form-control" id="ip"
+                                            aria-label="IP Address"
+                                            aria-describedby="ip-address-prepend"
+                                            required="required"
+                                            [(ngModel)]="newDns.ip" name="ip"
+                                            #ip="ngModel">
+                      <option *ngFor="let myip of ipList" [value]="myip">{{myip}}</option>
+                                        
+                  </select>
+
               </div>
 
               <div [hidden]="ip.valid || ip.pristine" class="alert alert-danger">

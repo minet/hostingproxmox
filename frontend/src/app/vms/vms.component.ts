@@ -8,6 +8,7 @@ import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Observable, Subscription, timer} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 import {ActivatedRoute, Router} from "@angular/router";
+import {Utils} from "../common/utils";
 
 @Component({
     selector: 'app-vms',
@@ -31,6 +32,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                 private router: Router,
                 public user: User,
                 private userService: UserService,
+                private utils: Utils,
                 public authService: AuthService,
                 public slugifyPipe: SlugifyPipe) {
     }
@@ -129,18 +131,18 @@ export class VmsComponent implements OnInit, OnDestroy {
         const newTimer = timer(0, 30000).pipe(
             mergeMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
-                    vm.name = rep.body['name'];
-                    vm.status = rep.body['status'];
+                    vm.name = rep.body['name'].strip();
+                    vm.status = rep.body['status'].stip();
                     vm.user = rep.body['user'];
                     vm.ip = rep.body['ip'][0];
                     vm.uptime = rep.body['uptime'];
                     vm.createdOn = rep.body['created_on'];
                     if (rep.body['type'] === 'nginx_vm') {
-                        vm.type = 'web server';
+                        vm.type = this.utils.getTranslation("home.vm_type.web");
                     } else if (rep.body['type'] === 'bare_vm') {
-                        vm.type = 'bare vm';
+                        vm.type = this.utils.getTranslation("home.vm_type.bare");
                     } else {
-                        vm.type = 'not defined';
+                        vm.type = this.utils.getTranslation("vms.type.unknow");
                     }
 
                     if (last) {

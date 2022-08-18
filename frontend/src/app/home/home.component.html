@@ -37,10 +37,10 @@
                 <div class="card-body">
                     <p class="lead">{{'home.createVm.form.overview' | translate}}</p>
                     <dl>
-                        <dt>{{'home.createVm.form.overview.bare_1' | translate}}</dt>
-                        <dd>{{'home.createVm.form.overview.bare_2' | translate}}</dd>
-                        <dt>{{'home.createVm.form.overview.web_1' | translate}}</dt>
-                        <dd>{{'home.createVm.form.overview.web_2' | translate}}</dd>
+                        <dt>{{'home.vm_type.bare' | translate}}</dt>
+                        <dd>{{'home.vm_desc.bare' | translate}}</dd>
+                        <dt>{{'home.vm_type.web' | translate}}</dt>
+                        <dd>{{'home.vm_desc.web' | translate}}</dd>
                     </dl>
                     <hr>
                     <div>
@@ -60,7 +60,7 @@
                                             required
                                             [(ngModel)]="vm.type" name="type"
                                             #type="ngModel">
-                                        <option *ngFor="let image of images" [value]="image.id">{{image.name}}</option>
+                                        <option *ngFor="let image of images" [value]="image.id">{{image.name | translate}}</option>
                                     </select>
                                 </div>
                                 <div [hidden]="type.valid || type.pristine" class="alert alert-danger">

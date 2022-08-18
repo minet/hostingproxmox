@@ -10,6 +10,7 @@ import {Subscription, timer} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 import {TranslateService} from "@ngx-translate/core";
 import {CookieService} from "ngx-cookie-service";
+import {Utils} from "../common/utils";
 
 @Component({
     selector: 'app-vm',
@@ -34,7 +35,8 @@ export class VmComponent implements OnInit, OnDestroy {
         public user: User,
         private userService: UserService,
         public authService: AuthService,
-        public slugifyPipe: SlugifyPipe
+        public slugifyPipe: SlugifyPipe, 
+        private utils : Utils,
     ) {
     }
 
@@ -158,13 +160,13 @@ export class VmComponent implements OnInit, OnDestroy {
         this.loading = false; // de toute manière on va pas charger pendant 106 ans
         switch(errorcode) {
             case 500:
-                return "Internal error, please contact our webmaster ! (webmaster@minet.net)";
+                return this.utils.getTranslation('vm.error.500');
                 break;
             case 404:
-                return "VM not found !";
+                return this.utils.getTranslation('vm.error.404');
                 break;
             case 403:
-                return "Session expired or wrong permission !";
+                return this.utils.getTranslation('vm.error.403');
                 break;
         }
     }
