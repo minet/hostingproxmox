@@ -10,15 +10,15 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a class="nav-link" href="#" [routerLink]="[cookie.get('lang'),'']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">Home</a>
+        <a class="nav-link" href="#" [routerLink]="['']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="[cookie.get('lang'),'vms']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">{{'navbar.vms.user' | translate}}</a>
-        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && user.admin" [routerLink]="[cookie.get('lang'),'vms']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">{{'navbar.vms.admin' | translate}}</a>
+        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">{{'navbar.vms.user' | translate}}</a>
+        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">{{'navbar.vms.admin' | translate}}</a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="[cookie.get('lang'),'dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.dns.user' | translate}}</a>
-        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && user.admin" [routerLink]="[cookie.get('lang'),'dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.dns.admin' | translate}}</a>
+        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.dns.user' | translate}}</a>
+        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.dns.admin' | translate}}</a>
       </li>
     </ul>
     <ul class="navbar-nav">
@@ -26,7 +26,7 @@
         <a class="nav-link" *ngIf="(validToken$ | async)" href="https://adh6.minet.net">{{user.name}}</a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" [routerLink]="[cookie.get('lang'),'manual']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.guide' | translate}}</a>
+        <a href="#" class="nav-link" [routerLink]="['manual']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.guide' | translate}}</a>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" *ngIf="this.cookie.get('lang') == 'fr'" class="nav-link dropdown-toggle">FR</a>

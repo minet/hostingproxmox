@@ -11,12 +11,12 @@ import {HistoryComponent} from './history/history.component';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
-  {path: ':lang/vms', component: VmsComponent},
-  {path: ':lang/vms/:vmid', component: VmComponent},
-  {path: ':lang/dns', component: DnsComponent},
-  {path: ':lang/legal', component: LegalComponent},
-  {path: ':lang/manual', component: ManualComponent},
-  {path: ':lang/history', component: HistoryComponent},
+  {path: 'vms', component: VmsComponent},
+  {path: 'vms/:vmid', component: VmComponent},
+  {path: 'dns', component: DnsComponent},
+  {path: 'legal', component: LegalComponent},
+  {path: 'manual', component: ManualComponent},
+  {path: 'history', component: HistoryComponent},
   {path: '**', redirectTo: ''},
 ];
 
