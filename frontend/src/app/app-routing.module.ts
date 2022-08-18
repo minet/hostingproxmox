@@ -4,7 +4,6 @@ import {HomeComponent} from './home/home.component';
 import {VmsComponent} from './vms/vms.component';
 import {VmComponent} from './vm/vm.component';
 import {DnsComponent} from './dns/dns.component';
-import {RulesComponent} from './rules/rules.component';
 import {LegalComponent} from './legal/legal.component';
 import {ManualComponent} from './manual/manual.component';
 import {HistoryComponent} from './history/history.component';
@@ -12,16 +11,13 @@ import {HistoryComponent} from './history/history.component';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
-  {path: 'vms', component: VmsComponent},
-  {path: 'vms/:vmid', component: VmComponent},
-  {path: 'dns', component: DnsComponent},
-  {path: 'rules', component: RulesComponent},
-  {path: 'legal', component: LegalComponent},
-  {path: 'manual', component: ManualComponent},
-  {path: 'history', component: HistoryComponent},
+  {path: ':lang/vms', component: VmsComponent},
+  {path: ':lang/vms/:vmid', component: VmComponent},
+  {path: ':lang/dns', component: DnsComponent},
+  {path: ':lang/legal', component: LegalComponent},
+  {path: ':lang/manual', component: ManualComponent},
+  {path: ':lang/history', component: HistoryComponent},
   {path: '**', redirectTo: ''},
-
-
 ];
 
 @NgModule({

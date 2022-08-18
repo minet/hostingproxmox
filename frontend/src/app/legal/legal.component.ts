@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import {TranslateService} from "@ngx-translate/core";
+import {CookieService} from "ngx-cookie-service";
 
 @Component({
   selector: 'app-legal',
@@ -7,7 +9,8 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LegalComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+  ) { }
 
   ngOnInit(): void {
   }

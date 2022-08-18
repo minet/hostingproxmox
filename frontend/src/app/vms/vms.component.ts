@@ -14,6 +14,7 @@ import {ActivatedRoute, Router} from "@angular/router";
     templateUrl: './vms.component.html',
     styleUrls: ['./vms.component.css']
 })
+
 export class VmsComponent implements OnInit, OnDestroy {
     loading = true;
     intervals = new Set<Subscription>();
@@ -24,13 +25,14 @@ export class VmsComponent implements OnInit, OnDestroy {
     totalVm = 0;
     pagesAlreadyLoaded = new Array<number>();
     public validToken$: Observable<boolean>;
+
     constructor(private http: HttpClient,
                 private activatedRoute: ActivatedRoute,
                 private router: Router,
                 public user: User,
                 private userService: UserService,
                 public authService: AuthService,
-                public slugifyPipe: SlugifyPipe, ) {
+                public slugifyPipe: SlugifyPipe) {
     }
 
     ngOnInit(): void {

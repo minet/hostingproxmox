@@ -3,6 +3,7 @@ import { UserService } from './common/services/user.service';
 import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
 import { Title } from '@angular/platform-browser';
+import {CookieService} from "ngx-cookie-service";
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,7 @@ export class AppComponent implements OnInit{
   title = 'Hosting';
 
 
-  constructor(public userService: UserService, public router: Router, private titleService: Title) {
+  constructor(public userService: UserService, public router: Router, private titleService: Title, public cookie: CookieService) {
     var url = window.location.hostname;
     this.title = "Hosting";
     

@@ -1,57 +1,58 @@
 <div class="home container flex-fill">
-    <h1 class="text-center mb-2">Home</h1>
+    <h1 class="text-center mb-2">{{'home.title' | translate}}</h1>
     <hr>
     <div *ngIf="!user.admin" class="userhome">
         <div class="alert alert-info text-center" role="alert">
             <h3 class="alert-heading">
-                Here you can create a virtual machine which will host your website or whichever service you want.
+                {{'home.description' | translate}}
             </h3>
             <hr>
             <p>
-                Be sure to read our <a href="https://chartes.minet.net/" target="_blank">rules</a> and our user's manual before. Do not hesitate
-                to contact our <a href="mailto:webmaster@listes.minet.net"> webmaster</a> for any question.
+                {{'home.read_1' | translate}} <a href="https://chartes.minet.net/" target="_blank">{{'home.read_2' | translate}}</a> {{'home.read_3' | translate}}
+                {{'home.read_4' | translate}} <a href="mailto:webmaster@listes.minet.net"> {{'home.read_5' | translate}}</a> {{'home.read_6' | translate}}
             </p>
         </div>
         <div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
-            <b>Expired subscription</b>
-            <p>To create VM you have to renew your subscription ! <a href="https://payment.minet.net/">click here</a> to renew your subscription</p>
+            <b>{{'home.subscription.expired_1' | translate}}</b>
+            <p>{{'home.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'home.subscription.expired_3' | translate}}</a> {{'home.subscription.expired_4' | translate}}</p>
         </div>
         <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && this.user.cotisation === 0">
-            <b>Unsigned charter !</b>
-            <p>To create VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+            <b>{{'home.charter.notsigned_1' | translate}}</b>
+            <p>{{'home.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'home.charter.notsigned_3' | translate}}</a> {{'home.charter.notsigned_4' | translate}}</p>
         </div>
+
         <div class="userok" *ngIf="this.user.cotisation === 1 && this.user.chartevalidated">
             <div class="alert alert-warning text-center" *ngIf="countvm >= maxVmPerUser">
-                <b>You reach the maximum VM possible (3 VMs) because you have currently {{ countvm }} vm created.</b>
-                <p>If you want to create a new VM you have to delete enough other.
+                <b>{{'home.createVm.error.maxVmAlready_1' | translate}} {{ countvm }} {{'home.createVm.error.maxVmAlready_2' | translate}}</b>
+                <p>{{'home.createVm.error.maxVmAlready_3' | translate}}
             </div>
             <div class="alert alert-secondary text-center" *ngIf="countvm < maxVmPerUser">
-                <b>You can create {{ maxVmPerUser - countvm}} more VM !</b>
+                <b>{{'home.createVm.numberMoreVm_1' | translate}} {{ maxVmPerUser - countvm}} {{'home.createVm.numberMoreVm_2' | translate}}</b>
             </div>
-            
+
             <div class="card mb-3" *ngIf="countvm < maxVmPerUser">
                 <h4 class="card-header">
-                    Create your VM
+                    {{'home.createVm.form.title' | translate}}
                 </h4>
                 <div class="card-body">
-                    <p class="lead">Overview of the available machine types</p>
+                    <p class="lead">{{'home.createVm.form.overview' | translate}}</p>
                     <dl>
-                        <dt>Bare VM</dt>
-                        <dd>Bare Debian 11 VM, use it as storage, compute machine or test machine.</dd>
-                        <dt>Simple web server</dt>
-                        <dd>Wordpress ready to use with ftps server.</dd>
+                        <dt>{{'home.createVm.form.form.overview.bare_1' | translate}}</dt>
+                        <dd>{{'home.createVm.form.form.overview.bare_2' | translate}}</dd>
+                        <dt>{{'home.createVm.form.form.overview.web_1' | translate}}</dt>
+                        <dd>{{'home.createVm.form.form.overview.web_2' | translate}}</dd>
                     </dl>
                     <hr>
-                    <div> 
-                        <div class="alert alert-danger text-center" *ngIf="errorMessage != ''">
-                            <b>Impossible to create your VM ! </b><br/>
+                    <div>
+                        <div class="alert alert-danger text-center" *ngIf="errorcode != 201 && errorcode != 0">
+                            <b>{{'home.createVm.form.error' | translate}} </b><br/>
                             {{ errorMessage }}
                         </div>
                         <form (ngSubmit)="create_vm(vm)" #vmForm="ngForm">
                             <div *ngIf="!loading && errorcode !=201">
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text" id="type-select-prepend">Type</span>
+                                        <span class="input-group-text" id="type-select-prepend">{{'home.createVm.form.type' | translate}}</span>
                                     </div>
                                     <select class="form-control" id="type"
                                             aria-label="Type"
@@ -63,12 +64,11 @@
                                     </select>
                                 </div>
                                 <div [hidden]="type.valid || type.pristine" class="alert alert-danger">
-                                    Type is required
+                                    {{'home.createVm.form.error.type' | translate}}
                                 </div>
-
                                 <div *ngIf="type.valid">
                                     <div class="form-group">
-                                        <label for="name">VM name</label>
+                                        <label for="name">{{'home.createVm.form.vmName' | translate}}</label>
                                         <input type="text" class="form-control" id="name"
                                                required
                                                [(ngModel)]="vm.name" name="name"
@@ -77,69 +77,65 @@
                                     </div>
                                     <div [hidden]="name.valid || !rulesCheck"
                                          class="alert alert-danger">
-                                        Name is required
+                                        {{'home.createVm.form.error.vmName' | translate}}
                                     </div>
 
-
                                     <div class="form-group">
-                                        <label for="sshKey">SSH key <a href="manual#sshKeyGenerationEn" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></label>
+                                        <label for="sshKey">{{'home.createVm.form.sshKey' | translate}} <a href="manual#sshKeyGenerationEn" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></label>
 
                                         <input type="text" class="form-control" id="sshKey"
                                                [(ngModel)]="vm.sshKey" name="sshKey" required="required"
                                                #sshKey="ngModel">
                                     </div>
                                     <div [hidden]="sshKey.valid ||  !rulesCheck " class="alert alert-danger">
-                                        A SSH key is required
+                                        {{'home.createVm.form.error.sshKey_1' | translate}}
                                     </div>
                                     <div [hidden]="!rulesCheck || checkSSHkey(vm) || !sshKey.valid" class="alert alert-danger">
-                                        Your ssh key isn't valid
+                                        {{'home.createVm.form.error.sshKey_2' | translate}}
                                     </div>
-
                                     <div class="form-group">
-                                        <label for="user">VM user</label>
+                                        <label for="user">{{'home.createVm.form.user' | translate}}</label>
                                         <input type="text" class="form-control" id="user"
                                                [(ngModel)]="vm.user" name="user"
                                                required="required"
                                                #user="ngModel">
                                     </div>
                                     <div [hidden]="user.valid ||  !rulesCheck" class="alert alert-danger">
-                                        User is required
+                                        {{'home.createVm.form.error.user_1' | translate}}
                                     </div>
                                     <div [hidden]="!rulesCheck || !checkUser(vm) || !user.valid" class="alert alert-danger">
-                                        The user cannot be root
+                                        {{'home.createVm.form.error.user_2' | translate}}
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="password">Password</label>
+                                        <label for="password">{{'home.createVm.form.password' | translate}}</label>
                                         <input type="password" class="form-control" id="password"
                                                [(ngModel)]="vm.password" name="password"
                                                #password="ngModel"
-                                               required="required" 
+                                               required="required"
                                                ng-model="password" ng-change="check_password(vm)">
                                     </div>
                                     <div *ngIf="passwordErrorMessage != ''" class="alert alert-danger" [innerHTML]="passwordErrorMessage">
-                                        
+
                                     </div>
 
                                     <div class="form-check mb-2 text-center m-3">
                                         <input (click)="rules_checked()" [checked]="rulesCheck" id="checkbox"
                                                type="checkbox" class="form-check-input">
-                                        <label class="form-check-label" for="checkbox">I agree with MiNET's and MiNET's
-                                            Hosting service <a [routerLink]="['rules']">rules</a>.</label>
+                                        <label class="form-check-label" for="checkbox">{{'home.createVm.form.agree_1' | translate}} <a target="_blank" href="https://chartes.minet.net/{{ this.cookie.get('lang') }}/chartehosting">{{'home.createVm.form.agree_2' | translate}}</a>.</label>
                                     </div>
                                 </div>
                                 <div class="text-center">
                                     <button [disabled]="!check_password(vm) || !vmForm.valid  || !rulesCheck || checkUser(vm) || !checkSSHkey(vm)" type="submit"
-                                            class="btn btn-primary text-center" >Submit
+                                            class="btn btn-primary text-center" >{{'home.createVm.form.submit' | translate}}
                                     </button>
                                 </div>
                             </div>
                         </form>
-
                     </div>
                     <div class="text-center" *ngIf="loading">
-                        Your VM is being created, please wait. It can take few minutes.
-                        <p *ngIf="progress == 100">Your VM has been created, click <a [routerLink]="['vms']">here</a></p>
+                        {{'home.createVm.loading' | translate}}
+                        <p *ngIf="progress == 100">{{'home.createVm.success_1' | translate}} <a [routerLink]="['vms']">{{'home.createVm.success_2' | translate}}</a></p>
                     </div>
 
                     <div class="progress" *ngIf="loading">
@@ -150,30 +146,30 @@
             </div>
         </div>
     </div>
-
     <div *ngIf="user.admin" class="adminmenu">
-        <p>Welcom to the hosting administration panel.<br>
-            Here you can manage all the VM and the DNS entries.</p>
-        <h2>Statistics</h2>
+        <p>{{'home.admin.description_1' | translate}}<br>
+            {{'home.admin.description_2' | translate}}</p>
+        <h2>{{'home.admin.stats.title' | translate}}</h2>
         <br>
         <div class="card-deck mb-3">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Created VM</h5>
+                    <h5 class="card-title">{{'home.admin.stats.createdVm' | translate}}</h5>
                     <a [routerLink]="['vms']" class="btn btn-primary">{{ countvm }}</a>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Active VM</h5>
+                    <h5 class="card-title">{{'home.admin.stats.activeVm' | translate}}</h5>
                     <a [routerLink]="['vms']" class="btn btn-primary">{{ countactivevm }}</a>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Created DNS entries</h5>
+                    <h5 class="card-title">{{'home.admin.stats.dns' | translate}}</h5>
                     <a [routerLink]="['dns']" class="btn btn-primary">{{ countdns }}</a>
                 </div>
             </div>
         </div>
     </div>
+</div>

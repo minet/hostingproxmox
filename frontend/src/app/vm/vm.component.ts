@@ -6,8 +6,10 @@ import {User} from '../models/user';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
-import {interval, Subscription, timer} from 'rxjs';
+import {Subscription, timer} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
+import {TranslateService} from "@ngx-translate/core";
+import {CookieService} from "ngx-cookie-service";
 
 @Component({
     selector: 'app-vm',
@@ -32,7 +34,7 @@ export class VmComponent implements OnInit, OnDestroy {
         public user: User,
         private userService: UserService,
         public authService: AuthService,
-        public slugifyPipe: SlugifyPipe,
+        public slugifyPipe: SlugifyPipe
     ) {
     }
 
