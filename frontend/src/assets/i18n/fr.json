@@ -218,7 +218,7 @@
   "vm.error.403": "Session expirée ou permissions insuffisantes",
   "vms.loading": "Chargement...",
   "vms.listTitle": "Mes VMs",
-  "vms.listTitleAdmin": "Liste des VMs",f
+  "vms.listTitleAdmin": "Liste des VMs",
   "vms.ipHistory": "Historique des IP",
   "vms.noVms": "Vous n'avez actuellement pas de VMs créées, créez-en une dans un premier temps !",
   "vms.noVmsAdmin": "Aucune VM créée !",
