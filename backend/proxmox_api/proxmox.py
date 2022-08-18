@@ -9,6 +9,7 @@ from proxmox_api.util import *
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration  
 from proxmox_api.db.db_functions import *
+from proxmox_api.mail import sendMail, mailHTMLGenerator
 from ipaddress import IPv4Network
 from threading import Thread
 import time
@@ -736,6 +737,9 @@ def get_user_ip_list(user_id) :
     :rtype: int, dict
 """
 def get_freeze_state(username):
+    msg = mailHTMLGenerator(4, date.today(), 1)
+    print(msg)
+    sendMail("nathanstchepinsky@gmail.com", msg)
     try :
         freezeState = getFreezeState(username)
     except Exception as e : 
@@ -782,6 +786,7 @@ def check_cotisation_job(app):
     :rtype: int, dict
 """
 def check_update_cotisation(username):
+        
         
         #headers = {"Authorization": req_headers}
         headers = {"X-API-KEY": config.ADH6_API_KEY}
