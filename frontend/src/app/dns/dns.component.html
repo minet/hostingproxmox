@@ -77,9 +77,9 @@
 
               <div class="input-group mt-3">
                 <div class="input-group-prepend">
-                  <span class="input-group-text" id="ip-address-prepend">{{'dns.form.ip' | translate}}IP Address</span>
+                  <span class="input-group-text" id="ip-address-prepend">{{'dns.form.ip' | translate}}</span>
                 </div>
-                <input type="text" class="form-control" id="ip" aria-label="IP Address"
+                <input type="text" class="form-control" id="ip" aria-label="{{'dns.form.ip' | translate}}"
                        aria-describedby="ip-address-prepend"
                        [(ngModel)]="newDns.ip" name="ip"
                        required="required"
