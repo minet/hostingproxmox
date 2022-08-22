@@ -10,6 +10,7 @@ from proxmox_api.db.db_functions import *
 from ipaddress import IPv4Network
 from threading import Thread
 import time
+from __main__ import create_app
 import connexion
 logging.basicConfig(filename="log", filemode="a", level=logging.INFO
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -90,23 +91,49 @@ def is_admin(memberOf):
     else:
         return False
 
+"""
+del_vm_list(vmid)
+            return {"state": "vm deleted"}, 201
+"""
+
 def delete_vm(vmid, node):
+    # First we delete the vm from proxmox
+    isProxmoxDeleted = False
+    isDatabaseDeleted = False 
+
+    # First we delete the vm from proxmox if exist
     try:
         if get_vm_status(vmid, node)[0]['status'] == 'stopped':
             proxmox.nodes(node).qemu(vmid).delete()
-            del_vm_list(vmid)
-            return {"state": "vm deleted"}, 201
+            isProxmoxDeleted = True
         else:
             stop_vm(vmid, node)
             while get_vm_status(vmid, node)[0]['status'] != 'stopped':
                 sleep(1)
             proxmox.nodes(node).qemu(vmid).delete()
-            del_vm_list(vmid)
-            return {"state": "vm deleted"}, 201
+            isProxmoxDeleted = True
     except Exception as e:
         print("Problem in delete_vm: " + str(e))
         logging.error("Problem in delete_vm: " + str(e))
-        return {"state": "error"}, 500
+        isProxmoxDeleted = False 
+
+    # Then we delete friom the database
+    try :
+        del_vm_list(vmid)
+        isDatabaseDeleted = True
+    except Exception as e :
+        print("Problem in delete_vm: " + str(e))
+        logging.error("Problem in delete_vm: " + str(e))
+        isDatabaseDeleted = False 
+    
+    if isDatabaseDeleted or isProxmoxDeleted : # if at least one vm is deleted then its ok (in case of an error during the creation for example, or both if the vm il fully created)
+        return {"state": "vm deleted"}, 201
+    else : 
+        return {"error": "VM not found. Impossible to delete it"}, 404
+
+    
+    
+        
 
     """_summary_
     Create a VM with the infos given by the user
@@ -211,6 +238,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     When the VM is up, the password, vm user name and ssh key are set up
     """
 def config_vm(vmid, node, password, vm_user,main_ssh_key):
+    app,_ = create_app()
     sync = False
     vm = proxmox.nodes(node).qemu(vmid)
     while not sync:  # Synchronisation
@@ -281,7 +309,11 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
 
 
     # if we are here then the VM is well created
-    update_vm_status(vmid, "created")
+    with app.app_context():
+        delete_vm(vmid, node)
+        update_vm_status(vmid,"deleted", errorCode=500)
+
+    #update_vm_status(vmid, "created")
     
 
 
