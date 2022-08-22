@@ -139,7 +139,7 @@ export class HomeComponent implements OnInit {
     }
 
     if (!isOk){
-      this.passwordErrorMessage = "Your password must contains at least <br/>" + this.passwordErrorMessage
+      this.passwordErrorMessage =  this.utils.getTranslation("home.password.requirementIntro") + "<br/>" + this.passwordErrorMessage
     }
     
     return isOk;

@@ -39,6 +39,7 @@ export class VmsComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
+            console.log(this.user)
             this.user.vms = Array<Vm>();
             if((this.user.chartevalidated && this.user.cotisation) || this.user.admin) {
                 this.get_vms(); // on laisse une seconde pour charger l'user avant de check si il a validé
@@ -131,16 +132,16 @@ export class VmsComponent implements OnInit, OnDestroy {
         const newTimer = timer(0, 30000).pipe(
             mergeMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
-                    vm.name = rep.body['name'].strip();
-                    vm.status = rep.body['status'].stip();
+                    vm.name = rep.body['name'].trim();
+                    vm.status = rep.body['status'].trim();
                     vm.user = rep.body['user'];
                     vm.ip = rep.body['ip'][0];
                     vm.uptime = rep.body['uptime'];
                     vm.createdOn = rep.body['created_on'];
                     if (rep.body['type'] === 'nginx_vm') {
-                        vm.type = this.utils.getTranslation("home.vm_type.web");
+                        vm.type = "web_server";
                     } else if (rep.body['type'] === 'bare_vm') {
-                        vm.type = this.utils.getTranslation("home.vm_type.bare");
+                        vm.type = "bare_vm";
                     } else {
                         vm.type = this.utils.getTranslation("vms.type.unknow");
                     }
