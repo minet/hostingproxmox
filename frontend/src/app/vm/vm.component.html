@@ -1,35 +1,36 @@
-<div *ngIf="(loading || deleting) && (user.chartevalidated || user.admin) && (errorcode !== 500)">
+<div *ngIf="(loading || deletionStatus != 'None') && (user.chartevalidated || user.admin) && (errorcode !== 500)">
     <div class="d-flex justify-content-center">
         <div class="spinner-grow text-primary" role="status">
             <span class="sr-only">{{'vm.loading' | translate}}</span>
         </div>
     </div>
 </div>
-<div *ngIf="errorcode !== 201" class="alert alert-danger text-center" role="alert">
-    <b>Oups...</b><br>
+<div *ngIf="errorcode !== 201 && errorcode !== 200" class="alert alert-danger text-center" role="alert">
+    <br>{{ displayError(errorcode)}}<br>
     {{ errorDescription }}
     <br><br>
-    {{ displayError(errorcode) }}
+    
     <br><a [routerLink]="['/']">{{'vm.errorBackHome' | translate}}</a>
 </div>
-<div class="container text-center" *ngIf="!loading && !deleting && errorcode === 201 && (user.chartevalidated || user.admin)">
+<div class="container text-center" *ngIf="!loading  && errorcode === 201 && (user.chartevalidated || user.admin)">
     <h1 class="text-center mb-2">VM: {{ user.vms[0].name }}</h1>
     <hr>
     <div class="alert"
          [ngClass]="{
-                    'alert-danger': user.vms[0].status === 'stopped',
+                    'alert-danger': user.vms[0].status === 'stopped' || deletionStatus == 'deleting' ,
                     'alert-info': user.vms[0].status === 'creating',
                     'alert-warning': user.vms[0].status === 'booting',
-                    'alert-success': user.vms[0].status === 'running'
+                    'alert-success': user.vms[0].status === 'running' || deletionStatus == 'deleted'
                     }"
     ><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
-           *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating'"></span>{{'vm.status' | translate}} :&nbsp;{{ user.vms[0].status }}
+           *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || deletionStatus == 'deleting' || deletionStatus == 'deleted'"></span>{{'vm.status' | translate}} :&nbsp;{{ deletionStatus != 'None' ? deletionStatus  : user.vms[0].status | translate }}
     </div>
+    <div *ngIf="deletionStatus != 'deleting' && deletionStatus != 'deleted'">
     <hr>
-    <div class="row">
+    <div class="row" >
         <div class="col-md-6">
             <div class="card">
-                <div class="card-body">
+                <div class="card-body" >
                     <h4>{{'vm.information' | translate}}</h4>
                     <hr>
                     <div class="row">
@@ -113,21 +114,22 @@
     </div>
 
     <hr>
+    </div>
 
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
                     <div class="btn-group">
-                        <button type="button" *ngIf="user.vms[0].status != 'creating'" class="btn btn-danger"
+                        <button type="button" *ngIf="user.vms[0].status != 'creating'" class="btn btn-danger" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
                                 (click)="delete_vm()">{{'vm.delete' | translate}}
                         </button>
                         <!-- <button type="button" class="btn btn-primary" *ngIf="!editing" (click)="edit()">Edit</button> -->
                         <!--<button type="button" class="btn btn-primary" *ngIf="editing" (click)="editing = false;">Confirm</button>-->
-                        <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'stopped'"
+                        <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'stopped'"  [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
                                 (click)="commit_edit('start')">{{'vm.start' | translate}}
                         </button>
-                        <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'running'"
+                        <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'running'" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
                                 (click)="commit_edit('stop')">{{'vm.stop' | translate}}
                         </button>
                     </div>

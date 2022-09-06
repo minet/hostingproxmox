@@ -212,13 +212,14 @@ def vm_creation_status(vmid) :
         jsonFile.close()
     try : 
         vm = jsonObject[str(vmid)]
+        print(vm)
         if vm == None : 
             return None 
         else: 
             status = vm["status"]
             if status == "error":
                 return (status, vm["httpErrorCode"], vm["errorMessage"])
-            elif status == "creating" or status == "created": 
+            elif status == "creating" or status == "created" or status == "deleting" or status == "deleted" : 
                 return (status, None, None)
             else: 
                 return ("error", 500, "Impossible to retrieve the status of the vm")

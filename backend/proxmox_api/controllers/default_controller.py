@@ -2,6 +2,7 @@ from logging import error
 import connexion
 import requests
 import json
+from threading import Thread
 from requests.api import head
 from slugify import slugify
 from proxmox_api import proxmox
@@ -129,11 +130,13 @@ def delete_vm_id(vmid):  # noqa: E501
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
-                return proxmox.delete_vm(vmid, node)
+                Thread(target=proxmox.delete_vm, args=(vmid, node,)).start()
+                return {"status": "deleting"}, 200
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
-        return proxmox.delete_vm(vmid, node)
+        Thread(target=proxmox.delete_vm, args=(vmid, node,)).start()
+        return {"status": "deleting"}, 200
     else:
-        return {"status": "error"}, 500
+        return {"error": "An error occured while deleting the VM"}, 500
 
 def is_cotisation_uptodate():
     headers = {"Authorization": connexion.request.headers["Authorization"]}
@@ -257,7 +260,7 @@ def get_vm_id(vmid):  # noqa: E501
 
     if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
         return {"error": "You don't have the right permissions"}, 403
-
+    
     node = proxmox.get_node_from_vm(vmid)
     if not node:
         return {"error": "Impossible to retrieve the vm"}, 404
@@ -265,9 +268,9 @@ def get_vm_id(vmid):  # noqa: E501
     status = proxmox.get_vm_status(vmid, node)
     type = dbfct.get_vm_type(vmid)
     created_on = get_vm_created_on(vmid)
+    
 
-
-    proxmoxStart = time.time()
+   
     (vmConfig, response) = proxmox.get_vm_config(vmid, node)
     #print("get_vm_config for " , vmid , " took ")
 
@@ -293,6 +296,10 @@ def get_vm_id(vmid):  # noqa: E501
         print("error while getting config : " + str(e))
         return {"error": "error while getting config : " + str(e)}, 500
 
+    
+
+
+    proxmoxStart = time.time()
     if is_cotisation_uptodate() == 0 and not admin:
         return {"error": "cotisation expired"}, 403
 

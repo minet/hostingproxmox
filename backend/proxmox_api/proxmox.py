@@ -96,22 +96,52 @@ del_vm_list(vmid)
             return {"state": "vm deleted"}, 201
 """
 
-def delete_vm(vmid, node):
+def delete_vm(vmid, node, dueToError = False):
     # First we delete the vm from proxmox
-    isProxmoxDeleted = False
-    isDatabaseDeleted = False 
+    isProxmoxDeleted = True
+    isDatabaseDeleted = True 
+    if not dueToError : # if not due to an error, then we return to the user the current state of the deletion
+        update_vm_status(vmid, "deleting")
+
+    if dueToError : # we wait for the vm to start in case if it was a problem during the creation
+        sleep(3)
 
     # First we delete the vm from proxmox if exist
     try:
         if get_vm_status(vmid, node)[0]['status'] == 'stopped':
+            print("vm is stopped")
             proxmox.nodes(node).qemu(vmid).delete()
-            isProxmoxDeleted = True
         else:
+            sync = False
+            while not sync:  # Synchronisation
+                try:
+                    if "lock" not in get_vm_status(vmid, node)[0]['status']:  # Si lockée, on attend
+                        sync = True
+                        sleep(1)
+                except ResourceException:  # Exception si pas encore synchronisés
+                    sleep(1)
             stop_vm(vmid, node)
-            while get_vm_status(vmid, node)[0]['status'] != 'stopped':
+            print("status",  get_vm_status(vmid, node)[0]['status'])
+            while get_vm_status(vmid, node)[0]['status'] != 'stopped' :  # Si lockée, on attend:
+                print("status",  get_vm_status(vmid, node)[0]['status'])
                 sleep(1)
-            proxmox.nodes(node).qemu(vmid).delete()
-            isProxmoxDeleted = True
+                print("sleep")
+            
+            proxmox.nodes(node).qemu(vmid).delete() # need to wait for the deletion but work
+            sync = False # we wait for the deletion to be done
+            counter = 0 # after 2 min of sync, we timeout
+            while not sync:
+                if counter >= 120 :
+                    print("Deleting the vm " , vmid, " timed out")
+                    return {"error": "Timeout while deleting the vm"}, 500
+                try:
+                    get_vm_status(vmid, node)[0]['status']
+                    counter += 1
+                    sleep(1)
+                except ResourceException: # The VM cannot be retrieved : it is deleted
+                    sync = True
+
+            print("isProxmoxDeleted: " + str(isProxmoxDeleted))
     except Exception as e:
         print("Problem in delete_vm: " + str(e))
         logging.error("Problem in delete_vm: " + str(e))
@@ -119,17 +149,28 @@ def delete_vm(vmid, node):
 
     # Then we delete friom the database
     try :
-        del_vm_list(vmid)
         isDatabaseDeleted = True
+        app,_ = create_app() # we need the context to delete the vm if there is an error
+        db.init_app(app.app)
+        with app.app.app_context():
+            del_vm_list(vmid)
+            
     except Exception as e :
         print("Problem in delete_vm: " + str(e))
-        logging.error("Problem in delete_vm: " + str(e))
+        logging.error("Problem in delete_vm: " + str(e)) 
         isDatabaseDeleted = False 
-    
-    if isDatabaseDeleted or isProxmoxDeleted : # if at least one vm is deleted then its ok (in case of an error during the creation for example, or both if the vm il fully created)
-        return {"state": "vm deleted"}, 201
-    else : 
-        return {"error": "VM not found. Impossible to delete it"}, 404
+    if not dueToError :
+        if isDatabaseDeleted and isProxmoxDeleted :
+            print("vm deleted")
+            update_vm_status(vmid, node, "deleted", deleteEntry=True)
+        else : # an error occured 
+            print("vm not deleted : ", "An unkonwn error occured while deleting your vm(vmid ="+str(vmid) +"). Please ask an admin to verify the deletion state for your vm id")
+            update_vm_status(vmid,"An unkonwn error occured while deleting your vm(vmid ="+str(vmid) +"). Please ask an admin to verify the deletion state for your vm id", errorCode=500)
+    else : # due to an error
+        if isDatabaseDeleted or isProxmoxDeleted : # if at least one vm is deleted then its ok (in case of an error during the creation for example, or both if the vm il fully created)
+            return {"state": "vm deleted"}, 201
+        else : 
+            return {"error": "VM not found. Impossible to delete it"}, 404
 
     
     
@@ -216,18 +257,16 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         else:
             return {"error": "vm type not defines"}, 400
 
-
+    
 
     except Exception as e:
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
-        delete_vm(next_vmid, node)
         return {"error": "Impossible to create the VM (cloning)"}, 500
     
 
     if not update_vm_status(next_vmid, "creating"):
         print("Problem while updating the vm status")
-        delete_vm(next_vmid, node)
         return {"error": "Impossible to update the VM status"}, 500
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key, )).start()
     return {"vmId": next_vmid}, 201
@@ -238,7 +277,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     When the VM is up, the password, vm user name and ssh key are set up
     """
 def config_vm(vmid, node, password, vm_user,main_ssh_key):
-    app,_ = create_app()
+    
     sync = False
     vm = proxmox.nodes(node).qemu(vmid)
     while not sync:  # Synchronisation
@@ -259,7 +298,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
     except Exception as e:
         update_vm_status(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
-        return delete_vm(vmid, node)
 
 
     try:
@@ -269,7 +307,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
     except Exception as e:
         update_vm_status(vmid,"An error occured while creating the user  (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting user: " + str(e))
-        return delete_vm(vmid, node)
         
 
     try:
@@ -279,7 +316,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
     except Exception as e:
         update_vm_status(vmid,"An error occured while setting your ssh key (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
-        return delete_vm(vmid, node)
 
     # We give an ip to the VM before it starts 
     #try : 
@@ -290,13 +326,15 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
     #            update_vm_status(vmid,"An error" + str(status) + " occured while setting your ip #address (vmid ="+str(vmid) +")", errorCode=500)
     #            logging.error("Problem in create_vm(" + str(vmid) + ") when updating ips")
     #            print("Problem in create_vm(" + str(vmid) + ") when updating ips: " ,body, status )
-    #            return delete_vm(vmid, node)
+    #            with app.app.app_context():
+                    #return delete_vm(vmid, node, dueToError=True)
     #       
     #except Exception as e: 
     #    update_vm_status(vmid,"An unkonwn error occured while setting your ip address (vmid ="+str#(vmid) +")", errorCode=500)
     #    logging.error("Problem in create_vm(" + str(vmid) + ") when updating ips." )
     #    print("Problem in create_vm(" + str(vmid) + ") when updating ips: ", e )
-    #    #return delete_vm(vmid, node)
+    #    #with app.app.app_context():
+            #return delete_vm(vmid, node, dueToError=True)
     #    return 1
 
     try:
@@ -305,15 +343,10 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
     except Exception as e:
         update_vm_status(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
-        return delete_vm(vmid, node)
 
 
     # if we are here then the VM is well created
-    with app.app_context():
-        delete_vm(vmid, node)
-        update_vm_status(vmid,"deleted", errorCode=500)
-
-    #update_vm_status(vmid, "created")
+    update_vm_status(vmid, "created")
     
 
 
@@ -443,6 +476,7 @@ Return all the configuration info related to a VM, it combines name,  cpu, disk,
 def get_vm_config(vmid, node):
     # first we check the vm creation status : 
     vm_creation = vm_creation_status(vmid)
+    print("vm_creation : " + str(vm_creation))
     if vm_creation != None : # if not then the vm is created of not found
         (status, httpErrorCode, errorMessage) = vm_creation 
         if status == "error":
@@ -453,6 +487,11 @@ def get_vm_config(vmid, node):
                 return {"error", "An unknown error occured"}, 500
         elif status == "creating" : 
             return {"status" : "creating"}, 200
+        elif status == "deleting":
+            return {"status" : "deleting"}, 200
+        elif status == "deleted":
+            update_vm_status(vmid, "deleted", deleteEntry= True) # We send to the user and delete here
+            return {"status": "deleted"}, 200
         elif  status == "created" : 
             update_vm_status(vmid, "delete", deleteEntry= True) # We send to the user and delete here
             return {"status": "created"}, 201

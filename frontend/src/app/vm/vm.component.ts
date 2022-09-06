@@ -7,10 +7,11 @@ import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Subscription, timer} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
+import {delay, mergeMap} from 'rxjs/operators';
 import {TranslateService} from "@ngx-translate/core";
 import {CookieService} from "ngx-cookie-service";
 import {Utils} from "../common/utils";
+import { ThisReceiver } from '@angular/compiler';
 
 @Component({
     selector: 'app-vm',
@@ -23,7 +24,7 @@ export class VmComponent implements OnInit, OnDestroy {
     editing = false;
     errorcode = 201;
     errorDescription = "";
-    deleting = false;
+    deletionStatus = "None";
     intervals = new Set<Subscription>();
     newVm = new Vm();
     history: any;
@@ -78,7 +79,6 @@ export class VmComponent implements OnInit, OnDestroy {
 
 
     commit_edit(status: string): void {
-
         const data = {
             status,
         };
@@ -89,23 +89,47 @@ export class VmComponent implements OnInit, OnDestroy {
             this.loading = false;
             this.errorcode = error.status;
         });
-
     }
 
     delete_vm(): void {
-        this.deleting = true;
-        this.http.delete(this.authService.SERVER_URL + '/vm/' + this.vmid).subscribe(rep => {
-                this.deleting = false;
-                this.router.navigate(['vms']);
+        this.deletionStatus = "deleting";
+         this.http.delete(this.authService.SERVER_URL + '/vm/' + this.vmid).subscribe(rep => {
+
+            const deletionTimer = timer(0, 3000).pipe(
+            mergeMap(() =>  this.http.get(this.authService.SERVER_URL + '/vm/' +this.vmid, {observe: 'response'}))).subscribe(rep => {
+                        const vmstate = rep.body['status'];
+                        if(vmstate == "deleted"){
+                            deletionTimer.unsubscribe();
+                            this.deletionStatus = "deleted";
+                            setTimeout(() =>this.router.navigate(['vms']), 2000);
+                        }
+                      },
+                    error => {
+                        if (error.status == 403 || error.status == 404){ // the vm is deleted 
+                            deletionTimer.unsubscribe();
+                            this.deletionStatus = "deleted";
+                            setTimeout(() =>this.router.navigate(['vms']), 2000);
+                        } else {
+                            deletionTimer.unsubscribe();
+                            this.loading = false;
+                              this.errorcode = error.status;
+                              this.errorDescription = error.error["error"];
+                        }
+                       
+                          
+                    });
+                this.intervals.add(deletionTimer);
             },
 
             error => {
                 this.loading = false;
-                this.deleting = false;
+                this.deletionStatus  = "None";
                 this.errorcode = error.status;
                 this.errorDescription = error.statusText;
             });
+        
     }
+
 
     get_vm(vmid): void {
         const vm = new Vm();
@@ -115,6 +139,8 @@ export class VmComponent implements OnInit, OnDestroy {
         const newTimer = timer(0, 3000).pipe(
             mergeMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
+
+                console.log(rep)
                     if(this.user.admin)
                         this.get_ip_history(vmid);
                     vm.name = rep.body['name'];

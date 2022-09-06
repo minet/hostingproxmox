@@ -127,7 +127,7 @@ export class HomeComponent implements OnInit {
       isOk = false;
     }
     if (!special.test(vm.password)){
-      this.passwordErrorMessage += this.utils.getTranslation("home.password.lowercase") + "<br>";
+      this.passwordErrorMessage += this.utils.getTranslation("home.password.special_char") + "<br>";
       isOk = false;
     }
 
