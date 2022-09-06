@@ -9,6 +9,8 @@ install_dependencies_angular:
   image: node
   before_script:
     - cd frontend
+    - export http_proxy="http://192.168.104.61:82/"
+    - export https_proxy="http://192.168.104.61:82/"
   script:
     - npm ci --prefer-offline --no-audit
   artifacts:
