@@ -65,6 +65,8 @@ angular_build:
   needs: 
     - install_dependencies_angular
   before_script:
+    - export http_proxy="http://192.168.102.61:82/"
+    - export https_proxy="http://192.168.102.61:82/"
     - cd frontend
     - NG_CLI_ANALYTICS=ci
     - export NODE_OPTIONS=--openssl-legacy-provider
