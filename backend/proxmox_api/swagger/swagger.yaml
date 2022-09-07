@@ -85,6 +85,13 @@ paths:
         schema:
           type: string
           example: "105"
+      - name: dueToError
+        in: query
+        description: optional parameter set to true (1) if the deletion is due to an error 
+        required: false
+        schema:
+          type: string
+          example: "0"
       responses:
         "201":
           description: deleted vm by id

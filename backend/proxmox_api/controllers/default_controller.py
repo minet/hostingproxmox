@@ -94,7 +94,7 @@ def create_vm(body=None):  # noqa: E501
     return proxmox.create_vm(body.name, body.type, user_id, body.password, body.user, body.ssh_key)
 
 
-def delete_vm_id(vmid):  # noqa: E501
+def delete_vm_id(vmid, dueToError=0):  # noqa: E501
     """delete vm by id
 
      # noqa: E501
@@ -133,7 +133,7 @@ def delete_vm_id(vmid):  # noqa: E501
                 Thread(target=proxmox.delete_vm, args=(vmid, node,)).start()
                 return {"status": "deleting"}, 200
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
-        Thread(target=proxmox.delete_vm, args=(vmid, node,)).start()
+        Thread(target=proxmox.delete_vm, args=(vmid, node, bool(dueToError))).start()
         return {"status": "deleting"}, 200
     else:
         return {"error": "An error occured while deleting the VM"}, 500
