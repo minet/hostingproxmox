@@ -12,20 +12,26 @@
     
     <br><a [routerLink]="['/']">{{'vm.errorBackHome' | translate}}</a>
 </div>
-<div class="container text-center" *ngIf="!loading  && errorcode === 201 && (user.chartevalidated || user.admin)">
+<div class="container text-center" *ngIf="!loading && errorcode === 201 && (user.chartevalidated || user.admin)">
     <h1 class="text-center mb-2">VM: {{ user.vms[0].name }}</h1>
     <hr>
     <div class="alert"
          [ngClass]="{
-                    'alert-danger': user.vms[0].status === 'stopped' || deletionStatus == 'deleting' ,
+                    'alert-danger': user.vms[0].status === 'stopped' || deletionStatus == 'deleting' || user.vms[0].status === 'Not found',
                     'alert-info': user.vms[0].status === 'creating',
                     'alert-warning': user.vms[0].status === 'booting',
                     'alert-success': user.vms[0].status === 'running' || deletionStatus == 'deleted'
                     }"
-    ><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
-           *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || deletionStatus == 'deleting' || deletionStatus == 'deleted'"></span>{{'vm.status' | translate}} :&nbsp;{{ deletionStatus != 'None' ? deletionStatus  : user.vms[0].status | translate }}
+    >
+    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
+           *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || deletionStatus == 'deleting' || deletionStatus == 'deleted' "></span> 
+           <div *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || user.vms[0].status === 'running' || deletionStatus == 'deleting' || deletionStatus == 'deleted'" >{{'vm.status' | translate}} :&nbsp;{{ deletionStatus != 'None' ? deletionStatus  : user.vms[0].status | translate }}</div>
+
+           <div *ngIf="user.vms[0].status == 'Not found'"><strong>Error 404 : {{'vm.error.404' | translate}}</strong><br> <p  [innerHtml]="'vm.error.404.description' | translate"></p></div>
+
     </div>
-    <div *ngIf="deletionStatus != 'deleting' && deletionStatus != 'deleted'">
+    
+    <div *ngIf="deletionStatus != 'deleting' && deletionStatus != 'deleted' && user.vms[0].status != 'Not found'">
     <hr>
     <div class="row" >
         <div class="col-md-6">

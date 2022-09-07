@@ -164,9 +164,17 @@ export class VmComponent implements OnInit, OnDestroy {
                     }
 
                     this.loading = false;
+                    console.log("vm.statis", vm.status)
                 },
                 error => {
-                    this.errorcode = error.status;
+                    if(error.status == 404){
+                        vm.status = "Not found";
+                        this.loading = false;
+
+                    } else {
+                        this.errorcode = error.status;
+                    }
+                    
                 });
         this.intervals.add(newTimer);
 
