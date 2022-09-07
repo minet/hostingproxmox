@@ -235,6 +235,7 @@
   "vm.error.500": "Erreur interne, contactez notre webmaster ! (webmaster@minet.net)",
   "vm.error.404": "VM non existante",
   "vm.error.403": "Session expirée ou permissions insuffisantes",
+  "vm.error.404.description": "Cet id de VM est associé à votre compte mais n'a pas été retrouvée.<br> Si vous avez essayé de la supprimer, ré-essayez<br> Sinon, contacter un admin",
   "vms.loading": "Chargement...",
   "vms.listTitle": "Mes VMs",
   "vms.listTitleAdmin": "Liste des VMs",

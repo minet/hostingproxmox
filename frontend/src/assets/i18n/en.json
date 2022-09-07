@@ -235,6 +235,7 @@
   "vm.error.500": "Internal error, please contact our webmaster ! (webmaster@minet.net)",
   "vm.error.404": "VM not found",
   "vm.error.403": "Session expired or wrong permissions !",
+  "vm.error.404.description": "This vmid is registred in your account but cannot be found.<br> If you tried to delete it, you can try again.<br> If not, contact an admin.",
   "vms.loading": "Loading...",
   "vms.listTitle": "My Vms",
   "vms.listTitleAdmin": "VMs List",
