@@ -53,8 +53,8 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
                                                 }"
                                   >
                                       <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
-                                            *ngIf="vm.status === 'booting'  || vm.status === 'creating'"></span>{{ vm.status }}</span>
-                                    &nbsp;{{ vm.name }}&nbsp;<small class="text-muted">(#{{ vm.id }})</small>&nbsp;<small *ngIf="user.admin" class="text-muted">- {{ vm.user }}</small>
+                                            *ngIf="vm.status === 'booting'  || vm.status === 'creating' || !loading"></span>{{ vm.status }}</span>
+                                    &nbsp;{{ vm.name }}&nbsp;<small clallass="text-muted">(#{{ vm.id }})</small>&nbsp;<small *ngIf="user.admin" class="text-muted">- {{ vm.user }}</small>
                                     <br/>
                                     <br/>
                                     <p>{{ "vms.createdOn" | translate}} : {{vm.createdOn}}</p>

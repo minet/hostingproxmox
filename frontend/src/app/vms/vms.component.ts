@@ -143,7 +143,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                     } else if (rep.body['type'] === 'bare_vm') {
                         vm.type = "bare_vm";
                     } else {
-                        vm.type = this.utils.getTranslation("vms.type.unknow");
+                        vm.type = "unknow";
                     }
 
                     if (last) {
@@ -151,6 +151,13 @@ export class VmsComponent implements OnInit, OnDestroy {
                     }
                 },
                 error => {
+                    vm.name = this.utils.getTranslation('vm.error.404');
+                    vm.status = "Error " + error.status;
+                    vm.createdOn = this.utils.getTranslation("vms.type.unknow")
+                    vm.type = "unknow";
+                    if (last) {
+                        this.loading = false;
+                    }
                     this.errorcode = error.status;
                 });
         this.intervals.add(newTimer);
