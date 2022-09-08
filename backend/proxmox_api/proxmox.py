@@ -10,7 +10,7 @@ from proxmox_api.db.db_functions import *
 from ipaddress import IPv4Network
 from threading import Thread
 import time
-from __main__ import create_app
+from proxmox_api.__main__ import create_app
 import connexion
 logging.basicConfig(filename="log", filemode="a", level=logging.INFO
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -98,8 +98,10 @@ del_vm_list(vmid)
 
 def delete_vm(vmid, node, dueToError = False):
     # First we delete the vm from proxmox
+    print("deletion due to error : " + str(dueToError))
     isProxmoxDeleted = True
     isDatabaseDeleted = True 
+    
     if not dueToError : # if not due to an error, then we return to the user the current state of the deletion
         update_vm_status(vmid, "deleting")
 
