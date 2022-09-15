@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Vm} from '../models/vm';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {User} from '../models/user';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
@@ -28,6 +28,9 @@ export class VmComponent implements OnInit, OnDestroy {
     intervals = new Set<Subscription>();
     newVm = new Vm();
     history: any;
+    input_vm_id = ""; // for the deletion pop up
+    vm_has_error = false;
+    vm_has_proxmox_error = false;
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -93,7 +96,14 @@ export class VmComponent implements OnInit, OnDestroy {
 
     delete_vm(): void {
         this.deletionStatus = "deleting";
-         this.http.delete(this.authService.SERVER_URL + '/vm/' + this.vmid).subscribe(rep => {
+        this.errorDescription = "";
+        var url = this.authService.SERVER_URL + '/vm/' + this.vmid;
+        if(this.vm_has_error ){
+            url = this.authService.SERVER_URL + '/vmWithError/' + this.vmid;
+        }
+        console.log(this.errorDescription)
+        console.log(url)
+         this.http.delete(url).subscribe(rep => {
 
             const deletionTimer = timer(0, 3000).pipe(
             mergeMap(() =>  this.http.get(this.authService.SERVER_URL + '/vm/' +this.vmid, {observe: 'response'}))).subscribe(rep => {
@@ -164,20 +174,19 @@ export class VmComponent implements OnInit, OnDestroy {
                     }
 
                     this.loading = false;
-                    console.log("vm.statis", vm.status)
+                    console.log("vm.status", vm.status)
                 },
                 error => {
-                    if(error.status == 404){
-                        vm.status = "Not found";
-                        this.loading = false;
-
-                    } else {
-                        this.errorcode = error.status;
+                    if(error.status == 500 && error.error["error"] == "VM not found in proxmox"){
+                       this.vm_has_proxmox_error = true;
                     }
-                    
+                    this.errorcode = error.status;
+                    this.errorDescription = error.error["error"];
+                    this.vm_has_error = true;
+                    console.log(this.vm_has_error)
+                    this.loading = false;
                 });
         this.intervals.add(newTimer);
-
     }
 
     get_ip_history(vmid): void {

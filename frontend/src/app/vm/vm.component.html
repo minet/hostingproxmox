@@ -5,19 +5,12 @@
         </div>
     </div>
 </div>
-<div *ngIf="errorcode !== 201 && errorcode !== 200" class="alert alert-danger text-center" role="alert">
-    <br>{{ displayError(errorcode)}}<br>
-    {{ errorDescription }}
-    <br><br>
-    
-    <br><a [routerLink]="['/']">{{'vm.errorBackHome' | translate}}</a>
-</div>
-<div class="container text-center" *ngIf="!loading && errorcode === 201 && (user.chartevalidated || user.admin)">
+<div class="container text-center" *ngIf="!loading && (user.chartevalidated || user.admin)">
     <h1 class="text-center mb-2">VM: {{ user.vms[0].name }}</h1>
     <hr>
     <div class="alert"
          [ngClass]="{
-                    'alert-danger': user.vms[0].status === 'stopped' || deletionStatus == 'deleting' || user.vms[0].status === 'Not found',
+                    'alert-danger': user.vms[0].status === 'stopped' || deletionStatus == 'deleting' || vm_has_error,
                     'alert-info': user.vms[0].status === 'creating',
                     'alert-warning': user.vms[0].status === 'booting',
                     'alert-success': user.vms[0].status === 'running' || deletionStatus == 'deleted'
@@ -27,11 +20,14 @@
            *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || deletionStatus == 'deleting' || deletionStatus == 'deleted' "></span> 
            <div *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || user.vms[0].status === 'running' || deletionStatus == 'deleting' || deletionStatus == 'deleted'" >{{'vm.status' | translate}} :&nbsp;{{ deletionStatus != 'None' ? deletionStatus  : user.vms[0].status | translate }}</div>
 
-           <div *ngIf="user.vms[0].status == 'Not found'"><strong>Error 404 : {{'vm.error.404' | translate}}</strong><br> <p  [innerHtml]="'vm.error.404.description' | translate"></p></div>
+           <div *ngIf="vm_has_error"><strong>{{"vm.error" | translate}} {{errorcode}} : {{utils.getHttpErrorMessage(errorcode)}}</strong><br> 
+            <p  *ngIf="vm_has_proxmox_error" [innerHtml]="'vm.error.404.description' | translate"></p>
+        
+        </div>
 
     </div>
     
-    <div *ngIf="deletionStatus != 'deleting' && deletionStatus != 'deleted' && user.vms[0].status != 'Not found'">
+    <div *ngIf="deletionStatus != 'deleting' && deletionStatus != 'deleted' && !vm_has_error">
     <hr>
     <div class="row" >
         <div class="col-md-6">
@@ -127,8 +123,8 @@
             <div class="card">
                 <div class="card-body">
                     <div class="btn-group">
-                        <button type="button" *ngIf="user.vms[0].status != 'creating'" class="btn btn-danger" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
-                                (click)="delete_vm()">{{'vm.delete' | translate}}
+                        <button type="button" *ngIf="(!vm_has_error && user.vms[0].status != 'creating') || vm_has_proxmox_error" class="btn btn-danger" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
+                        data-toggle="modal" data-target="#deleteVMModal">{{'vm.delete' | translate}}
                         </button>
                         <!-- <button type="button" class="btn btn-primary" *ngIf="!editing" (click)="edit()">Edit</button> -->
                         <!--<button type="button" class="btn btn-primary" *ngIf="editing" (click)="editing = false;">Confirm</button>-->
@@ -143,6 +139,30 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="deleteVMModal" tabindex="-1" role="dialog" aria-labelledby="deleteVMModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="popUpAlertTitle"> {{ 'vm.delete.popup.title' | translate }} {{ this.vmid }}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                      <label for="input_vm_id" class="col-form-label">{{ "vm.delete.popup.desc" | translate }}<br><br>{{ "vm.delete.popup.prompt.label" | translate }}:</label>
+                      <input type="text" class="form-control" id="input_vm_id" [(ngModel)]="this.input_vm_id" name="input_vm_id" [placeholder]="this.vmid" value=""/>
+                    </div>
+                  </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary btn-danger" [disabled]="this.input_vm_id != this.vmid" (click)="delete_vm()" data-dismiss="modal" >{{"vm.delete" | translate}} </button>
+            </div>
+          </div>
+        </div>
+      </div>
     <div class="row" style="margin-top: 20px;" *ngIf="this.user.admin">
         <div class="col-12">
             <div class="card">
