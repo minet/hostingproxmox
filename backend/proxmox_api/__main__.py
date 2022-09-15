@@ -5,6 +5,7 @@ from flask_apscheduler import APScheduler
 
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
+from proxmox_api.db.db_models import db
 
 def create_app():
 
@@ -28,7 +29,7 @@ def conf_jobs(app):
     app.app.config['SCHEDULER_API_ENABLE'] = False
 
 
-from proxmox_api.db.db_models import db
+
 
 
 
