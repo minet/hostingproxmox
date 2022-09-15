@@ -85,13 +85,6 @@ paths:
         schema:
           type: string
           example: "105"
-      - name: dueToError
-        in: query
-        description: optional parameter set to true (1) if the deletion is due to an error 
-        required: false
-        schema:
-          type: string
-          example: "0"
       responses:
         "201":
           description: deleted vm by id
@@ -128,6 +121,29 @@ paths:
           description: "invalid input, object invalid"
         "404":
           description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /vmWithError/{vmid}:
+    delete:
+      operationId: delete_vm_id_with_error
+      parameters:
+      - name: vmid
+        in: path
+        description: vmid to delete
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: "105"
+      responses:
+        "201":
+          description: deleted vm by id
+        "400":
+          description: "invalid input, object invalid"
+        "404":
+          description: vm not found
+        "500":
+          description: An internal error occured
       x-openapi-router-controller: proxmox_api.controllers.default_controller
   /dns:
     get:
