@@ -8,6 +8,8 @@
 
 - [Frontend possibility to destroy a ghost VM](http://gitlabint.priv.minet.net/hosting/api/-/commit/f08bb4b4889441978ea8aacbe1f435b2f1fe6923) - *The user can now open it and it doesn't load forever in the VM list page*
 
+- [Add a pop up to validate a VM deletion](http://gitlabint.priv.minet.net/hosting/api/-/commit/c23f28c24523cb1bf26db835a189ed7f56355725)
+
 ## Changed 
 - [Upgrade angular to angular 14](http://gitlabint.priv.minet.net/hosting/api/-/commit/2a336475bed2c6fed987c0e175ec79e29b278070)
 
