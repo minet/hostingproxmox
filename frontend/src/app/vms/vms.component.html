@@ -1,16 +1,16 @@
 <div *ngIf="loading && (user.chartevalidated || user.admin)">
     <div class="d-flex justify-content-center">
         <div class="spinner-grow text-primary" role="status">
-            <span class="sr-only">Loading...</span>
+            <span class="sr-only">{{ "vms.loading" | translate}}</span>
         </div>
         
     </div>
 </div>
 
 <div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.cotisation === 1) || this.user.admin)" >
-    <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
-    <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
-    <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">IP History</button></div>
+    <h1 class="text-center mb-2" *ngIf="!user.admin">{{ "vms.listTitle" | translate}}</h1>
+    <h1 class="text-center mb-2" *ngIf="user.admin">{{ "vms.listTitleAdmin" | translate}}</h1>
+    <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">{{ "vms.ipHistory" | translate}}</button></div>
 
     <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
                     aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
@@ -18,18 +18,18 @@
     <div class="text-center">
         
         <ng-container *ngIf="user.vms.length == 0 && !user.admin && !loading">
-            <h4 class="text-danger">You currently have no VMs, create one first!</h4>
+            <h4 class="text-danger">{{ "vms.noVms" | translate}}</h4>
         </ng-container>
         <ng-container *ngIf="user.vms.length == 0 && user.admin && !loading">
-            <h4 class="text-danger">No VMs created</h4>
+            <h4 class="text-danger">{{ "vms.noVmsAdmin" | translate}}</h4>
         </ng-container>
         <ng-container *ngIf="user.vms.length != 0 && !user.admin">
-            <button *ngIf="!loading" class="btn btn-primary" (click)="scrollSsh(ssh)">Show the web-based SSH interface</button>
+            <button *ngIf="!loading" class="btn btn-primary" (click)="scrollSsh(ssh)">{{ "vms.showSsh" | translate}}</button>
         </ng-container>
     </div>
     <hr>
     <div>
-        <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf="!loading && user.vms.length !=0 "><span>VM's information are refreshed every 30s</span></div>
+        <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf="!loading && user.vms.length !=0 "><span>{{ "vms.refresh" | translate}}</span></div>
         <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
             
             <div class="col-12" >
@@ -38,7 +38,7 @@
                          style='background-image: url("assets/images/vms/{{ vm.type }}.png"); height: 100px;
 background-position: 50% 50%; background-size: 100%; position: relative'>
                         <small class="text-white m-2"
-                               style="position: absolute; right: 0; bottom: 0">{{ vm.type }}</small>
+                               style="position: absolute; right: 0; bottom: 0">{{ vm.type | translate}}</small>
                     </div>
                     <div class="card-body">
                         <h4 class="card-title">
@@ -53,19 +53,19 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
                                                 }"
                                   >
                                       <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
-                                            *ngIf="vm.status === 'booting'  || vm.status === 'creating'"></span>{{ vm.status }}</span>
-                                    &nbsp;{{ vm.name }}&nbsp;<small class="text-muted">(#{{ vm.id }})</small>&nbsp;<small *ngIf="user.admin" class="text-muted">by {{ vm.user }}</small>
+                                            *ngIf="vm.status === 'booting'  || vm.status === 'creating' || !loading"></span>{{ vm.status }}</span>
+                                    &nbsp;{{ vm.name }}&nbsp;<small clallass="text-muted">(#{{ vm.id }})</small>&nbsp;<small *ngIf="user.admin" class="text-muted">- {{ vm.user }}</small>
                                     <br/>
                                     <br/>
-                                    <p>Created on: {{vm.createdOn}}</p>
+                                    <p>{{ "vms.createdOn" | translate}} : {{vm.createdOn}}</p>
 
                                 </div>
                                 <div class="col-6">
                                     <div class="spinner-grow text-primary" role="status" *ngIf="vm.createdOn == null">
-                                        <span class="sr-only">Loading...</span>
+                                        <span class="sr-only">{{ "vms.createdOn" | translate}}</span>
                                     </div>
                                     <p class="text-right">{{ vm.ip }}</p>
-                                    <p class="text-right" *ngIf="vm.status == 'running'">Uptime: {{secondsToDhms(vm.uptime)}} </p>
+                                    <p class="text-right" *ngIf="vm.status == 'running'">{{ "vms.uptime" | translate}} : {{secondsToDhms(vm.uptime)}} </p>
                                 </div>
 
                             </div>
@@ -83,13 +83,12 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
     </div>
 </div><br/>
 <div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
-    <b>Expired subscription</b>
-    <p>To manage your VMs you have to renew your subscription ! <a href="https://payment.minet.net/">click here</a> to renew your subscription</p>
+    <b>{{'vms.subscription.expired_1' | translate}}</b>
+    <p>{{'vms.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'vms.subscription.expired_3' | translate}}</a> {{'vms.subscription.expired_4' | translate}}</p>
 </div>
-
 <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.cotisation ===1">
-    <b>Unsigned charter !</b>
-    <p>To manage your VMs you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+    <b>{{'vms.charter.notsigned_1' | translate}}</b>
+    <p>{{'vms.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'vms.charter.notsigned_3' | translate}}</a> {{'vms.charter.notsigned_4' | translate}}</p>
 </div>
 <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
                 aria-label="Default pagination"></ngb-pagination>

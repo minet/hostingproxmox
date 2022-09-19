@@ -5,6 +5,12 @@ import typing
 import re
 import json
 import proxmox_api.config.configuration as  config 
+from flask_apscheduler import APScheduler
+import proxmox_api.config.configuration as config
+from proxmox_api import encoder
+import connexion
+from flask_cors import CORS
+from flask_apscheduler import APScheduler
 
 def _deserialize(data, klass):
     """Deserializes dict, list, str into an object.
@@ -196,8 +202,8 @@ def check_dns_entry(entry:str) -> bool:
 
 
 
-"""Return the vm creation status retrieved in the json file
-    Possible status are created, creating and error
+"""Return the vm creation state retrieved in the json file
+    Possible status are created, creating, deleting, deleted and error
     If status == error,  error code and errorMessage explain the error
     If not, its are None
 
@@ -206,19 +212,20 @@ def check_dns_entry(entry:str) -> bool:
     :return: (status, httpErrorCode, errorMessage)
     :rtype:  Tuple[str, str, str]
 """
-def vm_creation_status(vmid) :
+def get_vm_state(vmid) :
     with open(config.VM_CREATION_STATUS_JSON) as jsonFile:
         jsonObject = json.load(jsonFile)
         jsonFile.close()
     try : 
         vm = jsonObject[str(vmid)]
+        print(vm)
         if vm == None : 
             return None 
         else: 
             status = vm["status"]
             if status == "error":
                 return (status, vm["httpErrorCode"], vm["errorMessage"])
-            elif status == "creating" or status == "created": 
+            elif status == "creating" or status == "created" or status == "deleting" or status == "deleted" : 
                 return (status, None, None)
             else: 
                 return ("error", 500, "Impossible to retrieve the status of the vm")
@@ -228,7 +235,10 @@ def vm_creation_status(vmid) :
 
 
 
-"""Update the vm creation status json file
+
+
+
+"""Update the vm creation state json file
 
     :param entry: 
         - vmid : the id of the vm creating
@@ -239,7 +249,7 @@ def vm_creation_status(vmid) :
     :return: True if success else False
     :rtype: bool
 """
-def update_vm_status(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
+def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
     with open(config.VM_CREATION_STATUS_JSON) as jsonFile:
         jsonObject = json.load(jsonFile)
         jsonFile.close()
@@ -261,3 +271,14 @@ def update_vm_status(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
     except Exception as e: 
         print("An error occured while updating the vm creation status dict : " , e)
         return False
+
+def create_app():
+
+    app = connexion.App(__name__, specification_dir='./swagger/')
+
+    app.app.json_encoder = encoder.JSONEncoder
+
+    app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
+
+    return app
+

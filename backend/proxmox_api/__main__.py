@@ -5,18 +5,36 @@ from flask_apscheduler import APScheduler
 
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
+from proxmox_api.db.db_models import db
 
-app = connexion.App(__name__, specification_dir='./swagger/')
+def create_app():
 
-app.app.json_encoder = encoder.JSONEncoder
+    app = connexion.App(__name__, specification_dir='./swagger/')
 
-app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
+    app.app.json_encoder = encoder.JSONEncoder
 
-CORS(app.app)
+    app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
 
-scheduler = APScheduler()
+    CORS(app.app)
 
-app.add_api('swagger.yaml', arguments={'title': 'Proxmox'}, pythonic_params=True)
+    scheduler = APScheduler()
+
+    app.add_api('swagger.yaml', arguments={'title': 'Proxmox'}, pythonic_params=True)
+    return app, scheduler
+
+
+
+def conf_jobs(app):
+    app.app.config['JOBS'] = JOBS
+    app.app.config['SCHEDULER_API_ENABLE'] = False
+
+
+
+
+
+
+## init db
+app, scheduler = create_app() 
 
 JOBS = [
         {
@@ -28,15 +46,8 @@ JOBS = [
         }
     ]
 
-app.app.config['JOBS'] = JOBS
-app.app.config['SCHEDULER_API_ENABLE'] = False
+conf_jobs(app)
 
-
-from proxmox_api.db.db_models import db
-
-
-
-## init db
 
 db.init_app(app.app)
 with app.app.app_context():

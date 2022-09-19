@@ -8,12 +8,14 @@ import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Observable, Subscription, timer} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 import {ActivatedRoute, Router} from "@angular/router";
+import {Utils} from "../common/utils";
 
 @Component({
     selector: 'app-vms',
     templateUrl: './vms.component.html',
     styleUrls: ['./vms.component.css']
 })
+
 export class VmsComponent implements OnInit, OnDestroy {
     loading = true;
     intervals = new Set<Subscription>();
@@ -24,17 +26,20 @@ export class VmsComponent implements OnInit, OnDestroy {
     totalVm = 0;
     pagesAlreadyLoaded = new Array<number>();
     public validToken$: Observable<boolean>;
+
     constructor(private http: HttpClient,
                 private activatedRoute: ActivatedRoute,
                 private router: Router,
                 public user: User,
                 private userService: UserService,
+                private utils: Utils,
                 public authService: AuthService,
-                public slugifyPipe: SlugifyPipe, ) {
+                public slugifyPipe: SlugifyPipe) {
     }
 
     ngOnInit(): void {
         setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
+            console.log(this.user)
             this.user.vms = Array<Vm>();
             if((this.user.chartevalidated && this.user.cotisation) || this.user.admin) {
                 this.get_vms(); // on laisse une seconde pour charger l'user avant de check si il a validé
@@ -127,18 +132,18 @@ export class VmsComponent implements OnInit, OnDestroy {
         const newTimer = timer(0, 30000).pipe(
             mergeMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
-                    vm.name = rep.body['name'];
-                    vm.status = rep.body['status'];
+                    vm.name = rep.body['name'].trim();
+                    vm.status = rep.body['status'].trim();
                     vm.user = rep.body['user'];
                     vm.ip = rep.body['ip'][0];
                     vm.uptime = rep.body['uptime'];
                     vm.createdOn = rep.body['created_on'];
                     if (rep.body['type'] === 'nginx_vm') {
-                        vm.type = 'web server';
+                        vm.type = "web_server";
                     } else if (rep.body['type'] === 'bare_vm') {
-                        vm.type = 'bare vm';
+                        vm.type = "bare_vm";
                     } else {
-                        vm.type = 'not defined';
+                        vm.type = "unknow";
                     }
 
                     if (last) {
@@ -146,6 +151,13 @@ export class VmsComponent implements OnInit, OnDestroy {
                     }
                 },
                 error => {
+                    vm.name = this.utils.getTranslation('vm.error.404');
+                    vm.status = "Error " + error.status;
+                    vm.createdOn = this.utils.getTranslation("vms.type.unknow")
+                    vm.type = "unknow";
+                    if (last) {
+                        this.loading = false;
+                    }
                     this.errorcode = error.status;
                 });
         this.intervals.add(newTimer);

@@ -10,31 +10,38 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a class="nav-link" href="#" [routerLink]="['/']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">Home</a>
+        <a class="nav-link" href="#" [routerLink]="['']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">Home</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">My VMs</a>
-        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">VMs Admin</a>
+        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']">{{'navbar.vms.user' | translate}}</a>
+        <a class="nav-link" href="#" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['vms']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">{{'navbar.vms.admin' | translate}}</a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >MiNET DNS entries</a>
-        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >DNS Admin</a>
+        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && !user.admin && user.chartevalidated" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.dns.user' | translate}}</a>
+        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.dns.admin' | translate}}</a>
       </li>
-
     </ul>
     <ul class="navbar-nav">
       <li class="nav-item">
         <a class="nav-link" *ngIf="(validToken$ | async)" href="https://adh6.minet.net">{{user.name}}</a>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" [routerLink]="['manual']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >User manual</a>
+        <a href="#" class="nav-link" [routerLink]="['manual']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.guide' | translate}}</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" *ngIf="this.cookie.get('lang') == 'fr'" class="nav-link dropdown-toggle">FR</a>
+        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" *ngIf="this.cookie.get('lang') == 'en'" class="nav-link dropdown-toggle">EN</a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" *ngIf="this.cookie.get('lang') != 'fr'" (click)="this.changeLanguage('fr');">FR</a>
+          <a class="dropdown-item" *ngIf="this.cookie.get('lang') != 'en'" (click)="this.changeLanguage('en');">EN</a>
+        </div>
       </li>
       <li class="nav-item">
-        <a href="#" class="nav-link" *ngIf="!(validToken$ | async)" (click)="userService.login()">Login</a>
+        <a href="#" class="nav-link" *ngIf="!(validToken$ | async)" (click)="userService.login()">{{'navbar.login' | translate}}</a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link" *ngIf="(validToken$ | async)" (click)="userService.logout()">Logout</a>
+        <a class="nav-link" *ngIf="(validToken$ | async)" (click)="userService.logout()">{{'navbar.logout' | translate}}</a>
       </li>
     </ul>
   </div>

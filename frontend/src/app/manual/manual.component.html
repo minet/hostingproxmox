@@ -1,173 +1,154 @@
 <div style="margin-left: 40px;">
-    <h1 class="toc-header" id="manuel-dutilisation"> Manuel d'Utilisation</h1>
+    <h1 class="toc-header" id="manuel-dutilisation"> {{'manual.title' | translate}}</h1>
     <div>
     </div>
-    <h2 class="toc-header" id="version-française"> Version Française</h2>
-    <div>
-    </div>
-    <h3 class="toc-header" id="hosting-cest-quoi"> Hosting, c'est quoi ?</h3>
+    <h2 class="toc-header" id="hosting-cest-quoi"> {{'manual.p1.title' | translate}}</h2>
     <div>
     </div>
     <p>
-        Le service d'hébergement "<strong>MiNET Hosting</strong>" permet aux adhérents de MiNET de créer des Machines
-        Virtuelles et de les stocker dans les serveurs MiNET.
+        {{'manual.p1_1' | translate}} "<strong>{{'manual.p1_2' | translate}}</strong>" {{'manual.p1_3' | translate}}
     </p>
     <div>
     </div>
-    <h3 class="toc-header" id="une-vm-cest-quoi"> Une VM, c'est quoi ?</h3>
+    <h2 class="toc-header" id="une-vm-cest-quoi"> {{'manual.p2.title' | translate}}</h2>
     <div>
     </div>
     <blockquote>
         <p>
-            Une machine virtuelle, ou « virtual machine », est « le client » créé dans un environnement informatique, «
-            l’hôte ». Plusieurs machines virtuelles peuvent coexister sur un seul hôte. Les principaux fichiers qui
-            constituent une machine virtuelle sont un fichier journal, un fichier de paramètres de RAM non volatile, un
-            fichier de disque virtuel et un fichier de configuration - <strong>VMware</strong>
+            {{'manual.p2_1' | translate}} <strong>{{'manual.p2_2' | translate}}</strong>
         </p>
     </blockquote>
     <div>
     </div>
-    <h3 class="toc-header" id="une-vm-pourquoi"> Une VM, pourquoi ?</h3>
+    <h2 class="toc-header" id="une-vm-pourquoi"> {{'manual.p3.title' | translate}}</h2>
     <div>
     </div>
     <p>
-        Une VM peut servir d'espace de stockage, de bac à sable pour des tests de développement, de plateforme d'hébergement
-        de site web... Les possibilitées sont multiples !
+        {{'manual.p3_1_1' | translate}} <br> {{'manual.p3_1_2' | translate}} <br>
     </p>
     <div>
     </div>
-    <h3 class="toc-header" id="une-vm-comment"> Une VM, comment ?</h3>
+    <h2 class="toc-header" id="une-vm-comment"> {{'manual.p4.title' | translate}}</h2>
     <div>
     </div>
     <p>
-        Le service MiNET Hosting vous offre la possbilité de créer une ou des VMs en quelques clics.<br>
-        Vous devez tout d'abord vous identifier avec vos IDs MiNET dans la section Login.
-    </p>
-    <div>
-    </div>
-    <p>
-        Dans l'onglet "Your VMs", vous pouvez procéder à la création en spécifiant notamment le nom de votre VM, si vous voulez une
-        authentification par clé SSH ou non, et le nom d'utilisateur de la VM (évitez root pour ne pas avoir de conflits)
-        ainsi que le mot de passe.
+        {{'manual.p4_1' | translate}}
     </p>
     <div>
     </div>
     <p>
-        La VM créée dispose de spécificités techniques qui dépendent du template utilisé. Il est possible de changer ces
-        paramètres sous présentation d'un justificatif auprès de l'équipe MiNET.
+        {{'manual.p4_2' | translate}}
     </p>
     <div>
     </div>
     <p>
-        Les deux templates disponibles sont :
+        {{'manual.p4_3' | translate}}
+    </p>
+    <div>
+    </div>
+    <p>
+        {{'manual.p4_4' | translate}}
     </p>
     <div>
     </div>
     <ul>
         <li>
-            <strong>Bare VM</strong> : crée une VM que vous pouvez manier à votre convenance. Il s'agit d'un modèle de base
-            composé de openssh, fail2ban, et les utilitaires debian par défaut.
+            <strong>{{'manual.p4_5.title' | translate}}</strong> {{'manual.p4_5.description' | translate}}
         </li>
     </ul>
     <div>
     </div>
     <blockquote class="is-info">
         <p>
-            Ce template est composé de <strong>2 GO de Ram</strong>, <strong>2 coeurs CPU virtuels</strong> et <strong>10 Go
-            de stockage</strong>.
+            {{'manual.p4_5.detail_1' | translate}} <strong>{{'manual.p4_5.detail_2' | translate}}</strong>, <strong>{{'manual.p4_5.detail_3' | translate}}</strong> {{'manual.p4_5.detail_4' | translate}} <strong>{{'manual.p4_5.detail_5' | translate}}</strong>.
         </p>
     </blockquote>
     <div>
     </div>
     <ul>
         <li>
-            <strong>Static web server</strong> : déploie une VM avec un serveur web (Wordpress) prêt à l'emploi.
+            <strong>{{'manual.p4_6.title' | translate}}</strong> {{'manual.p4_6.description' | translate}}
         </li>
     </ul>
     <div>
     </div>
     <blockquote class="is-info">
         <p>
-            Ce template est composé de <strong>1 GO de Ram</strong>, <strong>1 coeur CPU virtuel</strong> et <strong>3 Go de
-            stockage</strong>.
+            {{'manual.p4_6.detail_1' | translate}} <strong>{{'manual.p4_6.detail_2' | translate}}</strong>, <strong>{{'manual.p4_6.detail_3' | translate}}</strong> {{'manual.p4_6.detail_4' | translate}} <strong>{{'manual.p4_6.detail_5' | translate}}</strong>.
         </p>
     </blockquote>
     <div>
     </div>
     <p>
-        Une fois votre formulaire de création de VM validé, il vous faudra <strong>attendre environ 3 minutes</strong> selon
-        le template souhaité pour que la création de la VM s'effectue.
+        {{'manual.p4_7_1' | translate}} <strong>{{'manual.p4_7_2' | translate}}</strong>, {{'manual.p4_7_3' | translate}}
     </p>
     <div>
     </div>
     <p>
-        Vous aurez ensuite accès à votre VM dans l'onglet "Your VMs".<br>
-        L'IP de votre VM sera en 157.159.195.X
+        {{'manual.p4_8_1' | translate}}<br>
+        {{'manual.p4_8_2' | translate}}
     </p>
     <div>
     </div>
     <blockquote class="is-warning">
-        <p>Attention : Il n'est possible de créer que 2 VM par adhérent.</p>
+        <p>{{'manual.p4_9' | translate}}</p>
     </blockquote>
     <div>
     </div>
-    <h3 class="toc-header" id="sshKeyGenerationFr">Comment générer des clés ssh</h3>
+    <h2 class="toc-header" id="sshKeyGenerationFr">{{'manual.p5.title' | translate}}</h2>
     <div>
     </div>
-    <p>La connexion en SSH à votre VM se fait obligatoirement grâce à une clé SSH. Elles sont bien plus sécurisées que des mots de passes.</p>
-    <p>Sur votre machine exécutez : </p>
+    <p>{{'manual.p5_1' | translate}}</p>
+    <p>{{'manual.p5_2_1' | translate}} </p>
     <ul>
-        <li><code>ssh-keygen -t ecdsa</code></li>
-        <li>Suivez les instructions. <strong>Nous vous conseillons de les protéger par un mot de passe comme suggérer par l'invite de commande !</strong></li>
-        <li>Copier la clé qui est enregistrée dans le fichier <code>~/.ssh/id_[typeClé].pub</code></li>
-        <li>Collez votre clés publiques dans le champ de hosting !</li>
+        <li><code>{{'manual.p5_2_2' | translate}}</code></li>
+        <li>{{'manual.p5_2_3' | translate}} <strong>{{'manual.p5_2_4' | translate}}</strong></li>
+        <li>{{'manual.p5_2_5' | translate}} <code>{{'manual.p5_2_6' | translate}}</code></li>
+        <li>{{'manual.p5_2_7' | translate}}</li>
     </ul>
     <blockquote class="is-warning">
-        <p>Attention : Sélectionnez bien la clé en <code>.pub</code> ! L'autre est votre clé privée. Elle doit le rester ! </p>
+        <p>{{'manual.p5_2_8' | translate}} <code>{{'manual.p5_2_9' | translate}}</code> {{'manual.p5_2_10' | translate}}</p>
     </blockquote>
-    <h3 class="toc-header" id="après-création-que-faire"> Après la création, que faire ?</h3>
+    <h2 class="toc-header" id="après-création-que-faire"> {{'manual.p6.title' | translate}}</h2>
     <div>
     </div>
-    <p>Vous pouvez dans un premier temps vous connecter sur votre VM. Il existe deux manières :</p>
+    <p>{{'manual.p6_1_1' | translate}}</p>
     <div>
     </div>
     <ul>
-        <li>via votre terminal en exécutant la commande<br>
-            <code>ssh &lt;nomd'utilisateur&gt;@&lt;ipdevotrevm&gt;</code><br>
-            Puis en entrant votre mot de passe.
+        <li>{{'manual.p6_1_2' | translate}}<br>
+            <code>{{'manual.p6_1_3' | translate}}</code><br>
+            {{'manual.p6_1_4' | translate}}
         </li>
-        <li>via l'utilitaire webssh intégré sur notre site qui vous permet de vous connecter directement sur votre
-            navigateur. Il vous faudra aussi entrer l'IP de votre machine et les identifiants que vous avez entré lors de la
-            création.
+        <li>{{'manual.p6_1_5' | translate}}
         </li>
     </ul>
     <div>
     </div>
-    <h3 class="toc-header" id="une-entrée-dns-pour-quoi-faire"> Une entrée DNS, pour quoi faire ?</h3>
+    <h2 class="toc-header" id="une-entrée-dns-pour-quoi-faire"> {{'manual.p7.title' | translate}}</h2>
     <div>
     </div>
     <blockquote>
         <p>
-            Le DNS permet d’associer un nom compréhensible, à une adresse IP. On associe donc une adresse logique, le nom de
-            domaine, à une adresse physique l’adresse IP. - <strong>Nameshield</strong>
+            {{'manual.p7_1_1' | translate}} <strong>{{'manual.p7_1_2' | translate}}</strong>
         </p>
     </blockquote>
     <div>
     </div>
     <p>
-        Dans l'onglet MiNET DNS entries, vous pouvez choisir d'ajouter une adresse à votre service web en <a class="is-external-link" href="http://nomdevotresite.h.minet.net">nomdevotresite.h.minet.net</a>
+        {{'manual.p7_2_1' | translate}} <a class="is-external-link" href="{{'manual.p7_2_2' | translate}}">{{'manual.p7_2_2' | translate}}</a>
     </p>
     <div>
     </div>
     <p>
-        Il vous suffit d'entrer le nom textuel que vous souhaitez obtenir et l'IP de votre serveur.<br>
-        Vous pourrez ensuite accéder à votre site via son entrée DNS.<br>
-        Exemple : <a class="is-external-link" href="http://toto.h.minet.net">toto.h.minet.net</a>
+        {{'manual.p7_3_1' | translate}}<br>
+        {{'manual.p7_3_2' | translate}}<br>
+        {{'manual.p7_3_3' | translate}} <a class="is-external-link" href="{{'manual.p7_3_4' | translate}}">{{'manual.p7_3_4' | translate}}</a>
     </p>
     <div>
     </div>
     <p>
-        Pour obtenir la certification HTTPS, lancez le script /opt/certbot.sh nom_de_votre_domaine sur votre VM.
+        {{'manual.p7_4' | translate}}
     </p>
     <div>
     </div>
@@ -175,178 +156,7 @@
     <div>
     </div>
     <p>
-        En cas de problèmes, de questions ou d'observations, contactez-nous sur <a class="is-external-link" href="https://tickets.minet.net">https://tickets.minet.net</a>
-    </p>
-    <div>
-    </div>
-    <h2 class="toc-header" id="version-anglaise"> English Version</h2>
-    <div>
-    </div>
-    <h3 class="toc-header" id="hosting-cest-quoi"> What's Hosting ?</h3>
-    <div>
-    </div>
-    <p>
-        <strong>MiNET Hosting</strong> is a hosting service provided by the MiNET association, that allows its members to create Virtual Machines and to store it within the servers of the association.
-    </p>
-    <div>
-    </div>
-    <h3 class="toc-header" id="une-vm-cest-quoi"> What's a VM ?</h3>
-    <div>
-    </div>
-    <blockquote>
-        <p>
-            A Virtual Machine (VM), is "the client" created by an IT environment, "the host". Many virtual machines can coexist with the same host.
-            The main files that constitute a virtual machine are : a journal file,
-            a setting file for RAM, a virtual disk file and a configuration file. - <strong>VMware</strong>
-        </p>
-    </blockquote>
-    <div>
-    </div>
-    <h3 class="toc-header" id="une-vm-pourquoi"> Why would I use a VM ?</h3>
-    <div>
-    </div>
-    <p>
-        A VM can be used as a storage area, a sandbox to make development tests, a hosting platform for websites... <br>The only limit is your imagination.
-    </p>
-    <div>
-    </div>
-    <h3 class="toc-header" id="une-vm-comment"> How can I create a VM ?</h3>
-    <div>
-    </div>
-    <p>
-        The MiNET Hosting service allows you to create a VM in just a few clicks.
-        You must firstly enter your MiNET credentials in the "Login" tab.
-    </p>
-    <div>
-    </div>
-    <p>
-        In the "Your VMs" tab, you may start to create your VM, by entering the name of your VM,
-        choosing the possibility to configure an SSH Key-Based Authentication,
-        and credentials (username/password) for the user in your VM (avoid "root" as a username in order not to face conflicts).
-    </p>
-    <div>
-    </div>
-    <p>
-        The created VM has technicals aspects which depends of the template used. It's possible to change these characteristics
-        by contacting the MiNET team with justification.
-    </p>
-    <div>
-    </div>
-    <p>
-        The two avaiable templates are :
-    </p>
-    <div>
-    </div>
-    <ul>
-        <li>
-            <strong>Bare VM</strong> : creates a fully customizable VM. It's the default model, that contains openssh, fail2ban, and the class debian packages.
-        </li>
-    </ul>
-    <div>
-    </div>
-    <blockquote class="is-info">
-        <p>
-            This template is composed of <strong>2 Go RAM</strong>, <strong>2 virtual CPU hearts</strong> and <strong>10 Go for storage</strong>.
-        </p>
-    </blockquote>
-    <div>
-    </div>
-    <ul>
-        <li>
-            <strong>Static web server</strong> : creates a VM with a ready for use web server (Wordpress).
-        </li>
-    </ul>
-    <div>
-    </div>
-    <blockquote class="is-info">
-        <p>
-            This template is composed of <strong>1 Go RAM</strong>, <strong>1 virtual CPU hearts</strong> and <strong>3 Go for storage</strong>.
-        </p>
-    </blockquote>
-    <div>
-    </div>
-    <p>
-        Once your registration form is filled, <strong>you must wait a few minutes</strong>, depending on the template you've chose,
-        for your VM to be created.
-    </p>
-    <div>
-    </div>
-    <p>
-        You can access your VM through the "Your VMs" tab.<br>
-        Its IP will look like this address : "157.159.195.X".
-    </p>
-    <div>
-    </div>
-    <blockquote class="is-warning">
-        <p>Warning : you can't create more than 2 VMs.</p>
-    </blockquote>
-    <div>
-    </div>
-    <h3 class="toc-header" id="sshKeyGenerationEn">How can I generate ssh keys ? </h3>
-
-   
-    <div>
-    </div>
-    <p>The ssh connection with keys is mandatory. It is far more safe than using password.</p>
-    <p>On your laptop execute : </p>
-    <ul>
-        <li><code>ssh-keygen -t ecdsa</code></li>
-        <li>Follow the instructions. <strong>We strongly advice you to protect your keys with a passphrase, as suggested by the command prompt</strong>.</li>
-        <li>Copy the key which is saved in the file <code>~/.ssh/id_[keyType].pub</code></li>
-        <li>Paste your public key in the VM creation form on hosting.</li>
-    </ul>
-    <blockquote class="is-warning">
-        <p>WARNING : Be sure to select the key ending with <code>.pub</code> ! The other is your private key. It must remains private ! </p>
-    </blockquote>
-    <div>
-    </div>
-    <h3 class="toc-header" id="après-création-que-faire"> What should I do after my VM is up ?</h3>
-    <p>You can connect to your VM. There are two ways :</p>
-    <div>
-    </div>
-    <ul>
-        <li>via your shell, by executing the command <br>
-            <code>ssh &lt;nomd'utilisateur&gt;@&lt;ipdevotrevm&gt;</code><br>
-            and entering your password.
-        </li>
-        <li>via the openssh tool, that is directly incorporated on our website, that allows you to connect to the VM through your browser.
-            You'll then have to enter the IP address of your VM and its credentials.
-        </li>
-    </ul>
-    <div>
-    </div>
-    <h3 class="toc-header" id="une-entrée-dns-pour-quoi-faire"> Why would I use a DNS entry ?</h3>
-    <div>
-    </div>
-    <blockquote>
-        <p>
-            A DNS allows to associate a clear name to an IP address. - <strong>Nameshield</strong>
-        </p>
-    </blockquote>
-    <div>
-    </div>
-    <p>
-        In the "MiNET DNS entries" tab, you can choose to add an address to your website, it will look like :  <a class="is-external-link" href="http://yourwebsite.h.minet.net">yourwebsite.h.minet.net</a>
-    </p>
-    <div>
-    </div>
-    <p>
-        You simply have to write the name you want to use and the IP of your server.
-        You will therefore be allowed to access your site through the DNS entry.<br>
-        Exemple : <a class="is-external-link" href="http://toto.h.minet.net">toto.h.minet.net</a>
-    </p>
-    <div>
-    </div>
-    <p>
-        To obtain an HTTPS certification, launch the script : /opt/certbot.sh your_domain_name inside your VM.
-    </p>
-    <div>
-    </div>
-    <hr>
-    <div>
-    </div>
-    <p>
-        If you have any follow-up questions or if you face a problem, you can contact us on <a class="is-external-link" href="https://tickets.minet.net">https://tickets.minet.net</a>
+        {{'manual.p7_5_1' | translate}} <a class="is-external-link" href="{{'manual.p7_5_2' | translate}}">{{'manual.p7_5_2' | translate}}</a>
     </p>
     <div>
     </div>

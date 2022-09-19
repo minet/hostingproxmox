@@ -11,3 +11,4 @@ Flask-APScheduler
 flask_sqlalchemy
 dnspython
 mysqlclient
+proxmoxer

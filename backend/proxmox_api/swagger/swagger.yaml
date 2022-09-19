@@ -122,6 +122,29 @@ paths:
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /vmWithError/{vmid}:
+    delete:
+      operationId: delete_vm_id_with_error
+      parameters:
+      - name: vmid
+        in: path
+        description: vmid to delete
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: "105"
+      responses:
+        "201":
+          description: deleted vm by id
+        "400":
+          description: "invalid input, object invalid"
+        "404":
+          description: vm not found
+        "500":
+          description: An internal error occured
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
   /dns:
     get:
       summary: get all user's dns entries
