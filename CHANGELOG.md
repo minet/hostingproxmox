@@ -1,3 +1,26 @@
+# [Beta 2.0] 19-09-2022
+
+## Added 
+
+- [French translation](http://gitlabint.priv.minet.net/hosting/api/-/commit/e01fc085e4870f11ebdd4b9ace98ce090493105e) - *Add the whole french translation for the project.*
+
+- [API endpoint to handle vm deletion when an error occured](http://gitlabint.priv.minet.net/hosting/api/-/commit/22e6a051b376e535d7349a770d5b4474a09ac8bb)
+
+- [Frontend possibility to destroy a ghost VM](http://gitlabint.priv.minet.net/hosting/api/-/commit/f08bb4b4889441978ea8aacbe1f435b2f1fe6923) - *The user can now open it and it doesn't load forever in the VM list page*
+
+## Changed 
+- [Upgrade angular to angular 14](http://gitlabint.priv.minet.net/hosting/api/-/commit/2a336475bed2c6fed987c0e175ec79e29b278070)
+
+- [Complete re-definition of the deletion backend method](http://gitlabint.priv.minet.net/hosting/api/-/commit/e8ef687050a141040d2e522f8f818a7d221c3763) - *The deletion func is now devided in two func : delete_from_db and delete_from_proxmox. They are just deleting the VM from the two instances and are called internally or by default_controller depending of the type of deletion. A common deletion func in called in thread an handle the errors and the update of the vm state*.
+
+- [Update the VM creation status to get vm state to be more clearer](http://gitlabint.priv.minet.net/hosting/api/-/commit/09e9f488966d04f2ac730bbd9cd9526b9597c01c) 
+
+- [Better handle of http errors message in the fronted](http://gitlabint.priv.minet.net/hosting/api/-/commit/c23f28c24523cb1bf26db835a189ed7f56355725) - *Better handle errors message which directly embedd the http code, http code description and error description in the page. Add a pop up to force user to write down the VM id to validate the deletion*
+
+## Fixed 
+- [Fix the issue causing the impossibility to delete an existing VM when an error occured](http://gitlabint.priv.minet.net/hosting/api/-/issues/21) - *Fix issue #21. The VM deletion is 100% rewritten with a heavy and resilient process able to delete a VM when an error occured during its creation, delete a VM when the user wanted to do so (it was working before but without any feedback for the user)*
+
+- [A user can now open and display an 'ghost VM'](http://gitlabint.priv.minet.net/hosting/api/-/commit/f08bb4b4889441978ea8aacbe1f435b2f1fe6923) - *A ghost VM is a VM created in the db but not on proxmox. The was causing a infinite loading in the VM list page and an error while trying to display information about it.*
 # [Beta 1.2] 31-07-2022
 ## Fixed 
 
