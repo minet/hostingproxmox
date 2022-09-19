@@ -11,8 +11,6 @@ install_dependencies_angular:
     - npm config set proxy "http://192.168.102.61:82/"
     - npm config set https-proxy "http://192.168.102.61:82/"
     - cd frontend
-    - npm config set proxy "http://192.168.104.61:82/"
-    - npm config set https-proxy "http://192.168.104.61:82/"
   script:
     - npm ci --prefer-offline --no-audit
   artifacts:
