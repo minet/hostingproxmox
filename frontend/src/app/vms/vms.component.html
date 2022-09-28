@@ -8,13 +8,28 @@
 </div>
 
 <div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.cotisation === 1) || this.user.admin)" >
+    
     <h1 class="text-center mb-2" *ngIf="!user.admin">{{ "vms.listTitle" | translate}}</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">{{ "vms.listTitleAdmin" | translate}}</h1>
-    <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">{{ "vms.ipHistory" | translate}}</button></div>
-
+    <div class="text-center">
+        <button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">{{ "vms.ipHistory" | translate}}</button>
+        <br><br>
+    </div>
+    <div class="d-flex justify-content-around">
+        <div *ngIf="user.admin">
+        <div class="input-group">
+            <br><br>
+            <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" [(ngModel)]="this.searchFilter" />
+            <button type="button" class="btn btn-outline-primary" (click)="get_vms()">search</button>
+            <br>
+        </div>
+          </div>
+          <div>
     <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
-                    aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
-    
+                    aria-label="Default pagination" (pageChange)="loadPage()">
+                </ngb-pagination>
+            </div>
+    </div>
     <div class="text-center">
         
         <ng-container *ngIf="user.vms.length == 0 && !user.admin && !loading">
@@ -29,7 +44,7 @@
     </div>
     <hr>
     <div>
-        <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf="!loading && user.vms.length !=0 "><span>{{ "vms.refresh" | translate}}</span></div>
+        <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf=" user.vms.length !=0 "><span>{{ "vms.refresh" | translate}}</span></div>
         <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
             
             <div class="col-12" >
@@ -91,6 +106,6 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
     <p>{{'vms.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'vms.charter.notsigned_3' | translate}}</a> {{'vms.charter.notsigned_4' | translate}}</p>
 </div>
 <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
-                aria-label="Default pagination"></ngb-pagination>
+                aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
 <hr>
 

@@ -25,6 +25,7 @@ export class VmsComponent implements OnInit, OnDestroy {
     pageSize = 10;
     totalVm = 0;
     pagesAlreadyLoaded = new Array<number>();
+    searchFilter = "";
     public validToken$: Observable<boolean>;
 
     constructor(private http: HttpClient,
@@ -82,9 +83,15 @@ export class VmsComponent implements OnInit, OnDestroy {
     */
 
     get_vms(): void {
+        this.user.vms = Array<Vm>();
         if(this.user.chartevalidated || this.user.admin) {
+            this.loading = true;
             let vmList: Array<string>;
-            this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
+            var url = this.authService.SERVER_URL + '/vm'
+            if(this.searchFilter != ""){
+                url += '?search=' + this.searchFilter
+            }
+            this.http.get(url, {observe: 'response'}).subscribe(rep => {
                     vmList = rep.body as Array<string>;
 
                     // Initiate the list to construct all the pages if there aren't already
@@ -110,6 +117,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                     }
                 },
                 error => {
+                    this.loading = false;
                     this.errorcode = error.status;
                 });
                 
@@ -183,6 +191,11 @@ export class VmsComponent implements OnInit, OnDestroy {
             }
             this.pagesAlreadyLoaded.push(this.page);
         }
+    }
+
+    search(){
+        this.loading = true;
+
     }
 
 }
