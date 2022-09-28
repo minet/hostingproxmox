@@ -388,6 +388,95 @@ class DefaultApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
+    def delete_vm_id_with_error(self, vmid, **kwargs):  # noqa: E501
+        """delete_vm_id_with_error  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_vm_id_with_error(vmid, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str vmid: vmid to delete (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.delete_vm_id_with_error_with_http_info(vmid, **kwargs)  # noqa: E501
+        else:
+            (data) = self.delete_vm_id_with_error_with_http_info(vmid, **kwargs)  # noqa: E501
+            return data
+
+    def delete_vm_id_with_error_with_http_info(self, vmid, **kwargs):  # noqa: E501
+        """delete_vm_id_with_error  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.delete_vm_id_with_error_with_http_info(vmid, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str vmid: vmid to delete (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['vmid']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method delete_vm_id_with_error" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'vmid' is set
+        if ('vmid' not in params or
+                params['vmid'] is None):
+            raise ValueError("Missing the required parameter `vmid` when calling `delete_vm_id_with_error`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'vmid' in params:
+            path_params['vmid'] = params['vmid']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # Authentication setting
+        auth_settings = ['OAuth2']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/vmWithError/{vmid}', 'DELETE',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def get_dns(self, **kwargs):  # noqa: E501
         """get all user's dns entries  # noqa: E501
 
@@ -744,36 +833,36 @@ class DefaultApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_vm(self, **kwargs):  # noqa: E501
-        """get all user vms  # noqa: E501
+    def get_ip_list(self, **kwargs):  # noqa: E501
+        """get the list of a users ip addresses  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_vm(async_req=True)
+        >>> thread = api.get_ip_list(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :return: list[VmIdItem]
+        :return: list[HistoryIdItem]
                  If the method is called asynchronously,
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.get_vm_with_http_info(**kwargs)  # noqa: E501
+            return self.get_ip_list_with_http_info(**kwargs)  # noqa: E501
         else:
-            (data) = self.get_vm_with_http_info(**kwargs)  # noqa: E501
+            (data) = self.get_ip_list_with_http_info(**kwargs)  # noqa: E501
             return data
 
-    def get_vm_with_http_info(self, **kwargs):  # noqa: E501
-        """get all user vms  # noqa: E501
+    def get_ip_list_with_http_info(self, **kwargs):  # noqa: E501
+        """get the list of a users ip addresses  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_vm_with_http_info(async_req=True)
+        >>> thread = api.get_ip_list_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool
-        :return: list[VmIdItem]
+        :return: list[HistoryIdItem]
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -789,7 +878,7 @@ class DefaultApi(object):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
-                    " to method get_vm" % key
+                    " to method get_ip_list" % key
                 )
             params[key] = val
         del params['kwargs']
@@ -799,6 +888,99 @@ class DefaultApi(object):
         path_params = {}
 
         query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['OAuth2']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/ips', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='list[HistoryIdItem]',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def get_vm(self, filter, **kwargs):  # noqa: E501
+        """get all user vms  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_vm(filter, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str filter: filter to use (required)
+        :return: list[VmIdItem]
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.get_vm_with_http_info(filter, **kwargs)  # noqa: E501
+        else:
+            (data) = self.get_vm_with_http_info(filter, **kwargs)  # noqa: E501
+            return data
+
+    def get_vm_with_http_info(self, filter, **kwargs):  # noqa: E501
+        """get all user vms  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_vm_with_http_info(filter, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str filter: filter to use (required)
+        :return: list[VmIdItem]
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['filter']  # noqa: E501
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_vm" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'filter' is set
+        if ('filter' not in params or
+                params['filter'] is None):
+            raise ValueError("Missing the required parameter `filter` when calling `get_vm`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'filter' in params:
+            query_params.append(('filter', params['filter']))  # noqa: E501
 
         header_params = {}
 
