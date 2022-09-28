@@ -172,7 +172,6 @@ def delete_vm_id(vmid):  # noqa: E501
 # Delete the vm in a thread after the API endpoint is called. It's a workaround to avoid the timeout of the API endpoint. The behavior is different in the error handling if the deletion is trigger while an error or not
 def delete_vm_in_thread(vmid, node="", dueToError=False):
     util.update_vm_state(vmid, "deleting")
-    print('deleting vm ' + str(vmid))
     if node == "" and not dueToError:
         print("Impossible to find the vm to delete.")
         util.update_vm_state(vmid, "Impossible to find the vm to delete.", errorCode=404, deleteEntry=True)
@@ -187,9 +186,7 @@ def delete_vm_in_thread(vmid, node="", dueToError=False):
         # If not isProxmoxDeleted and dueToError then it's fine. 
     # Now we can delete the entry in the db
     isDbDeleted = proxmox.delete_from_db(vmid)
-    print("isDbDeleted : " + str(isDbDeleted))
     if (not dueToError and isDbDeleted and isProxmoxDeleted) or (dueToError and (isDbDeleted or not     isProxmoxDeleted)):
-        print("vm deleted")
         util.update_vm_state(vmid, "deleted", deleteEntry=True)
         return 1
     else : 
@@ -255,7 +252,7 @@ def get_dns():  # noqa: E501
     return proxmox.get_user_dns(user_id)
 
 
-def get_vm():  # noqa: E501
+def get_vm(search= ""):  # noqa: E501
     """get all user vms
 
      # noqa: E501
@@ -276,14 +273,15 @@ def get_vm():  # noqa: E501
         
         return {"error": "Cotisation expired"}, 403
 
-
+    print('filter : ', search)
     
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
-                return proxmox.get_vm()  # affichage de la liste sans condition
+                return proxmox.get_vm(search=search)  # affichage de la liste sans condition
+ 
     return proxmox.get_vm(user_id=user_id)
 
 
@@ -298,7 +296,6 @@ def get_vm_id(vmid):  # noqa: E501
     :rtype: VmItem
     """
     start = time.time()
-    print("backend api called " , vmid)
 
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
@@ -347,7 +344,6 @@ def get_vm_id(vmid):  # noqa: E501
 
 
     node = proxmox.get_node_from_vm(vmid)
-    print('node', node)
     if node == None and not admin: # exist in the db but not in proxmox. It's a error
         return {"error": "VM not found in proxmox"}, 500
     elif node == None and  admin:
@@ -361,7 +357,6 @@ def get_vm_id(vmid):  # noqa: E501
     (vmConfig, response) = proxmox.get_vm_config(vmid, node)
     #print("get_vm_config for " , vmid , " took ")
 
-    print("(vmConfig, response) = ", (vmConfig, response))
 
     if response == 500:
         print("500 error, vmConfig = ", vmConfig)
