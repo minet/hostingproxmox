@@ -163,40 +163,4 @@ def getNextVmID(min = 110): # get the next vmid available. The minimum whould no
             return vmid 
         
 
-def get_active_users(): # return actives users (ie those who have a vm)
-    list = []
-    for vm in Vm.query.all():
-        if vm.userId:
-            list.append(vm.userId)
-    return list
-
-
-def updateFreezeState(username, freezeState):
-    user = User.query.filter_by(id=username).first()
-    user.freezeState = freezeState
-    #print("update freeze state", user, username, freezeState)
-    db.session.commit()
-
-def getFreezeState(username):
-    user = User.query.filter_by(id=username).first()
-    if user is None:
-        print("user not found", username)
-        return None
-    return user.freezeState
-
-def getLastNotificationDate(username):
-    user = User.query.filter_by(id=username).first()
-    if user is None:
-        print("user not found", username)
-        return None
-    return user.lastNotificationDate
-
-
-def updateLastNotificationDate(username, date):
-    user = User.query.filter_by(id=username).first()
-    user.lastNotificationDate = date
-    #print("update last botif date", user, username, date)
-    db.session.commit()
-
-
 #######
