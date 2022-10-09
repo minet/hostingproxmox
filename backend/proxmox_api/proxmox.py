@@ -1,3 +1,4 @@
+from imp import SEARCH_ERROR
 import urllib.parse
 from time import sleep
 import logging
@@ -287,7 +288,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     template_node = ""
     try:
         if vm_type == "bare_vm":
-            user = get_user_id(user_id=user_id)
+            user = get_user_list(user_id=user_id)
 
             if user is None:
                 add_user(user_id)
@@ -309,7 +310,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
             )
 
         elif vm_type == "nginx_vm":
-            user = get_user_id(user_id=user_id)
+            user = get_user_list(user_id=user_id)
 
             if user is None:
                 add_user(user_id)
@@ -512,11 +513,34 @@ def get_vm_name(vmid, node):
         return {"name": "error"}, 500
 
 
-def get_vm(user_id = 0):
-    if user_id != 0:
-        return get_vm_list(user_id), 201
+def get_vm(user_id = 0, search=None):
+    if user_id != 0: # No filter for non admin
+        return get_vm_list(user_id), 200
     else:
-        return get_vm_list(), 201
+        if search is None : 
+            return get_vm_list(), 200
+        else: # We get all user/name and filter them
+            user_filtered = get_user_list(searchItem=search) # get all user filtered
+            print("user_filtered = " , user_filtered)
+            vm_filtered_list = []
+            for user in user_filtered:
+                vm_filtered_list += get_vm_list(user_id = user.id)
+            start = time.time()
+            vm_list = get_vm_list() # only id
+            for vmid in vm_list:
+                node = get_node_from_vm(vmid)
+                if vmid not in vm_filtered_list :
+                    infos,_ = get_vm_name(vmid, node)
+                    name = infos["name"]
+                    print("name = ", name)
+                    if search in name :
+                        vm_filtered_list.append(vmid)
+            print("time to filter proxmxo = ", time.time() - start)
+            return vm_filtered_list, 200
+            
+            
+
+
 
 def is_vmid_available_cluster(vmid): # Checks if a vmid is available on the cluster for a new vm to be created
     kars, wammu = False, False

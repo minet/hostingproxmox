@@ -1,3 +1,9 @@
+# [Beta 2.0.1] 09-10-2022
+## Added 
+
+- [Search bar for admin](http://gitlabint.priv.minet.net/hosting/api/-/commit/9a33083ec78f53b2be5e2f1c70050c5ac650966a) - *Add a search field for admin in order to retrieve a vm from its name or owner. Fix #7*
+
+
 # [Beta 2.0] 19-09-2022
 
 ## Added 

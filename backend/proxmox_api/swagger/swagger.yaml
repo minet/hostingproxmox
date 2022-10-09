@@ -18,6 +18,16 @@ paths:
     get:
       summary: get all user vms
       operationId: get_vm
+      parameters:
+      - name: search
+        in: query
+        description: filter to use
+        required: false
+        style: form
+        explode: true 
+        schema:
+          type: string
+          example: "My super VM name"
       responses:
         "201":
           description: all user vms
