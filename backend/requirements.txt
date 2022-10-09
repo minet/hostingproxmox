@@ -11,4 +11,4 @@ Flask-APScheduler
 flask_sqlalchemy
 dnspython
 mysqlclient
-Flask-Mail
+flask_mail==0.9.0
