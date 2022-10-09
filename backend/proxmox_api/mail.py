@@ -14,7 +14,7 @@ app.config["MAIL_PORT"] = 25
 email = Mail(app)  # creation d'une instance de flask-mail
 
 def sendMail(recipient, htmlbody):
-    print("send mail t")
+    print("send mail to", recipient)
     msg = Message(
         "[Hosting] Your VMs are about to be deteled",
         sender="hosting-noreply@minet.net",
@@ -52,8 +52,8 @@ def mailHTMLGenerator(nb_notif, expiration_date, freeze_status):
 </head>
 <style>
 body{
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 18px;
+    font-family: Times, Helvetica, sans-serif;
+    font-size: 14px;
     font-color:black;
 }
 </style>"""
