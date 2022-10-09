@@ -54,3 +54,5 @@ frontend/typings
 frontend/.DS_Store
 frontend/Thumbs.db
 
+# Bakend dynamic config file
+backend/proxmox_api/config/vm_creation_status.json
