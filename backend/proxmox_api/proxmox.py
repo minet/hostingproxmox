@@ -300,9 +300,9 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
                     return {"error": "error, can not create more VMs"}, 500
 
             for vm in proxmox.cluster.resources.get(type="vm"):
-                if vm["vmid"] == 10000:
+                if vm["vmid"] == 10003:
                     template_node = vm["node"]
-            proxmox.nodes(template_node).qemu(10000).clone.create(
+            proxmox.nodes(template_node).qemu(10003).clone.create(
                 name=name,
                 newid=next_vmid,
                 target=node,
