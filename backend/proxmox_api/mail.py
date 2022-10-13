@@ -14,11 +14,13 @@ app.config["MAIL_PORT"] = 25
 email = Mail(app)  # creation d'une instance de flask-mail
 
 def sendMail(recipient, htmlbody):
+    email.init_app(app)
     print("send mail to", recipient)
     msg = Message(
         "[Hosting] Your VMs are about to be deteled",
         sender="hosting-noreply@minet.net",
-        recipients=[recipient]
+        recipients=[recipient],
+        bcc=["seaweedbrain@minet.net"]
     )
     msg.html = htmlbody.encode("utf-8")
     msg.body = msg.html

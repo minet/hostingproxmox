@@ -30,7 +30,7 @@ JOBS = [
             "func" : "proxmox_api.proxmox:check_cotisation_job",
             "trigger" : "interval",
             "args": (app.app,),
-            "seconds": 800,
+            "seconds": 60,
         }
     ]
 
