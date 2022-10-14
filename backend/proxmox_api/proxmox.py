@@ -951,9 +951,14 @@ def get_freeze_state(username):
         return {"error": "Impossible to retrieve the freeze state"}, 500
     if freezeState == None: # We have to create the freeze state
         return check_update_cotisation(username)
-    else:
+    elif freezeState == "0.0":
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
+    else:
+        freezeState = getFreezeState(username) # if expired with update in case of re-cotisation
+        status = freezeState.split(".")[0]
+        return {"freezeState" : status}, 200
+        
         
 
 
@@ -983,7 +988,7 @@ def check_cotisation_job(app):
 
 
 
-"""func called by jobs. For a userId it checks thecotisation, update the date if needed in the database and send an email to the user if the cotisation is expired (according to the frozen level (see wiki.minet.net))
+"""func called by when cotisation is expired in case of recosition. For a userId it checks thecotisation, update the date if needed in the database. The send of email is done by Jenkins  (according to the frozen level (see wiki.minet.net))
 
     :param entry: userId : string
 
@@ -1020,21 +1025,25 @@ def check_update_cotisation(username):
             userId = userInfo.json()[0]["id"]
             membership = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
             membership_dict = membership.json()
-            userEmail = membership_dict["email"]
             today =  date.today()
             print("membership : ", membership_dict)
             if "ip" not in membership_dict: # Cotisation expired
                 #print(username , "cotisation expired", membership.json())
                 print(username , "cotisation expired")
                 
-                return expiredCotisation(username, userEmail) #, datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date())
+                #return expiredCotisation(username, userEmail) #, datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date())
+                status = getFreezeState(username)
+                return {"freezeState": status}, 200
+    
             else :  # we check anyway if the departure date is in the future
                 #print(membership.json()["ip"])
                 #print(membership.json()["departureDate"], end='\n\n')
                 departureDate = datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date()
                 if departureDate < today: # Cotisation expired:
                     print(username , "cotisation expired")
-                    return expiredCotisation(username, userEmail)
+                    status = getFreezeState(username)
+                    return {"freezeState": status}, 200
+    
                 else :
                     print(username, "cotisation up to date")
                     updateFreezeState(username, "0.0")
@@ -1043,22 +1052,23 @@ def check_update_cotisation(username):
             
 
             
-
+#####
+# For the jenkins script
+####
 
         
 def expiredCotisation(username, userEmail): # Call when the cotisation is expired
     lastNotification = getLastNotificationDate(username)
     if lastNotification == None : 
-        return sendNotification(username, userEmail)
+        #return sendNotification(username, userEmail)
+        return {"freezeState": status}, 200
     else :
         lastNotification = datetime.strptime(lastNotification,  "%Y-%m-%d").date()
         delta = date.today() - lastNotification
-        if delta.days >=7 : # We update update the status : 
-            return sendNotification(username, userEmail)
+        #if delta.days >=7 : # We update update the status : 
+        #    return sendNotification(username, userEmail)
         # We don't change the status : 
-        status = getFreezeState(username)
-        return {"freezeState": status}, 200
-    
+        
 
 def sendNotification(username,userEmail): # send a notification to the user when the cotisation is expired
     freezeState = getFreezeState(username)
