@@ -41,7 +41,15 @@ def create_dns(body=None):  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
     if freezeAccountState != 0 and not admin:
         return {"error": "Your cotisation has expired"}, 403
 
@@ -82,7 +90,15 @@ def create_vm(body=None):  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
     if freezeAccountState != 0 and not admin: # for any other freestate user can't create vm
         return {"error": "Your cotisation has expired"}, 403
 
@@ -200,7 +216,15 @@ def delete_vm_in_thread(vmid, node="", dueToError=False):
         util.update_vm_state(vmid, "An error occured while deleting the VM.", errorCode=500, deleteEntry=True)
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
     if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
         return {"status": "cotisation expired"}, 403
 
@@ -265,7 +289,15 @@ def get_dns():  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
     if freezeAccountState >= 3 and not admin: # For freeze state 1 and 2, the user still can be connected to hosting
         return {"status": "cotisation expired"}, 403
 
@@ -296,7 +328,19 @@ def get_vm(search= ""):  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
     if freezeAccountState >= 3 and not admin: # For freeze state 1 or 2, the user can access to hosting
         return {"error": "cotisation expired"}, 403
 
@@ -331,8 +375,17 @@ def get_vm_id(vmid):  # noqa: E501
     if r.status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
-        user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    print(statusCode)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
     if freezeAccountState >= 3: # For freeze state 1 or 2, the user can access to hosting
         return {"error": "cotisation expired"}, 403
 
@@ -479,7 +532,15 @@ def delete_dns_id(dnsid):  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
     if freezeAccountState >= 3 and not admin: # For freeze state 1 or 2, the user can access to hosting
         return {"status": "cotisation expired"}, 403
 
@@ -517,7 +578,15 @@ def get_dns_id(dnsid):  # noqa: E501
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
     if freezeAccountState >= 3 and not admin: # For freeze state 1 or 2, the user can access to hosting
         return {"status": "cotisation expired"}, 403
 
@@ -579,7 +648,15 @@ def patch_vm(vmid, body=None):  # noqa: E501
                 admin = True
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
     if freezeAccountState >= 3 and not admin: # For freeze state 1 or 2, the user can access to hosting
         return {"status": "cotisation expired"}, 403
 
@@ -646,7 +723,15 @@ def get_ip_list():
         return {"status": "This is forbidden"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    freezeAccountState = proxmox_api.get_freeze_state(user_id)
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+        print(freezeAccountState)
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
     if freezeAccountState >= 3: # if freeze state 1 or 2 the user can access to proxmox
         return {"status": "cotisation expired"}, 403
 

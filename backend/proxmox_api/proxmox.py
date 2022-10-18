@@ -941,9 +941,9 @@ def next_available_vmid():# determine the next available vmid from both db and p
     :rtype: int, dict
 """
 def get_freeze_state(username):
-    msg = mailHTMLGenerator(4, date.today(), 1)
-    print(msg)
-    sendMail("nathanstchepinsky@gmail.com", msg)
+    #msg = mailHTMLGenerator(4, date.today(), 1)
+    #print(msg)
+    #sendMail("nathanstchepinsky@gmail.com", msg)
     try :
         freezeState = getFreezeState(username)
     except Exception as e : 
