@@ -737,9 +737,9 @@ def get_user_ip_list(user_id) :
     :rtype: int, dict
 """
 def get_freeze_state(username):
-    msg = mailHTMLGenerator(4, date.today(), 1)
-    print(msg)
-    sendMail("nathanstchepinsky@gmail.com", msg)
+    #msg = mailHTMLGenerator(4, date.today(), 1)
+    #print(msg)
+    #sendMail("nathanstchepinsky@gmail.com", msg)
     try :
         freezeState = getFreezeState(username)
     except Exception as e : 
