@@ -24,13 +24,6 @@ JOBS = [
             "args": (app.app,),
             "trigger": "interval",
             "seconds": 120,
-        }, 
-        { # Check all cotisation to uodate endCotisationDate and send email if needed
-            "id" : "check_cotisation",
-            "func" : "proxmox_api.proxmox:check_cotisation_job",
-            "trigger" : "interval",
-            "args": (app.app,),
-            "seconds": 60,
         }
     ]
 
