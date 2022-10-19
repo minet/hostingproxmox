@@ -7,7 +7,31 @@
     </div>
 </div>
 
-<div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.cotisation === 1) || this.user.admin)" >
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
+    <h1>❄️</h1>
+    <h4>Your account is frozen !</h4>
+    <p>Your cotisation has expired ! You will still be able to manage your vm for few days. After 30 days of expiration your vm will be shutdown and after 60 days, they will be definitively destroyed</p>
+    <p><strong>WARNING : you have only 30 days to renew your cotisation before the shutdown of your vm ! </strong></p>
+</div>
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
+    <h1>❄️</h1>
+    <h4>Your account is frozen !</h4>
+    <p>Your cotisation has expired since at least <strong>30 days !</strong> You will still be able to backup your vm for few days.  After 60 days (in less than 30 days now), they will be definitively destroyed</p>
+    <p><strong>WARNING : you have only 30 days to renew your cotisation before the FULL DELETION of your vm ! </strong></p>
+</div>
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 3  ">
+    <h1>❄️</h1>
+    <h4>Your account is frozen !</h4>
+    <p>Your cotisation has expired since at least <strong>60 days !</strong></p>
+    <p><strong>WARNING : Your vm will be fully deleted in few days.</strong></p>
+</div>
+<div class="alert alert-warning text-center" *ngIf="this.user.freezeState == 3">
+    <h4>Your cotisation has expired</h4>
+    <p>Your cotisation has expired you cannot create any vm</p>
+</div>
+
+<div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.freezeState < 3) || this.user.admin)" >
+
     <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
     <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">IP History</button></div>
@@ -82,12 +106,9 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
         </div>
     </div>
 </div><br/>
-<div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
-    <b>Expired subscription</b>
-    <p>To manage your VMs you have to renew your subscription ! <a href="https://payment.minet.net/">click here</a> to renew your subscription</p>
-</div>
+<!--
 
-<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.cotisation ===1">
+<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.freezeState == 0">
     <b>Unsigned charter !</b>
     <p>To manage your VMs you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
 </div>
@@ -95,3 +116,4 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
                 aria-label="Default pagination"></ngb-pagination>
 <hr>
 
+-->

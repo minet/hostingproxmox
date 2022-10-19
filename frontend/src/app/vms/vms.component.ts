@@ -36,7 +36,7 @@ export class VmsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
             this.user.vms = Array<Vm>();
-            if((this.user.chartevalidated && this.user.cotisation) || this.user.admin) {
+            if((this.user.chartevalidated && this.user.freezeState < 3) || this.user.admin) {
                 this.get_vms(); // on laisse une seconde pour charger l'user avant de check si il a validé
             }
         }, 1000);

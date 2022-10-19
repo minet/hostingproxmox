@@ -1,3 +1,26 @@
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
+    <h1>❄️</h1>
+    <h4>Your account is frozen !</h4>
+    <p>Your cotisation has expired ! You will still be able to manage your vm for few days. After 30 days of expiration your vm will be shutdown and after 60 days, they will be definitively destroyed</p>
+    <p><strong>WARNING : you have only 30 days to renew your cotisation before the shutdown of your vm ! </strong></p>
+</div>
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
+    <h1>❄️</h1>
+    <h4>Your account is frozen !</h4>
+    <p>Your cotisation has expired since at least <strong>30 days !</strong> You will still be able to backup your vm for few days.  After 60 days (in less than 30 days now), they will be definitively destroyed</p>
+    <p><strong>WARNING : you have only 30 days to renew your cotisation before the FULL DELETION of your vm ! </strong></p>
+</div>
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 3 ">
+    <h1>❄️</h1>
+    <h4>Your account is frozen !</h4>
+    <p>Your cotisation has expired since at least <strong>60 days !</strong></p>
+    <p><strong>WARNING : Your vm will be fully deleted in few days.</strong></p>
+</div>
+<div class="alert alert-warning text-center" *ngIf="this.user.freezeState == 3">
+    <h4>Your cotisation has expired</h4>
+    <p>Your cotisation has expired you cannot create any vm</p>
+</div>
+
 <div *ngIf="(loading || deleting) && (user.chartevalidated || user.admin) && (errorcode !== 500)">
     <div class="d-flex justify-content-center">
         <div class="spinner-grow text-primary" role="status">
@@ -162,12 +185,9 @@
         </div>
     </div>
 </div>
-<div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
-    <b>Expired subscription</b>
-    <p>To manage VM you have to renew your subscription ! <a href="https://payment.minet.net/">click here</a> to renew your subscription</p>
-</div>
 
-<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.cotisation ===1">
+
+<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.freezeState == 0">
     <b>Unsigned charter !</b>
     <p>To manage your VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
 </div>
