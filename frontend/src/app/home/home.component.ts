@@ -148,7 +148,7 @@ export class HomeComponent implements OnInit {
 
   // check with a regex if the ssh key has a correct format. It is check after the box check and after that, after each new char modification
   checkSSHkey(vm: Vm):boolean{
-    var rule = /ssh.[a-zA-Z0-9]* [a-zA-Z0-9[()[\]{}+*\/%$&#@=:?]*/
+    var rule = /^[a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]*/
     return rule.test(vm.sshKey)
   }
 

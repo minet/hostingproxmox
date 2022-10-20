@@ -172,7 +172,7 @@ def check_password_strength(password:str) -> bool:
     :rtype: bool
 """
 def check_ssh_key(key:str) -> bool:
-    return not not re.search("^ssh.[a-zA-Z0-9]* [a-zA-Z0-9[()[\]{}+*\/%$&#@=:?]*", key)
+    return not not re.search("^[a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]*", key)
 
 
 
