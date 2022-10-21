@@ -37,7 +37,7 @@ def conf_jobs(app):
 app, scheduler = create_app() 
 
 JOBS = [
-        {
+        { # update all vm ips 
             "id": "update_vm_ips",
             "func": "proxmox_api.proxmox:update_vm_ips_job",
             "args": (app.app,),

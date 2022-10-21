@@ -1,20 +1,27 @@
+from email import header
+from operator import truediv
 from imp import SEARCH_ERROR
+
 import urllib.parse
 from time import sleep
 import logging
 from proxmoxer import ProxmoxAPI
 from proxmoxer import ResourceException
+
 from proxmox_api.util import check_password_strength, check_ssh_key, check_username, update_vm_state, get_vm_state, create_app
+
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration  
 from proxmox_api.db.db_functions import *
+from proxmox_api.mail import sendMail, mailHTMLGenerator
 from ipaddress import IPv4Network
 from threading import Thread
 import time
-
-
+from datetime import datetime, date
 from proxmox_api.util import create_app
 import connexion
+import requests
+import proxmox_api.mail as mail
 logging.basicConfig(filename="log", filemode="a", level=logging.INFO
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
@@ -269,6 +276,7 @@ def delete_from_proxmox(vmid, node) -> bool :
     """
     
 def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="no"):
+    print("create vm" , name, vm,vm_type, user_id, vm_user)
     if not check_password_strength(password):
         return {"error" : "Incorrect password format"}, 400
     if not check_ssh_key(main_ssh_key):
@@ -567,6 +575,7 @@ def is_vmid_available_cluster(vmid): # Checks if a vmid is available on the clus
 
 
 def get_node_from_vm(vmid):
+    print("get node for ", vmid)
     if vmid:
         for vm in proxmox.cluster.resources.get(type="vm"):
             if vm["vmid"] == vmid:
@@ -574,8 +583,10 @@ def get_node_from_vm(vmid):
                     return vm['node']
                 except Exception as e:
                     logging.error("Problem in get_node_from_vm(" + str(vmid) + ") when getting VM node: " + str(e))
-                    return {"cpu": "error"}, 500
+                    print("Problem in get_node_from_vm(" + str(vmid) + ") when getting VM node: " + str(e))
+                    return {"error": "Impossible to retrieve the vm node"}, 500
     else:
+        print("Error : vmid is null")
         return {"get_node": "Vm not found"}, 404
 
 """
@@ -900,6 +911,163 @@ def get_user_ip_list(user_id) :
         print("ERROR : the vm list of user " , user_id, " failed to be retrieved : " , e)
         return None 
 
+
+
+""" API endpoint to return the freeze status of a user (only the status, not the nb of notification recieved)
+
+    :param entry: username of the user asking for the freeze status
+
+    :return: httpcode, {"freezeState" : Freeze state}
+    :rtype: int, dict
+"""
+def get_freeze_state(username):
+    #msg = mailHTMLGenerator(4, date.today(), 1)
+    #print(msg)
+    #sendMail("nathanstchepinsky@gmail.com", msg)
+    try :
+        freezeState = getFreezeState(username)
+    except Exception as e : 
+        print("ERROR : the freeze state of user " , username, " failed to be retrieved : " , e)
+        return {"error": "Impossible to retrieve the freeze state"}, 500
+    if freezeState == None: # We have to create the freeze state
+        return check_update_cotisation(username)
+    elif freezeState == "0.0":
+        status = freezeState.split(".")[0]
+        return {"freezeState" : status}, 200
+    else:
+        freezeState = getFreezeState(username) # if expired with update in case of re-cotisation
+        status = freezeState.split(".")[0]
+        return {"freezeState" : status}, 200
+        
+        
+
+
+
+
+"""func called by jobs. For all user, it calls a function to check if the user has a cotisation. 
+
+    :param entry: None
+
+    :return: None
+    :rtype: None
+"""
+def check_cotisation_job(app):
+     print("check_update_cotisation_job")
+     with app.app_context():    # Needs application context
+        users = get_active_users()
+        
+        
+        for user in users:
+            try :
+                status = check_update_cotisation(user)
+                print("check_update_cotisation for user", user, " : ", status)
+            except Exception as e:
+                print("exception : ",e)
+                pass
+        db.session.commit()
+
+
+
+"""func called by when cotisation is expired in case of recosition. For a userId it checks thecotisation, update the date if needed in the database. The send of email is done by Jenkins  (according to the frozen level (see wiki.minet.net))
+
+    :param entry: userId : string
+
+    :return: status code, {"status": "ok"} if the cotisation is ok, {"status": "expired"} if the cotisation is expired, {"error": "error message"} if there is an error
+    :rtype: int, dict
+"""
+def check_update_cotisation(username):
+        
+        print("check cotisation of", username)
+        #headers = {"Authorization": req_headers}
+        headers = {"X-API-KEY": config.ADH6_API_KEY}
+        #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
+        userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
+        print("userInfo : ", userInfo.json())
+        
+        userInfoJson = userInfo.json()
+        if (len(userInfoJson) != 1):
+            return {"error": "Impossible to retrieve the user info"}, 404
+        elif userInfo == None or userInfoJson  == []: # not found
+            if "-" in username:
+                print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+                new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
+                print("'"+new_username+"'")
+                return check_update_cotisation(new_username)
+                
+            elif "_" in username: # same
+                print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+                new_username = username.replace("_",".").strip() # hosting replace by default _ with -. So we try if not found
+                print("'"+new_username+"'")
+                return check_update_cotisation(new_username)
+            else :
+                print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
+                return {"error" : "the user " + username + " failed to be retrieved"}, 404
+        else : 
+            username = username.replace("_", "-") # hosting replace by default _ and .  with -.
+            userId = userInfoJson[0] 
+            membership = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
+            membership_dict = membership.json()
+            today =  date.today()
+            print("membership : ", membership_dict)
+            if "ip" not in membership_dict: # Cotisation expired
+                #print(username , "cotisation expired", membership.json())
+                print(username , "cotisation expired")
+                
+                #return expiredCotisation(username, userEmail) #, datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date())
+                status = getFreezeState(username)
+                return {"freezeState": status}, 200
+    
+            else :  # we check anyway if the departure date is in the future
+                #print(membership.json()["ip"])
+                #print(membership.json()["departureDate"], end='\n\n')
+                departureDate = datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date()
+                if departureDate < today: # Cotisation expired:
+                    print(username , "cotisation expired")
+                    status = getFreezeState(username)
+                    return {"freezeState": status}, 200
+    
+                else :
+                    print(username, "cotisation up to date")
+                    updateFreezeState(username, "0.0")
+                    return  {"freezeState": "0.0"}, 200
+
+            
+
+            
+#####
+# For the jenkins script
+####
+
+        
+def expiredCotisation(username, userEmail): # Call when the cotisation is expired
+    lastNotification = getLastNotificationDate(username)
+    if lastNotification == None : 
+        #return sendNotification(username, userEmail)
+        return {"freezeState": status}, 200
+    else :
+        lastNotification = datetime.strptime(lastNotification,  "%Y-%m-%d").date()
+        delta = date.today() - lastNotification
+        #if delta.days >=7 : # We update update the status : 
+        #    return sendNotification(username, userEmail)
+        # We don't change the status : 
+        
+
+def sendNotification(username,userEmail): # send a notification to the user when the cotisation is expired
+    freezeState = getFreezeState(username)
+    status, nbNotif = generateNewFreezeState(freezeState)
+
+    print("send a notification to " + str(username) + "with status" +str(status) + "and nbNotif" + str(nbNotif))
+    # when the notification is sent : 
+    updateLastNotificationDate(username, date.today())
+    updatedfreezeState = str(status) + "." + str(nbNotif)
+    updateFreezeState(username, updatedfreezeState)
+    return  {"freezeState": updatedfreezeState}, 200
+    
+    
+
+        
+
+
 def next_available_vmid():# determine the next available vmid from both db and proxmox
     next_vmid_db = 110
     is_vmid_available_prox = False 
@@ -909,3 +1077,4 @@ def next_available_vmid():# determine the next available vmid from both db and p
        
         is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
     return next_vmid_db
+

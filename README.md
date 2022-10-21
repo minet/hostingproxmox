@@ -15,7 +15,8 @@ KEYRING_DNS_SECRET : clé pour utiliser le ddns (ajouter / supprimer des entrée
 PROXMOX_API_KEY_NAME : nom de la clé pour accéder à l'api proxmox
 PROXMOX_API_KEY : clé pour utiliser l'api proxmox
 PROXMOX_BACK_DB : mysql:// lien vers la db contenant le passwd, user, nom de la database et bien sûr ip de celle-ci
-```
+ADH6_API_KEY : La clé d'API de hosting pour accéder à adh6
+
 - vous ensuite devez vous rendre dans backend/ et exécuter la commande `python3 -m proxmox_api`. Le serveur se lance alors. *Assurez vous qu'il est joignable via le port 8080 de votre machine pour qu'il puisse être joint par le `frontend`*
 
 

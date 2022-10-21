@@ -16,26 +16,27 @@ import {mergeMap} from 'rxjs/operators';
   styleUrls: ['./dns.component.css']
 })
 export class DnsComponent implements OnInit, OnDestroy {
-    loading = true;
-    newDns = new Dns();
-    ipList = Array<string>();
-    intervals = new Set<Subscription>();
-    showForm = false;
-    errorcode = 201;
-    httpErrorMessage = "";
-    errorMessage = ""
-    timer: Subscription;
-    success = false;
-    page = 1;
-    pageSize = 10;
-    constructor(private activatedRoute: ActivatedRoute,
-                private http: HttpClient,
-                private router: Router,
-                public user: User,
-                private utils : Utils,
-                private userService: UserService,
-                private authService: AuthService) {
-    }
+<<<<<<< frontend/src/app/dns/dns.component.ts
+  loading = true;
+  newDns = new Dns();
+  ipList = Array<string>();
+  intervals = new Set<Subscription>();
+  showForm = false;
+  errorcode = 201;
+  httpErrorMessage = "";
+  errorMessage = ""
+  timer: Subscription;
+  success = false;
+  page = 1;
+  pageSize = 10;
+  constructor(private activatedRoute: ActivatedRoute,
+              private http: HttpClient,
+              private router: Router,
+              public user: User,
+              private userService: UserService,
+              private authService: AuthService,
+              private slugifyPipe: SlugifyPipe) {
+  }
 
 
     ngOnInit(): void {
@@ -54,6 +55,9 @@ export class DnsComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         for (const id of this.intervals) {
             id.unsubscribe();
+
+
+
         }
     }
 
