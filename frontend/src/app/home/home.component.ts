@@ -70,7 +70,13 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
       if ((this.user.chartevalidated) || this.user.admin) {
-        console.log(this.user.freezeState)
+        if (this.userService.errorcode != null) {
+          this.loading = false;
+          this.errorcode = this.userService.errorcode;
+          this.errorMessage = this.userService.errorMessage;
+          console.log(this.user.freezeState)
+        console.log("error code =" , this.userService.errorMessage)
+        }
         this.count_vm();
       }
       if(this.user.admin) {
