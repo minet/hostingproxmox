@@ -1001,11 +1001,13 @@ def check_update_cotisation(username):
         #headers = {"Authorization": req_headers}
         headers = {"X-API-KEY": config.ADH6_API_KEY}
         #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
-        userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username", headers=headers) # [id,username], from ADH6 
-        print("userInfo : ", userInfo)
+        userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
+        print("userInfo : ", userInfo.json())
         
-        
-        if userInfo == None or  userInfo.json() == []: # not found
+        userInfoJson = userInfo.json()
+        if (len(userInfoJson) != 1):
+            return {"error": "Impossible to retrieve the user info"}, 404
+        elif userInfo == None or userInfoJson  == []: # not found
             if "-" in username:
                 print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
                 new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
@@ -1018,11 +1020,11 @@ def check_update_cotisation(username):
                 print("'"+new_username+"'")
                 return check_update_cotisation(new_username)
             else :
-                print("ERROR : the user " , username , " failed to be retrieved :" , userInfo.json())
+                print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
                 return {"error" : "the user " + username + " failed to be retrieved"}, 404
         else : 
             username = username.replace("_", "-") # hosting replace by default _ and .  with -.
-            userId = userInfo.json()[0]["id"]
+            userId = userInfoJson[0] 
             membership = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
             membership_dict = membership.json()
             today =  date.today()
