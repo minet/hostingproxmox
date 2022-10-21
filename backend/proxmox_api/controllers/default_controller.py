@@ -1,12 +1,11 @@
 from email import header
 from logging import error
-from backend import proxmox_api
+from proxmox_api import proxmox
 import connexion
 import requests
 import json
 from requests.api import head
 from slugify import slugify
-from proxmox_api import proxmox
 from proxmox_api.models.dns_entry_item import DnsEntryItem  # noqa: E501
 from proxmox_api.models.dns_item import DnsItem  # noqa: E501
 from proxmox_api.models.vm_id_item import VmIdItem  # noqa: E501
