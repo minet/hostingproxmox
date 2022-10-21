@@ -11,9 +11,9 @@ import {HttpClient} from '@angular/common/http';
     providedIn: 'root'
 })
 export class UserService {
-    private errorcode;
+    public errorcode = null;
     private discoveryDocument$: Promise<boolean>;
-
+    public errorMessage = null;
     constructor(private http: HttpClient, private user: User, private authService: AuthService, private oauthService: OAuthService) {
         this.configureSingleSignOn();
     }
@@ -47,14 +47,22 @@ export class UserService {
     }
 
     check_freezeState(): void {
-        /*this.http.get(this.authService.SERVER_URL + '/account_state/' + this.user.username, {observe: 'response'}).subscribe(rep => {
+        this.http.get(this.authService.SERVER_URL + '/account_state/' + this.user.username, {observe: 'response'}).subscribe(rep => {
                 console.log(rep)
-                this.user.freezeState = 0//Number(rep.body['freezeState']);
+                this.user.freezeState = Number(rep.body['freezeState']);
             },
             error => {
-                this.errorcode = error.status;
-            });*/
-            this.user.freezeState = 2//Number(rep.body['freezeState']);
+                console.log(error)
+                if (error.status == 0 ){
+                    this.errorcode = 500;
+                } else {
+                    this.errorcode = error.status;
+                }
+                this.errorMessage = error.statusText;
+                this.user.freezeState = null;
+                console.log("error code local ", this.errorcode)
+            });
+            //this.user.freezeState = 2//Number(rep.body['freezeState']);
     }
 
     // A function which return the http error message for a given http error code
