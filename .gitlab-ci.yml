@@ -8,6 +8,8 @@ install_dependencies_angular:
   stage: dependencies
   image: node
   before_script:
+    - npm config set proxy "http://192.168.102.61:82/"
+    - npm config set https-proxy "http://192.168.102.61:82/"
     - cd frontend
   script:
     - npm ci --prefer-offline --no-audit
@@ -63,15 +65,16 @@ angular_build:
   needs: 
     - install_dependencies_angular
   before_script:
+    - npm config rm proxy
+    - npm config rm https-proxy
+    - npm config set proxy "http://192.168.102.61:82/"
+    - npm config set https-proxy "http://192.168.102.61:82/"
     - cd frontend
     - NG_CLI_ANALYTICS=ci
     - export NODE_OPTIONS=--openssl-legacy-provider
     - npm install -g @angular/cli
   script:
-    - yarn ng build --prod
-  environment:
-    name: production
-    url: https://proxmox.minet.net/
+    - yarn ng build
   artifacts:
     paths:
       - frontend/dist
@@ -91,7 +94,10 @@ deploy_backend:
     - cd /var/www/proxmox_api
     - sudo /bin/systemctl start proxmox_api
   tags:
-    - hosting-proxmox 
+    - hosting-proxmox
+  environment:
+    name: production
+    url: https://hosting.minet.net/
   only:
     - master
 
@@ -102,6 +108,9 @@ deploy_frontend:
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
   tags:
     - hosting-proxmox
+  environment:
+    name: production
+    url: https://hosting.minet.net/
   only:
     - master
 
@@ -120,7 +129,10 @@ deploy_backend_dev:
     - cd /var/www/proxmox_api
     - sudo /bin/systemctl start proxmox_api
   tags:
-    - hosting-dev 
+    - hosting-dev
+  environment:
+    name: development
+    url: https://hosting-dev.minet.net/
   only:
     - development
 
@@ -129,6 +141,9 @@ deploy_frontend_dev:
   script:
     - rm -rf /var/www/proxmox_dashboard
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
+  environment:
+    name: development
+    url: https://hosting-dev.minet.net/
   tags:
     - hosting-dev
   only:

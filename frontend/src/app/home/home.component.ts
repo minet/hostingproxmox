@@ -1,14 +1,17 @@
 import {Component, OnInit, Input, SimpleChange, OnChanges, SimpleChanges} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {UserService} from '../common/services/user.service';
+import {Utils} from '../common/utils';
 import {AuthService} from '../common/services/auth.service';
 import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Vm} from '../models/vm';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {timer} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 import {Dns} from "../models/dns";
+import {TranslateService} from "@ngx-translate/core";
+import {CookieService} from "ngx-cookie-service";
 
 @Component({
   selector: 'app-home',
@@ -43,20 +46,25 @@ export class HomeComponent implements OnInit {
   nb_error_resquest = 0; // Count the number of SUCCESSIVE error returned by a same request
   isVmCreated = false; // true doesn't mean the VM is started 
 
-  images = [
-    {name: 'Bare VM', id: 'bare_vm'},
-    {name: 'Simple static web server', id: 'nginx_vm'},
-  ];
+ 
 
 
   constructor(private http: HttpClient,
               private router: Router,
               public user: User,
+              private utils: Utils,
               private userService: UserService,
               private authService: AuthService,
-              private slugifyPipe: SlugifyPipe) {
-
+              private slugifyPipe: SlugifyPipe,
+              private route: ActivatedRoute,
+              public translate: TranslateService,
+              private cookie: CookieService, 
+              ) {
+    this.cookie.get('lang') == 'en' ? this.translate.use('en') && this.cookie.set('lang','en') : this.translate.use('fr') && this.cookie.set('lang','fr');
+    console.log("cookie =" + this.route.snapshot.paramMap.get('lang'))
   }
+
+  
 
 
   ngOnInit(): void {
@@ -74,7 +82,14 @@ export class HomeComponent implements OnInit {
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
+      console.log("translation  = " +this.utils.getTranslation("home.errorMessage.errorCreating"))
+
   }
+
+  images = [
+    {name: "home.vm_type.bare", id: 'bare_vm'},
+    {name: "home.vm_type.web", id: 'nginx_vm'},
+  ];
 
 
   progress_bar(): void{
@@ -110,28 +125,28 @@ export class HomeComponent implements OnInit {
     var isOk = true;
 
     if (vm.password.length<=11){
-      this.passwordErrorMessage += "● 12 characters.<br/>";
+      this.passwordErrorMessage += this.utils.getTranslation("home.password.length") + "<br>";
       isOk = false;
     }
     
     if (!upper.test(vm.password)){
-      this.passwordErrorMessage += "● 1 uppercase letter.<br/>";
+      this.passwordErrorMessage += this.utils.getTranslation("home.password.uppercase") + "<br>";
       isOk = false;
     }
     if (!special.test(vm.password)){
-      this.passwordErrorMessage += "● 1 special character.<br/>";
+      this.passwordErrorMessage += this.utils.getTranslation("home.password.special_char") + "<br>";
       isOk = false;
     }
 
     
 
     if(!number.test(vm.password)){
-      this.passwordErrorMessage += "●  1 number.<br/>";
+      this.passwordErrorMessage += this.utils.getTranslation("home.password.digit") + "<br>";;
       isOk = false;
     }
 
     if (!isOk){
-      this.passwordErrorMessage = "Your password must contains at least <br/>" + this.passwordErrorMessage
+      this.passwordErrorMessage =  this.utils.getTranslation("home.password.requirementIntro") + "<br/>" + this.passwordErrorMessage
     }
     
     return isOk;
@@ -140,7 +155,7 @@ export class HomeComponent implements OnInit {
 
   // check with a regex if the ssh key has a correct format. It is check after the box check and after that, after each new char modification
   checkSSHkey(vm: Vm):boolean{
-    var rule = /ssh.[a-zA-Z0-9]* [a-zA-Z0-9[()[\]{}+*\/%$&#@=:?]*/
+    var rule = /^[a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]*/
     return rule.test(vm.sshKey)
   }
 
@@ -298,7 +313,7 @@ is_vm_booting(vmid: string) : boolean {
           if (error.status == 404){
             this.loading = false;
             this.errorcode = error.status;
-            this.errorMessage = "An error occured while creating  the VM. Please, try again";
+            this.errorMessage = this.utils.getTranslation("home.errorMessage.errorCreating");
 
           } else {
             this.loading = false;

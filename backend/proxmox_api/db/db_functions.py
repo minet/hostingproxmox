@@ -17,11 +17,22 @@ def update_vm_ip(vmid, vmip):
 def get_vm_db_info(vmid):
     return  Vm.query.filter_by(id=vmid).first()
 
-def get_user_id(user_id):
-    return User.query.filter_by(id=user_id).first()
+def get_user_list(user_id=None, searchItem = None): # filter is for the user name
+    if user_id is not None:
+        return User.query.filter_by(id=user_id).first()
+    elif searchItem is not None:
+        search = "%{}%".format(searchItem)
+        print("db search : ", search)
+        start = time.time()
+        filtered = User.query.filter(User.id.like(search)).all()
+        print("db search time : ", time.time() - start)
+        return filtered
+        
+    else : 
+        return User.query.all()
 
 
-def get_vm_list(user_id=""):  # user id est vide quand un admin veut voir la liste
+def get_vm_list(user_id=""): 
     if user_id != "":  # dans ce cas on affiche ce qui est lié à l'user
         if User.query.filter_by(id=user_id).first() is None:
             return []
@@ -34,7 +45,7 @@ def get_vm_list(user_id=""):  # user id est vide quand un admin veut voir la lis
         list = []
         for i in User.query.all():
             for j in i.vms:
-                list.append(j.id)
+                    list.append(j.id)
         return list
 
 
@@ -144,6 +155,13 @@ def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
     else:
         return True;
 
+def getNextVmID(min = 110): # get the next vmid available. The minimum whould not be less than 110
+    if min <110 : 
+        min = 110
+    for vmid in (range(min, 999)): # should not exceed 999, if not, we have a problem
+        if Vm.query.filter_by(id=vmid).first() is None:
+            return vmid 
+        
 
 def get_active_users(): # return actives users (ie those who have a vm)
     list = []

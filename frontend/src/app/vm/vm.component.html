@@ -1,3 +1,4 @@
+
 <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
     <h1>❄️</h1>
     <h4>Your account is frozen !</h4>
@@ -21,59 +22,63 @@
     <p>Your cotisation has expired you cannot create any vm</p>
 </div>
 
-<div *ngIf="(loading || deleting) && (user.chartevalidated || user.admin) && (errorcode !== 500)">
+
+<div *ngIf="(loading || deletionStatus != 'None') && (user.chartevalidated || user.admin) && (errorcode !== 500)">
     <div class="d-flex justify-content-center">
         <div class="spinner-grow text-primary" role="status">
-            <span class="sr-only">Loading...</span>
+            <span class="sr-only">{{'vm.loading' | translate}}</span>
         </div>
     </div>
 </div>
-<div *ngIf="errorcode !== 201" class="alert alert-danger text-center" role="alert">
-    <b>Oups...</b><br>
-    {{ errorDescription }}
-    <br><br>
-    {{ displayError(errorcode) }}
-    <br><a [routerLink]="['/']">Go back to home</a>
-</div>
-<div class="container text-center" *ngIf="!loading && !deleting && errorcode === 201 && (user.chartevalidated || user.admin)">
+<div class="container text-center" *ngIf="!loading && (user.chartevalidated || user.admin)">
     <h1 class="text-center mb-2">VM: {{ user.vms[0].name }}</h1>
     <hr>
     <div class="alert"
          [ngClass]="{
-                    'alert-danger': user.vms[0].status === 'stopped',
+                    'alert-danger': user.vms[0].status === 'stopped' || deletionStatus == 'deleting' || vm_has_error,
                     'alert-info': user.vms[0].status === 'creating',
                     'alert-warning': user.vms[0].status === 'booting',
-                    'alert-success': user.vms[0].status === 'running'
+                    'alert-success': user.vms[0].status === 'running' || deletionStatus == 'deleted'
                     }"
-    ><span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
-           *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating'"></span>Status:&nbsp;{{ user.vms[0].status }}
+    >
+    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
+           *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || deletionStatus == 'deleting' || deletionStatus == 'deleted' "></span> 
+           <div *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || user.vms[0].status === 'running' || deletionStatus == 'deleting' || deletionStatus == 'deleted'" >{{'vm.status' | translate}} :&nbsp;{{ deletionStatus != 'None' ? deletionStatus  : user.vms[0].status | translate }}</div>
+
+           <div *ngIf="vm_has_error"><strong>{{"vm.error" | translate}} {{errorcode}} : {{utils.getHttpErrorMessage(errorcode)}}</strong><br> 
+            <p  *ngIf="vm_has_proxmox_error" [innerHtml]="'vm.error.404.description' | translate"></p>
+        
+        </div>
+
     </div>
+    
+    <div *ngIf="deletionStatus != 'deleting' && deletionStatus != 'deleted' && !vm_has_error">
     <hr>
-    <div class="row">
+    <div class="row" >
         <div class="col-md-6">
             <div class="card">
-                <div class="card-body">
-                    <h4>VM information</h4>
+                <div class="card-body" >
+                    <h4>{{'vm.information' | translate}}</h4>
                     <hr>
                     <div class="row">
                         <div class="col-6 text-left">
-                            <p><b>ID :</b>&nbsp; {{ user.vms[0].id }}</p>
-                            <p><b>Type :</b>&nbsp; {{ user.vms[0].type }}</p>
-                            <p><b>Status :</b>&nbsp; {{ user.vms[0].status }}</p>
-                            <p><b>Name :</b>&nbsp; {{ user.vms[0].name }}</p>
-                            <p><b>IPv4 address :</b>&nbsp; {{ user.vms[0].ip }}
-                            <p><b>Start on boot :</b>
+                            <p><b>{{'vm.id' | translate}} :</b>&nbsp; {{ user.vms[0].id }}</p>
+                            <p><b>{{'vm.type' | translate}} :</b>&nbsp; {{ user.vms[0].type }}</p>
+                            <p><b>{{'vm.status' | translate}} :</b>&nbsp; {{ user.vms[0].status }}</p>
+                            <p><b>{{'vm.name' | translate}} :</b>&nbsp; {{ user.vms[0].name }}</p>
+                            <p><b>{{'vm.ipv4' | translate}} :</b>&nbsp; {{ user.vms[0].ip }}
+                            <p><b>{{'vm.startOnBoot' | translate}} :</b>
                             <div class="custom-control custom-switch">
                                 <input type="checkbox" (change)="commit_edit('switch_autoreboot')" [checked]="user.vms[0].autoreboot === 1" class="custom-control-input" id="customSwitches">
-                                <label class="custom-control-label" for="customSwitches">Toggle off this if you don't want to your VM to reboot automatically when our server is rebooting.</label>
+                                <label class="custom-control-label" for="customSwitches">{{'vm.startOnBootDescription' | translate}}</label>
                             </div>
                         </div>
                         <div class="col-6 text-left">
-                            <p *ngIf="user.admin"><b>Owner:</b> {{ user.vms[0].user }}</p>
+                            <p *ngIf="user.admin"><b>{{'vm.owner' | translate}} :</b> {{ user.vms[0].user }}</p>
 
-                            <p><b>Created on:</b> {{user.vms[0].createdOn}}</p>
+                            <p><b>{{'vm.createdOn' | translate}} :</b> {{user.vms[0].createdOn}}</p>
 
-                            <p *ngIf="user.vms[0].status == 'running'"><b>Uptime:</b> {{secondsToDhms( user.vms[0].uptime )}}</p>
+                            <p *ngIf="user.vms[0].status == 'running'"><b>{{'vm.upTime' | translate}} :</b> {{secondsToDhms( user.vms[0].uptime )}}</p>
                         </div>
                     </div>
                 </div>
@@ -83,11 +88,10 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h4>System information</h4>
+                    <h4>{{'vm.systemInformation' | translate}}</h4>
                     <hr>
                     <div class="text-left">
-                        <!--<p *ngIf="editing"><button (click)="dec('ram')" class="btn btn-danger btn-sm">-</button>{{newVm.ram}}<button (click)="add('ram')" class="btn btn-primary btn-sm">+</button></p>-->
-                        <p *ngIf="!editing"><b>CPU:</b>&nbsp; {{ user.vms[0].cpu }}</p>
+                        <p *ngIf="!editing"><b>{{'vm.cpu' | translate}} :</b>&nbsp; {{ user.vms[0].cpu }}</p>
                         <div class="progress flex-fill">
                             <div *ngIf="user.vms[0].cpuUsage <= 50" class="progress-bar progress-bar-animated"
                                  role="progressbar"
@@ -107,8 +111,7 @@
                         </div>
                         <span *ngIf="user.vms[0].cpuUsage" style="float: right"
                               class="text-info"> {{user.vms[0].cpuUsage}}%</span>
-                        <!--  <p *ngIf="editing"><button (click)="dec('cpu')" class="btn btn-danger btn-sm">-</button>{{newVm.cpu}}<button (click)="add('cpu')" class="btn btn-primary btn-sm">+</button></p>-->
-                        <p style="padding-top: 5%" *ngIf="!editing"><b>RAM (MB):</b>&nbsp; {{ user.vms[0].ram }}</p>
+                        <p style="padding-top: 5%" *ngIf="!editing"><b>{{'vm.ram' | translate}} :</b>&nbsp; {{ user.vms[0].ram }}</p>
                         <div class="progress flex-fill">
                             <div *ngIf="user.vms[0].ramUsage <= 50" class="progress-bar progress-bar-animated"
                                  role="progressbar"
@@ -129,7 +132,7 @@
                               class="text-info">{{user.vms[0].ram * (user.vms[0].ramUsage / 100) | number:'1.1-2'}}
                             /{{user.vms[0].ram}} MB</span>
                         <!-- <p *ngIf="editing">{{newVm.disk}}<button (click)="add('disk')" class="btn btn-primary btn-sm">+</button></p> -->
-                        <p *ngIf="!editing" style="padding-top: 5%"><b>Disk space (GB):</b>&nbsp; {{ user.vms[0].disk }}
+                        <p *ngIf="!editing" style="padding-top: 5%"><b>{{'vm.diskSpace' | translate}} :</b>&nbsp; {{ user.vms[0].disk }}
                         </p>
                     </div>
                 </div>
@@ -138,35 +141,60 @@
     </div>
 
     <hr>
+    </div>
 
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
                     <div class="btn-group">
-                        <button type="button" *ngIf="user.vms[0].status != 'creating'" class="btn btn-danger"
-                                (click)="delete_vm()">Delete
+                        <button type="button" *ngIf="(!vm_has_error && user.vms[0].status != 'creating') || vm_has_proxmox_error" class="btn btn-danger" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
+                        data-toggle="modal" data-target="#deleteVMModal">{{'vm.delete' | translate}}
                         </button>
                         <!-- <button type="button" class="btn btn-primary" *ngIf="!editing" (click)="edit()">Edit</button> -->
                         <!--<button type="button" class="btn btn-primary" *ngIf="editing" (click)="editing = false;">Confirm</button>-->
-                        <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'stopped'"
-                                (click)="commit_edit('start')">Start
+                        <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'stopped'"  [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
+                                (click)="commit_edit('start')">{{'vm.start' | translate}}
                         </button>
-                        <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'running'"
-                                (click)="commit_edit('stop')">Stop
+                        <button type="button" class="btn btn-info" *ngIf="user.vms[0].status == 'running'" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
+                                (click)="commit_edit('stop')">{{'vm.stop' | translate}}
                         </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="modal fade" id="deleteVMModal" tabindex="-1" role="dialog" aria-labelledby="deleteVMModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="popUpAlertTitle"> {{ 'vm.delete.popup.title' | translate }} {{ this.vmid }}</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                      <label for="input_vm_id" class="col-form-label">{{ "vm.delete.popup.desc" | translate }}<br><br>{{ "vm.delete.popup.prompt.label" | translate }}:</label>
+                      <input type="text" class="form-control" id="input_vm_id" [(ngModel)]="this.input_vm_id" name="input_vm_id" [placeholder]="this.vmid" value=""/>
+                    </div>
+                  </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary btn-danger" [disabled]="this.input_vm_id != this.vmid" (click)="delete_vm()" data-dismiss="modal" >{{"vm.delete" | translate}} </button>
+            </div>
+          </div>
+        </div>
+      </div>
     <div class="row" style="margin-top: 20px;" *ngIf="this.user.admin">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                        <h4>Historique des IP</h4>
+                        <h4>{{'vm.ipHistory' | translate}}</h4>
                         <hr>
-                        <div class="text-center">Cet historique technique permet de retracer les éventuels changements d'IP d'une VM via le DHCP.</div>
+                        <div class="text-center">{{'vm.ipHistoryDescription' | translate}}</div>
                         <table style="margin-top: px" class="table table-striped">
                             <thead>
                                 <th scope="col">IP</th>
@@ -188,8 +216,9 @@
 
 
 <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.freezeState == 0">
-    <b>Unsigned charter !</b>
-    <p>To manage your VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+    <b>{{'vm.charter.notsigned_1' | translate}}</b>
+    <p>{{'vm.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'vm.charter.notsigned_3' | translate}}</a> {{'vm.charter.notsigned_4' | translate}}</p>
+
 </div>
 
 

@@ -4,6 +4,7 @@ from proxmox_api import proxmox
 import connexion
 import requests
 import json
+from threading import Thread
 from requests.api import head
 from slugify import slugify
 from proxmox_api.models.dns_entry_item import DnsEntryItem  # noqa: E501
@@ -114,6 +115,41 @@ def create_vm(body=None):  # noqa: E501
 
     return proxmox.create_vm(body.name, body.type, user_id, body.password, body.user, body.ssh_key)
 
+def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error occured
+    """delete vm by id where an error occured
+
+     # noqa: E501
+
+    :param vmid: vmid to get
+    :type vmid: float
+
+    :rtype: None
+    """
+    try:
+        vmid = int(vmid)
+    except:
+        return {"status": "error not an integer"}, 500
+
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"error": "cotisation expired"}, 403
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
+        return {"error": "You don't have the right permissions"}, 403
+    
+    Thread(target=delete_vm_in_thread, args=(vmid, "", True,)).start()
+    return {"status": "deleting"}, 200
 
 def delete_vm_id(vmid):  # noqa: E501
     """delete vm by id
@@ -141,6 +177,7 @@ def delete_vm_id(vmid):  # noqa: E501
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     body,statusCode = proxmox.get_freeze_state(user_id)
     if statusCode != 200:
@@ -154,17 +191,42 @@ def delete_vm_id(vmid):  # noqa: E501
     if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
         return {"status": "cotisation expired"}, 403
 
+    
     node = proxmox.get_node_from_vm(vmid)
-    if not node:
-        return {"status": "vm not exists"}, 404
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
-                return proxmox.delete_vm(vmid, node)
-    if vmid in map(int, proxmox.get_vm(user_id)[0]):
-        return proxmox.delete_vm(vmid, node)
-    else:
-        return {"status": "error"}, 500
+    if not node : #doesn't exist
+        return {"error": "VM doesn't exist"}, 404
+    
+    Thread(target=delete_vm_in_thread, args=(vmid, node, False,)).start()
+    return {"status": "deleting"}, 200
+
+
+# Delete the vm in a thread after the API endpoint is called. It's a workaround to avoid the timeout of the API endpoint. The behavior is different in the error handling if the deletion is trigger while an error or not
+def delete_vm_in_thread(vmid, node="", dueToError=False):
+    util.update_vm_state(vmid, "deleting")
+    if node == "" and not dueToError:
+        print("Impossible to find the vm to delete.")
+        util.update_vm_state(vmid, "Impossible to find the vm to delete.", errorCode=404, deleteEntry=True)
+        return 0
+    elif node != "" : 
+        isProxmoxDeleted = proxmox.delete_from_proxmox(vmid, node)
+        print("isProxmoxDeleted : " + str(isProxmoxDeleted))
+        if not isProxmoxDeleted and not dueToError:
+            print("An error occured while deleting the VM from proxmox")
+            util.update_vm_state(vmid, "An error occured while deleting the VM from proxmox", errorCode=500, deleteEntry=True)
+            return 0
+        # If not isProxmoxDeleted and dueToError then it's fine. 
+    # Now we can delete the entry in the db
+    isDbDeleted = proxmox.delete_from_db(vmid)
+    if (not dueToError and isDbDeleted and isProxmoxDeleted) or (dueToError and (isDbDeleted or not     isProxmoxDeleted)):
+        util.update_vm_state(vmid, "deleted", deleteEntry=True)
+        return 1
+    else : 
+        print("An error occured while deleting the VM.")
+        util.update_vm_state(vmid, "An error occured while deleting the VM.", errorCode=500, deleteEntry=True)
+
+
+
+
 
 ################
 ## DEPRECATED ##
@@ -237,7 +299,7 @@ def get_dns():  # noqa: E501
     return proxmox.get_user_dns(user_id)
 
 
-def get_vm():  # noqa: E501
+def get_vm(search= ""):  # noqa: E501
     """get all user vms
 
      # noqa: E501
@@ -253,6 +315,7 @@ def get_vm():  # noqa: E501
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     body,statusCode = proxmox.get_freeze_state(user_id)
     if statusCode != 200:
@@ -271,11 +334,14 @@ def get_vm():  # noqa: E501
         return {"error": "cotisation expired"}, 403
 
 
+    print('filter : ', search)
+    
 
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
-                return proxmox.get_vm()  # affichage de la liste sans condition
+                return proxmox.get_vm(search=search)  # affichage de la liste sans condition
+ 
     return proxmox.get_vm(user_id=user_id)
 
 
@@ -290,7 +356,6 @@ def get_vm_id(vmid):  # noqa: E501
     :rtype: VmItem
     """
     start = time.time()
-    print("backend api called " , vmid)
 
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
@@ -327,22 +392,46 @@ def get_vm_id(vmid):  # noqa: E501
 
     if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
         return {"error": "You don't have the right permissions"}, 403
+    
+    vm_state = util.get_vm_state(vmid)
+    if vm_state != None : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
+        (status, httpErrorCode, errorMessage) = vm_state 
+        if status == "error":
+            util.update_vm_state(vmid, "delete", deleteEntry= True) # We send to the user and delete here
+            try : 
+                return {"error", errorMessage}, httpErrorCode
+            except: 
+                return {"error", "An unknown error occured"}, 500
+        elif status == "creating" : 
+            return {"status" : "creating"}, 200
+        elif status == "deleting":
+            return {"status" : "deleting"}, 200
+        elif status == "deleted":
+            util.update_vm_state(vmid, "deleted", deleteEntry= True) # We send to the user and delete here
+            return {"status": "deleted"}, 200
+        elif  status == "created" : 
+            util.update_vm_state(vmid, "delete", deleteEntry= True) # We send to the user and delete here
+            return {"status": "created"}, 201
+        else :
+            return {"error": "Unknown vm status"}, 400
+
 
     node = proxmox.get_node_from_vm(vmid)
-    print("node recieved :", node)
-    if not node:
-        return {"error": "Impossible to retrieve the vm"}, 404
 
-    status = proxmox.get_vm_status(vmid, node)
+    if node == None and not admin: # exist in the db but not in proxmox. It's a error
+        return {"error": "VM not found in proxmox"}, 500
+    elif node == None and  admin:
+        return {'error' : "VM no found"} , 404
+
+
+
+    status = proxmox.get_proxmox_vm_status(vmid, node)
     type = dbfct.get_vm_type(vmid)
     created_on = get_vm_created_on(vmid)
-
-
-    proxmoxStart = time.time()
+   
     (vmConfig, response) = proxmox.get_vm_config(vmid, node)
     #print("get_vm_config for " , vmid , " took ")
 
-    print("(vmConfig, response) = ", (vmConfig, response))
 
     if response == 500:
         print("500 error, vmConfig = ", vmConfig)
@@ -363,6 +452,13 @@ def get_vm_id(vmid):  # noqa: E501
     except Exception as e:
         print("error while getting config : " + str(e))
         return {"error": "error while getting config : " + str(e)}, 500
+
+
+
+    proxmoxStart = time.time()
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"error": "cotisation expired"}, 403
+
 
    # print("recieved config response (" ,vmid ,") ok. Took" , str(time.time() - start))
 

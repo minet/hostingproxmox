@@ -1,13 +1,17 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Vm} from '../models/vm';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {User} from '../models/user';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
-import {interval, Subscription, timer} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
+import {Subscription, timer} from 'rxjs';
+import {delay, mergeMap} from 'rxjs/operators';
+import {TranslateService} from "@ngx-translate/core";
+import {CookieService} from "ngx-cookie-service";
+import {Utils} from "../common/utils";
+import { ThisReceiver } from '@angular/compiler';
 
 @Component({
     selector: 'app-vm',
@@ -20,10 +24,13 @@ export class VmComponent implements OnInit, OnDestroy {
     editing = false;
     errorcode = 201;
     errorDescription = "";
-    deleting = false;
+    deletionStatus = "None";
     intervals = new Set<Subscription>();
     newVm = new Vm();
     history: any;
+    input_vm_id = ""; // for the deletion pop up
+    vm_has_error = false;
+    vm_has_proxmox_error = false;
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -32,7 +39,8 @@ export class VmComponent implements OnInit, OnDestroy {
         public user: User,
         private userService: UserService,
         public authService: AuthService,
-        public slugifyPipe: SlugifyPipe,
+        public slugifyPipe: SlugifyPipe, 
+        private utils : Utils,
     ) {
     }
 
@@ -74,7 +82,6 @@ export class VmComponent implements OnInit, OnDestroy {
 
 
     commit_edit(status: string): void {
-
         const data = {
             status,
         };
@@ -85,23 +92,54 @@ export class VmComponent implements OnInit, OnDestroy {
             this.loading = false;
             this.errorcode = error.status;
         });
-
     }
 
     delete_vm(): void {
-        this.deleting = true;
-        this.http.delete(this.authService.SERVER_URL + '/vm/' + this.vmid).subscribe(rep => {
-                this.deleting = false;
-                this.router.navigate(['vms']);
+        this.deletionStatus = "deleting";
+        this.errorDescription = "";
+        var url = this.authService.SERVER_URL + '/vm/' + this.vmid;
+        if(this.vm_has_error ){
+            url = this.authService.SERVER_URL + '/vmWithError/' + this.vmid;
+        }
+        console.log(this.errorDescription)
+        console.log(url)
+         this.http.delete(url).subscribe(rep => {
+
+            const deletionTimer = timer(0, 3000).pipe(
+            mergeMap(() =>  this.http.get(this.authService.SERVER_URL + '/vm/' +this.vmid, {observe: 'response'}))).subscribe(rep => {
+                        const vmstate = rep.body['status'];
+                        if(vmstate == "deleted"){
+                            deletionTimer.unsubscribe();
+                            this.deletionStatus = "deleted";
+                            setTimeout(() =>this.router.navigate(['vms']), 2000);
+                        }
+                      },
+                    error => {
+                        if (error.status == 403 || error.status == 404){ // the vm is deleted 
+                            deletionTimer.unsubscribe();
+                            this.deletionStatus = "deleted";
+                            setTimeout(() =>this.router.navigate(['vms']), 2000);
+                        } else {
+                            deletionTimer.unsubscribe();
+                            this.loading = false;
+                              this.errorcode = error.status;
+                              this.errorDescription = error.error["error"];
+                        }
+                       
+                          
+                    });
+                this.intervals.add(deletionTimer);
             },
 
             error => {
                 this.loading = false;
-                this.deleting = false;
+                this.deletionStatus  = "None";
                 this.errorcode = error.status;
                 this.errorDescription = error.statusText;
             });
+        
     }
+
 
     get_vm(vmid): void {
         const vm = new Vm();
@@ -111,6 +149,8 @@ export class VmComponent implements OnInit, OnDestroy {
         const newTimer = timer(0, 3000).pipe(
             mergeMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
             .subscribe(rep => {
+
+                console.log(rep)
                     if(this.user.admin)
                         this.get_ip_history(vmid);
                     vm.name = rep.body['name'];
@@ -134,12 +174,19 @@ export class VmComponent implements OnInit, OnDestroy {
                     }
 
                     this.loading = false;
+                    console.log("vm.status", vm.status)
                 },
                 error => {
+                    if(error.status == 500 && error.error["error"] == "VM not found in proxmox"){
+                       this.vm_has_proxmox_error = true;
+                    }
                     this.errorcode = error.status;
+                    this.errorDescription = error.error["error"];
+                    this.vm_has_error = true;
+                    console.log(this.vm_has_error)
+                    this.loading = false;
                 });
         this.intervals.add(newTimer);
-
     }
 
     get_ip_history(vmid): void {
@@ -156,13 +203,13 @@ export class VmComponent implements OnInit, OnDestroy {
         this.loading = false; // de toute manière on va pas charger pendant 106 ans
         switch(errorcode) {
             case 500:
-                return "Internal error, please contact our webmaster ! (webmaster@minet.net)";
+                return this.utils.getTranslation('vm.error.500');
                 break;
             case 404:
-                return "VM not found !";
+                return this.utils.getTranslation('vm.error.404');
                 break;
             case 403:
-                return "Session expired or wrong permission !";
+                return this.utils.getTranslation('vm.error.403');
                 break;
         }
     }
