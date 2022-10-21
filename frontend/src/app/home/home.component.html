@@ -1,6 +1,10 @@
 <div class="home container flex-fill">
     <h1 class="text-center mb-2">Home</h1>
     <hr>
+    <div class="alert alert-danger text-center" *ngIf="errorcode != 200 && errorcode != 201 && errorcode != 0">
+        <b>Impossible to check your account</b>
+        <p>Please, try to log out and log in. If this doesn't work, open an issue on tickets.minet.net</p>
+    </div>
     <div *ngIf="!user.admin" class="userhome">
        <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
             <h1>❄️</h1>
