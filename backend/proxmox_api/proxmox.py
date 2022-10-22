@@ -812,7 +812,8 @@ def update_vm_ips_job(app):    # Job (schedules each 10s) to update all VMs' ip
                 try:
                     update_vm_ip_address(vm, node)
                 except Exception as e:
-                    print("Impossible to update the ip of  vm " , j['vmid'] , e)
+                    break
+                    
                 #print("ip updated")
             
    #print("update vm finish, took", time.time() - start , "s")
@@ -854,7 +855,6 @@ def update_vm_ip_address(vm, node, debug=False):
 
 
 def switch_autoreboot(vmid,node):
-    print(get_vm_autoreboot(vmid, node))
     (config, status) = get_vm_autoreboot(vmid, node)
     if status != 201 :
         return {"error" : "Impossible to retrieve onboot status"}, 500
@@ -982,7 +982,6 @@ def check_update_cotisation(username):
         headers = {"X-API-KEY": config.ADH6_API_KEY}
         #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
         userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
-        print("userInfo : ", userInfo.json())
         
         userInfoJson = userInfo.json()
         if (len(userInfoJson) != 1):
@@ -1008,7 +1007,6 @@ def check_update_cotisation(username):
             membership = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
             membership_dict = membership.json()
             today =  date.today()
-            print("membership : ", membership_dict)
             if "ip" not in membership_dict: # Cotisation expired
                 #print(username , "cotisation expired", membership.json())
                 print(username , "cotisation expired")
