@@ -115,6 +115,9 @@
 
     }},
   "defaultProject": "hosting",
+  "cli": {
+    "analytics": false
+  },
     }
   },
   "cli": {

@@ -16,7 +16,6 @@ import {mergeMap} from 'rxjs/operators';
   styleUrls: ['./dns.component.css']
 })
 export class DnsComponent implements OnInit, OnDestroy {
-<<<<<<< frontend/src/app/dns/dns.component.ts
   loading = true;
   newDns = new Dns();
   ipList = Array<string>();
@@ -35,13 +34,13 @@ export class DnsComponent implements OnInit, OnDestroy {
               public user: User,
               private userService: UserService,
               private authService: AuthService,
-              private slugifyPipe: SlugifyPipe) {
+              private utils: Utils) {
   }
 
 
     ngOnInit(): void {
         setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
-            if(this.user.admin || (this.user.chartevalidated && this.user.cotisation)) {
+            if(this.user.admin || (this.user.chartevalidated && this.user.freezeState < 3)) {
                 this.get_dns_list();
                 this.user.dns = Array<Dns>();
                 this.get_ips_list();
