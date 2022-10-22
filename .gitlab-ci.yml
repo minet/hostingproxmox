@@ -8,6 +8,8 @@ install_dependencies_angular:
   stage: dependencies
   image: node
   before_script:
+    - npm config rm proxy
+    - npm config rm https-proxy
     - npm config set proxy "http://192.168.102.61:82/"
     - npm config set https-proxy "http://192.168.102.61:82/"
     - cd frontend
