@@ -9,35 +9,28 @@
 
 <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
     <h1>❄️</h1>
-    <h4>Your account is frozen !</h4>
-    <p>Your cotisation has expired ! You will still be able to manage your vm for few days. After 30 days of expiration your vm will be shutdown and after 60 days, they will be definitively destroyed</p>
-    <p><strong>WARNING : you have only 30 days to renew your cotisation before the shutdown of your vm ! </strong></p>
-</div>
-<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
+    <h4>{{'account.freeze.title' | translate }}</h4>
+    <p></p>
+    <p>{{'account.freeze.1.description' | translate }}<strong>{{'account.freeze.1.description.strong' | translate }} </strong></p>
+  </div>
+  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
     <h1>❄️</h1>
-    <h4>Your account is frozen !</h4>
-    <p>Your cotisation has expired since at least <strong>30 days !</strong> You will still be able to backup your vm for few days.  After 60 days (in less than 30 days now), they will be definitively destroyed</p>
-    <p><strong>WARNING : you have only 30 days to renew your cotisation before the FULL DELETION of your vm ! </strong></p>
-</div>
-<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 3  ">
+    <h4>{{'account.freeze.title' | translate }}</h4>
+    <p>{{'account.freeze.2.description.1' | translate }}<strong>{{'account.freeze.2.description.1.strong' | translate }}</strong> {{'account.freeze.2.description.2' | translate }}</p>
+    <p><strong>{{'account.freeze.2.description.2.strong' | translate }}</strong></p>
+  </div>
+  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState >= 3 ">
     <h1>❄️</h1>
-    <h4>Your account is frozen !</h4>
-    <p>Your cotisation has expired since at least <strong>60 days !</strong></p>
-    <p><strong>WARNING : Your vm will be fully deleted in few days.</strong></p>
-</div>
-<div class="alert alert-warning text-center" *ngIf="this.user.freezeState == 3">
-    <h4>Your cotisation has expired</h4>
-    <p>Your cotisation has expired you cannot create any vm</p>
-</div>
-
+    <h4>{{'account.freeze.title' | translate }}</h4>
+    <p>{{'account.freeze.3.description' | translate }}<br><strong>{{'account.freeze.3.description.strong' | translate }}</strong></p>
+  </div>
+  <div class="alert alert-warning text-center" *ngIf="this.user.freezeState >= 3">
+    <h4>{{'account.expired.title' | translate }}</h4>
+    <p>{{'account.expired.description' | translate }}</p>
+  </div>
 <div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.freezeState < 3) || this.user.admin)" >
 
-    <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
-    <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
-    <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">IP History</button></div>
 
-    <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
-                    aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
     
     <h1 class="text-center mb-2" *ngIf="!user.admin">{{ "vms.listTitle" | translate}}</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">{{ "vms.listTitleAdmin" | translate}}</h1>

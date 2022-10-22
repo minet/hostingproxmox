@@ -1,36 +1,35 @@
 <div class="home container flex-fill">
     <h1 class="text-center mb-2">{{'home.title' | translate}}</h1>
     <hr>
-    <div class="alert alert-danger text-center" *ngIf="errorcode != 200 && errorcode != 201 && errorcode != 0 && this.user.freezeState == null">
-        <b>Impossible to check your account</b>
-        <p>Please, try to log out and log in. If this doesn't work, open an issue on tickets.minet.net</p>
+    <div class="alert alert-danger text-center" *ngIf="errorcode != 200 && errorcode != 201 && errorcode != -1 && this.user.freezeState == null">
+        <b>{{'home.error.account' | translate }}</b>
+        <p>{{'home.error.account.message' | translate }}</p>
     </div>
     <div *ngIf="!user.admin" class="userhome">
        <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
             <h1>❄️</h1>
-            <h4>Your account is frozen !</h4>
-            <p>Your cotisation has expired ! You will still be able to manage your vm for few days. After 30 days of expiration your vm will be shutdown and after 60 days, they will be definitively destroyed</p>
-            <p><strong>WARNING : you have only 30 days to renew your cotisation before the shutdown of your vm ! </strong></p>
+            <h4>{{'account.freeze.title' | translate }}</h4>
+            <p></p>
+            <p>{{'account.freeze.1.description' | translate }}<strong>{{'account.freeze.1.description.strong' | translate }} </strong></p>
         </div>
         <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
             <h1>❄️</h1>
-            <h4>Your account is frozen !</h4>
-            <p>Your cotisation has expired since at least <strong>30 days !</strong> You will still be able to backup your vm for few days.  After 60 days (in less than 30 days now), they will be definitively destroyed</p>
-            <p><strong>WARNING : you have only 30 days to renew your cotisation before the FULL DELETION of your vm ! </strong></p>
+            <h4>{{'account.freeze.title' | translate }}</h4>
+            <p>{{'account.freeze.2.description.1' | translate }}<strong>{{'account.freeze.2.description.1.strong' | translate }}</strong> {{'account.freeze.2.description.2' | translate }}</p>
+            <p><strong>{{'account.freeze.2.description.2.strong' | translate }}</strong></p>
         </div>
-        <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 3 && countvm >0">
+        <div class="alert alert-primary text-center" *ngIf="this.user.freezeState >= 3 ">
             <h1>❄️</h1>
-            <h4>Your account is frozen !</h4>
-            <p>Your cotisation has expired since at least <strong>60 days !</strong></p>
-            <p><strong>WARNING : Your vm will be fully deleted in few days.</strong></p>
+            <h4>{{'account.freeze.title' | translate }}</h4>
+            <p>{{'account.freeze.3.description' | translate }}<br><strong>{{'account.freeze.3.description.strong' | translate }}</strong></p>
         </div>
-        <div class="alert alert-warning text-center" *ngIf="this.user.freezeState >=1 && countvm > 0">
-            <h4>Your cotisation has expired</h4>
-            <p>Your cotisation has expired you cannot create any vm</p>
+        <div class="alert alert-warning text-center" *ngIf="this.user.freezeState >=1 && countvm == 0">
+            <h4>{{'account.expired.title' | translate }}</h4>
+            <p>{{'account.expired.description' | translate }}</p>
         </div>
         <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && this.user.freezeState == 0">
-            <b>Unsigned charter !</b>
-            <p>To create VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+            <b>{{'account.nocharter.title' | translate }}</b>
+            <p>{{'account.nocharter.desc.1' | translate}}<a href="https://chartes.minet.net/">{{'account.nocharter.desc.a' | translate}}</a>{{'account.nocharter.desc.2' | translate}}</p>
         </div>
 
         <div class="alert alert-info text-center" role="alert" *ngIf="this.user.freezeState == 0">
@@ -76,7 +75,7 @@
                     </dl>
                     <hr>
                     <div>
-                        <div class="alert alert-danger text-center" *ngIf="errorcode != 201 && errorcode != 0">
+                        <div class="alert alert-danger text-center" *ngIf="errorcode != 201 && errorcode != -1">
                             <b>{{'home.createVm.form.error' | translate}} </b><br/>
                             {{ errorMessage }}
                         </div>

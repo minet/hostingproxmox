@@ -33,7 +33,7 @@ export class HomeComponent implements OnInit {
   prefix: string;
   loading = false;
   valide = false;
-  errorcode = 0;
+  errorcode = -1;
   errorMessage = ""
   url: string;
   sshAddress: string;
