@@ -1056,32 +1056,7 @@ def check_update_cotisation(username):
 # For the jenkins script
 ####
 
-        
-def expiredCotisation(username, userEmail): # Call when the cotisation is expired
-    lastNotification = getLastNotificationDate(username)
-    if lastNotification == None : 
-        #return sendNotification(username, userEmail)
-        return {"freezeState": status}, 200
-    else :
-        lastNotification = datetime.strptime(lastNotification,  "%Y-%m-%d").date()
-        delta = date.today() - lastNotification
-        #if delta.days >=7 : # We update update the status : 
-        #    return sendNotification(username, userEmail)
-        # We don't change the status : 
-        
-
-def sendNotification(username,userEmail): # send a notification to the user when the cotisation is expired
-    freezeState = getFreezeState(username)
-    status, nbNotif = generateNewFreezeState(freezeState)
-
-    print("send a notification to " + str(username) + "with status" +str(status) + "and nbNotif" + str(nbNotif))
-    # when the notification is sent : 
-    updateLastNotificationDate(username, date.today())
-    updatedfreezeState = str(status) + "." + str(nbNotif)
-    updateFreezeState(username, updatedfreezeState)
-    return  {"freezeState": updatedfreezeState}, 200
-    
-    
+ 
 
         
 
