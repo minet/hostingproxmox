@@ -134,7 +134,7 @@ export class VmsComponent implements OnInit, OnDestroy {
 
 
 
-    get_vm(id: number, last: boolean): void {
+    async get_vm(id: number, last: boolean) {
         let vm = this.user.vms[id]
         const vmid = vm.id;
         const newTimer = timer(0, 30000).pipe(
@@ -159,6 +159,8 @@ export class VmsComponent implements OnInit, OnDestroy {
                     }
                 },
                 error => {
+                    this.get_need_to_be_restored(vm)
+                    
                     vm.name = this.utils.getTranslation('vm.error.404');
                     vm.status = "Error " + error.status;
                     vm.createdOn = this.utils.getTranslation("vms.type.unknow")
@@ -197,5 +199,26 @@ export class VmsComponent implements OnInit, OnDestroy {
         this.loading = true;
 
     }
+
+    // Check if a VM need to be restored
+    get_need_to_be_restored(vm):void{
+        this.http.get(this.authService.SERVER_URL + '/needToBeRestored/' + vm.id, {observe: 'response'})
+        .subscribe(rep => {
+            console.log(rep)
+            const needToBeRestored = Boolean(rep.body['need_to_be_restored']);
+                if(needToBeRestored){
+                    console.log("needToBeRestored", needToBeRestored)
+                    if (needToBeRestored){// If the VM is not found, and need to be restored, then it data are lost
+                        vm.name = ""
+                        vm.status = "Error: Your VM data is lost. Click to see more details."
+                        vm.createdOn = ""
+                        vm.type = "unknow";
+                    }
+                }
+                 
+            });
+            return null;
+    }
+   
 
 }
