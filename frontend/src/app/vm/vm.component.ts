@@ -201,7 +201,8 @@ export class VmComponent implements OnInit, OnDestroy {
                     console.log("vm.status", vm.status)
                 },
                 error => {
-                    if (this.need_to_be_restored == null || !this.popUpShowed){
+                    if (this.need_to_be_restored == null){
+                        console
                         this.get_need_to_be_restored(vmid);
                     }
           
@@ -233,7 +234,9 @@ export class VmComponent implements OnInit, OnDestroy {
             console.log(rep)
 
                 this.need_to_be_restored = rep.body['need_to_be_restored'];
-                this.startPopUp();
+                if(this.need_to_be_restored){
+                    this.startPopUp();
+                }
             },
             error => {
                 this.errorcode = error.status;

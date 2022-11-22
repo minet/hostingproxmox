@@ -46,12 +46,12 @@ document.onload = loaded();
     </div>
         <div class="modal-body">
             <p [innerHtml]="'vm.backup.popup.description.1' | translate"></p>
-            <p [innerHtml]="'vm.backup.popup.description.2' | translate" *ngIf="!this.vm_has_proxmox_error"></p>
-            <p [innerHtml]="'vm.backup.popup.description.3' | translate" *ngIf="this.vm_has_proxmox_error"></p>
+            <p [innerHtml]="'vm.backup.popup.description.2' | translate" *ngIf="!this.vm_has_proxmox_error && errorcode != 404"></p>
+            <p [innerHtml]="'vm.backup.popup.description.3' | translate" *ngIf="this.vm_has_proxmox_error || errorcode == 404"></p>
         </div>
         <div class="modal-footer .center">
             <p><button type="button" class="btn btn-primary btn btn-danger" data-toggle="modal" data-target="#deleteVMModal">{{ 'vm.backup.popup.button.delete' | translate }}</button></p>
-            <p><button type="button" class="btn btn-primary btn btn-success" data-toggle="modal" data-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error">{{ 'vm.backup.popup.button.restore' | translate }}</button></p>
+            <p><button type="button" class="btn btn-primary btn btn-success" data-toggle="modal" data-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{ 'vm.backup.popup.button.restore' | translate }}</button></p>
             <p><a href="/vms"><button type="button" class="btn btn-secondary" >{{ 'vm.backup.popup.button.cancel' | translate }}</button></a></p>
         </div>
       </div>
