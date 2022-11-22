@@ -450,6 +450,25 @@ def start_vm(vmid, node):
         logging.error("Problem in start_vm(" + str(vmid) + ") when starting VM: " + str(e))
         return {"status": "error"}, 500
 
+def update_vm_credentials(vmid,username, password, sshKey):
+    node = get_node_from_vm(vmid)
+    try : 
+        proxmox.nodes(node).qemu(vmid).config.post(
+        ciuser=username,
+        cipassword=password,
+        sshkeys=[urllib.parse.quote(sshKey, safe='')])
+        try : 
+            setNeedToBeRestored(vmid, False)
+            return {"status" :"ok"},200
+        except Exception as e: 
+            return {"status": "Problem while updatig the VM(" + str(vmid) + ") status : " + str(e)}, 500
+       
+    except Exception as e:
+        logging.error("Problem in update_vm_credentials(" + str(vmid) + ") when updating VM: " + str(e))
+        return {"status": "Problem while updatig the VM(" + str(vmid) + ") : " + str(e)}, 400
+
+
+
 
 def stop_vm(vmid, node):
     try:
