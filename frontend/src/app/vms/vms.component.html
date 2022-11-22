@@ -1,3 +1,5 @@
+
+
 <div *ngIf="loading && (user.chartevalidated || user.admin)">
     <div class="d-flex justify-content-center">
         <div class="spinner-grow text-primary" role="status">
@@ -6,6 +8,13 @@
         
     </div>
 </div>
+<div class="alert alert-warning text-center" >
+    <h5>{{"vm.alert.title" | translate}}</h5>
+    <p>{{"vm.alert.descr.1" | translate}}</p><br>
+    <p>{{"vm.alert.descr.2" | translate}}</p>
+    <p>{{"vm.alert.descr.3" | translate}}</p>
+    <p><a href='https://www.minet.net/fr/2022/10/29/incident.html'>{{"vm.alert.repair" | translate}}</a></p>
+  </div>
 
 <div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.cotisation === 1) || this.user.admin)" >
     
