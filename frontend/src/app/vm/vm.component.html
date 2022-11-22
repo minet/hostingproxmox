@@ -1,3 +1,12 @@
+<script>
+    function loaded()
+{
+    document.getElementById('openModalButton').click()
+};
+document.onload = loaded();
+</script>
+
+
 <div *ngIf="(loading || deletionStatus != 'None') && (user.chartevalidated || user.admin) && (errorcode !== 500)">
     <div class="d-flex justify-content-center">
         <div class="spinner-grow text-primary" role="status">
@@ -26,7 +35,71 @@
         </div>
 
     </div>
-    
+
+    <button id="openModalButton" data-toggle="modal" data-target="#restoreLabel" [hidden]="true">Open popup</button>
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="restoreLabel" aria-hidden="true" id = "restoreLabel" data-show="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        
+                <div class="modal-header ">
+        <h3 class="modal-title text-danger" id="title">{{ 'vm.backup.popup.title' | translate }}</h3>
+    </div>
+        <div class="modal-body">
+            <p [innerHtml]="'vm.backup.popup.description.1' | translate"></p>
+            <p [innerHtml]="'vm.backup.popup.description.2' | translate" *ngIf="!this.vm_has_proxmox_error"></p>
+            <p [innerHtml]="'vm.backup.popup.description.3' | translate" *ngIf="this.vm_has_proxmox_error"></p>
+        </div>
+        <div class="modal-footer .center">
+            <p><button type="button" class="btn btn-primary btn btn-danger" data-toggle="modal" data-target="#deleteVMModal">{{ 'vm.backup.popup.button.delete' | translate }}</button></p>
+            <p><button type="button" class="btn btn-primary btn btn-success" data-toggle="modal" data-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error">{{ 'vm.backup.popup.button.restore' | translate }}</button></p>
+            <p><a href="/vms"><button type="button" class="btn btn-secondary" >{{ 'vm.backup.popup.button.cancel' | translate }}</button></a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+<div class="modal fade bd-example-modal-lg" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="restoreModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="restoreModalLabel">{{ "vm.backup.popup.title" | translate }} </h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p><strong class="text-alert">{{ "vm.backup.popup.button.explanation" | translate }}</strong> </p>
+        <div class="alert alert-danger" *ngIf="popUpErrorCode != 0">
+          <b>Error {{popUpErrorCode}} : {{popUpErrorMessage}}</b>
+        </div>
+        <form (ngSubmit)="update_vm()">
+          <div class="form-group">
+            <label for="username" class="col-form-label">{{"vm.updateCreds.username" | translate}}</label>
+            <input type="text" class="form-control" id="username" [(ngModel)]="popUpUsername">
+          </div>
+          <div class="form-group">
+            <label for="password" class="col-form-label">{{"vm.updateCreds.password" | translate}}</label>
+            <input type="password" class="form-control" id="password" [(ngModel)]="popUpPassword">
+          </div>
+          <div class="form-group">
+            <label for="sshKey" class="col-form-label">{{"vm.updateCreds.ssh" | translate}}</label>
+            <textarea class="form-control" id="sshKey" [(ngModel)]="popUpSSHkey"></textarea>
+          </div>
+        </form>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" [disabled]="popUpLoading">{{ "vm.backup.popup.button.cancel" |translate }}</button>
+  
+          <button  class="btn btn-success w-50" [disabled]="popUpLoading" (click)="update_vm_credentials()"><span [hidden]="popUpLoading" >{{ "vm.backup.popup.button.restore" | translate }}</span> <div class="spinner-border spinner-border-sm text-light" role="status" *ngIf="popUpLoading">
+            <span class="sr-only">Loading...</span>
+          </div></button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
     <div *ngIf="deletionStatus != 'deleting' && deletionStatus != 'deleted' && !vm_has_error">
     <hr>
     <div class="row" >
@@ -196,6 +269,7 @@
     <b>{{'vm.charter.notsigned_1' | translate}}</b>
     <p>{{'vm.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'vm.charter.notsigned_3' | translate}}</a> {{'vm.charter.notsigned_4' | translate}}</p>
 </div>
+
 
 
 

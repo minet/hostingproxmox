@@ -31,6 +31,15 @@ export class VmComponent implements OnInit, OnDestroy {
     input_vm_id = ""; // for the deletion pop up
     vm_has_error = false;
     vm_has_proxmox_error = false;
+    need_to_be_restored = null; 
+    popUpShowed = false; 
+    popUpErrorCode = 0;
+    popUpErrorMessage = "";
+    popUpUsername ="";
+    popUpPassword = "";
+    popUpSSHkey = "";
+    popUpLoading = false;
+
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -39,7 +48,7 @@ export class VmComponent implements OnInit, OnDestroy {
         public user: User,
         private userService: UserService,
         public authService: AuthService,
-        public slugifyPipe: SlugifyPipe, 
+        public slugifyPipe: SlugifyPipe,
         private utils : Utils,
     ) {
     }
@@ -49,8 +58,19 @@ export class VmComponent implements OnInit, OnDestroy {
         this.user.vms = Array<Vm>();
         this.vmid = this.activatedRoute.snapshot.params.vmid;
         this.get_vm(this.vmid);
-
     }
+
+
+    startPopUp(){
+        try {
+            document.getElementById('openModalButton').click();
+            this.popUpShowed = true;
+        } catch (error) {
+            console.log(error)
+        }
+       
+    }
+    
 
     ngOnDestroy(): void {
         for (const id of this.intervals) {
@@ -110,6 +130,9 @@ export class VmComponent implements OnInit, OnDestroy {
                         const vmstate = rep.body['status'];
                         if(vmstate == "deleted"){
                             deletionTimer.unsubscribe();
+                            if(this.need_to_be_restored){
+                                document.getElementById('openModalButton').click();
+                            }
                             this.deletionStatus = "deleted";
                             setTimeout(() =>this.router.navigate(['vms']), 2000);
                         }
@@ -137,7 +160,6 @@ export class VmComponent implements OnInit, OnDestroy {
                 this.errorcode = error.status;
                 this.errorDescription = error.statusText;
             });
-        
     }
 
 
@@ -172,11 +194,17 @@ export class VmComponent implements OnInit, OnDestroy {
                     } else {
                         vm.type = 'not defined';
                     }
-
+                    if (this.need_to_be_restored == null || !this.popUpShowed){
+                        this.get_need_to_be_restored(vmid);
+                    }
                     this.loading = false;
                     console.log("vm.status", vm.status)
                 },
                 error => {
+                    if (this.need_to_be_restored == null || !this.popUpShowed){
+                        this.get_need_to_be_restored(vmid);
+                    }
+          
                     if(error.status == 500 && error.error["error"] == "VM not found in proxmox"){
                        this.vm_has_proxmox_error = true;
                     }
@@ -197,6 +225,47 @@ export class VmComponent implements OnInit, OnDestroy {
             error => {
                 this.errorcode = error.status;
             });
+    }
+
+    get_need_to_be_restored(vmid):void{
+        this.http.get(this.authService.SERVER_URL + '/needToBeRestored/' + vmid, {observe: 'response'})
+        .subscribe(rep => {
+            console.log(rep)
+
+                this.need_to_be_restored = rep.body['need_to_be_restored'];
+                this.startPopUp();
+            },
+            error => {
+                this.errorcode = error.status;
+                this.errorDescription = error.error["error"];
+            });
+    }
+
+    update_vm_credentials(): void {
+        console.log("test")
+        let data = {};
+        data = {
+            vmid: this.vmid,
+          username: this.popUpUsername,
+            password: this.popUpPassword,
+            sshKey: this.popUpSSHkey,
+        };
+        this.popUpLoading = true;
+        
+      this.http.post(this.authService.SERVER_URL + '/updateCredentials', data, {observe: 'response'}).subscribe(rep => {
+        console.log("success")
+        document.getElementById('openModalButton').click();
+        document.getElementById('openUpdateButton').click();
+        this.popUpShowed = false;
+        this.popUpLoading = false;
+        this.popUpErrorCode = 0;
+        this.popUpErrorMessage = "";
+        this.router.navigate(['/vms/' + this.vmid]);
+        }, error => {
+            this.popUpErrorCode = error.status;
+            this.popUpErrorMessage = error.error["error"];
+            this.popUpLoading = false;
+        });
     }
 
     displayError(errorcode): String {
