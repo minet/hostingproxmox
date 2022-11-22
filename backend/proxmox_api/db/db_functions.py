@@ -163,4 +163,12 @@ def getNextVmID(min = 110): # get the next vmid available. The minimum whould no
             return vmid 
         
 
+def getNeedToBeRestored(vmid):
+    return Vm.query.filter_by(id=vmid).first().needToBeRestored
+
+def setNeedToBeRestored(vmid, needToBeRestored):
+    vm = Vm.query.filter_by(id=vmid).first()
+    vm.needToBeRestored = needToBeRestored
+    db.session.commit()
+
 #######
