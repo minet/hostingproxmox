@@ -631,3 +631,79 @@ def get_ip_list():
         return {"status": "Impossible to retrieve the list of your ip addresses. Please make juste you have at least one."}, 500
     else : 
         return {"ip_list": list}, 200
+
+def update_credentials():
+
+    if connexion.request.is_json:
+        body = connexion.request.get_json()  # noqa: E50
+
+    try:
+        vmid = int(body['vmid'])
+    except:
+        return {"error": "Bad vmid"}, 400
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"error": "cotisation expired"}, 403
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
+        return {"error": "You don't have the right permissions"}, 403
+
+
+    
+
+    if not util.check_password_strength(body['password']):
+        return {"error" : "Incorrect password format. Your password must contain at least 1 special char, 1 uppercase letter, 1 number and 8 chars in total."}, 400
+    if not util.check_ssh_key(body['sshKey']):
+        return {"error" : "Incorrect ssh key format"}, 400
+    if not util.check_username(body['username']):
+        return {"error" : "Incorrect vm user format"}, 400
+    
+    return proxmox.update_vm_credentials(vmid, body['username'], body['password'], body['sshKey'])
+
+    
+
+def get_need_to_be_restored(vmid):
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    
+    if r.status_code != 200:
+        return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
+
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    admin = False
+
+    try:
+        vmid = int(vmid)
+    except:
+        return {"error": "The request contains errors"}, 400
+
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+
+    if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
+        return {"error": "You don't have the right permissions"}, 403
+
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"error": "Cotisation expired"}, 403
+
+    
+    try : 
+        value =  dbfct.getNeedToBeRestored(vmid)
+        print(value)
+        return {"need_to_be_restored": value}, 200
+    except :
+        return {"error": "Impossible to check the restore status of the vm"}, 500
+    

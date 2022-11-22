@@ -187,6 +187,55 @@ paths:
         "409":
           description: a vm already exists
       x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /needToBeRestored/{vmid}:
+    get:
+      summary : Get the restore status of a vm
+      operationId : get_need_to_be_restored
+      parameters :
+        - name : vmid
+          in : path 
+          description: vmid to get restore status
+          required : true
+          style : simple
+          explode : false
+          schema :
+            type : string
+            example : "105"
+      responses:
+        "200":
+          description: get storage status
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VmIdItem'
+                x-content-type: application/json
+        "400":
+          description: "invalid input, object invalid"
+        "403":
+          description: "not enough permissions"
+        "404":
+          description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /updateCredentials:
+    post:
+      summary: Update the creds of a vm
+      operationId: update_credentials
+      requestBody:
+        description:  Update the creds of a vm
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VmItem'
+      responses:
+        "200":
+          description: updated
+        "400":
+          description: "invalid input, object invalid"
+        "409":
+          description: a vm already exists
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
   /history/{vmid}:
     get:
       summary: get the ip history of a vm
