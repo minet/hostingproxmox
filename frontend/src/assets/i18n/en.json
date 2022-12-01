@@ -253,6 +253,7 @@
   "vm.updateCreds.username" : "Username of the VM :",
   "vm.updateCreds.password" : "Password :",
   "vm.updateCreds.ssh" : "Public ssh key :",
+  "vm.updateCreds.charte" : "By restoring your VM, you accept the hosting's <a href=\"https://chartes.minet.net/fr/chartehosting\">terms of use</a>",
   "vm.alert.title" : "Data lost for VM created before 29/10/2022",
   "vm.alert.descr.1" : "2 of our storage servers used by our 6 production servers had been damaged following a general outage in our server rooms. Despite all our efforts, nights and days, we only managed to recover 1 storage server. Unfortunatly, 60% of the hosting data are lost.",
   "vm.alert.descr.2":"We are deploying backups from the 01.10.2022. All the VMs created after the 29.10.2022 are not involved.",

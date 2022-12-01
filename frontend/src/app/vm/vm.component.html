@@ -87,6 +87,10 @@ document.onload = loaded();
             <textarea class="form-control" id="sshKey" [(ngModel)]="popUpSSHkey"></textarea>
           </div>
         </form>
+
+        <div class="alert alert-primary">
+          <p [innerHtml]="'vm.updateCreds.charte' | translate"></p>
+        </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal" [disabled]="popUpLoading">{{ "vm.backup.popup.button.cancel" |translate }}</button>
   
