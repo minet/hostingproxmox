@@ -112,13 +112,8 @@
           }
         }
       }
-<<<<<<< HEAD
     }
   },
-=======
-    }},
-  "defaultProject": "hosting",
->>>>>>> 99b15b2 (Recompilation for mail)
   "cli": {
     "analytics": false
   }
