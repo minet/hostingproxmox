@@ -9,7 +9,7 @@ export class User {
     public name: string;
     public admin = false;
     public chartevalidated;
-    public cotisation;
+    public freezeState: number;
     public vms?: Array<Vm>;
     public dns?: Array<Dns>;
     public ips?: Array<string>;

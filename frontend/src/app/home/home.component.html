@@ -2,7 +2,34 @@
     <h1 class="text-center mb-2">{{'home.title' | translate}}</h1>
     <hr>
     <div *ngIf="!user.admin" class="userhome">
-        <div class="alert alert-info text-center" role="alert">
+       <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
+            <h1>❄️</h1>
+            <h4>Your account is frozen !</h4>
+            <p>Your cotisation has expired ! You will still be able to manage your vm for few days. After 30 days of expiration your vm will be shutdown and after 60 days, they will be definitively destroyed</p>
+            <p><strong>WARNING : you have only 30 days to renew your cotisation before the shutdown of your vm ! </strong></p>
+        </div>
+        <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
+            <h1>❄️</h1>
+            <h4>Your account is frozen !</h4>
+            <p>Your cotisation has expired since at least <strong>30 days !</strong> You will still be able to backup your vm for few days.  After 60 days (in less than 30 days now), they will be definitively destroyed</p>
+            <p><strong>WARNING : you have only 30 days to renew your cotisation before the FULL DELETION of your vm ! </strong></p>
+        </div>
+        <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 3 && countvm >0">
+            <h1>❄️</h1>
+            <h4>Your account is frozen !</h4>
+            <p>Your cotisation has expired since at least <strong>60 days !</strong></p>
+            <p><strong>WARNING : Your vm will be fully deleted in few days.</strong></p>
+        </div>
+        <div class="alert alert-warning text-center" *ngIf="this.user.freezeState >=1 && countvm > 0">
+            <h4>Your cotisation has expired</h4>
+            <p>Your cotisation has expired you cannot create any vm</p>
+        </div>
+        <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && this.user.freezeState == 0">
+            <b>Unsigned charter !</b>
+            <p>To create VM you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+        </div>
+
+        <div class="alert alert-info text-center" role="alert" *ngIf="this.user.freezeState == 0">
             <h3 class="alert-heading">
                 {{'home.description' | translate}}
             </h3>
@@ -12,16 +39,18 @@
                 {{'home.read_4' | translate}} <a href="mailto:webmaster@listes.minet.net"> {{'home.read_5' | translate}}</a> {{'home.read_6' | translate}}
             </p>
         </div>
-        <div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
+
+        <div class="alert alert-danger text-center" *ngIf="this.user.cotisation >= 3">
             <b>{{'home.subscription.expired_1' | translate}}</b>
             <p>{{'home.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'home.subscription.expired_3' | translate}}</a> {{'home.subscription.expired_4' | translate}}</p>
         </div>
-        <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && this.user.cotisation === 0">
+        <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && this.user.cotisation < 3">
             <b>{{'home.charter.notsigned_1' | translate}}</b>
             <p>{{'home.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'home.charter.notsigned_3' | translate}}</a> {{'home.charter.notsigned_4' | translate}}</p>
         </div>
 
-        <div class="userok" *ngIf="this.user.cotisation === 1 && this.user.chartevalidated">
+        <div class="userok" *ngIf="this.user.freezeState == 0 && this.user.chartevalidated">
+
             <div class="alert alert-warning text-center" *ngIf="countvm >= maxVmPerUser">
                 <b>{{'home.createVm.error.maxVmAlready_1' | translate}} {{ countvm }} {{'home.createVm.error.maxVmAlready_2' | translate}}</b>
                 <p>{{'home.createVm.error.maxVmAlready_3' | translate}}

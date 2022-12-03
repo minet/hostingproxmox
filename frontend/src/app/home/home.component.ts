@@ -69,13 +69,13 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
-      if ((this.user.chartevalidated && this.user.cotisation) || this.user.admin) {
+      if ((this.user.chartevalidated) || this.user.admin) {
+        console.log(this.user.freezeState)
         this.count_vm();
       }
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
-      console.log("translation  = " +this.utils.getTranslation("home.errorMessage.errorCreating"))
 
   }
 

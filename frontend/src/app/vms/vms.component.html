@@ -16,7 +16,37 @@
     <p><a href='https://www.minet.net/fr/2022/10/29/incident.html'>{{"vm.alert.repair" | translate}}</a></p>
   </div>
 
-<div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.cotisation === 1) || this.user.admin)" >
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
+    <h1>❄️</h1>
+    <h4>Your account is frozen !</h4>
+    <p>Your cotisation has expired ! You will still be able to manage your vm for few days. After 30 days of expiration your vm will be shutdown and after 60 days, they will be definitively destroyed</p>
+    <p><strong>WARNING : you have only 30 days to renew your cotisation before the shutdown of your vm ! </strong></p>
+</div>
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
+    <h1>❄️</h1>
+    <h4>Your account is frozen !</h4>
+    <p>Your cotisation has expired since at least <strong>30 days !</strong> You will still be able to backup your vm for few days.  After 60 days (in less than 30 days now), they will be definitively destroyed</p>
+    <p><strong>WARNING : you have only 30 days to renew your cotisation before the FULL DELETION of your vm ! </strong></p>
+</div>
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 3  ">
+    <h1>❄️</h1>
+    <h4>Your account is frozen !</h4>
+    <p>Your cotisation has expired since at least <strong>60 days !</strong></p>
+    <p><strong>WARNING : Your vm will be fully deleted in few days.</strong></p>
+</div>
+<div class="alert alert-warning text-center" *ngIf="this.user.freezeState == 3">
+    <h4>Your cotisation has expired</h4>
+    <p>Your cotisation has expired you cannot create any vm</p>
+</div>
+
+<div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.freezeState < 3) || this.user.admin)" >
+
+    <h1 class="text-center mb-2" *ngIf="!user.admin">My VMs</h1>
+    <h1 class="text-center mb-2" *ngIf="user.admin">VMs List</h1>
+    <div class="text-center"><button class="btn btn-primary" href="#" *ngIf="user.admin" [routerLink]="['/history']" [routerLinkActiveOptions]="{exact: true}"  [routerLinkActive]="['active', 'text-primary']">IP History</button></div>
+
+    <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
+                    aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
     
     <h1 class="text-center mb-2" *ngIf="!user.admin">{{ "vms.listTitle" | translate}}</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">{{ "vms.listTitleAdmin" | translate}}</h1>
@@ -106,6 +136,7 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
         </div>
     </div>
 </div><br/>
+<<<<<<< HEAD
 <div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
     <b>{{'vms.subscription.expired_1' | translate}}</b>
     <p>{{'vms.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'vms.subscription.expired_3' | translate}}</a> {{'vms.subscription.expired_4' | translate}}</p>
@@ -113,8 +144,16 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
 <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.cotisation ===1">
     <b>{{'vms.charter.notsigned_1' | translate}}</b>
     <p>{{'vms.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'vms.charter.notsigned_3' | translate}}</a> {{'vms.charter.notsigned_4' | translate}}</p>
+=======
+<!--
+
+<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.freezeState == 0">
+    <b>Unsigned charter !</b>
+    <p>To manage your VMs you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
+>>>>>>> 27d6f82 (Add the support of freezestatus by the frontend)
 </div>
 <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
                 aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
 <hr>
 
+-->

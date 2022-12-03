@@ -47,13 +47,15 @@ export class UserService {
         );
     }
 
-    check_cotisation(): void {
-        this.http.get(this.authService.SERVER_URL + '/cotisation', {observe: 'response'}).subscribe(rep => {
-                this.user.cotisation = rep.body['uptodate'];
+    check_freezeState(): void {
+        /*this.http.get(this.authService.SERVER_URL + '/account_state/' + this.user.username, {observe: 'response'}).subscribe(rep => {
+                console.log(rep)
+                this.user.freezeState = 0//Number(rep.body['freezeState']);
             },
             error => {
                 this.errorcode = error.status;
-            });
+            });*/
+            this.user.freezeState = 2//Number(rep.body['freezeState']);
     }
 
     
@@ -74,8 +76,7 @@ export class UserService {
                             this.user.admin = true;
                         }
                     }
-                    if(this.user.admin == false)
-                        this.check_cotisation();
+                    this.check_freezeState();
                     if(r.attributes['signedhosting'] === "false")
                         this.user.chartevalidated = false;
                     else
