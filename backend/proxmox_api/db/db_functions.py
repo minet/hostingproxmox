@@ -161,7 +161,37 @@ def getNextVmID(min = 110): # get the next vmid available. The minimum whould no
     for vmid in (range(min, 999)): # should not exceed 999, if not, we have a problem
         if Vm.query.filter_by(id=vmid).first() is None:
             return vmid 
-        
+
+
+
+def updateFreezeState(username, freezeState):
+    user = User.query.filter_by(id=username).first()
+    user.freezeState = freezeState
+    #print("update freeze state", user, username, freezeState)
+    db.session.commit()
+
+def getFreezeState(username):
+    user = User.query.filter_by(id=username).first()
+    if user is None:
+        print("user not found", username)
+        return None
+    return user.freezeState
+
+def getLastNotificationDate(username):
+    user = User.query.filter_by(id=username).first()
+    if user is None:
+        print("user not found", username)
+        return None
+    return user.lastNotificationDate
+
+
+def updateLastNotificationDate(username, date):
+    user = User.query.filter_by(id=username).first()
+    user.lastNotificationDate = date
+    #print("update last botif date", user, username, date)
+    db.session.commit()
+
+
 
 def getNeedToBeRestored(vmid):
     return Vm.query.filter_by(id=vmid).first().needToBeRestored

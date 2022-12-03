@@ -811,3 +811,23 @@ def get_need_to_be_restored(vmid):
     except :
         return {"error": "Impossible to check the restore status of the vm"}, 500
     
+
+
+
+def get_account_state(username):
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    
+    if r.status_code != 200:
+        return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
+
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    admin = False
+
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+    if not admin and user_id != username:
+        return {"error": "You are not allowed to check this account"}, 403
+    return proxmox.get_freeze_state(username)

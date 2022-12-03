@@ -129,24 +129,16 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
         </div>
     </div>
 </div><br/>
-<<<<<<< HEAD
-<div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
+
+<div class="alert alert-danger text-center" *ngIf="this.user.freezeState >= 3">
     <b>{{'vms.subscription.expired_1' | translate}}</b>
     <p>{{'vms.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'vms.subscription.expired_3' | translate}}</a> {{'vms.subscription.expired_4' | translate}}</p>
 </div>
-<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.cotisation ===1">
+<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.freezeState < 3">
     <b>{{'vms.charter.notsigned_1' | translate}}</b>
     <p>{{'vms.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'vms.charter.notsigned_3' | translate}}</a> {{'vms.charter.notsigned_4' | translate}}</p>
-=======
-<!--
 
-<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.freezeState == 0">
-    <b>Unsigned charter !</b>
-    <p>To manage your VMs you have to sign the hosting charter ! <a href="https://chartes.minet.net/">click here</a> to sign the rules</p>
->>>>>>> 27d6f82 (Add the support of freezestatus by the frontend)
 </div>
 <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
                 aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
 <hr>
-
--->
