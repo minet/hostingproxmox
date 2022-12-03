@@ -306,8 +306,3 @@ def create_app():
     app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
 
     return app
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 8b6c92b2388ca878d6024c1adc8fae2e61537ecb
