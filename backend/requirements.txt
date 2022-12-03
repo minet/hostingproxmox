@@ -3,13 +3,13 @@ six >= 1.10
 python_dateutil >= 2.5.3
 setuptools >= 21.0.0
 urllib3 >= 1.15.1
-connexion
-python-slugify
-gunicorn
+connexion == 2.14.1
+python-slugify == 6.1.1
+gunicorn == 20.1.0
 flask_cors
-Flask-APScheduler
+Flask-APScheduler == 1.12.3
 flask_sqlalchemy
-dnspython
-mysqlclient
+dnspython ==2.2.1
+mysqlclient == 2.1.0
 markupsafe==2.0.1
 openapi-spec-validator==0.4.0
