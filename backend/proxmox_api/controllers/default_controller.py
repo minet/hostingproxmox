@@ -45,7 +45,6 @@ def create_dns(body=None):  # noqa: E501
         return body, statusCode
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
    
@@ -94,7 +93,6 @@ def create_vm(body=None):  # noqa: E501
         return body, statusCode
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
    
@@ -179,8 +177,16 @@ def delete_vm_id(vmid):  # noqa: E501
     if is_cotisation_uptodate() == 0 and not admin:
         return {"error": "cotisation expired"}, 403
     user_id = slugify(r.json()['sub'].replace('_', '-'))
-    if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
-        return {"error": "You don't have the right permissions"}, 403
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
+    if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
+        return {"status": "cotisation expired"}, 403
 
     node = proxmox.get_node_from_vm(vmid)
     if not node : #doesn't exist
@@ -293,7 +299,6 @@ def get_dns():  # noqa: E501
         return body, statusCode
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
    
@@ -332,19 +337,16 @@ def get_vm(search= ""):  # noqa: E501
         return body, statusCode
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
     if freezeAccountState >= 3 and not admin: # For freeze state 1 or 2, the user can access to hosting
         return {"error": "cotisation expired"}, 403
 
 
-    print('filter : ', search)
     
 
     if "attributes" in r.json():
@@ -376,12 +378,10 @@ def get_vm_id(vmid):  # noqa: E501
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     body,statusCode = proxmox.get_freeze_state(user_id)
-    print(statusCode)
     if statusCode != 200:
         return body, statusCode
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
    
@@ -536,7 +536,6 @@ def delete_dns_id(dnsid):  # noqa: E501
         return body, statusCode
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
    
@@ -582,7 +581,6 @@ def get_dns_id(dnsid):  # noqa: E501
         return body, statusCode
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
    
@@ -652,7 +650,6 @@ def patch_vm(vmid, body=None):  # noqa: E501
         return body, statusCode
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
    
@@ -727,7 +724,6 @@ def get_ip_list():
         return body, statusCode
     try:
         freezeAccountState = int(body["freezeState"])
-        print(freezeAccountState)
     except Exception as e:
         return {"error": "error while getting freeze state"}, 500
    
