@@ -2,9 +2,9 @@
 
 <div *ngIf="loading && (user.chartevalidated || user.admin)">
     <div class="d-flex justify-content-center">
-        <div class="spinner-grow text-primary" role="status">
+        <div class="spinner-border text-primary" role="status">
             <span class="sr-only">{{ "vms.loading" | translate}}</span>
-        </div>
+        </div><br><br>
         
     </div>
 </div>
@@ -76,8 +76,8 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
                                         'badge-success': vm.status === 'running'
                                                 }"
                                   >
-                                      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"
-                                            *ngIf="vm.status === 'booting'  || vm.status === 'creating' || !loading"></span>{{ vm.status }}</span>
+                                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                                            *ngIf="vm.status === 'booting'  || vm.status === 'creating' || loading"></span>{{ vm.status }}</span>
                                     &nbsp;{{ vm.name }}&nbsp;<small clallass="text-muted">(#{{ vm.id }})</small>&nbsp;<small *ngIf="user.admin" class="text-muted">- {{ vm.user }}</small>
                                     <br/>
                                     <br/>
@@ -85,7 +85,7 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
 
                                 </div>
                                 <div class="col-6">
-                                    <div class="spinner-grow text-primary" role="status" *ngIf="vm.createdOn == null">
+                                    <div class="spinner-border text-primary" role="status" *ngIf="vm.createdOn == null">
                                         <span class="sr-only">{{ "vms.createdOn" | translate}}</span>
                                     </div>
                                     <p class="text-right">{{ vm.ip }}</p>
