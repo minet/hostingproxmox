@@ -974,9 +974,10 @@ def check_cotisation_job(app):
         
         for user in users:
             try :
-                check_update_cotisation(user)
+                status = check_update_cotisation(user)
+                print("check_update_cotisation for user", user, " : ", status)
             except Exception as e:
-                print(e)
+                print("exception : ",e)
                 pass
         db.session.commit()
 
@@ -991,23 +992,25 @@ def check_cotisation_job(app):
 """
 def check_update_cotisation(username):
         
-        
+        print("check cotisation of", username)
         #headers = {"Authorization": req_headers}
         headers = {"X-API-KEY": config.ADH6_API_KEY}
         #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
         userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username", headers=headers) # [id,username], from ADH6 
+        print("userInfo : ", userInfo)
+        
         
         if userInfo == None or  userInfo.json() == []: # not found
             if "-" in username:
-                #print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+                print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
                 new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
-                #print("'"+new_username+"'")
+                print("'"+new_username+"'")
                 return check_update_cotisation(new_username)
                 
             elif "_" in username: # same
-                #print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+                print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
                 new_username = username.replace("_",".").strip() # hosting replace by default _ with -. So we try if not found
-                #print("'"+new_username+"'")
+                print("'"+new_username+"'")
                 return check_update_cotisation(new_username)
             else :
                 print("ERROR : the user " , username , " failed to be retrieved :" , userInfo.json())
@@ -1019,6 +1022,7 @@ def check_update_cotisation(username):
             membership_dict = membership.json()
             userEmail = membership_dict["email"]
             today =  date.today()
+            print("membership : ", membership_dict)
             if "ip" not in membership_dict: # Cotisation expired
                 #print(username , "cotisation expired", membership.json())
                 print(username , "cotisation expired")
@@ -1032,6 +1036,7 @@ def check_update_cotisation(username):
                     print(username , "cotisation expired")
                     return expiredCotisation(username, userEmail)
                 else :
+                    print(username, "cotisation up to date")
                     updateFreezeState(username, "0.0")
                     return  {"freezeState": "0.0"}, 200
 
@@ -1059,7 +1064,7 @@ def sendNotification(username,userEmail): # send a notification to the user when
     freezeState = getFreezeState(username)
     status, nbNotif = generateNewFreezeState(freezeState)
 
-    mail.sender_email("send a notification to " + str(username) + "with status" +str(status) + "and nbNotif" + str(nbNotif))
+    print("send a notification to " + str(username) + "with status" +str(status) + "and nbNotif" + str(nbNotif))
     # when the notification is sent : 
     updateLastNotificationDate(username, date.today())
     updatedfreezeState = str(status) + "." + str(nbNotif)
