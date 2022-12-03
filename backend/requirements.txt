@@ -3,3 +3,15 @@ six >= 1.10
 python_dateutil >= 2.5.3
 setuptools >= 21.0.0
 urllib3 >= 1.15.1
+<<<<<<< HEAD
+=======
+connexion
+python-slugify
+gunicorn
+flask_cors
+Flask-APScheduler
+flask_sqlalchemy
+dnspython
+mysqlclient
+Flask-Mail
+>>>>>>> 0f86fac (Add the flask mail package)
