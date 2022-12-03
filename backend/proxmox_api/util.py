@@ -272,6 +272,31 @@ def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
         print("An error occured while updating the vm creation status dict : " , e)
         return False
 
+
+"""generate the main freeze state (0,1,2 or 3) and the nb of  notification sent  based on the departure date. 
+
+    :param entry: 
+        - departure date as a datetime object
+        -lastNotificationDate : date of the last notification (None if no relevant)
+        - Old freeze state : string
+
+    :return: freeze state (0,1,2 or 3), ont
+    :rtype: tuple
+"""
+def generateNewFreezeState(freezeState) :# return the freeze state of the user based on the last notification date and departure date
+    if freezeState == None : 
+        return (1,1)
+    status, nbNotif = int(freezeState.split(".")[0]), int(freezeState.split(".")[1])
+    if status == 0 :
+        return (1, 1)
+    else :
+        newFreezeStatus = status + nbNotif//5 # while we don't have send 4 notifications, we don't change the status
+        nbNotif %= 5
+        return (newFreezeStatus, nbNotif)
+
+
+    
+
 def create_app():
 
     app = connexion.App(__name__, specification_dir='./swagger/')
@@ -282,3 +307,7 @@ def create_app():
 
     return app
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8b6c92b2388ca878d6024c1adc8fae2e61537ecb

@@ -1,18 +1,36 @@
+<<<<<<< HEAD
 from imp import SEARCH_ERROR
+=======
+from email import header
+from operator import truediv
+from imp import SEARCH_ERROR
+
+>>>>>>> 8b6c92b2388ca878d6024c1adc8fae2e61537ecb
 import urllib.parse
 from time import sleep
 import logging
 from proxmoxer import ProxmoxAPI
 from proxmoxer import ResourceException
+<<<<<<< HEAD
 from proxmox_api.util import check_password_strength, check_ssh_key, check_username, update_vm_state, get_vm_state, create_app
+=======
+
+from proxmox_api.util import check_password_strength, check_ssh_key, check_username, update_vm_state, get_vm_state, create_app
+
+>>>>>>> 8b6c92b2388ca878d6024c1adc8fae2e61537ecb
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration  
 from proxmox_api.db.db_functions import *
+from proxmox_api.mail import sendMail, mailHTMLGenerator
 from ipaddress import IPv4Network
 from threading import Thread
 import time
+<<<<<<< HEAD
 
 
+=======
+from datetime import datetime, date
+>>>>>>> 8b6c92b2388ca878d6024c1adc8fae2e61537ecb
 from proxmox_api.util import create_app
 import connexion
 import requests
@@ -921,17 +939,6 @@ def get_user_ip_list(user_id) :
         return None 
 
 
-def next_available_vmid():# determine the next available vmid from both db and proxmox
-    next_vmid_db = 110
-    is_vmid_available_prox = False 
-    while next_vmid_db != None and not is_vmid_available_prox : # if next_vmid_db is None then there is no next vmid available and if is_vmid_available_prox = True then the next vmid is available in proxmox and in db
-        next_vmid_db += 1
-        next_vmid_db = getNextVmID(next_vmid_db)
-       
-        is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
-    return next_vmid_db
-
-
 
 """ API endpoint to return the freeze status of a user (only the status, not the nb of notification recieved)
 
@@ -1056,7 +1063,50 @@ def check_update_cotisation(username):
 # For the jenkins script
 ####
 
+<<<<<<< HEAD
  
 
         
 
+=======
+        
+def expiredCotisation(username, userEmail): # Call when the cotisation is expired
+    lastNotification = getLastNotificationDate(username)
+    if lastNotification == None : 
+        #return sendNotification(username, userEmail)
+        return {"freezeState": status}, 200
+    else :
+        lastNotification = datetime.strptime(lastNotification,  "%Y-%m-%d").date()
+        delta = date.today() - lastNotification
+        #if delta.days >=7 : # We update update the status : 
+        #    return sendNotification(username, userEmail)
+        # We don't change the status : 
+        
+
+def sendNotification(username,userEmail): # send a notification to the user when the cotisation is expired
+    freezeState = getFreezeState(username)
+    status, nbNotif = generateNewFreezeState(freezeState)
+
+    print("send a notification to " + str(username) + "with status" +str(status) + "and nbNotif" + str(nbNotif))
+    # when the notification is sent : 
+    updateLastNotificationDate(username, date.today())
+    updatedfreezeState = str(status) + "." + str(nbNotif)
+    updateFreezeState(username, updatedfreezeState)
+    return  {"freezeState": updatedfreezeState}, 200
+    
+    
+
+        
+
+
+def next_available_vmid():# determine the next available vmid from both db and proxmox
+    next_vmid_db = 110
+    is_vmid_available_prox = False 
+    while next_vmid_db != None and not is_vmid_available_prox : # if next_vmid_db is None then there is no next vmid available and if is_vmid_available_prox = True then the next vmid is available in proxmox and in db
+        next_vmid_db += 1
+        next_vmid_db = getNextVmID(next_vmid_db)
+       
+        is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
+    return next_vmid_db
+
+>>>>>>> 8b6c92b2388ca878d6024c1adc8fae2e61537ecb

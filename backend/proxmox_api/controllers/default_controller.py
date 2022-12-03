@@ -188,6 +188,19 @@ def delete_vm_id(vmid):  # noqa: E501
     if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
         return {"status": "cotisation expired"}, 403
 
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    body,statusCode = proxmox.get_freeze_state(user_id)
+    if statusCode != 200:
+        return body, statusCode
+    try:
+        freezeAccountState = int(body["freezeState"])
+    except Exception as e:
+        return {"error": "error while getting freeze state"}, 500
+   
+    if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
+        return {"status": "cotisation expired"}, 403
+
+    
     node = proxmox.get_node_from_vm(vmid)
     if not node : #doesn't exist
         return {"error": "VM doesn't exist"}, 404
@@ -244,6 +257,7 @@ def delete_vm_in_thread(vmid, node="", dueToError=False):
         return proxmox.delete_vm(vmid, node)
     else:
         return {"status": "error"}, 500
+
 
 ################
 ## DEPRECATED ##
@@ -331,6 +345,7 @@ def get_vm(search= ""):  # noqa: E501
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):
                 admin = True;
+
     user_id = slugify(r.json()['sub'].replace('_', '-'))
     body,statusCode = proxmox.get_freeze_state(user_id)
     if statusCode != 200:
@@ -427,10 +442,12 @@ def get_vm_id(vmid):  # noqa: E501
 
 
     node = proxmox.get_node_from_vm(vmid)
+
     if node == None and not admin: # exist in the db but not in proxmox. It's a error
         return {"error": "VM not found in proxmox"}, 500
     elif node == None and  admin:
         return {'error' : "VM no found"} , 404
+
 
 
     status = proxmox.get_proxmox_vm_status(vmid, node)
@@ -460,6 +477,13 @@ def get_vm_id(vmid):  # noqa: E501
     except Exception as e:
         print("error while getting config : " + str(e))
         return {"error": "error while getting config : " + str(e)}, 500
+
+
+
+    proxmoxStart = time.time()
+    if is_cotisation_uptodate() == 0 and not admin:
+        return {"error": "cotisation expired"}, 403
+
 
    # print("recieved config response (" ,vmid ,") ok. Took" , str(time.time() - start))
 

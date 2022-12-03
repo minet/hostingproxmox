@@ -43,7 +43,7 @@
             </p>
         </div>
 
-        <div class="alert alert-danger text-center" *ngIf="this.user.cotisation >= 3">
+        <div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
             <b>{{'home.subscription.expired_1' | translate}}</b>
             <p>{{'home.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'home.subscription.expired_3' | translate}}</a> {{'home.subscription.expired_4' | translate}}</p>
         </div>
@@ -52,8 +52,7 @@
             <p>{{'home.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'home.charter.notsigned_3' | translate}}</a> {{'home.charter.notsigned_4' | translate}}</p>
         </div>
 
-        <div class="userok" *ngIf="this.user.freezeState == 0 && this.user.chartevalidated">
-
+        <div class="userok" *ngIf='this.user.freezeState == 0 && this.user.chartevalidated'>
             <div class="alert alert-warning text-center" *ngIf="countvm >= maxVmPerUser">
                 <b>{{'home.createVm.error.maxVmAlready_1' | translate}} {{ countvm }} {{'home.createVm.error.maxVmAlready_2' | translate}}</b>
                 <p>{{'home.createVm.error.maxVmAlready_3' | translate}}

@@ -55,6 +55,7 @@ export class DnsComponent implements OnInit, OnDestroy {
         for (const id of this.intervals) {
             id.unsubscribe();
 
+
         }
     }
 
