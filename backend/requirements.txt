@@ -11,4 +11,5 @@ Flask-APScheduler
 flask_sqlalchemy
 dnspython
 mysqlclient
-
+markupsafe==2.0.1
+openapi-spec-validator==0.4.0
