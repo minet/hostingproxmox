@@ -16,27 +16,26 @@ import {mergeMap} from 'rxjs/operators';
   styleUrls: ['./dns.component.css']
 })
 export class DnsComponent implements OnInit, OnDestroy {
-    loading = true;
-    newDns = new Dns();
-    ipList = Array<string>();
-    intervals = new Set<Subscription>();
-    showForm = false;
-    errorcode = 201;
-    httpErrorMessage = "";
-    errorMessage = ""
-    timer: Subscription;
-    success = false;
-    page = 1;
-    pageSize = 10;
-    constructor(private activatedRoute: ActivatedRoute,
-                private http: HttpClient,
-                private router: Router,
-                public user: User,
-                private utils : Utils,
-                private userService: UserService,
-                private authService: AuthService) {
-    }
-
+  loading = true;
+  newDns = new Dns();
+  ipList = Array<string>();
+  intervals = new Set<Subscription>();
+  showForm = false;
+  errorcode = 201;
+  httpErrorMessage = "";
+  errorMessage = ""
+  timer: Subscription;
+  success = false;
+  page = 1;
+  pageSize = 10;
+  constructor(private activatedRoute: ActivatedRoute,
+              private http: HttpClient,
+              private router: Router,
+              public user: User,
+              private userService: UserService,
+              private authService: AuthService,
+              private utils: Utils) {
+  }
 
 
     ngOnInit(): void {
