@@ -5,7 +5,11 @@ from flask_apscheduler import APScheduler
 
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
+
 from proxmox_api.db.db_models import db
+
+
+app = connexion.App(__name__, specification_dir='./swagger/')
 
 def create_app():
 
