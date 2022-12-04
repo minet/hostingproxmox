@@ -132,6 +132,38 @@ paths:
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /account_state/{username}:
+    get:
+      summary : get the freeze state of a user account 
+      operationId: get_account_state
+      parameters:
+        - name: username
+          in: path
+          description: username to get account state 
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "michel_j"
+      responses : 
+        "200" :
+          description : "The freeze state of the account"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistoryIdItem'
+                x-content-type: application/json
+        "400":
+          description: "invalid input, object invalid"
+        "403":
+          description: "not enough permissions"
+        "404":
+          description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+
   /vmWithError/{vmid}:
     delete:
       operationId: delete_vm_id_with_error

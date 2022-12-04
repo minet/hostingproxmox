@@ -1,5 +1,15 @@
-certifi >= 14.05.14
-six >= 1.10
-python_dateutil >= 2.5.3
-setuptools >= 21.0.0
-urllib3 >= 1.15.1
+certifi == 2021.10.8
+six == 1.15.0
+python_dateutil == 2.8.2
+setuptools == 60.9.3
+urllib3 == 1.26.8
+connexion == 2.14.1
+python-slugify == 6.1.1
+gunicorn == 20.1.0
+flask_cors == 3.0.10
+Flask-APScheduler == 1.12.3
+flask_sqlalchemy
+dnspython ==2.2.1
+mysqlclient == 2.1.0
+markupsafe==2.0.1
+openapi-spec-validator==0.4.0

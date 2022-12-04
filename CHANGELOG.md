@@ -1,3 +1,17 @@
+# [Beta 3.0.0] 03-10-2022
+
+## Added 
+- [Handling of end cotisation](http://gitlabint.priv.minet.net/hosting/api/-/commit/27d6f82247a2eae0f55b3b147b7db978e6808c62) - *The frontend is now able to display to the user when its cotisation is expired and what to expect from it. It adapts according to the freeze status. The backend also handle this feature. Firstly to deal with this new user property and secondly to protect all endpoint. Fix #5. Fix #16.*
+
+## Fixed 
+- [All types of ssh keys are now supported](http://gitlabint.priv.minet.net/hosting/api/-/commit/9366bbbdd4aba06d5fc84441d7fa5593feaa8950) - *The regex in charge of checking ssh keys was blacklisting valid keys. Fix #32*
+
+# [Beta 2.1.0] 01-10-2022
+
+## Added 
+- [Possibility to update the cloud init creds](http://gitlabint.priv.minet.net/hosting/api/-/commit/46ea63a013edec2d8f1ff7f98f64768c898d55e8) - *For now this feature is only available when restoring a VM after losing its data*
+
+- [Add a information, warning and call to actions after the data lost of VMs](http://gitlabint.priv.minet.net/hosting/api/-/commit/7b66d7a7665d86af8490b407eedddea735a3dd64) - *For data lost from prod only*
 # [Beta 2.0.1] 09-10-2022
 ## Added 
 

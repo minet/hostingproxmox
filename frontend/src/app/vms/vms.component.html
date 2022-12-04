@@ -8,7 +8,7 @@
         
     </div>
 </div>
-<div class="alert alert-warning text-center" >
+<div class="alert alert-warning text-center" *ngIf="vmToRestoreCounter >= 1">
     <h5>{{"vm.alert.title" | translate}}</h5>
     <p>{{"vm.alert.descr.1" | translate}}</p><br>
     <p>{{"vm.alert.descr.2" | translate}}</p>
@@ -16,7 +16,31 @@
     <p><a href='https://www.minet.net/fr/2022/10/29/incident.html'>{{"vm.alert.repair" | translate}}</a></p>
   </div>
 
-<div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.cotisation === 1) || this.user.admin)" >
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
+    <h1>❄️</h1>
+    <h4>{{'account.freeze.title' | translate }}</h4>
+    <p></p>
+    <p>{{'account.freeze.1.description' | translate }}<strong>{{'account.freeze.1.description.strong' | translate }} </strong></p>
+  </div>
+  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
+    <h1>❄️</h1>
+    <h4>{{'account.freeze.title' | translate }}</h4>
+    <p>{{'account.freeze.2.description.1' | translate }}<strong>{{'account.freeze.2.description.1.strong' | translate }}</strong> {{'account.freeze.2.description.2' | translate }}</p>
+    <p><strong>{{'account.freeze.2.description.2.strong' | translate }}</strong></p>
+  </div>
+  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState >= 3 ">
+    <h1>❄️</h1>
+    <h4>{{'account.freeze.title' | translate }}</h4>
+    <p>{{'account.freeze.3.description' | translate }}<br><strong>{{'account.freeze.3.description.strong' | translate }}</strong></p>
+  </div>
+  <div class="alert alert-warning text-center" *ngIf="this.user.freezeState >= 3">
+    <h4>{{'account.expired.title' | translate }}</h4>
+    <p>{{'account.expired.description' | translate }}</p>
+  </div>
+<div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.freezeState < 3) || this.user.admin)" >
+
+
+
     
     <h1 class="text-center mb-2" *ngIf="!user.admin">{{ "vms.listTitle" | translate}}</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">{{ "vms.listTitleAdmin" | translate}}</h1>
@@ -106,15 +130,14 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
         </div>
     </div>
 </div><br/>
-<div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
+
+
+<div class="alert alert-danger text-center" *ngIf="this.user.freezeState >= 3">
     <b>{{'vms.subscription.expired_1' | translate}}</b>
     <p>{{'vms.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'vms.subscription.expired_3' | translate}}</a> {{'vms.subscription.expired_4' | translate}}</p>
 </div>
-<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.cotisation ===1">
+<div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.freezeState < 3">
     <b>{{'vms.charter.notsigned_1' | translate}}</b>
     <p>{{'vms.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'vms.charter.notsigned_3' | translate}}</a> {{'vms.charter.notsigned_4' | translate}}</p>
-</div>
-<ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
-                aria-label="Default pagination" (pageChange)="loadPage()"></ngb-pagination>
-<hr>
 
+</div>

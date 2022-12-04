@@ -16,31 +16,31 @@ import {mergeMap} from 'rxjs/operators';
   styleUrls: ['./dns.component.css']
 })
 export class DnsComponent implements OnInit, OnDestroy {
-    loading = true;
-    newDns = new Dns();
-    ipList = Array<string>();
-    intervals = new Set<Subscription>();
-    showForm = false;
-    errorcode = 201;
-    httpErrorMessage = "";
-    errorMessage = ""
-    timer: Subscription;
-    success = false;
-    page = 1;
-    pageSize = 10;
-    constructor(private activatedRoute: ActivatedRoute,
-                private http: HttpClient,
-                private router: Router,
-                public user: User,
-                private utils : Utils,
-                private userService: UserService,
-                private authService: AuthService) {
-    }
+  loading = true;
+  newDns = new Dns();
+  ipList = Array<string>();
+  intervals = new Set<Subscription>();
+  showForm = false;
+  errorcode = 201;
+  httpErrorMessage = "";
+  errorMessage = ""
+  timer: Subscription;
+  success = false;
+  page = 1;
+  pageSize = 10;
+  constructor(private activatedRoute: ActivatedRoute,
+              private http: HttpClient,
+              private router: Router,
+              public user: User,
+              private userService: UserService,
+              private authService: AuthService,
+              private utils: Utils) {
+  }
 
 
     ngOnInit(): void {
         setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
-            if(this.user.admin || (this.user.chartevalidated && this.user.cotisation)) {
+            if(this.user.admin || (this.user.chartevalidated && this.user.freezeState < 3)) {
                 this.get_dns_list();
                 this.user.dns = Array<Dns>();
                 this.get_ips_list();
@@ -54,6 +54,8 @@ export class DnsComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         for (const id of this.intervals) {
             id.unsubscribe();
+
+
         }
     }
 

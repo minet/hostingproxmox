@@ -33,7 +33,7 @@ export class HomeComponent implements OnInit {
   prefix: string;
   loading = false;
   valide = false;
-  errorcode = 0;
+  errorcode = -1;
   errorMessage = ""
   url: string;
   sshAddress: string;
@@ -69,13 +69,19 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
-      if ((this.user.chartevalidated && this.user.cotisation) || this.user.admin) {
+      if ((this.user.chartevalidated) || this.user.admin) {
+        if (this.userService.errorcode != null) {
+          this.loading = false;
+          this.errorcode = this.userService.errorcode;
+          this.errorMessage = this.userService.errorMessage;
+          console.log(this.user.freezeState)
+        console.log("error code =" , this.userService.errorMessage)
+        }
         this.count_vm();
       }
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
-      console.log("translation  = " +this.utils.getTranslation("home.errorMessage.errorCreating"))
 
   }
 
@@ -148,7 +154,7 @@ export class HomeComponent implements OnInit {
 
   // check with a regex if the ssh key has a correct format. It is check after the box check and after that, after each new char modification
   checkSSHkey(vm: Vm):boolean{
-    var rule = /ssh.[a-zA-Z0-9]* [a-zA-Z0-9[()[\]{}+*\/%$&#@=:?]*/
+    var rule = /^[a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]*/
     return rule.test(vm.sshKey)
   }
 
