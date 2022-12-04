@@ -107,6 +107,8 @@
   "home.password.uppercase" : "● 1 uppercase letter.",
   "home.password.special_char" : "● 1 special character.",
   "home.password.digit" : "● 1 digit.",
+  "home.createVm.form.confirmPassword" : "Confirm your password",
+  "home.confirmPassword.form.error" : "Passwords are not the same.",
   "home.errorMessage.errorCreating" : "An error occured while creating  the VM. Please, try again",
   "home.error.account" : "Impossible to check your account",
   "home.error.account.message" : "Please, try to log out and log in. If this doesn't work, open an issue on tickets.minet.net",
