@@ -107,6 +107,8 @@
   "home.password.uppercase" : "● 1 majuscule.",
   "home.password.special_char" : "● 1 caractère spécial.",
   "home.password.digit" : "● 1 chiffre.",
+  "home.createVm.form.confirmPassword" : "Confirmer le mot de passe",
+  "home.confirmPassword.form.error" : "Les mots de passe ne correspondent pas.",
   "home.errorMessage.errorCreating" : "Une erreur est survenue lors de la création de la VM. Veuillez réessayer",
   "home.error.account" : "Impossible de vérifier votre compte",
   "home.error.account.message" : "Essayez de vous déconnecter et vous reconnecter. Si le problème persiste, ouvrez un ticket sur tickets.minet.net.",

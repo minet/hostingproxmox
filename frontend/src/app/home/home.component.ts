@@ -45,6 +45,7 @@ export class HomeComponent implements OnInit {
   progress = 0;
   nb_error_resquest = 0; // Count the number of SUCCESSIVE error returned by a same request
   isVmCreated = false; // true doesn't mean the VM is started 
+  confirmPassword = "";
 
  
 
@@ -111,6 +112,7 @@ export class HomeComponent implements OnInit {
       this.rulesCheck = false;
     }
     this.check_password(this.vm)
+    this.checkConfirmPassword(this.vm)
     this.checkSSHkey(this.vm)
   }
 
@@ -162,6 +164,11 @@ export class HomeComponent implements OnInit {
   checkUser(vm:Vm):boolean{
     console.log("check user")
     return vm.user == "root"
+  }
+
+  // check if the password and the confirmation password are the same
+  checkConfirmPassword(vm:Vm):boolean{
+    return vm.password == this.confirmPassword;
   }
 
   /*

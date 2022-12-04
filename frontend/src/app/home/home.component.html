@@ -150,6 +150,18 @@
 
                                     </div>
 
+                                    <div class="form-group">
+                                        <label for="confirmPassword">{{'home.createVm.form.confirmPassword' | translate}}</label>
+                                        <input type="password" class="form-control" id="confirmPassword"
+                                               [(ngModel)]="confirmPassword" name="confirmPassword"
+                                               #password="ngModel"
+                                               required="required"
+                                               ng-model="confirmPassword" ng-change="checkConfirmPassword(vm)">
+                                    </div>
+                                    <div [hidden]="!rulesCheck || checkConfirmPassword(vm)" class="alert alert-danger">
+                                        {{'home.confirmPassword.form.error' | translate}}
+                                    </div>
+
                                     <div class="form-check mb-2 text-center m-3">
                                         <input (click)="rules_checked()" [checked]="rulesCheck" id="checkbox"
                                                type="checkbox" class="form-check-input">
@@ -157,7 +169,7 @@
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <button [disabled]="!check_password(vm) || !vmForm.valid  || !rulesCheck || checkUser(vm) || !checkSSHkey(vm)" type="submit"
+                                    <button [disabled]="!check_password(vm) || !vmForm.valid  || !rulesCheck || checkUser(vm) || !checkSSHkey(vm) || !checkConfirmPassword(vm)" type="submit"
                                             class="btn btn-primary text-center" >{{'home.createVm.form.submit' | translate}}
                                     </button>
                                 </div>
