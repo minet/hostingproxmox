@@ -8,7 +8,7 @@
         
     </div>
 </div>
-<div class="alert alert-warning text-center" >
+<div class="alert alert-warning text-center" *ngIf="vmToRestoreCounter >= 1">
     <h5>{{"vm.alert.title" | translate}}</h5>
     <p>{{"vm.alert.descr.1" | translate}}</p><br>
     <p>{{"vm.alert.descr.2" | translate}}</p>

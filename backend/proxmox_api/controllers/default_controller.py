@@ -649,7 +649,7 @@ def patch_vm(vmid, body=None):  # noqa: E501
     :rtype: None
     """
     if connexion.request.is_json:
-        body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
+        requetsBody = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
 
     try:
         vmid = int(vmid)
@@ -686,11 +686,11 @@ def patch_vm(vmid, body=None):  # noqa: E501
         node = proxmox.get_node_from_vm(vmid)
         if not node:
             return {"status": "vm not exists"}, 404
-        if body.status == "start":
+        if requetsBody.status == "start":
             return proxmox.start_vm(vmid, node)
-        elif body.status == "stop":
+        elif requetsBody.status == "stop":
             return proxmox.stop_vm(vmid, node)
-        elif body.status == "switch_autoreboot":
+        elif requetsBody.status == "switch_autoreboot":
             return proxmox.switch_autoreboot(vmid, node)
         else:
             return {"status": "error"}, 500

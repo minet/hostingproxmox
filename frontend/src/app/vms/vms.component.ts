@@ -27,6 +27,7 @@ export class VmsComponent implements OnInit, OnDestroy {
     pagesAlreadyLoaded = new Array<number>();
     searchFilter = "";
     public validToken$: Observable<boolean>;
+    vmToRestoreCounter = 0; // Number VMs that need to be restored
 
     constructor(private http: HttpClient,
                 private activatedRoute: ActivatedRoute,
@@ -157,9 +158,10 @@ export class VmsComponent implements OnInit, OnDestroy {
                     if (last) {
                         this.loading = false;
                     }
+                    this.get_need_to_be_restored(vm, false)
                 },
                 error => {
-                    this.get_need_to_be_restored(vm)
+                    this.get_need_to_be_restored(vm, true)
                     
                     vm.name = this.utils.getTranslation('vm.error.404');
                     vm.status = "Error " + error.status;
@@ -201,18 +203,20 @@ export class VmsComponent implements OnInit, OnDestroy {
     }
 
     // Check if a VM need to be restored
-    get_need_to_be_restored(vm):void{
+    get_need_to_be_restored(vm, didAnErrorOccur):void{
         this.http.get(this.authService.SERVER_URL + '/needToBeRestored/' + vm.id, {observe: 'response'})
         .subscribe(rep => {
             console.log(rep)
             const needToBeRestored = Boolean(rep.body['need_to_be_restored']);
                 if(needToBeRestored){
                     console.log("needToBeRestored", needToBeRestored)
-                    if (needToBeRestored){// If the VM is not found, and need to be restored, then it data are lost
+                    if (needToBeRestored && didAnErrorOccur){// If the VM is not found, and need to be restored, then it data are lost
                         vm.name = ""
                         vm.status = "Error: Your VM data is lost. Click to see more details."
                         vm.createdOn = ""
                         vm.type = "unknow";
+                    } else if (needToBeRestored && !didAnErrorOccur){ // juste incremente the number of vù to be restored
+                        this.vmToRestoreCounter += 1
                     }
                 }
                  
