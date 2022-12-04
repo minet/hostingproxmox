@@ -1,4 +1,4 @@
-from email import header
+
 from operator import truediv
 from imp import SEARCH_ERROR
 
@@ -13,7 +13,6 @@ from proxmox_api.util import check_password_strength, check_ssh_key, check_usern
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration  
 from proxmox_api.db.db_functions import *
-from proxmox_api.mail import sendMail, mailHTMLGenerator
 from ipaddress import IPv4Network
 from threading import Thread
 import time
