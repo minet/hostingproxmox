@@ -44,7 +44,8 @@ document.onload = loaded();
     <hr>
     <div class="alert"
          [ngClass]="{
-                    'alert-danger': user.vms[0].status === 'stopped' || deletionStatus == 'deleting' || vm_has_error,
+                    'alert-danger': deletionStatus == 'deleting' || vm_has_error,
+                    'alert-secondary' : user.vms[0].status === 'stopped',
                     'alert-info': user.vms[0].status === 'creating',
                     'alert-warning': user.vms[0].status === 'booting',
                     'alert-success': user.vms[0].status === 'running' || deletionStatus == 'deleted'
@@ -52,7 +53,7 @@ document.onload = loaded();
     >
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
            *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || deletionStatus == 'deleting' || deletionStatus == 'deleted' "></span> 
-           <div *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || user.vms[0].status === 'running' || deletionStatus == 'deleting' || deletionStatus == 'deleted'" >{{'vm.status' | translate}} :&nbsp;{{ deletionStatus != 'None' ? deletionStatus  : user.vms[0].status | translate }}</div>
+           <div *ngIf="user.vms[0].status === 'booting'  || user.vms[0].status === 'creating' || user.vms[0].status === 'running' || deletionStatus == 'deleting' || deletionStatus == 'deleted' || user.vms[0].status == 'stopped'" >{{'vm.status' | translate}} :&nbsp;{{ deletionStatus != 'None' ? deletionStatus  : user.vms[0].status | translate }}</div>
 
            <div *ngIf="vm_has_error"><strong>{{"vm.error" | translate}} {{errorcode}} : {{utils.getHttpErrorMessage(errorcode)}}</strong><br> 
             <p  *ngIf="vm_has_proxmox_error" [innerHtml]="'vm.error.404.description' | translate"></p>
