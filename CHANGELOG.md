@@ -1,3 +1,13 @@
+# [Beta 3.1.1]
+## Fixed
+- [Fix LDAP account verification failure](http://gitlabint.priv.minet.net/hosting/api/-/commit/481618cd01c6301cdeb2a2eaad4147a28f60bcec) - *Fix #37. The LDAP account have not an associated freeze status, so the account verification was failing*
+
+# [Beta 3.1.0]
+
+## Added
+- [Add password confirmation field in vm's creation form](http://gitlabint.priv.minet.net/hosting/api/-/releases/b3.1.0)
+
+
 # [Beta 3.0.0] 03-10-2022
 
 ## Added 
