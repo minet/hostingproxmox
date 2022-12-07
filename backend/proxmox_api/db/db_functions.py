@@ -14,6 +14,18 @@ def update_vm_ip(vmid, vmip):
     db.session.commit()
 
 
+def get_vm_ip(vmid):
+    vm = Vm.query.filter_by(id=vmid).first()
+    return vm.ip
+
+
+def update_vm_mac(vmid, mac):
+
+    vm = Vm.query.filter_by(id=vmid).first()
+    vm.mac = mac
+    db.session.commit()
+
+
 def get_vm_db_info(vmid):
     return  Vm.query.filter_by(id=vmid).first()
 
