@@ -444,8 +444,6 @@ def get_vm_id(vmid):  # noqa: E501
 
     
 
-    if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
-        return {"error": "You don't have the right permissions"}, 403
     
     vm_state = util.get_vm_state(vmid)
     if vm_state != None : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
@@ -456,6 +454,8 @@ def get_vm_id(vmid):  # noqa: E501
                 return {"error", errorMessage}, httpErrorCode
             except: 
                 return {"error", "An unknown error occured"}, 500
+        elif not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin: # we authorize to consult error message
+            return {"error": "You don't have the right permissions"}, 403
         elif status == "creating" : 
             return {"status" : "creating"}, 200
         elif status == "deleting":
