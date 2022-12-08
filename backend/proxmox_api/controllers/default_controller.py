@@ -163,7 +163,7 @@ def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error oc
     if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
         return {"error": "You don't have the right permissions"}, 403
     
-    Thread(target=delete_vm_in_thread, args=(vmid, "", True,)).start()
+    Thread(target=delete_vm_in_thread, args=(vmid, user_id, "", True,)).start()
     return {"status": "deleting"}, 200
 
 def delete_vm_id(vmid):  # noqa: E501
@@ -231,6 +231,7 @@ def delete_vm_id(vmid):  # noqa: E501
 
 # Delete the vm in a thread after the API endpoint is called. It's a workaround to avoid the timeout of the API endpoint. The behavior is different in the error handling if the deletion is trigger while an error or not
 def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
+    print("Deleting VM " + str(vmid) + ". Is due to an error :", dueToError)
     util.update_vm_state(vmid, "deleting")
     if node == "" and not dueToError:
         print("Impossible to find the vm to delete.")
@@ -246,7 +247,7 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
         # If not isProxmoxDeleted and dueToError then it's fine. 
     # Now we can delete the entry in the db
     isDbDeleted = proxmox.delete_from_db(vmid)
-    if (not dueToError and isDbDeleted and isProxmoxDeleted) or (dueToError and (isDbDeleted or not     isProxmoxDeleted)):
+    if (not dueToError and isDbDeleted and isProxmoxDeleted) or (dueToError and (isDbDeleted or not isProxmoxDeleted)):
         util.update_vm_state(vmid, "deleted", deleteEntry=True)
         return 1
     else : 
