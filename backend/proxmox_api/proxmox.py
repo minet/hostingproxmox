@@ -11,7 +11,7 @@ from proxmoxer import ResourceException
 from proxmox_api.util import check_password_strength, check_ssh_key, check_username, update_vm_state, get_vm_state, create_app
 
 import proxmox_api.ddns as ddns
-from proxmox_api.config import configuration  
+from proxmox_api.config import configuration as configuration 
 import proxmox_api.db.db_functions as database
 import proxmox_api.db.db_models as db_models
 from ipaddress import IPv4Network
@@ -314,6 +314,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         else:
             if len(database.get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(database.get_vm_list()) < configuration.TOTAL_VM_LIMIT:
                 database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
+                database.add_ip_to_history(ip, next_vmid, user_id)
             else:
                 return {"error": "error, can not create more VMs"}, 500
         for vm in proxmox.cluster.resources.get(type="vm"):
@@ -1031,7 +1032,7 @@ def check_cotisation_job(app):
             except Exception as e:
                 print("exception : ",e)
                 pass
-        db.session.commit()
+        database.session.commit()
 
 
 
@@ -1046,7 +1047,7 @@ def check_update_cotisation(username):
         
         print("check cotisation of", username)
         #headers = {"Authorization": req_headers}
-        headers = {"X-API-KEY": config.ADH6_API_KEY}
+        headers = {"X-API-KEY": configuration.ADH6_API_KEY}
         #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
         userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
         
