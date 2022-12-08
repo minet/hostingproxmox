@@ -25,7 +25,7 @@ TOTAL_VM_LIMIT = 120
 # Proxmox host
 
 PROXMOX_API_KEY_NAME = os.environ.get('PROXMOX_API_KEY_NAME')
-
+ADH6_API_KEY = os.environ.get('ADH6_API_KEY')
 
 # Database uri : "mysql://user:pass@dbhost/dbname"
 """Be sure to set "set global log_bin_trust_function_creators=1"; in the database if mysql"""
