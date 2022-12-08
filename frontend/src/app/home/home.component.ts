@@ -88,7 +88,7 @@ export class HomeComponent implements OnInit {
 
   images = [
     {name: "home.vm_type.bare", id: 'bare_vm'},
-    {name: "home.vm_type.web", id: 'nginx_vm'},
+    //{name: "home.vm_type.web", id: 'nginx_vm'},
   ];
 
 
