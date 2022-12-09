@@ -11,8 +11,9 @@ from proxmoxer import ResourceException
 from proxmox_api.util import check_password_strength, check_ssh_key, check_username, update_vm_state, get_vm_state, create_app
 
 import proxmox_api.ddns as ddns
-from proxmox_api.config import configuration  
-from proxmox_api.db.db_functions import *
+from proxmox_api.config import configuration as configuration 
+import proxmox_api.db.db_functions as database
+import proxmox_api.db.db_models as db_models
 from ipaddress import IPv4Network
 from threading import Thread
 import time
@@ -46,7 +47,7 @@ def add_user_dns(user_id, entry, ip):
 
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
-        add_dns_entry(user_id, entry, ip)
+        database.add_dns_entry(user_id, entry, ip)
         logging.info("DNS entry added: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
     return rep_msg, rep_code
 
@@ -54,22 +55,22 @@ def add_user_dns(user_id, entry, ip):
 def get_user_dns(user_id = ""):
     try:
         if user_id != "" :
-            dnsList = get_dns_entries(user_id)
+            dnsList = database.get_dns_entries(user_id)
             return dnsList, 201
         else :
-            return get_dns_entries(), 201
+            return database.get_dns_entries(), 201
     except Exception as e:
         logging.error("Problem in get_user_dns: " + str(e))
         return {"dns": "error occured"}, 500
 
 
 def del_user_dns(dnsid):
-    entry = get_entry_host(dnsid)[0]['host']
+    entry = database.get_entry_host(dnsid)[0]['host']
     if entry is None:
         return {"dns": "not found"}, 404
     ddns_rep = ddns.delete_dns_record(entry)
     if ddns_rep[1] == 201:
-        del_dns_entry(dnsid)
+        database.del_dns_entry(dnsid)
         logging.info("DNS entry deleted: " + str(dnsid))
     return ddns_rep
 
@@ -103,7 +104,7 @@ def is_admin(memberOf):
 ####### DEPRECATED #######
 ##########################
 
-"""delete a vm by id and node from proxmox and in the db
+"""delete a vm by id and node from proxmox and in the database
 
     :param vmid: vmid to delete
     :type vmid: string
@@ -191,7 +192,7 @@ def delete_vm(vmid, node, dueToError = False, updateVMStatus=True):
 ####### DEPRECATED #######
 ##########################
 
-"""delete a vm by id in the db
+"""delete a vm by id in the database
 :param vmid: vmid to delete
 :type vmid: string
 :param node: node of the vmid to delete
@@ -201,9 +202,9 @@ def delete_vm(vmid, node, dueToError = False, updateVMStatus=True):
 def delete_from_db(vmid) -> bool:
     try :
         app = create_app() # we need the context to delete the vm if there is an error
-        db.init_app(app.app)
+        db_models.db.init_app(app.app)
         with app.app.app_context():
-            del_vm_list(vmid)
+            database.del_vm_list(vmid)
         return True
             
     except Exception as e :
@@ -284,62 +285,47 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     next_vmid = int(next_available_vmid())
     node = load_balance_server()
 
-
+   
     if node[1] != 201:
         return node
     else:
         node = node[0]["server"]
 
+    ip = set_new_vm_ip(next_vmid, node)
+    if ip is None : 
+        return {"error": "Impossible to attribute your IP address."}, 500
+
+
+
     template_node = ""
     try:
+        template_id = -1
         if vm_type == "bare_vm":
-            user = get_user_list(user_id=user_id)
-
-            if user is None:
-                add_user(user_id)
-                add_vm(id=next_vmid, user_id=user_id, type=vm_type)
-            else:
-                if len(get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(get_vm_list()) < configuration.TOTAL_VM_LIMIT:
-                    add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
-                else:
-                    return {"error": "error, can not create more VMs"}, 500
-
-            for vm in proxmox.cluster.resources.get(type="vm"):
-                if vm["vmid"] == 10003:
-                    template_node = vm["node"]
-            proxmox.nodes(template_node).qemu(10003).clone.create(
-                name=name,
-                newid=next_vmid,
-                target=node,
-                full=1,
-            )
-
+            template_id = 10003
         elif vm_type == "nginx_vm":
-            user = get_user_list(user_id=user_id)
-
-            if user is None:
-                add_user(user_id)
-                add_vm(id=next_vmid, user_id=user_id, type=vm_type)
-            else:
-                if len(get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(get_vm_list()) < configuration.TOTAL_VM_LIMIT:
-                    add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip="En attente")
-                else:
-                    return {"error": "Impossible to create more VMs"}, 403
-
-            for vm in proxmox.cluster.resources.get(type="vm"):
-                if vm["vmid"] == 10001:
-                    template_node = vm["node"]
-
-            proxmox.nodes(template_node).qemu(10001).clone.create(
-                name=name,
-                newid=next_vmid,
-                target=node,
-                full=0,
-
-            )
-
-        else:
+            template_id = 10001
+        else :
             return {"error": "vm type not defines"}, 400
+        
+        user = database.get_user_list(user_id=user_id)
+        if user is None:
+            database.add_user(user_id)
+            database.add_vm(id=next_vmid, user_id=user_id, type=vm_type)
+        else:
+            if len(database.get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(database.get_vm_list()) < configuration.TOTAL_VM_LIMIT:
+                database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
+                database.add_ip_to_history(ip, next_vmid, user_id)
+            else:
+                return {"error": "error, can not create more VMs"}, 500
+        for vm in proxmox.cluster.resources.get(type="vm"):
+            if vm["vmid"] == template_id:
+                template_node = vm["node"]
+        proxmox.nodes(template_node).qemu(template_id).clone.create(
+            name=name,
+            newid=next_vmid,
+            target=node,
+            full=1,
+        )
 
     
 
@@ -354,7 +340,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     if not update_vm_state(next_vmid, "creating"):
         print("Problem while updating the vm status")
         return {"error": "Impossible to update the VM status"}, 500
-    Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key, )).start()
+    Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key,ip,  )).start()
     return {"vmId": next_vmid}, 201
 
 
@@ -362,7 +348,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     """After the vm creation (ie the vm clone) we wait for it to be up to config it
     When the VM is up, the password, vm user name and ssh key are set up
     """
-def config_vm(vmid, node, password, vm_user,main_ssh_key):
+def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
     
     sync = False
     vm = proxmox.nodes(node).qemu(vmid)
@@ -375,8 +361,10 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
         except ResourceException:  # Exception si pas encore synchronisés
             sleep(1)
 
-   
 
+    
+
+   
     try:
         vm.config.create(
             cipassword=password
@@ -386,6 +374,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
         delete_from_proxmox(vmid, node)
         update_vm_state(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
 
 
     try:
@@ -397,6 +386,30 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
         delete_from_proxmox(vmid, node)
         update_vm_state(vmid,"An error occured while creating the user  (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting user: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when setting user: " + str(e))
+    
+    try:
+        vm.config.create(
+            searchdomain="minet.net", 
+            nameserver="157.159.195.51"
+        )
+    except Exception as e:
+        delete_from_db(vmid)
+        delete_from_proxmox(vmid, node)
+        update_vm_state(vmid,"An error occured while setting the DNS (vmid ="+str(vmid) +")", errorCode=500)
+        logging.error("Problem in create_vm(" + str(vmid) + ") when setting DNS: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when setting DNS: " + str(e))
+
+    try:
+        vm.config.create(
+            ipconfig0= "ip=" + str(ip)+"/24,gw=157.159.195.1"
+        )
+    except Exception as e:
+        delete_from_db(vmid)
+        delete_from_proxmox(vmid, node)
+        update_vm_state(vmid,"An error occured while setting the ip (vmid ="+str(vmid) +")", errorCode=500)
+        logging.error("Problem in create_vm(" + str(vmid) + ") when setting ip: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when setting ip: " + str(e))
         
 
     try:
@@ -408,6 +421,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
         delete_from_proxmox(vmid, node)
         update_vm_state(vmid,"An error occured while setting your ssh key (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
 
     # We give an ip to the VM before it starts 
     #try : 
@@ -437,6 +451,25 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key):
         delete_from_proxmox(vmid, node)
         update_vm_state(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
+
+
+    
+    #mac = get_vm_hardware_address(vmid, node)
+    #update_vm_mac(vmid, mac)
+
+    try : 
+        for k in proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").get():  # on vire d'abord toutes leip set
+               cidr = k['cidr']
+               proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").delete(cidr)
+        proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").create(cidr=ip)  # on met l'ipset à jour
+        #db.session.commit()
+    except Exception as e:
+        delete_from_db(vmid)
+        delete_from_proxmox(vmid, node)
+        update_vm_state(vmid,"An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")", errorCode=500)
+        logging.error("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
 
 
     # if we are here then the VM is well created
@@ -463,7 +496,7 @@ def update_vm_credentials(vmid,username, password, sshKey):
         cipassword=password,
         sshkeys=[urllib.parse.quote(sshKey, safe='')])
         try : 
-            setNeedToBeRestored(vmid, False)
+            database.setNeedToBeRestored(vmid, False)
             return {"status" :"ok"},200
         except Exception as e: 
             return {"status": "Problem while updatig the VM(" + str(vmid) + ") status : " + str(e)}, 500
@@ -539,18 +572,18 @@ def get_vm_name(vmid, node):
 
 def get_vm(user_id = 0, search=None):
     if user_id != 0: # No filter for non admin
-        return get_vm_list(user_id), 200
+        return database.get_vm_list(user_id), 200
     else:
         if search is None : 
-            return get_vm_list(), 200
+            return database.get_vm_list(), 200
         else: # We get all user/name and filter them
-            user_filtered = get_user_list(searchItem=search) # get all user filtered
+            user_filtered = database.get_user_list(searchItem=search) # get all user filtered
             print("user_filtered = " , user_filtered)
             vm_filtered_list = []
             for user in user_filtered:
-                vm_filtered_list += get_vm_list(user_id = user.id)
+                vm_filtered_list += database.get_vm_list(user_id = user.id)
             start = time.time()
-            vm_list = get_vm_list() # only id
+            vm_list = database.get_vm_list() # only id
             for vmid in vm_list:
                 node = get_node_from_vm(vmid)
                 if vmid not in vm_filtered_list :
@@ -611,6 +644,7 @@ Return all the configuration info related to a VM, it combines name,  cpu, disk,
 """
 
 def get_vm_config(vmid, node):
+        #print(proxmox.nodes(node).qemu(vmid).config.get())
         start = time.time()
         try:
             config = proxmox.nodes(node).qemu(vmid).config.get()
@@ -810,6 +844,9 @@ def get_vm_uptime(vmid, node):
 
 
 
+##########################
+####### DEPRECATED #######
+##########################
 def update_vm_ips_job(app):    # Job (schedules each 10s) to update all VMs' ip
     #start = time.time()
     #
@@ -831,7 +868,9 @@ def update_vm_ips_job(app):    # Job (schedules each 10s) to update all VMs' ip
             
    #print("update vm finish, took", time.time() - start , "s")
    
-
+##########################
+####### DEPRECATED #######
+##########################
 # Update the VM ip address
 # The debug mode is optionnal and test if a ip was well updated
 def update_vm_ip_address(vm, node, debug=False):
@@ -844,7 +883,7 @@ def update_vm_ip_address(vm, node, debug=False):
                     '157.159.195.10'}
         hosts_iterator = (host for host in network.hosts() if str(host) not in reserved)
         for host in hosts_iterator:
-            if is_ip_available(host) == True:
+            if database.is_ip_available(host) == True:
                 vm.ip = host
                 if debug:
                     print("DEBUG : attribution of " + host + "for vm" + vm.id )
@@ -856,7 +895,7 @@ def update_vm_ip_address(vm, node, debug=False):
             cidr = k['cidr']
             proxmox.nodes(node).qemu(vm.id).firewall.ipset("hosting").delete(cidr)
         proxmox.nodes(node).qemu(vm.id).firewall.ipset("hosting").create(cidr=vm.ip)  # on met l'ipset à jour
-        db.session.commit()
+        database.session.commit()
         return {"status": "Success"}, 201
     else : 
         if vm is None :
@@ -864,7 +903,25 @@ def update_vm_ip_address(vm, node, debug=False):
                 print("DEBUG : Error while updating a VM. vm = None. This error must be investigate and lead to unable a VM to get an ip address.")
             return {"error": "Impossible to set the vm ip address"}, 500
     return {"error": "Impossible to set the vm ip address (no info)"}, 500
-           
+
+
+# Select the next available ip address and set up in the proxmox firewall
+def set_new_vm_ip(vmid, node):
+    network = IPv4Network('157.159.195.0/24')
+    reserved = {'157.159.195.1', '157.159.195.2', '157.159.195.3', '157.159.195.4', '157.159.195.5',
+                    '157.159.195.6', '157.159.195.7', '157.159.195.8', '157.159.195.9',
+                    '157.159.195.10'}
+    hosts_iterator = (host for host in network.hosts() if str(host) not in reserved)
+    ip = ""
+    for host in hosts_iterator:
+        if database.is_ip_available(host) == True:
+            ip = host
+            break
+    if ip != "":
+        return ip 
+    else :
+        return None # no ip available
+
 
 
 def switch_autoreboot(vmid,node):
@@ -912,7 +969,7 @@ def check_dns_ip_entry(user_id, ip:str) -> bool:
 
 def get_user_ip_list(user_id) :
     try : 
-        vm_id_list = get_vm_list(user_id)
+        vm_id_list = database.get_vm_list(user_id)
         ip_list = [] # ip of the user
         for vmid in vm_id_list:
             node = get_node_from_vm(vmid)
@@ -938,7 +995,7 @@ def get_freeze_state(username):
     #print(msg)
     #sendMail("nathanstchepinsky@gmail.com", msg)
     try :
-        freezeState = getFreezeState(username)
+        freezeState = database.getFreezeState(username)
     except Exception as e : 
         print("ERROR : the freeze state of user " , username, " failed to be retrieved : " , e)
         return {"error": "Impossible to retrieve the freeze state"}, 500
@@ -948,7 +1005,7 @@ def get_freeze_state(username):
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
     else:
-        freezeState = getFreezeState(username) # if expired with update in case of re-cotisation
+        freezeState = database.getFreezeState(username) # if expired with update in case of re-cotisation
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
         
@@ -967,9 +1024,7 @@ def get_freeze_state(username):
 def check_cotisation_job(app):
      print("check_update_cotisation_job")
      with app.app_context():    # Needs application context
-        users = get_active_users()
-        
-        
+        users = database.get_active_users()
         for user in users:
             try :
                 status = check_update_cotisation(user)
@@ -977,7 +1032,7 @@ def check_cotisation_job(app):
             except Exception as e:
                 print("exception : ",e)
                 pass
-        db.session.commit()
+        database.session.commit()
 
 
 
@@ -992,7 +1047,7 @@ def check_update_cotisation(username):
         
         print("check cotisation of", username)
         #headers = {"Authorization": req_headers}
-        headers = {"X-API-KEY": config.ADH6_API_KEY}
+        headers = {"X-API-KEY": configuration.ADH6_API_KEY}
         #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
         userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
         
@@ -1025,7 +1080,7 @@ def check_update_cotisation(username):
                 print(username , "cotisation expired")
                 
                 #return expiredCotisation(username, userEmail) #, datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date())
-                status = getFreezeState(username)
+                status = database.getFreezeState(username)
                 return {"freezeState": status}, 200
     
             else :  # we check anyway if the departure date is in the future
@@ -1034,12 +1089,12 @@ def check_update_cotisation(username):
                 departureDate = datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date()
                 if departureDate < today: # Cotisation expired:
                     print(username , "cotisation expired")
-                    status = getFreezeState(username)
+                    status = database.getFreezeState(username)
                     return {"freezeState": status}, 200
     
                 else :
                     print(username, "cotisation up to date")
-                    updateFreezeState(username, "0.0")
+                    database.updateFreezeState(username, "0.0")
                     return  {"freezeState": "0.0"}, 200
 
             
@@ -1060,7 +1115,7 @@ def next_available_vmid():# determine the next available vmid from both db and p
     is_vmid_available_prox = False 
     while next_vmid_db != None and not is_vmid_available_prox : # if next_vmid_db is None then there is no next vmid available and if is_vmid_available_prox = True then the next vmid is available in proxmox and in db
         next_vmid_db += 1
-        next_vmid_db = getNextVmID(next_vmid_db)
+        next_vmid_db = database.getNextVmID(next_vmid_db)
        
         is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
     return next_vmid_db
