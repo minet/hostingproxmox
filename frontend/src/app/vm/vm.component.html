@@ -144,8 +144,8 @@ document.onload = loaded();
                             <p><b>{{'vm.type' | translate}} :</b>&nbsp; {{ user.vms[0].type }}</p>
                             <p><b>{{'vm.status' | translate}} :</b>&nbsp; {{ user.vms[0].status }}</p>
                             <p><b>{{'vm.name' | translate}} :</b>&nbsp; {{ user.vms[0].name }}</p>
-                            <p><b>{{'vm.ipv4' | translate}} :</b>&nbsp; {{ user.vms[0].ip }}
-                            <p><b>{{'vm.startOnBoot' | translate}} :</b>
+                            <p *ngIf="user.vms[0].status == 'running'"><b>{{'vm.ipv4' | translate}} :</b>&nbsp; <span *ngIf="renew_vm_status != 'reboot'">{{ user.vms[0].ip }}</span> <button *ngIf="user.vms[0].ip == '' && (renew_vm_status == '' || renew_vm_status == 'loading')" class="btn btn-primary" (click)="renew_vm()"><span *ngIf="renew_vm_status == ''">{{'vm.ipv4.renew' | translate}}</span><span class="spinner-border spinner-border-sm" *ngIf="renew_vm_status == 'loading'"></span> </button>  <button  class="btn btn-danger" (click)="commit_edit('reboot')" *ngIf="renew_vm_status == 'reboot'">{{ 'vm.reboot.apply' | translate}}</button></p>
+                            <p><b>{{'vm.startOnBoot' | translate}} :</b></p>
                             <div class="custom-control custom-switch">
                                 <input type="checkbox" (change)="commit_edit('switch_autoreboot')" [checked]="user.vms[0].autoreboot === 1" class="custom-control-input" id="customSwitches">
                                 <label class="custom-control-label" for="customSwitches">{{'vm.startOnBootDescription' | translate}}</label>

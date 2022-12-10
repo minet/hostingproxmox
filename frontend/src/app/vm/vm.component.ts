@@ -39,6 +39,7 @@ export class VmComponent implements OnInit, OnDestroy {
     popUpPassword = "";
     popUpSSHkey = "";
     popUpLoading = false;
+    renew_vm_status = "";
 
 
     constructor(
@@ -185,7 +186,12 @@ export class VmComponent implements OnInit, OnDestroy {
                     vm.ramUsage = rep.body['ram_usage'];
                     vm.cpuUsage = rep.body['cpu_usage'];
                     vm.uptime = rep.body['uptime'];
-                    vm.ip = rep.body['ip'][0];
+                    if (rep.body['ip'] == ""){
+                        vm.ip = ""
+                    } else {
+                        vm.ip = rep.body['ip'][0];
+                    }
+                    //console.log("rep = ", rep.body['ip']);
                     vm.createdOn = rep.body['created_on'];
                     if (rep.body['type'] === 'nginx_vm') {
                         vm.type = 'web server';
@@ -243,6 +249,23 @@ export class VmComponent implements OnInit, OnDestroy {
                 this.errorDescription = error.error["error"];
             });
     }
+
+    renew_vm():void{
+        this.renew_vm_status = "loading";
+        let data = {};
+        data = {
+            vmid: this.vmid,
+        };
+        this.http.post(this.authService.SERVER_URL + '/renew-ip', data, {observe: 'response'}).subscribe(rep => {
+            this.renew_vm_status = "reboot" // need reboot to apply
+            this.user.vms[0].ip = rep.body['ip'];
+        }, 
+        error => {
+            this.errorcode = error.status;
+            this.errorDescription = error.error["error"];
+        })
+    }
+
 
     update_vm_credentials(): void {
         console.log("test")

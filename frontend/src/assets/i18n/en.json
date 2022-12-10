@@ -263,6 +263,8 @@
   "vm.alert.descr.2":"We are deploying backups from the 01.10.2022. All the VMs created after the 29.10.2022 are not involved.",
   "vm.alert.descr.3":"We apologize for the inconvenience caused by this incident.",
   "vm.alert.repair":"More info",
+  "vm.ipv4.renew":"Ask for an IP",
+  "vm.reboot.apply" : "Reboot to apply",
   "vms.loading": "Loading...",
   "vms.listTitle": "My Vms",
   "vms.listTitleAdmin": "VMs List",
