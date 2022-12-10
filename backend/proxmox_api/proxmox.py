@@ -488,13 +488,41 @@ def start_vm(vmid, node):
         logging.error("Problem in start_vm(" + str(vmid) + ") when starting VM: " + str(e))
         return {"status": "error"}, 500
 
+def reboot_vm(vmid, node):
+    try:
+            proxmox.nodes(node).qemu(vmid).status.reboot.create()
+            logging.info("VM " + str(vmid) + " rebooted")
+            return {"state": "vm rebooted"}, 201
+    except Exception as e:
+        print("Problem in reboot_vm(" + str(vmid) + ") when starting VM: " + str(e))
+        logging.error("Problem in reboot_vm(" + str(vmid) + ") when starting VM: " + str(e))
+        return {"status": "An error occur while rebooting the vm"}, 500
+
+def renew_ip(vmid):
+    node = get_node_from_vm(vmid)
+    try: 
+        ip = database.get_vm_ip(vmid)
+        proxmox.nodes(node).qemu(vmid).config.post(
+        searchdomain="minet.net", 
+        nameserver="157.159.195.51",
+        ipconfig0= "ip=" + str(ip)+"/24,gw=157.159.195.1"
+        )
+    except Exception as e:
+        print("Problem in renew_ip(" + str(vmid) + ") when updating ip address: " + str(e))
+        logging.error("Problem in renew_ip(" + str(vmid) + ") when updating ip address: " + str(e))
+        return {"status": "error updating your ip address."}, 500
+
 def update_vm_credentials(vmid,username, password, sshKey):
     node = get_node_from_vm(vmid)
     try : 
+        ip = database.get_vm_ip(vmid)
         proxmox.nodes(node).qemu(vmid).config.post(
         ciuser=username,
         cipassword=password,
-        sshkeys=[urllib.parse.quote(sshKey, safe='')])
+        sshkeys=[urllib.parse.quote(sshKey, safe='')], 
+        searchdomain="minet.net", 
+        nameserver="157.159.195.51",
+        ipconfig0= "ip=" + str(ip)+"/24,gw=157.159.195.1")
         try : 
             database.setNeedToBeRestored(vmid, False)
             return {"status" :"ok"},200
@@ -504,8 +532,7 @@ def update_vm_credentials(vmid,username, password, sshKey):
     except Exception as e:
         logging.error("Problem in update_vm_credentials(" + str(vmid) + ") when updating VM: " + str(e))
         return {"status": "Problem while updatig the VM(" + str(vmid) + ") : " + str(e)}, 400
-
-
+    
 
 
 def stop_vm(vmid, node):
