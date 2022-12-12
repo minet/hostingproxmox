@@ -961,12 +961,15 @@ def get_account_state(username):
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
     user_id = slugify(r.json()['sub'].replace('_', '-'))
+    username = username.replace('_', '-')
     admin = False
 
     if "attributes" in r.json():
         if "memberOf" in r.json()["attributes"]:
             if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
+    print(user_id)
+    print(username)
     if not admin and user_id != username:
         return {"error": "You are not allowed to check this account"}, 403
     elif admin : 

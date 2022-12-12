@@ -311,7 +311,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         if user is None:
             database.add_user(user_id)
             check_update_cotisation(user_id)
-            database.add_vm(id=next_vmid, user_id=user_id, type=vm_type)
+            database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
         else:
             if len(database.get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(database.get_vm_list()) < configuration.TOTAL_VM_LIMIT:
                 database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
@@ -1036,6 +1036,7 @@ def get_freeze_state(username):
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
     else:
+        check_update_cotisation(username)
         freezeState = database.getFreezeState(username) # if expired with update in case of re-cotisation
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
@@ -1083,7 +1084,8 @@ def check_update_cotisation(username):
         userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
         
         userInfoJson = userInfo.json()
-        if (len(userInfoJson) != 1):
+        print(userInfoJson)
+        if (len(userInfoJson) > 1 ):
             return {"error": "Impossible to retrieve the user info"}, 404
         elif userInfo == None or userInfoJson  == []: # not found
             if "-" in username:
@@ -1112,6 +1114,9 @@ def check_update_cotisation(username):
                 
                 #return expiredCotisation(username, userEmail) #, datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date())
                 status = database.getFreezeState(username)
+                if status == None:
+                    status = '1'
+                    database.updateFreezeState(username, "1.0")
                 return {"freezeState": status}, 200
     
             else :  # we check anyway if the departure date is in the future
@@ -1121,6 +1126,9 @@ def check_update_cotisation(username):
                 if departureDate < today: # Cotisation expired:
                     print(username , "cotisation expired")
                     status = database.getFreezeState(username)
+                    if status == None:
+                        status = '1'
+                        database.updateFreezeState(username, "1.0")
                     return {"freezeState": status}, 200
     
                 else :
