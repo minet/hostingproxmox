@@ -163,7 +163,7 @@ def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error oc
     if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
         return {"error": "You don't have the right permissions"}, 403
     
-    Thread(target=delete_vm_in_thread, args=(vmid, "", True,)).start()
+    Thread(target=delete_vm_in_thread, args=(vmid, user_id, "", True,)).start()
     return {"status": "deleting"}, 200
 
 def delete_vm_id(vmid):  # noqa: E501
@@ -231,6 +231,7 @@ def delete_vm_id(vmid):  # noqa: E501
 
 # Delete the vm in a thread after the API endpoint is called. It's a workaround to avoid the timeout of the API endpoint. The behavior is different in the error handling if the deletion is trigger while an error or not
 def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
+    print("Deleting VM " + str(vmid) + ". Is due to an error :", dueToError)
     util.update_vm_state(vmid, "deleting")
     if node == "" and not dueToError:
         print("Impossible to find the vm to delete.")
@@ -246,7 +247,7 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
         # If not isProxmoxDeleted and dueToError then it's fine. 
     # Now we can delete the entry in the db
     isDbDeleted = proxmox.delete_from_db(vmid)
-    if (not dueToError and isDbDeleted and isProxmoxDeleted) or (dueToError and (isDbDeleted or not     isProxmoxDeleted)):
+    if (not dueToError and isDbDeleted and isProxmoxDeleted) or (dueToError and (isDbDeleted or not isProxmoxDeleted)):
         util.update_vm_state(vmid, "deleted", deleteEntry=True)
         return 1
     else : 
@@ -444,8 +445,6 @@ def get_vm_id(vmid):  # noqa: E501
 
     
 
-    if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
-        return {"error": "You don't have the right permissions"}, 403
     
     vm_state = util.get_vm_state(vmid)
     if vm_state != None : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
@@ -456,6 +455,8 @@ def get_vm_id(vmid):  # noqa: E501
                 return {"error", errorMessage}, httpErrorCode
             except: 
                 return {"error", "An unknown error occured"}, 500
+        elif not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin: # we authorize to consult error message
+            return {"error": "You don't have the right permissions"}, 403
         elif status == "creating" : 
             return {"status" : "creating"}, 200
         elif status == "deleting":
@@ -541,18 +542,62 @@ def get_vm_id(vmid):  # noqa: E501
 
 
     #print("backend api vm (" ,vmid ,") ok. Took" , str(time.time() - start))
-    if  (status[1] == 201 or status[1] == 200) and (type[1] == 201 or type[1] == 200) and (ip[1] == 201 or ip[1] == 200):
-        return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": ip[0]["vm_ip"]
+    ipAddr = ""
+    if ip[1] == 200 or ip[1] == 201:
+       ipAddr = ip[0]["vm_ip"]
+    if  (status[1] == 201 or status[1] == 200) and (type[1] == 201 or type[1] == 200) :
+        return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": ipAddr
                    , "status": status[0]["status"], "ram": ram
                    , "cpu": cpu, "disk": disk, "type": type[0]["type"]
                    , "ram_usage": ram_usage, "cpu_usage": cpu_usage
                    , "uptime": uptime, "created_on": created_on[0]["created_on"]}, 201
 
-    elif   status[1] == 404 or type[1] == 404 or ip[1] == 404 :
+    elif   status[1] == 404 or type[1] == 404  :
         return {"error": "vm not found"}, 404
-    else:
+    else :
         print("datal error for vm ", vmid, "Unknown error one of the status, type or ip doesn't exists : ", status, type, ip)
         return {"error": "Unknown error one of the status, type or ip doesn't exists."}, 500
+
+
+def renew_ip():
+    if connexion.request.is_json:
+        body = connexion.request.get_json()  # noqa: E50
+
+    try:
+        vmid = int(body['vmid'])
+    except:
+        return {"error": "Bad vmid"}, 400
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+
+    if r.status_code != 200:
+        return {"status": "error"}, 403
+
+    admin = False
+    if "attributes" in r.json():
+        if "memberOf" in r.json()["attributes"]:
+            if is_admin(r.json()["attributes"]["memberOf"]):
+                admin = True;
+
+    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    if admin :
+        freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
+    else :
+        body,statusCode = proxmox.get_freeze_state(user_id)
+        if statusCode != 200:
+            return body, statusCode
+        try:
+            freezeAccountState = int(body["freezeState"])
+        except Exception as e:
+            return {"error": "error while getting freeze state"}, 500
+    
+    if freezeAccountState >= 3: # if freeze state 1 or 2 the user can access to proxmox
+        return {"status": "cotisation expired"}, 403
+    if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
+        return {"error": "You don't have the right permissions"}, 403
+
+    return proxmox.renew_ip(vmid)
+
 
 
 def delete_dns_id(dnsid):  # noqa: E501
@@ -725,14 +770,16 @@ def patch_vm(vmid, body=None):  # noqa: E501
             return {"status": "vm not exists"}, 404
         if requetsBody.status == "start":
             return proxmox.start_vm(vmid, node)
+        if requetsBody.status == "reboot":
+            return proxmox.reboot_vm(vmid, node)
         elif requetsBody.status == "stop":
             return proxmox.stop_vm(vmid, node)
         elif requetsBody.status == "switch_autoreboot":
             return proxmox.switch_autoreboot(vmid, node)
         else:
-            return {"status": "error"}, 500
+            return {"status": "uknown status"}, 500
     else:
-        return {"status": "error"}, 500
+        return {"status": "Permission denied"}, 403
 
 def get_historyip(vmid):
     headers = {"Authorization": connexion.request.headers["Authorization"]}

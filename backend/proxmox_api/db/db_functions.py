@@ -14,6 +14,18 @@ def update_vm_ip(vmid, vmip):
     db.session.commit()
 
 
+def get_vm_ip(vmid):
+    vm = Vm.query.filter_by(id=vmid).first()
+    return vm.ip
+
+
+def update_vm_mac(vmid, mac):
+
+    vm = Vm.query.filter_by(id=vmid).first()
+    vm.mac = mac
+    db.session.commit()
+
+
 def get_vm_db_info(vmid):
     return  Vm.query.filter_by(id=vmid).first()
 
@@ -148,6 +160,11 @@ def get_historyip_fromdb(vmid = ""): # vmid vide si on récupère tt l'historiqu
         for i in History.query.all():
             list.append([i.ip,i.date,i.userId,i.vmId])
     return list
+    
+def add_ip_to_history(ip, vmid, userid):
+    new_ip = History(ip=ip, vmId=vmid, userId=userid)
+    db.session.add(new_ip)
+    db.session.commit()
 
 def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
     if Vm.query.filter_by(ip=ip).first():
