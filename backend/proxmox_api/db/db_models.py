@@ -35,7 +35,7 @@ class History(db.Model):
     userId = db.Column(db.String(254), db.ForeignKey("user.id"), nullable=True)
     vmId = db.Column(db.Integer, nullable=True)
     ip = db.Column(db.String(15), nullable=True)
-    date = db.Column(db.TIMESTAMP, nullable=False)
+    date = db.Column(db.TIMESTAMP,default=db.func.current_timestamp(),  nullable=False)
 
 
 
