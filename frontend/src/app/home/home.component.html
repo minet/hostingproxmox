@@ -23,7 +23,7 @@
             <h4>{{'account.freeze.title' | translate }}</h4>
             <p>{{'account.freeze.3.description' | translate }}<br><strong>{{'account.freeze.3.description.strong' | translate }}</strong></p>
         </div>
-        <div class="alert alert-warning text-center" *ngIf="this.user.freezeState >= 0 && countvm == 0">
+        <div class="alert alert-warning text-center" *ngIf="this.user.freezeState > 0 && countvm == 0">
             <h4>{{'account.expired.title' | translate }}</h4>
             <p>{{'account.expired.description' | translate }}</p>
         </div>

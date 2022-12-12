@@ -40,17 +40,17 @@ def conf_jobs(app):
 ## init db
 app, scheduler = create_app() 
 
-JOBS = [
-        {
-            "id": "update_vm_ips",
-            "func": "proxmox_api.proxmox:update_vm_ips_job",
-            "args": (app.app,),
-            "trigger": "interval",
-            "seconds": 120,
-        }
-    ]
-
-conf_jobs(app)
+#JOBS = [
+#        {
+#            "id": "update_vm_ips",
+#            "func": "proxmox_api.proxmox:update_vm_ips_job",
+#            "args": (app.app,),
+#            "trigger": "interval",
+#            "seconds": 120,
+#        }
+#    ]
+#
+#conf_jobs(app)
 
 
 db.init_app(app.app)
