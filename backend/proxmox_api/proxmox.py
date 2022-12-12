@@ -310,6 +310,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         user = database.get_user_list(user_id=user_id)
         if user is None:
             database.add_user(user_id)
+            check_update_cotisation(user_id)
             database.add_vm(id=next_vmid, user_id=user_id, type=vm_type)
         else:
             if len(database.get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(database.get_vm_list()) < configuration.TOTAL_VM_LIMIT:
@@ -1021,6 +1022,9 @@ def get_freeze_state(username):
     #msg = mailHTMLGenerator(4, date.today(), 1)
     #print(msg)
     #sendMail("nathanstchepinsky@gmail.com", msg)
+    user = database.get_user_list(user_id=username)
+    if user is None:
+        return {"freezeState" : "0"}, 200 # user doesn't exist so we fake the freezestatus
     try :
         freezeState = database.getFreezeState(username)
     except Exception as e : 
