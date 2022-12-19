@@ -9,6 +9,17 @@ from proxmox_api import encoder
 from proxmox_api.db.db_models import db
 
 
+print("confi = ",  config.ENV)
+if config.ENV == "DEV":
+        print("**************************************************")
+        print("**************************************************")
+        print("**************************************************")
+        print("************* ENTERING IN DEV MODE ***************")
+        print("********* NOT DESIGNED FOR PRODUCTION ************")
+        print("**************************************************")
+        print("**************************************************")
+        print("**************************************************\n\n")
+
 app = connexion.App(__name__, specification_dir='./swagger/')
 
 def create_app():
@@ -63,4 +74,3 @@ scheduler.start()
 
 if __name__ == '__main__':
     app.run(port=8080, debug=True)
-

@@ -211,6 +211,8 @@ def delete_from_db(vmid) -> bool:
         print("Problem in delete_vm: " + str(e))
         logging.error("Problem in delete_vm: " + str(e)) 
         return False
+
+
 """delete a vm by id and node from proxmox 
 :param vmid: vmid to delete
 :type vmid: string
@@ -1027,9 +1029,8 @@ def get_freeze_state(username):
         return {"freezeState" : "0"}, 200 # user doesn't exist so we fake the freezestatus
     try :
         freezeState = database.getFreezeState(username)
-    except Exception as e : 
-        print("ERROR : the freeze state of user " , username, " failed to be retrieved : " , e)
-        return {"error": "Impossible to retrieve the freeze state"}, 500
+    except Exception as e :
+        return {"freeztatus" : "0.0"} # User doesn't exist, we fake the freeze state to 0.0
     if freezeState == None: # We have to create the freeze state
         return check_update_cotisation(username)
     elif freezeState == "0.0":
@@ -1075,7 +1076,7 @@ def check_cotisation_job(app):
     :return: status code, {"status": "ok"} if the cotisation is ok, {"status": "expired"} if the cotisation is expired, {"error": "error message"} if there is an error
     :rtype: int, dict
 """
-def check_update_cotisation(username):
+def check_update_cotisation(username, createEntry=False):
         
         print("check cotisation of", username)
         #headers = {"Authorization": req_headers}
@@ -1113,6 +1114,7 @@ def check_update_cotisation(username):
                 print(username , "cotisation expired")
                 
                 #return expiredCotisation(username, userEmail) #, datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date())
+                
                 status = database.getFreezeState(username)
                 if status == None:
                     status = '1'

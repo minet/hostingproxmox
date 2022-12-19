@@ -1,5 +1,5 @@
 import datetime
-
+import requests
 import six
 import typing
 import re
@@ -306,3 +306,16 @@ def create_app():
     app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
 
     return app
+
+
+def check_cas_token(headers):
+    print(headers)
+    if config.ENV == "DEV":
+        print('dev')
+        return 200, {'sub': 'fake-admin'}
+    elif config.ENV == "PROD":
+        r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+        print(r)
+        return r.status_code, r.json()
+    else : 
+        return None
