@@ -1,6 +1,6 @@
 stages:
-  - dependencies
   - test
+  - dependencies
   - build
   - deploy
 
@@ -64,9 +64,9 @@ install_dependencies_angular:
 
 test_backend:
   stage: test
-  image: python3.9
-  needs : 
-   - install_dependencies_angular
+  image: python:3.9
+  #needs : 
+   #- install_dependencies_angular
   before_script:
     - export http_proxy="http://192.168.104.61:82/"
     - export https_proxy="http://192.168.104.61:82/"
