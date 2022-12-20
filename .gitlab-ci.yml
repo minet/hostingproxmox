@@ -1,6 +1,6 @@
 stages:
   - dependencies
-#  - test
+  - test
   - build
   - deploy
 
@@ -61,11 +61,29 @@ install_dependencies_angular:
 #    when: always
 #  allow_failure: true
 
+
+test_backend:
+  stage: test
+  image: node
+  needs : 
+   - install_dependencies_angular
+  before_script:
+    - cd backend/
+    - ENVIRONMENT='DEV'
+  script :
+    - pytest
+  artifacts:
+    paths:
+      - backend/test.txt
+    expire_in: 2 days
+    when: always
+
+
 angular_build:
   stage: build
   image: node
   needs: 
-    - install_dependencies_angular
+    - test_backend
   before_script:
     - npm cache clean --force  
     - npm config rm proxy
@@ -86,6 +104,8 @@ angular_build:
 
 deploy_backend:
   stage: deploy
+  needs :
+    - angular_build
   before_script:
     - export http_proxy="http://192.168.104.61:82/"
     - export https_proxy="http://192.168.104.61:82/"
@@ -107,6 +127,8 @@ deploy_backend:
 
 deploy_frontend:
   stage: deploy
+  needs:
+    - angular_build
   script:
     - rm -rf /var/www/proxmox_dashboard
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
