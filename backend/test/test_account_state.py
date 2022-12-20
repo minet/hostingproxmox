@@ -1,33 +1,56 @@
 import requests 
 import proxmox_api.config.configuration as config
-from .conftest import init_database
 import pytest
+import requests
+import proxmox_api
+import proxmox_api.controllers.default_controller as controller
+from proxmox_api import util
+import proxmox_api.proxmox as proxmox
+import proxmox_api.__main__ as main
+from proxmox_api.config.configuration import *
+import proxmox_api.db.db_models as db_models
+from flask_sqlalchemy import SQLAlchemy
 
 backendURL = "http://localhost:8080/api/1.0.0";
 
 
-@pytest.fixture
-def client():
-    init_database()
+#@pytest.fixture
+#def client():
+#    init_database()
 
-def test_valid_account_state():
+def test_valid_account_state(monkeypatch):
     """Test case for account_state
 
     get all user's vms  # noqa: E501
     """
-    r = requests.get(backendURL + "/account_state/valid-user", headers={'Authorization': 'Bearer AT-fake-admin-token', "fake-user": "valid-user"})
-    assert r.status_code == 200
-    assert r.json()['freezeState'] == '0'
+    #mocker.patch('proxmox_api.util.check_cas_token', return_value= (200, {'sub': "valid-user"}))
+    #monkeypatch.setattr(util, 'check_cas_token', (200,{'sub': "valid-user"}))
+
+    #r = requests.get(backendURL + "/account_state/valid-user", headers={'Authorization': 'Bearer AT-fake-admin-token', "fake-user": "valid-user"})
+    app = util.create_app()
+    db = SQLAlchemy()
+    db.init_app(app.app)
+    with app.app.app_context():
+        r = proxmox.get_freeze_state("valid-user")
+        dict,status_code = r
+        assert status_code == 200
+        assert dict['freezeState'] == '0'
 
 
-def test_unknown_account_state():
+def test_unknown_account_state(mocker):
     """Test case for account_state
 
     Even if the user is not known, the result must be 200 and 0 because its a new member, wihtout vm.
     """
-    r = requests.get(backendURL + "/account_state/which-user", headers={'Authorization': 'Bearer AT-fake-admin-token', "fake-user": "which-user"})
-    assert r.status_code == 200
-    assert r.json()['freezeState'] == '0'
+
+    app = util.create_app()
+    db = SQLAlchemy()
+    db.init_app(app.app)
+    with app.app.app_context():
+        r = proxmox.get_freeze_state("which-user")
+        dict,status_code = r
+        assert status_code == 200
+        assert dict['freezeState'] == '0'
 
 
 def test_expired_account_freezed_1():
@@ -35,43 +58,78 @@ def test_expired_account_freezed_1():
 
     freeze state of 1
     """
-    r = requests.get(backendURL + "/account_state/expired_user_1", headers={'Authorization': 'Bearer AT-fake-admin-token', "fake-user": "expired_user_1"})
-    assert r.status_code == 200
-    assert r.json()['freezeState'] == '1'
+    app = util.create_app()
+    db = SQLAlchemy()
+    db.init_app(app.app)
+    with app.app.app_context():
+        r = proxmox.get_freeze_state("expired-user-1")
+        dict,status_code = r
+        assert status_code == 200
+        assert dict['freezeState'] == '1'
 
 def test_expired_account_freezed_2():
     """Test case for account_state
 
     freeze state of 2
     """
-    r = requests.get(backendURL + "/account_state/expired_user_2", headers={'Authorization': 'Bearer AT-fake-admin-token', "fake-user": "expired_user_2"})
-    assert r.status_code == 200
-    assert r.json()['freezeState'] == '2'
+    app = util.create_app()
+    db = SQLAlchemy()
+    db.init_app(app.app)
+    with app.app.app_context():
+        r = proxmox.get_freeze_state("expired-user-2")
+        dict,status_code = r
+        assert status_code == 200
+        assert dict['freezeState'] == '2'
 
 def test_expired_account_freezed_3():
     """Test case for account_state
 
     freeze state of 3
     """
-    r = requests.get(backendURL + "/account_state/expired_user_3", headers={'Authorization': "Bearer AT-fake-admin-token", "fake-user": "expired_user_3"})
-    assert r.status_code == 200
-    assert r.json()['freezeState'] == '3'
+    app = util.create_app()
+    db = SQLAlchemy()
+    db.init_app(app.app)
+    with app.app.app_context():
+        r = proxmox.get_freeze_state("expired-user-3")
+        dict,status_code = r
+        assert status_code == 200
+        assert dict['freezeState'] == '3'
 
 def test_expired_account_freezed_4():
     """Test case for account_state
 
     freeze state of 4
     """
-    r = requests.get(backendURL + "/account_state/expired_user_4", headers={'Authorization': 'Bearer AT-fake-admin-token', "fake-user": "expired_user_4"})
-    assert r.status_code == 200
-    assert r.json()['freezeState'] == '4'
+    app = util.create_app()
+    db = SQLAlchemy()
+    db.init_app(app.app)
+    with app.app.app_context():
+        r = proxmox.get_freeze_state("expired-user-4")
+        dict,status_code = r
+        assert status_code == 200 
+        assert dict['freezeState'] == '4'
 
 
-def test_new_account_to_be_checked():
+def test_new_account_to_be_checked(monkeypatch):
     """Test case for account_state
 
     Account that must be checked by adh6
     """
-    r = requests.get(backendURL + "/account_state/new-user-to-be-checked", headers={'Authorization': 'Bearer AT-fake-admin-token', "fake-user": "new-user-to-be-checked"})
-    assert r.status_code == 200
-    assert r.json()['freezeState'] == '0'
+
+    def fake_adh6_check(username, headers):
+        return {'ip': "127.0.0.1", "departureDate" : "2199-01-01"}
+    def fake_adh6_search_user(username, headers):
+        return [0]
+
+    
+    
+    app = util.create_app()
+    db = SQLAlchemy()
+    db.init_app(app.app)
+    with app.app.app_context():
+        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
+        r = proxmox.get_freeze_state("new-user-to-be-checked")
+        dict,status_code = r
+        assert status_code == 200
+        assert dict['freezeState'] == '0'
