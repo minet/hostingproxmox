@@ -304,20 +304,30 @@ def create_app():
     app.app.json_encoder = encoder.JSONEncoder
 
     app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
+    app.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     return app
 
 
 def check_cas_token(headers):
-    if config.ENV == "DEV":
-        if headers["Fake-User"] == "admin":
-            return 200, {'sub': 'fake-admin', "attributes" : {"memberOf" : 'cn=cluster-hosting,ou=groups,dc=minet,dc=net'}}
-        else :
-            return 200, {'sub': headers["Fake-User"]}
-    elif config.ENV == "PROD":
-        autorization = {"Authorization": headers["Authorization"]}
-        r = requests.get("https://cas.minet.net/oidc/profile", headers=autorization)
-        print(r)
-        return r.status_code, r.json()
-    else : 
-        return None
+    #if config.ENV == "DEV":
+    #    if headers["Fake-User"] == "admin":
+    #        return 200, {'sub': 'fake-admin', "attributes" : {"memberOf" : 'cn=cluster-hosting,ou=groups,dc=minet,dc=net'}}
+    #    else :
+    #        return 200, {'sub': headers["Fake-User"]}
+    #elif config.ENV == "PROD":
+    autorization = {"Authorization": headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=autorization)
+    print("return =", r.json())
+    return r.status_code, r.json()
+    
+
+
+
+def check_adh6_membership(headers, userId):
+    response = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
+    return response.json()
+
+def adh6_search_user(username, headers):
+    response = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
+    return None if response == None else response.json()

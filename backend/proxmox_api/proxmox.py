@@ -8,7 +8,8 @@ import logging
 from proxmoxer import ProxmoxAPI
 from proxmoxer import ResourceException
 
-from proxmox_api.util import check_password_strength, check_ssh_key, check_username, update_vm_state, get_vm_state, create_app
+import proxmox_api.util  as util
+
 
 import proxmox_api.ddns as ddns
 from proxmox_api.config import configuration as configuration 
@@ -18,7 +19,6 @@ from ipaddress import IPv4Network
 from threading import Thread
 import time
 from datetime import datetime, date
-from proxmox_api.util import create_app
 import connexion
 import requests
 logging.basicConfig(filename="log", filemode="a", level=logging.INFO
@@ -201,7 +201,7 @@ def delete_vm(vmid, node, dueToError = False, updateVMStatus=True):
 """
 def delete_from_db(vmid) -> bool:
     try :
-        app = create_app() # we need the context to delete the vm if there is an error
+        app = util.create_app() # we need the context to delete the vm if there is an error
         db_models.db.init_app(app.app)
         with app.app.app_context():
             database.del_vm_list(vmid)
@@ -277,11 +277,11 @@ def delete_from_proxmox(vmid, node) -> bool :
     """
     
 def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="no"):
-    if not check_password_strength(password):
+    if not util.check_password_strength(password):
         return {"error" : "Incorrect password format"}, 400
-    if not check_ssh_key(main_ssh_key):
+    if not util.check_ssh_key(main_ssh_key):
         return {"error" : "Incorrect ssh key format"}, 400
-    if not check_username(vm_user):
+    if not util.check_username(vm_user):
         return {"error" : "Incorrect vm user format"}, 400
 
     next_vmid = int(next_available_vmid())
@@ -340,7 +340,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         return {"error": "Impossible to create the VM (cloning)"}, 500
     
 
-    if not update_vm_state(next_vmid, "creating"):
+    if not util.update_vm_state(next_vmid, "creating"):
         print("Problem while updating the vm status")
         return {"error": "Impossible to update the VM status"}, 500
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key,ip,  )).start()
@@ -375,7 +375,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
     except Exception as e:
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
-        update_vm_state(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
+        util.update_vm_state(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
 
@@ -387,7 +387,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
     except Exception as e:
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
-        update_vm_state(vmid,"An error occured while creating the user  (vmid ="+str(vmid) +")", errorCode=500)
+        util.update_vm_state(vmid,"An error occured while creating the user  (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting user: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when setting user: " + str(e))
     
@@ -399,7 +399,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
     except Exception as e:
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
-        update_vm_state(vmid,"An error occured while setting the DNS (vmid ="+str(vmid) +")", errorCode=500)
+        util.update_vm_state(vmid,"An error occured while setting the DNS (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting DNS: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when setting DNS: " + str(e))
 
@@ -410,7 +410,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
     except Exception as e:
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
-        update_vm_state(vmid,"An error occured while setting the ip (vmid ="+str(vmid) +")", errorCode=500)
+        util.update_vm_state(vmid,"An error occured while setting the ip (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting ip: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when setting ip: " + str(e))
         
@@ -422,7 +422,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
     except Exception as e:
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
-        update_vm_state(vmid,"An error occured while setting your ssh key (vmid ="+str(vmid) +")", errorCode=500)
+        util.update_vm_state(vmid,"An error occured while setting your ssh key (vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
 
@@ -452,7 +452,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
     except Exception as e:
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
-        update_vm_state(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
+        util.update_vm_state(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
 
@@ -470,13 +470,13 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
     except Exception as e:
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
-        update_vm_state(vmid,"An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")", errorCode=500)
+        util.update_vm_state(vmid,"An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
 
 
     # if we are here then the VM is well created
-    update_vm_state(vmid, "created")
+    util.update_vm_state(vmid, "created")
 
 
 def start_vm(vmid, node):
@@ -1087,13 +1087,11 @@ def check_update_cotisation(username, createEntry=False):
         #headers = {"Authorization": req_headers}
         headers = {"X-API-KEY": configuration.ADH6_API_KEY}
         #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
-        userInfo = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
-        
-        userInfoJson = userInfo.json()
+        userInfoJson = util.adh6_search_user(username, headers)
         print(userInfoJson)
         if (len(userInfoJson) > 1 ):
             return {"error": "Impossible to retrieve the user info"}, 404
-        elif userInfo == None or userInfoJson  == []: # not found
+        elif userInfoJson == None or userInfoJson  == []: # not found
             if "-" in username:
                 print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
                 new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
@@ -1111,12 +1109,12 @@ def check_update_cotisation(username, createEntry=False):
         else : 
             username = username.replace("_", "-") # hosting replace by default _ and .  with -.
             userId = userInfoJson[0] 
-            membership = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
-            membership_dict = membership.json()
+            membership_dict = util.check_adh6_membership(headers, userId)
+            print(membership_dict)
             today =  date.today()
             if "ip" not in membership_dict: # Cotisation expired
                 #print(username , "cotisation expired", membership.json())
-                print(username , "cotisation expired")
+                print(username , "cotisation expired (no ip)")
                 
                 #return expiredCotisation(username, userEmail) #, datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date())
                 
@@ -1131,7 +1129,7 @@ def check_update_cotisation(username, createEntry=False):
                 #print(membership.json()["departureDate"], end='\n\n')
                 departureDate = datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date()
                 if departureDate < today: # Cotisation expired:
-                    print(username , "cotisation expired")
+                    print(username , "cotisation expired (departure date)")
                     status = database.getFreezeState(username)
                     if status == None:
                         status = '1'

@@ -956,13 +956,14 @@ def get_account_state(username):
     headers = connexion.request.headers
     status_code, cas = util.check_cas_token(headers)
     
-    
+    print("cas", cas)
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
     user_id = slugify(cas['sub'].replace('_', '-'))
     username = username.replace('_', '-')
     admin = False
+    print(user_id, username)
 
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
