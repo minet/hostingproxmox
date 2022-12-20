@@ -33,8 +33,12 @@ ADH6_API_KEY = os.environ.get('ADH6_API_KEY')
 
 if os.environ.get('ENVIRONMENT') == 'DEV':
     ENV = "DEV"
+<<<<<<< Updated upstream
     #DATABASE_URI = os.environ.get('PROXMOX_BACK_DB_DEV')
     DATABASE_URI = 'sqlite:///proxmox_dev.db'
+=======
+    DATABASE_URI = os.environ.get('PROXMOX_BACK_DB_DEV')
+>>>>>>> Stashed changes
 else :
     ENV = "PROD"
     DATABASE_URI = os.environ.get('PROXMOX_BACK_DB')

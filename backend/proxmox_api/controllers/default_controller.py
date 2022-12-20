@@ -953,15 +953,24 @@ def get_need_to_be_restored(vmid):
 
 
 def get_account_state(username):
+<<<<<<< Updated upstream
     headers = connexion.request.headers
     status_code, cas = util.check_cas_token(headers)
     
     print("cas", cas)
+=======
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    status_code, cas = util.check_cas_token(headers)
+    
+>>>>>>> Stashed changes
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+<<<<<<< Updated upstream
     username = username.replace('_', '-')
+=======
+>>>>>>> Stashed changes
     admin = False
     print(user_id, username)
 
