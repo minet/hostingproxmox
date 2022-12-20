@@ -64,12 +64,20 @@ install_dependencies_angular:
 
 test_backend:
   stage: test
-  image: node
+  image: python3.9
   needs : 
    - install_dependencies_angular
   before_script:
-    - cd backend/
-    - ENVIRONMENT='DEV'
+    - export http_proxy="http://192.168.104.61:82/"
+    - export https_proxy="http://192.168.104.61:82/"
+    - export ENVIRONMENT='DEV'
+    - export KEYRING_DNS_SECRET=$KEYRING_DNS_SECRET
+    - export PROXMOX_API_KEY_NAME=$PROXMOX_API_KEY_NAME
+    - export PROXMOX_API_KEY=$PROXMOX_API_KEY
+    - export PROXMOX_BACK_DB_DEV=$PROXMOX_BACK_DB_DEV
+    - cd backend
+    - pip3 install -r requirements.txt
+    - python3 -m proxmox_api &
   script :
     - pytest
   artifacts:
