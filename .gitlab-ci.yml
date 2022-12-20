@@ -75,17 +75,19 @@ test_backend:
     - export PROXMOX_API_KEY_NAME=$PROXMOX_API_KEY_NAME
     - export PROXMOX_API_KEY=$PROXMOX_API_KEY
     - export PROXMOX_BACK_DB_DEV=$PROXMOX_BACK_DB_DEV
-    - cd backend
+    - cd backend/
     - pip3 install -r requirements.txt
     - pip3 install pytest
-    - python3 -m proxmox_api &
+    - python3 -m proxmox_api
   script :
+    - pwd
+    - ls
     - pytest
-  artifacts:
-    paths:
-      - backend/test.txt
-    expire_in: 2 days
-    when: always
+  #artifacts:
+    #paths:
+      #- backend/test.txt
+    #expire_in: 2 days
+    #when: always
 
 
 angular_build:
