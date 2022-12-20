@@ -4,9 +4,37 @@ stages:
   - build
   - deploy
 
+
+
+test_backend:
+  stage: test
+  image: python:3.9
+  before_script:
+    - export http_proxy="http://192.168.102.61:82/"
+    - export https_proxy="http://192.168.102.61:82/"
+    - export ENVIRONMENT='DEV'
+    - export KEYRING_DNS_SECRET=$KEYRING_DNS_SECRET
+    - export PROXMOX_API_KEY_NAME=$PROXMOX_API_KEY_NAME
+    - export PROXMOX_API_KEY=$PROXMOX_API_KEY
+    - export PROXMOX_BACK_DB_DEV=$PROXMOX_BACK_DB_DEV
+    - cd backend/
+    - export PYTHONPATH=$(pwd)
+    - pip3 install -r requirements.txt
+    - pip3 install -r test-requirements.txt
+  script :
+    - pytest
+  #artifacts:
+    #paths:
+      #- backend/test.txt
+    #expire_in: 2 days
+    #when: always
+
+
 install_dependencies_angular:
   stage: dependencies
   image: node
+  needs : 
+   - test_backend
   before_script:
     - npm config rm proxy
     - npm config rm https-proxy
@@ -62,37 +90,11 @@ install_dependencies_angular:
 #  allow_failure: true
 
 
-test_backend:
-  stage: test
-  image: python:3.9
-  #needs : 
-   #- install_dependencies_angular
-  before_script:
-    - export http_proxy="http://192.168.102.61:82/"
-    - export https_proxy="http://192.168.102.61:82/"
-    - export ENVIRONMENT='DEV'
-    - export KEYRING_DNS_SECRET=$KEYRING_DNS_SECRET
-    - export PROXMOX_API_KEY_NAME=$PROXMOX_API_KEY_NAME
-    - export PROXMOX_API_KEY=$PROXMOX_API_KEY
-    - export PROXMOX_BACK_DB_DEV=$PROXMOX_BACK_DB_DEV
-    - cd backend/
-    - export PYTHONPATH=$(pwd)
-    - pip3 install -r requirements.txt
-    - pip3 install -r test-requirements.txt
-  script :
-    - pytest
-  #artifacts:
-    #paths:
-      #- backend/test.txt
-    #expire_in: 2 days
-    #when: always
-
-
 angular_build:
   stage: build
   image: node
   needs: 
-    - test_backend
+    - install_dependencies_angular
   before_script:
     - npm cache clean --force  
     - npm config rm proxy
@@ -152,6 +154,8 @@ deploy_frontend:
 
 deploy_backend_dev:
   stage: deploy
+  needs:
+    - angular_build
   before_script:
     - export http_proxy="http://192.168.104.61:82/"
     - export https_proxy="http://192.168.104.61:82/"
@@ -173,6 +177,8 @@ deploy_backend_dev:
 
 deploy_frontend_dev:
   stage: deploy
+  needs:
+    - angular_build
   script:
     - rm -rf /var/www/proxmox_dashboard
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
