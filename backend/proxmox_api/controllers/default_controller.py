@@ -953,8 +953,9 @@ def get_need_to_be_restored(vmid):
 
 
 def get_account_state(username):
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = connexion.request.headers
     status_code, cas = util.check_cas_token(headers)
+    
     
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
@@ -967,8 +968,6 @@ def get_account_state(username):
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    print(user_id)
-    print(username)
     if not admin and user_id != username:
         return {"error": "You are not allowed to check this account"}, 403
     elif admin : 

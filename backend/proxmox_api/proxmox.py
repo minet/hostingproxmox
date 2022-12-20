@@ -1025,21 +1025,26 @@ def get_freeze_state(username):
     #print(msg)
     #sendMail("nathanstchepinsky@gmail.com", msg)
     user = database.get_user_list(user_id=username)
+    print(username, user)
     if user is None:
         return {"freezeState" : "0"}, 200 # user doesn't exist so we fake the freezestatus
     try :
         freezeState = database.getFreezeState(username)
+        print("freezeState : ", freezeState)
     except Exception as e :
-        return {"freeztatus" : "0.0"} # User doesn't exist, we fake the freeze state to 0.0
+        print(e)
+        return {"freeztatus" : "unknown"}, 404 # User doesn't exist, we fake the freeze state to 0.0
     if freezeState == None: # We have to create the freeze state
         return check_update_cotisation(username)
     elif freezeState == "0.0":
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
     else:
+        print(freezeState)
         check_update_cotisation(username)
         freezeState = database.getFreezeState(username) # if expired with update in case of re-cotisation
         status = freezeState.split(".")[0]
+        print(status)
         return {"freezeState" : status}, 200
         
         

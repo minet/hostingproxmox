@@ -9,7 +9,7 @@ from proxmox_api import encoder
 from proxmox_api.db.db_models import db
 
 
-print("confi = ",  config.ENV)
+print("config = ",  config.ENV)
 if config.ENV == "DEV":
         print("**************************************************")
         print("**************************************************")
@@ -40,7 +40,6 @@ def create_app():
 
 
 def conf_jobs(app):
-    app.app.config['JOBS'] = JOBS
     app.app.config['SCHEDULER_API_ENABLE'] = False
 
 
