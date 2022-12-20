@@ -18,8 +18,9 @@ def init_database():
     db.init_app(app.app)
     with app.app.app_context():
         # Create the database and the database table
+        #model.User.query.delete()
+        db.session.query(model.User).delete()
         db.create_all()
-
         # List of test users
         test_users = [
             {"id": "valid-user", "freezeState": "0.0",  "lastNotificationDate": None},
@@ -39,6 +40,7 @@ def init_database():
         t_users = list(mapped_users)
 
         # Add the users to the database - add_all() is used #to dd  multiple records
+        
         db.session.add_all(t_users)
 
         # Commit the changes for the users
@@ -47,6 +49,8 @@ def init_database():
         yield db  # this is where the testing happens!
         db.session.remove()  # looks like db.session.close() would  work as well
         # Drop the database table
-        db.drop_all()
+        #model.User.query.delete()
+        db.session.query(model.User).delete()
+        db.session.commit()
 
 

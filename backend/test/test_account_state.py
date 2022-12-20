@@ -38,7 +38,7 @@ def test_valid_account_state(monkeypatch, init_database):
         assert dict['freezeState'] == '0'
 
 
-def test_unknown_account_state(mocker):
+def test_unknown_account_state(mocker, init_database):
     """Test case for account_state
 
     Even if the user is not known, the result must be 200 and 0 because its a new member, wihtout vm.
@@ -54,7 +54,7 @@ def test_unknown_account_state(mocker):
         assert dict['freezeState'] == '0'
 
 
-def test_expired_account_freezed_1(monkeypatch):
+def test_expired_account_freezed_1(monkeypatch, init_database):
     """Test case for account_state
 
     freeze state of 1
@@ -75,7 +75,7 @@ def test_expired_account_freezed_1(monkeypatch):
         assert status_code == 200
         assert dict['freezeState'] == '1'
 
-def test_expired_account_freezed_2(monkeypatch):
+def test_expired_account_freezed_2(monkeypatch, init_database):
     """Test case for account_state
 
     freeze state of 2
@@ -97,7 +97,7 @@ def test_expired_account_freezed_2(monkeypatch):
         assert status_code == 200
         assert dict['freezeState'] == '2'
 
-def test_expired_account_freezed_3(monkeypatch):
+def test_expired_account_freezed_3(monkeypatch, init_database):
     """Test case for account_state
 
     freeze state of 3
@@ -119,7 +119,7 @@ def test_expired_account_freezed_3(monkeypatch):
         assert status_code == 200
         assert dict['freezeState'] == '3'
 
-def test_expired_account_freezed_4(monkeypatch):
+def test_expired_account_freezed_4(monkeypatch,init_database):
     """Test case for account_state
 
     freeze state of 4
@@ -142,7 +142,7 @@ def test_expired_account_freezed_4(monkeypatch):
         assert dict['freezeState'] == '4'
 
 
-def test_new_account_to_be_checked(monkeypatch):
+def test_new_account_to_be_checked(monkeypatch, init_database):
     """Test case for account_state
 
     Account that must be checked by adh6
