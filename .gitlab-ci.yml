@@ -77,11 +77,8 @@ test_backend:
     - export PROXMOX_BACK_DB_DEV=$PROXMOX_BACK_DB_DEV
     - cd backend/
     - pip3 install -r requirements.txt
-    - pip3 install pytest
-    - python3 -m proxmox_api
+    - pip3 install -r test-requirements.txt
   script :
-    - pwd
-    - ls
     - pytest
   #artifacts:
     #paths:
