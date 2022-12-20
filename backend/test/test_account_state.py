@@ -10,15 +10,16 @@ import proxmox_api.__main__ as main
 from proxmox_api.config.configuration import *
 import proxmox_api.db.db_models as db_models
 from flask_sqlalchemy import SQLAlchemy
+from test.conftest import *
 
-backendURL = "http://localhost:8080/api/1.0.0";
+#backendURL = "http://localhost:8080/api/1.0.0";
 
 
 #@pytest.fixture
 #def client():
 #    init_database()
 
-def test_valid_account_state(monkeypatch):
+def test_valid_account_state(monkeypatch, init_database):
     """Test case for account_state
 
     get all user's vms  # noqa: E501
@@ -47,63 +48,94 @@ def test_unknown_account_state(mocker):
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        r = proxmox.get_freeze_state("which-user")
+        r = proxmox.get_freeze_state("unknown-user")
         dict,status_code = r
         assert status_code == 200
         assert dict['freezeState'] == '0'
 
 
-def test_expired_account_freezed_1():
+def test_expired_account_freezed_1(monkeypatch):
     """Test case for account_state
 
     freeze state of 1
     """
+    def fake_adh6_check(username, headers):
+        return {}
+    def fake_adh6_search_user(username, headers):
+        return [0]
+
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
+        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
         r = proxmox.get_freeze_state("expired-user-1")
         dict,status_code = r
         assert status_code == 200
         assert dict['freezeState'] == '1'
 
-def test_expired_account_freezed_2():
+def test_expired_account_freezed_2(monkeypatch):
     """Test case for account_state
 
     freeze state of 2
     """
+
+    def fake_adh6_check(username, headers):
+        return {}
+    def fake_adh6_search_user(username, headers):
+        return [0]
+
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
+        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
         r = proxmox.get_freeze_state("expired-user-2")
         dict,status_code = r
         assert status_code == 200
         assert dict['freezeState'] == '2'
 
-def test_expired_account_freezed_3():
+def test_expired_account_freezed_3(monkeypatch):
     """Test case for account_state
 
     freeze state of 3
     """
+
+    def fake_adh6_check(username, headers):
+        return {}
+    def fake_adh6_search_user(username, headers):
+        return [0]
+
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
+        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
         r = proxmox.get_freeze_state("expired-user-3")
         dict,status_code = r
         assert status_code == 200
         assert dict['freezeState'] == '3'
 
-def test_expired_account_freezed_4():
+def test_expired_account_freezed_4(monkeypatch):
     """Test case for account_state
 
     freeze state of 4
     """
+
+    def fake_adh6_check(username, headers):
+        return {}
+    def fake_adh6_search_user(username, headers):
+        return [0]
+
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
+        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
         r = proxmox.get_freeze_state("expired-user-4")
         dict,status_code = r
         assert status_code == 200 
