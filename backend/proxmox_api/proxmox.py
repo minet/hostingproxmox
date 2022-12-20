@@ -1139,7 +1139,7 @@ def check_update_cotisation(username, createEntry=False):
                 else :
                     print(username, "cotisation up to date")
                     database.updateFreezeState(username, "0.0")
-                    return  {"freezeState": "0.0"}, 200
+                    return  {"freezeState": "0"}, 200
 
             
 
