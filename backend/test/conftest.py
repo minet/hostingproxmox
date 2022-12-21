@@ -4,6 +4,8 @@ import proxmox_api.db.db_functions as database
 import proxmox_api.db.db_models as model
 from flask_sqlalchemy import SQLAlchemy
 from proxmox_api import util
+import proxmox_api.config.configuration as configuration
+from proxmoxer import ProxmoxAPI
 
 
 #@pytest.fixture
@@ -12,7 +14,7 @@ from proxmox_api import util
 #
 #
 @pytest.fixture()
-def init_database():
+def init_user_database():
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
@@ -51,6 +53,27 @@ def init_database():
         # Drop the database table
         #model.User.query.delete()
         db.session.query(model.User).delete()
+        db.session.query(model.Vm).delete()
         db.session.commit()
 
 
+@pytest.fixture()
+def init_vm_database():
+    app = util.create_app()
+    db = SQLAlchemy()
+    db.init_app(app.app)
+    with app.app.app_context():
+        db.session.query(model.Vm).delete()
+
+
+@pytest.fixture()
+def proxmoxAPI():
+    assert configuration.PROXMOX_HOST != None 
+    assert configuration.PROXMOX_USER != None
+    assert configuration.PROXMOX_API_KEY_NAME != None
+    assert configuration.PROXMOX_API_KEY != None
+
+    return ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER
+                     , token_name=configuration.PROXMOX_API_KEY_NAME
+                     , token_value=configuration.PROXMOX_API_KEY, verify_ssl=False)
+    
