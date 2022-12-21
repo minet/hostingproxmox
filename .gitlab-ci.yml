@@ -26,6 +26,8 @@ test_backend:
     - pytest --cov=proxmox_api --junitxml=report.xml
   artifacts:
     when: always
+    paths:
+      - report.xml
     reports:
       junit: report.xml
 
