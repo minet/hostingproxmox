@@ -10,6 +10,7 @@ test_backend:
   before_script:
     - export http_proxy="http://192.168.102.61:82/"
     - export https_proxy="http://192.168.102.61:82/"
+    - export no_proxy="192.168.104.7"
     - apt update 
     - apt install sqlite3
     - export ENVIRONMENT='DEV'
@@ -22,7 +23,11 @@ test_backend:
     - pip3 install -r requirements.txt
     - pip3 install -r test-requirements.txt
   script :
-    - pytest --cov=proxmox_api
+    - pytest --cov=proxmox_api --junitxml=report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
 
 install_dependencies_angular:
   stage: dependencies
