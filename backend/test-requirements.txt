@@ -6,3 +6,4 @@ randomize>=0.13
 pytest
 pytest-mock
 pytest-cov
+pytest-dependency
