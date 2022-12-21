@@ -654,16 +654,22 @@ def is_vmid_available_cluster(vmid): # Checks if a vmid is available on the clus
 
 
 def get_node_from_vm(vmid):
+    node = ""
     if vmid:
         for vm in proxmox.cluster.resources.get(type="vm"):
             if vm["vmid"] == vmid:
                 try:
-                    return vm['node']
+                    node = vm['node']
                 except Exception as e:
                     logging.error("Problem in get_node_from_vm(" + str(vmid) + ") when getting VM node: " + str(e))
                     return {"cpu": "error"}, 500
+        print("node = ", node)
+        if node == "":
+              return {"get_node": "Vm not found"}, 404 
+        else : 
+            return node
     else:
-        return {"get_node": "Vm not found"}, 404
+        return {"get_node": "Vmid incorrect"}, 404
 
 """
 If the vm is creating then we return its state if not : 
