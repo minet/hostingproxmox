@@ -27,9 +27,9 @@ test_backend:
   artifacts:
     when: always
     paths:
-      - report.xml
+      - backend/report.xml
     reports:
-      junit: report.xml
+      junit: backend/report.xml
 
 install_dependencies_angular:
   stage: dependencies
