@@ -1,12 +1,48 @@
 stages:
+  - lint
   - test
   - dependencies
   - build
   - deploy
 
+python_code_quality:
+  stage: lint
+  image: python:3.9
+  before_script:
+    - cd backend
+    - pip3 install pylint
+  script:
+    - pylint --fail-under=1 proxmox_api/*.py > code_quality.txt
+  artifacts:
+    paths:
+      - backend/code_quality.txt
+    expire_in: 2 days
+    when: always
+  allow_failure: true
+
+
+#angular_code_quality:
+#  stage: lint
+#  image: node
+#  before_script:
+#    - cd frontend
+#    - NG_CLI_ANALYTICS=ci
+#    - npm install -g @angular/cli
+#  script:
+#    - ng lint > code_quality.txt
+#  artifacts:
+#    paths:
+#      - frontend/code_quality.txt
+#    expire_in: 2 days
+#    when: always
+#  allow_failure: true
+
+
 test_backend:
   stage: test
   image: python:3.9
+  needs : 
+   - python_code_quality
   before_script:
     - export http_proxy="http://192.168.102.61:82/"
     - export https_proxy="http://192.168.102.61:82/"
@@ -26,14 +62,17 @@ test_backend:
     - pytest --cov=proxmox_api --junitxml=report.xml
   artifacts:
     when: always
+    paths:
+      - backend/report.xml
     reports:
-      junit: report.xml
+      junit: backend/report.xml
 
 install_dependencies_angular:
   stage: dependencies
   image: node
   needs : 
    - test_backend
+   #- angular_code_quality
   before_script:
     - npm config rm proxy
     - npm config rm https-proxy
@@ -47,46 +86,6 @@ install_dependencies_angular:
       - frontend/node_modules
     expire_in: 1 days
 
-#python_code_quality:
-#  stage: test
-#  image: python:3.7
-#  before_script:
-#    - cd backend/proxmox_api
-#    - pip3 install pylint
-#  script:
-#    - pylint *.py > ../code_quality.txt
-#  artifacts:
-#    paths:
-#      - backend/code_quality.txt
-#    expire_in: 2 days
-#    when: always
-#  allow_failure: true
-
-#python_code_test:
- # stage: test
-  #image: python:3.7
- # before_script:
-  #  - cd backend/proxmox_api/tests
-   # - pip3 install pytest
-  #script:
-   # - pytest
-
-#angular_code_quality:
-#  stage: test
-#  image: node
-#  before_script:
-#    - cd frontend
-#    - NG_CLI_ANALYTICS=ci
-#    - npm install -g @angular/cli
-#  script:
-#    - ls
-#    - ng lint > code_quality.txt
-#  artifacts:
-#    paths:
-#      - frontend/code_quality.txt
-#    expire_in: 2 days
-#    when: always
-#  allow_failure: true
 
 
 angular_build:
