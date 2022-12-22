@@ -21,6 +21,23 @@ python_code_quality:
   allow_failure: true
 
 
+#angular_code_quality:
+#  stage: lint
+#  image: node
+#  before_script:
+#    - cd frontend
+#    - NG_CLI_ANALYTICS=ci
+#    - npm install -g @angular/cli
+#  script:
+#    - ng lint > code_quality.txt
+#  artifacts:
+#    paths:
+#      - frontend/code_quality.txt
+#    expire_in: 2 days
+#    when: always
+#  allow_failure: true
+
+
 test_backend:
   stage: test
   image: python:3.9
@@ -55,6 +72,7 @@ install_dependencies_angular:
   image: node
   needs : 
    - test_backend
+   #- angular_code_quality
   before_script:
     - npm config rm proxy
     - npm config rm https-proxy
@@ -68,32 +86,6 @@ install_dependencies_angular:
       - frontend/node_modules
     expire_in: 1 days
 
-
-#python_code_test:
- # stage: test
-  #image: python:3.7
- # before_script:
-  #  - cd backend/proxmox_api/tests
-   # - pip3 install pytest
-  #script:
-   # - pytest
-
-#angular_code_quality:
-#  stage: test
-#  image: node
-#  before_script:
-#    - cd frontend
-#    - NG_CLI_ANALYTICS=ci
-#    - npm install -g @angular/cli
-#  script:
-#    - ls
-#    - ng lint > code_quality.txt
-#  artifacts:
-#    paths:
-#      - frontend/code_quality.txt
-#    expire_in: 2 days
-#    when: always
-#  allow_failure: true
 
 
 angular_build:
