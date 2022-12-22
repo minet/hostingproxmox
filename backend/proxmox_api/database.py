@@ -1,4 +1,4 @@
-from proxmox_api.db.db_models import *
+from proxmox_api.db.db_models import User,db
 
 
 def get_user_id(user_id):

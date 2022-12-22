@@ -2,38 +2,30 @@
 import connexion
 from flask_cors import CORS
 from flask_apscheduler import APScheduler
-
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
-
 from proxmox_api.db.db_models import db
 
 
 print("config = ",  config.ENV)
 if config.ENV == "DEV":
-        print("**************************************************")
-        print("**************************************************")
-        print("**************************************************")
-        print("************* ENTERING IN DEV MODE ***************")
-        print("********* NOT DESIGNED FOR PRODUCTION ************")
-        print("**************************************************")
-        print("**************************************************")
-        print("**************************************************\n\n")
+    print("**************************************************")
+    print("**************************************************")
+    print("**************************************************")
+    print("************* ENTERING IN DEV MODE ***************")
+    print("********* NOT DESIGNED FOR PRODUCTION ************")
+    print("**************************************************")
+    print("**************************************************")
+    print("**************************************************\n\n")
 
-app = connexion.App(__name__, specification_dir='./swagger/')
+
 
 def create_app():
-
     app = connexion.App(__name__, specification_dir='./swagger/')
-
     app.app.json_encoder = encoder.JSONEncoder
-
     app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
-
     CORS(app.app)
-
     scheduler = APScheduler()
-
     app.add_api('swagger.yaml', arguments={'title': 'Proxmox'}, pythonic_params=True)
     return app, scheduler
 
@@ -48,7 +40,7 @@ def conf_jobs(app):
 
 
 ## init db
-app, scheduler = create_app() 
+app, scheduler = create_app()
 
 #JOBS = [
 #        {
