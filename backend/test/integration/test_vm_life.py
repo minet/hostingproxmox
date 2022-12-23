@@ -29,12 +29,12 @@ def test_old_vm_deletion(init_vm_database):
         else :
             assert True
  # If previous test fail, we do not try to create a new one
- 
+
 @pytest.mark.dependency(name="creation", depends=["clean"])
 def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
-    """Test case for vm_creation. The vm configuration is also tested 
+    """Test case for vm_creation. The vm configuration is also tested
     """
-    
+
     def fake_next_available_vmid():
         return VMID
 
@@ -45,14 +45,14 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        # Mocking 
+        # Mocking
         monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
         monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)
 
 
 
         body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", "valid-user", password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
-        assert status == 201 
+        assert status == 201
         start_time = time.time()
         configuration_state = "creating"
         while time.time() - start_time <= 600 and   configuration_state == "creating": # timeout after 10min
@@ -98,6 +98,7 @@ def test_vm_deletion():
         node = proxmox.get_node_from_vm(VMID)
         isProxmoxDeleted = proxmox.delete_from_proxmox(VMID, node)
         isDbDeleted = proxmox.delete_from_db(VMID)
-        assert isProxmoxDeleted and isDbDeleted
+        assert isProxmoxDeleted
+        assert isDbDeleted
 
-          
+
