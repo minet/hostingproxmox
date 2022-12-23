@@ -10,6 +10,9 @@ python_code_quality:
   image: python:3.9
   before_script:
     - cd backend
+    - export PYTHONPATH=$(pwd)
+    - export http_proxy="http://192.168.102.61:82/"
+    - export https_proxy="http://192.168.102.61:82/"
     - pip3 install pylint
   script:
     - pylint --fail-under=1 proxmox_api/*.py > code_quality.txt
