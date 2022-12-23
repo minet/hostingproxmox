@@ -1,16 +1,16 @@
 import datetime
-
 import six
 import typing
 import re
 import json
-import proxmox_api.config.configuration as  config 
+import requests
+import connexion
 from flask_apscheduler import APScheduler
+from flask_cors import CORS
+import proxmox_api.config.configuration as  config 
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
-import connexion
-from flask_cors import CORS
-from flask_apscheduler import APScheduler
+
 
 def _deserialize(data, klass):
     """Deserializes dict, list, str into an object.
@@ -157,9 +157,9 @@ def _deserialize_dict(data, boxed_type):
     :rtype: bool
 """
 def check_password_strength(password:str) -> bool:
-    special = "[`!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~]";
-    upper = "[A-Z]";
-    number = "[0-9]";
+    special = "[`!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~]"
+    upper = "[A-Z]"
+    number = "[0-9]"
     # Return true if and only if there are at least 12 char, 1 spec char, 1 uppercase letter and 1 lowercase letter
     return len(password) >= 12 and re.search(special, password) is not  None  and re.search(upper, password) is not None and  re.search(number, password) is not None
 
@@ -197,7 +197,7 @@ def check_username(username:str) -> bool:
 """
 def check_dns_entry(entry:str) -> bool:
     forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"]
-    allowed = "^[a-zA-Z0-9]*$"; 
+    allowed = "^[a-zA-Z0-9]*$"
     return entry != "" and re.search(allowed, entry) and entry not in forbidden_entries
 
 
@@ -216,20 +216,20 @@ def get_vm_state(vmid) :
     with open(config.VM_CREATION_STATUS_JSON) as jsonFile:
         jsonObject = json.load(jsonFile)
         jsonFile.close()
-    try : 
+    try :
         vm = jsonObject[str(vmid)]
         print(vm)
-        if vm == None : 
-            return None 
+        if vm is None :
+            return None
         else: 
             status = vm["status"]
             if status == "error":
                 return (status, vm["httpErrorCode"], vm["errorMessage"])
-            elif status == "creating" or status == "created" or status == "deleting" or status == "deleted" : 
+            elif status == "creating" or status == "created" or status == "deleting" or status == "deleted" :
                 return (status, None, None)
-            else: 
+            else:
                 return ("error", 500, "Impossible to retrieve the status of the vm")
-    except : 
+    except :
         return None
 
 
@@ -253,22 +253,22 @@ def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
     with open(config.VM_CREATION_STATUS_JSON) as jsonFile:
         jsonObject = json.load(jsonFile)
         jsonFile.close()
-    
-    try : 
+
+    try :
         if deleteEntry :
             jsonObject.pop(str(vmid))
-        else : 
+        else :
            jsonObject[vmid] = {}
            if not errorCode: # not 0 = 1 = True
-                   jsonObject[vmid]["status"] = message
-           else: 
-               jsonObject[vmid]["status"] = "error"
-               jsonObject[vmid]["httpErrorCode"] = str(errorCode) 
-               jsonObject[vmid]["errorMessage"] = message
+                jsonObject[vmid]["status"] = message
+           else:
+                jsonObject[vmid]["status"] = "error"
+                jsonObject[vmid]["httpErrorCode"] = str(errorCode) 
+                jsonObject[vmid]["errorMessage"] = message
         with open(config.VM_CREATION_STATUS_JSON, "w") as outfile:
             json.dump(jsonObject, outfile)
-        return True 
-    except Exception as e: 
+        return True
+    except Exception as e:
         print("An error occured while updating the vm creation status dict : " , e)
         return False
 
@@ -284,7 +284,7 @@ def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
     :rtype: tuple
 """
 def generateNewFreezeState(freezeState) :# return the freeze state of the user based on the last notification date and departure date
-    if freezeState == None : 
+    if freezeState is None : 
         return (1,1)
     status, nbNotif = int(freezeState.split(".")[0]), int(freezeState.split(".")[1])
     if status == 0 :
@@ -304,5 +304,30 @@ def create_app():
     app.app.json_encoder = encoder.JSONEncoder
 
     app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
+    app.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     return app
+
+
+def check_cas_token(headers):
+    #if config.ENV == "DEV":
+    #    if headers["Fake-User"] == "admin":
+    #        return 200, {'sub': 'fake-admin', "attributes" : {"memberOf" : 'cn=cluster-hosting,ou=groups,dc=minet,dc=net'}}
+    #    else :
+    #        return 200, {'sub': headers["Fake-User"]}
+    #elif config.ENV == "PROD":
+    autorization = {"Authorization": headers["Authorization"]}
+    r = requests.get("https://cas.minet.net/oidc/profile", headers=autorization)
+    print("return =", r.json())
+    return r.status_code, r.json()
+    
+
+
+
+def check_adh6_membership(headers, userId):
+    response = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
+    return response.json()
+
+def adh6_search_user(username, headers):
+    response = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
+    return None if response is None else response.json()

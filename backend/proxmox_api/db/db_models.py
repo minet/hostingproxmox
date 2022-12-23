@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy import event
-
+from proxmox_api.config.configuration import ENV
 
 db = SQLAlchemy()
 
@@ -38,21 +38,24 @@ class History(db.Model):
     date = db.Column(db.TIMESTAMP,default=db.func.current_timestamp(),  nullable=False)
 
 
-
+if ENV != "DEV":
 ### Trigger for ip tracking
+    TRIGGER_CREATION =  """
+            CREATE TRIGGER history_insert_vm AFTER UPDATE ON vm
+            FOR EACH ROW BEGIN
+                IF OLD.ip != NEW.ip THEN
+                    INSERT INTO history (userId, vmId, ip, date) VALUES (NEW.userId, NEW.id, NEW.ip, NOW());
+                END IF;
+            END;
+            """
+else :
+    TRIGGER_CREATION = ""
 
 event.listen(
     Vm.__table__,
     "after_create",
     db.DDL(
-        """
-        CREATE TRIGGER history_insert_vm AFTER UPDATE ON vm
-        FOR EACH ROW BEGIN
-            IF OLD.ip != NEW.ip THEN
-                INSERT INTO history (userId, vmId, ip, date) VALUES (NEW.userId, NEW.id, NEW.ip, NOW());
-            END IF;
-        END;
-        """
+       TRIGGER_CREATION
     )
 )
 

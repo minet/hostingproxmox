@@ -11,6 +11,7 @@ def update_vm_ip(vmid, vmip):
 
     vm = Vm.query.filter_by(id=vmid).first()
     vm.ip = vmip
+    
     db.session.commit()
 
 

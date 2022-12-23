@@ -29,16 +29,16 @@ def create_dns(body=None):  # noqa: E501
     :rtype: None
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    status_code, cas = util.check_cas_token(headers)
 
-    if r.status_code != 200:
+    if status_code != 200:
         return {"error": "You seem to be not connected."}, 403
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     admin = False
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
                 
     if admin :
@@ -55,7 +55,7 @@ def create_dns(body=None):  # noqa: E501
     if freezeAccountState != 0 and not admin:
         return {"error": "Your cotisation has expired"}, 403
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
 
     if connexion.request.is_json:
         body = DnsItem.from_dict(connexion.request.get_json())  # noqa: E501
@@ -79,22 +79,22 @@ def create_vm(body=None):  # noqa: E501
     :rtype: None
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    status_code, cas = util.check_cas_token(headers)
 
-    if r.status_code != 200:
+    if status_code != 200:
         return {"error": "Your are not allowed to be here"}, 403
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
 
     admin = False
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
     if admin:
         freezeAccountState = 0
     else:    
-        user_id = slugify(r.json()['sub'].replace('_', '-'))
+        user_id = slugify(cas['sub'].replace('_', '-'))
         body,statusCode = proxmox.get_freeze_state(user_id)
         if statusCode != 200:
             return body, statusCode
@@ -134,18 +134,18 @@ def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error oc
         return {"status": "error not an integer"}, 500
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    status_code, cas = util.check_cas_token(headers)
 
-    if r.status_code != 200:
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin: 
         freezeAccountState = 0
     else: 
@@ -182,18 +182,18 @@ def delete_vm_id(vmid):  # noqa: E501
         return {"status": "error not an integer"}, 500
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    status_code, cas = util.check_cas_token(headers)
 
-    if r.status_code != 200:
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin: 
         freezeAccountState = 0
     else: 
@@ -208,7 +208,7 @@ def delete_vm_id(vmid):  # noqa: E501
     if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
         return {"status": "cotisation expired"}, 403
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     body,statusCode = proxmox.get_freeze_state(user_id)
     if statusCode != 200:
         return body, statusCode
@@ -271,9 +271,9 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
     node = proxmox.get_node_from_vm(vmid)
     if not node:
         return {"status": "vm not exists"}, 404
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 return proxmox.delete_vm(vmid, node)
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
         return proxmox.delete_vm(vmid, node)
@@ -287,22 +287,22 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
 # Reason : must be remplaced by the freeze state
 def is_cotisation_uptodate():
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-    if r.status_code != 200:
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
         return {"Error": "You are UNAUTHORIZED to connect to CAS"}, 403
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 return {"status": "function denied for admin"}, 403
 
-    id = r.json()['attributes']['id']
+    id = cas['attributes']['id']
 
     r = requests.get("https://adh6.minet.net/api/member/" + id, headers=headers)
 
-    if r.status_code != 200:
+    if status_code != 200:
         return {"Error": "You are UNAUTHORIZED to connect to adh6"}, 403
 
-    strdate = r.json()['departureDate']
+    strdate = cas['departureDate']
     date = datetime.strptime(strdate, '%Y-%m-%d')
     if date > datetime.today():
         return {"uptodate": 1}, 201;
@@ -319,17 +319,17 @@ def get_dns():  # noqa: E501
     :rtype: List[DnsEntryItem]
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    status_code, cas = util.check_cas_token(headers)
 
-    if r.status_code != 200:
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin: 
         freezeAccountState = 0
     else: 
@@ -346,9 +346,9 @@ def get_dns():  # noqa: E501
 
    
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 return proxmox.get_user_dns()
 
     return proxmox.get_user_dns(user_id)
@@ -362,16 +362,16 @@ def get_vm(search= ""):  # noqa: E501
     :rtype: List[VmIdItem]
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-    if r.status_code != 200:
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
         return {"status": "error"}, 403
     admin = False
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin: 
         freezeAccountState = 0
     else: 
@@ -388,9 +388,9 @@ def get_vm(search= ""):  # noqa: E501
 
     
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 return proxmox.get_vm(search=search)  # affichage de la liste sans condition
  
     return proxmox.get_vm(user_id=user_id)
@@ -410,9 +410,8 @@ def get_vm_id(vmid):  # noqa: E501
 
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-    
-    if r.status_code != 200:
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
     
     admin = False
@@ -422,12 +421,12 @@ def get_vm_id(vmid):  # noqa: E501
     except:
         return {"error": "The request contains errors"}, 400
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin: 
         freezeAccountState = 0
     else: 
@@ -568,18 +567,18 @@ def renew_ip():
     except:
         return {"error": "Bad vmid"}, 400
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    status_code, cas = util.check_cas_token(headers)
 
-    if r.status_code != 200:
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :
@@ -616,17 +615,17 @@ def delete_dns_id(dnsid):  # noqa: E501
         return {"status": "error not an integer"}, 500
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    status_code, cas = util.check_cas_token(headers)
 
-    if r.status_code != 200:
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin: 
         freezeAccountState = 0
     else: 
@@ -642,11 +641,11 @@ def delete_dns_id(dnsid):  # noqa: E501
     if freezeAccountState >= 3 and not admin: # For freeze state 1 or 2, the user can access to hosting
         return {"status": "cotisation expired"}, 403
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 return proxmox.del_user_dns(dnsid)
 
     if dnsid in map(int, proxmox.get_user_dns(user_id)[0]):
@@ -666,16 +665,16 @@ def get_dns_id(dnsid):  # noqa: E501
     :rtype: DnsItem
     """
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-    if r.status_code != 200:
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin: 
         freezeAccountState = 0
     else: 
@@ -690,7 +689,7 @@ def get_dns_id(dnsid):  # noqa: E501
     if freezeAccountState >= 3 and not admin: # For freeze state 1 or 2, the user can access to hosting
         return {"status": "cotisation expired"}, 403
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
 
     try:
         dnsid = int(dnsid)
@@ -699,9 +698,9 @@ def get_dns_id(dnsid):  # noqa: E501
 
     admin = False
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
     entry = dbfct.get_entry_host(dnsid)
@@ -736,18 +735,18 @@ def patch_vm(vmid, body=None):  # noqa: E501
         return {"status": "error not an integer"}, 500
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-    if r.status_code != 200:
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin: 
         freezeAccountState = 0
     else: 
@@ -762,7 +761,7 @@ def patch_vm(vmid, body=None):  # noqa: E501
     if freezeAccountState >= 3 and not admin: # For freeze state 1 or 2, the user can access to hosting
         return {"status": "cotisation expired"}, 403
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
 
     if vmid in map(int, proxmox.get_vm(user_id)[0]) or admin:
         node = proxmox.get_node_from_vm(vmid)
@@ -783,15 +782,15 @@ def patch_vm(vmid, body=None):  # noqa: E501
 
 def get_historyip(vmid):
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-    if r.status_code != 200:
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
     if admin == True:
@@ -801,15 +800,15 @@ def get_historyip(vmid):
 
 def get_historyipall():
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-    if r.status_code != 200:
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
 
     if admin == True:
@@ -822,16 +821,16 @@ def get_historyipall():
 
 def get_ip_list():
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
-    if r.status_code != 200:
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
         return {"status": "This is forbidden"}, 403
     admin = False
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :
@@ -846,7 +845,7 @@ def get_ip_list():
     if freezeAccountState >= 3: # if freeze state 1 or 2 the user can access to proxmox
         return {"status": "cotisation expired"}, 403
 
-    list = proxmox.get_user_ip_list(r.json()["id"])
+    list = proxmox.get_user_ip_list(cas["id"])
     if list == None:
         return {"status": "Impossible to retrieve the list of your ip addresses. Please make juste you have at least one."}, 500
     else : 
@@ -862,18 +861,18 @@ def update_credentials():
     except:
         return {"error": "Bad vmid"}, 400
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    status_code, cas = util.check_cas_token(headers)
 
-    if r.status_code != 200:
+    if status_code != 200:
         return {"status": "error"}, 403
 
     admin = False
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :
@@ -906,12 +905,12 @@ def update_credentials():
 
 def get_need_to_be_restored(vmid):
     headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    status_code, cas = util.check_cas_token(headers)
     
-    if r.status_code != 200:
+    if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     admin = False
 
     try:
@@ -919,9 +918,9 @@ def get_need_to_be_restored(vmid):
     except:
         return {"error": "The request contains errors"}, 400
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
     
     if admin :
@@ -954,22 +953,22 @@ def get_need_to_be_restored(vmid):
 
 
 def get_account_state(username):
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
-    r = requests.get("https://cas.minet.net/oidc/profile", headers=headers)
+    headers = connexion.request.headers
+    status_code, cas = util.check_cas_token(headers)
     
-    if r.status_code != 200:
+    print("cas", cas)
+    if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
-    user_id = slugify(r.json()['sub'].replace('_', '-'))
+    user_id = slugify(cas['sub'].replace('_', '-'))
     username = username.replace('_', '-')
     admin = False
+    print(user_id, username)
 
-    if "attributes" in r.json():
-        if "memberOf" in r.json()["attributes"]:
-            if is_admin(r.json()["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    print(user_id)
-    print(username)
     if not admin and user_id != username:
         return {"error": "You are not allowed to check this account"}, 403
     elif admin : 
