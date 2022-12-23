@@ -211,10 +211,7 @@ def delete_from_db(vmid) -> bool:
 """
 def delete_from_proxmox(vmid, node) -> bool :
     try:
-        if get_proxmox_vm_status(vmid, node)[0]['status'] == 'stopped':
-            print("vm is stopped")
-            proxmox.nodes(node).qemu(vmid).delete()
-        else:
+        if get_proxmox_vm_status(vmid, node)[0]['status'] != 'stopped':
             sync = False
             while not sync:  # Synchronisation
                 try:
@@ -231,20 +228,20 @@ def delete_from_proxmox(vmid, node) -> bool :
                 print("status",  get_proxmox_vm_status(vmid, node)[0]['status'])
                 sleep(1)
                 print("sleep")
-            proxmox.nodes(node).qemu(vmid).delete() # need to wait for the deletion but work
-            sync = False # we wait for the deletion to be done
-            counter = 0 # after 2 min of sync, we timeout
-            while not sync:
-                if counter >= 120 :
-                    print("Deleting the vm " , vmid, " timed out")
-                    return {"error": "Timeout while deleting the vm"}, 500
-                try:
-                    get_proxmox_vm_status(vmid, node)[0]['status']
-                    counter += 1
-                    sleep(1)
-                except ResourceException: # The VM cannot be retrieved : it is deleted
-                    sync = True
-            return True
+        proxmox.nodes(node).qemu(vmid).delete() # need to wait for the deletion but work
+        sync = False # we wait for the deletion to be done
+        counter = 0 # after 2 min of sync, we timeout
+        while not sync:
+            if counter >= 120 :
+                print("Deleting the vm " , vmid, " timed out")
+                return {"error": "Timeout while deleting the vm"}, 500
+            try:
+                get_proxmox_vm_status(vmid, node)[0]['status']
+                counter += 1
+                sleep(1)
+            except ResourceException: # The VM cannot be retrieved : it is deleted
+                sync = True
+        return True
     except Exception as e:
         print("Problem in delete_vm: " + str(e))
         logging.error("Problem in delete_vm: " + str(e))
