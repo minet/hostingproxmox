@@ -62,7 +62,8 @@ test_backend:
     - pip3 install -r requirements.txt
     - pip3 install -r test-requirements.txt
   script :
-    - pytest --cov=proxmox_api --junitxml=report.xml
+    - pytest --cov=proxmox_api --cov-report term-missing --cov-report xml:./coverage_out_report.xml --junitxml=report.xml
+  coverage: '/TOTAL.*\s+(\d+%)$/'
   artifacts:
     when: always
     paths:
