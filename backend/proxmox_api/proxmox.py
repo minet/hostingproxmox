@@ -301,8 +301,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
             check_update_cotisation(user_id)
             database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
         else:
-            limit = configuration.LIMIT_BY_USER
-            if len(database.get_vm_list(user_id)) < limit and len(database.get_vm_list()) < limit:
+            if len(database.get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(database.get_vm_list()) < configuration.TOTAL_VM_LIMIT:
                 database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
                 database.add_ip_to_history(ip, next_vmid, user_id)
             else:
