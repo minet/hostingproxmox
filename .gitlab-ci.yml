@@ -16,6 +16,7 @@ python_code_quality:
     - pip3 install pylint
   script:
     - pylint --fail-under=1 proxmox_api/*.py > code_quality.txt
+    - cat code_quality.txt
   artifacts:
     paths:
       - backend/code_quality.txt
