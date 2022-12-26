@@ -45,10 +45,10 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database,
         monkeypatch.setattr(proxmox, 'config_vm', fake_vm_config)
         monkeypatch.setattr(proxmox, 'check_update_cotisation', fake_check_update_cotisation)
 
-        userId = "new-user"
+        userId = "new-user6"
         body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", userId, password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
         assert status == 201
-        userVms = db_functions.get_user_list(user_id=userId)
+        userVms = db_functions.get_vm_list(user_id=userId)
         assert len(userVms) == 1
 
 
