@@ -110,17 +110,24 @@
               "devServerTarget": "hosting:serve:production"
             }
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
-
-    }},
-  "defaultProject": "hosting",
-  "cli": {
-    "analytics": false
-  },
     }
   },
+  "defaultProject": "hosting",
   "cli": {
-    "analytics": false
+    "analytics": false,
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
   }
 }

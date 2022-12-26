@@ -108,14 +108,6 @@ def create_vm(body=None):  # noqa: E501
 
     if connexion.request.is_json:
         body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
-
-    if not util.check_password_strength(body.password):
-        return {"error" : "Incorrect password format"}, 400
-    if not util.check_ssh_key(body.ssh_key):
-        return {"error" : "Incorrect ssh key format"}, 400
-    if not util.check_username(body.user):
-        return {"error" : "Incorrect vm user format"}, 400
-
     return proxmox.create_vm(body.name, body.type, user_id, body.password, body.user, body.ssh_key)
 
 def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error occured

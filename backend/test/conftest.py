@@ -64,6 +64,49 @@ def init_vm_database():
     db.init_app(app.app)
     with app.app.app_context():
         db.session.query(model.Vm).delete()
+        db.session.query(model.User).delete()
+        db.create_all()
+        # List of test users
+        test_users = [
+            {"id": "user-1", "freezeState": "0.0",  "lastNotificationDate": None},
+            {"id": "user-2", "freezeState": "0.0",  "lastNotificationDate": None},
+        ]
+        # List of test VM
+        test_vms = [
+            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
+            {"id" : 2, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
+            {"id" : 3, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
+            {"id" : 4, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
+            {"id" : 5, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False}
+        ]
+
+
+        # Convert the list of dictionaries to a list of User    objects
+        def create_user_model(user):
+            return model.User(**user)
+        def create_vm_model(vms):
+            return model.Vm(**vms)
+        
+        # Create a list of objects
+        mapped_users = map(create_user_model, test_users)
+        t_users = list(mapped_users)
+        mapped_vms = map(create_vm_model, test_vms)
+        t_vms = list(mapped_vms)
+
+        db.session.add_all(t_users)
+        db.session.add_all(t_vms)
+
+        # Commit the changes for the users
+        db.session.commit()
+
+        yield db  # this is where the testing happens!
+        db.session.remove()  # looks like db.session.close() would  work as well
+        # Drop the database table
+        #model.User.query.delete()
+        db.session.query(model.User).delete()
+        db.session.query(model.Vm).delete()
+        db.session.commit()
+
 
 
 @pytest.fixture()
