@@ -275,7 +275,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 
    
     if node[1] != 201:
-        return node
+        return {"error": "Impossible to find an available server"}, 500
     else:
         node = node[0]["server"]
 
