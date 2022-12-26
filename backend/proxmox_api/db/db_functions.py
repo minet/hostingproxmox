@@ -35,10 +35,8 @@ def get_user_list(user_id=None, searchItem = None): # filter is for the user nam
         return User.query.filter_by(id=user_id).first()
     elif searchItem is not None:
         search = "%{}%".format(searchItem)
-        print("db search : ", search)
         start = time.time()
         filtered = User.query.filter(User.id.like(search)).all()
-        print("db search time : ", time.time() - start)
         return filtered
         
     else : 
