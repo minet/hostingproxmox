@@ -15,6 +15,8 @@ from proxmoxer import ProxmoxAPI
 #
 @pytest.fixture()
 def init_user_database():
+    if configuration.ENV != "DEV":
+        raise Exception("You must set the environnement to DEV to run the tests")
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
@@ -25,6 +27,8 @@ def init_user_database():
         db.create_all()
         # List of test users
         test_users = [
+            {"id": "user-1", "freezeState": "0.0",  "lastNotificationDate": None},
+            {"id": "user-2", "freezeState": "0.0",  "lastNotificationDate": None},
             {"id": "valid-user", "freezeState": "0.0",  "lastNotificationDate": None},
              {"id": "expired-user-1", "freezeState": "1.0",    "lastNotificationDate": None},
             {"id": "expired-user-2", "freezeState": "2.0",    "lastNotificationDate": None},
@@ -59,18 +63,18 @@ def init_user_database():
 
 @pytest.fixture()
 def init_vm_database():
+    if configuration.ENV != "DEV":
+        raise Exception("You must set the environnement to DEV to run the tests")
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        db.session.query(model.Vm).delete()
-        db.session.query(model.User).delete()
+        try:
+            db.session.query(model.Vm).delete()
+        except:
+            print("No VM to delete")
         db.create_all()
-        # List of test users
-        test_users = [
-            {"id": "user-1", "freezeState": "0.0",  "lastNotificationDate": None},
-            {"id": "user-2", "freezeState": "0.0",  "lastNotificationDate": None},
-        ]
+
         # List of test VM
         test_vms = [
             {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
@@ -88,12 +92,9 @@ def init_vm_database():
             return model.Vm(**vms)
         
         # Create a list of objects
-        mapped_users = map(create_user_model, test_users)
-        t_users = list(mapped_users)
         mapped_vms = map(create_vm_model, test_vms)
         t_vms = list(mapped_vms)
 
-        db.session.add_all(t_users)
         db.session.add_all(t_vms)
 
         # Commit the changes for the users
