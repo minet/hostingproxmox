@@ -263,43 +263,10 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
     node = proxmox.get_node_from_vm(vmid)
     if not node:
         return {"status": "vm not exists"}, 404
-    if "attributes" in cas:
-        if "memberOf" in cas["attributes"]:
-            if is_admin(cas["attributes"]["memberOf"]):
-                return proxmox.delete_vm(vmid, node)
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
         return proxmox.delete_vm(vmid, node)
     else:
         return {"status": "error"}, 500
-
-
-################
-## DEPRECATED ##
-################
-# Reason : must be remplaced by the freeze state
-def is_cotisation_uptodate():
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
-    status_code, cas = util.check_cas_token(headers)
-    if status_code != 200:
-        return {"Error": "You are UNAUTHORIZED to connect to CAS"}, 403
-    if "attributes" in cas:
-        if "memberOf" in cas["attributes"]:
-            if is_admin(cas["attributes"]["memberOf"]):
-                return {"status": "function denied for admin"}, 403
-
-    id = cas['attributes']['id']
-
-    r = requests.get("https://adh6.minet.net/api/member/" + id, headers=headers)
-
-    if status_code != 200:
-        return {"Error": "You are UNAUTHORIZED to connect to adh6"}, 403
-
-    strdate = cas['departureDate']
-    date = datetime.strptime(strdate, '%Y-%m-%d')
-    if date > datetime.today():
-        return {"uptodate": 1}, 201;
-    else:
-        return {"uptodate": 0}, 201;
 
 
 def get_dns():  # noqa: E501

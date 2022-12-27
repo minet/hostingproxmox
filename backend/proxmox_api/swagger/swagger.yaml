@@ -338,19 +338,6 @@ paths:
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
-      
-  /cotisation:
-    get:
-      summary: check is the cotisation is up to date for a user
-      operationId: is_cotisation_uptodate
-      responses:
-        "201":
-          description: return 1 if okay, return 0 if not
-        "400":
-          description: "invalid input, object invalid, adherent not found"
-        "403":
-          description: "not enough permissions"
-      x-openapi-router-controller: proxmox_api.controllers.default_controller
   /historyall:
     get:
       summary: get the ip history of all the vm
