@@ -146,9 +146,7 @@
                                                required="required"
                                                ng-model="password" ng-change="check_password(vm)">
                                     </div>
-                                    <div *ngIf="passwordErrorMessage != ''" class="alert alert-danger" [innerHTML]="passwordErrorMessage">
-
-                                    </div>
+                                    
 
                                     <div class="form-group">
                                         <label for="confirmPassword">{{'home.createVm.form.confirmPassword' | translate}}</label>
@@ -161,6 +159,7 @@
                                     <div [hidden]="!rulesCheck || checkConfirmPassword(vm)" class="alert alert-danger">
                                         {{'home.confirmPassword.form.error' | translate}}
                                     </div>
+                                    <div *ngIf="passwordErrorMessage != ''" class="alert alert-success" [innerHTML]="passwordErrorMessage"></div>
 
                                     <div class="form-check mb-2 text-center m-3">
                                         <input (click)="rules_checked()" [checked]="rulesCheck" id="checkbox"
@@ -180,8 +179,13 @@
                         {{'home.createVm.loading' | translate}}
                         <p *ngIf="progress == 100">{{'home.createVm.success_1' | translate}} <a [routerLink]="['vms']">{{'home.createVm.success_2' | translate}}</a></p>
                     </div>
-
-                    
+                    <div *ngIf="loading">
+                        <div class="progress" >
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                 aria-valuemin="0" aria-valuemax="100" style="width: {{progress}}%"><strong class="text-light" >{{progress | number:'1.0-0'}}%</strong></div>
+                        </div>
+                        <p class="text-primary text-center font-weight-light font-italic">{{creation_state}}</p>
+                        </div>
                 </div>
             </div>
         </div>
