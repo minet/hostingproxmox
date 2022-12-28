@@ -43,6 +43,7 @@ export class HomeComponent implements OnInit {
   vmstate: string;
   interval;
   progress = 0;
+  creation_state = "";
   nb_error_resquest = 0; // Count the number of SUCCESSIVE error returned by a same request
   isVmCreated = false; // true doesn't mean the VM is started 
   confirmPassword = "";
@@ -83,7 +84,7 @@ export class HomeComponent implements OnInit {
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
-
+      this.progress_bar()
   }
 
   images = [
@@ -91,11 +92,36 @@ export class HomeComponent implements OnInit {
     //{name: "home.vm_type.web", id: 'nginx_vm'},
   ];
 
+  get_creation_state():string{
+    if (this.progress >= 90){
+      return this.utils.getTranslation("home.vm_creation_state.7");
+    }
+    if (this.progress >= 84){
+      return this.utils.getTranslation("home.vm_creation_state.6");;
+    }
+    if (this.progress >= 76){
+      return this.utils.getTranslation("home.vm_creation_state.5");;
+    }
+    if (this.progress >= 67){
+      return this.utils.getTranslation("home.vm_creation_state.4");;
+    }
+    if (this.progress >= 47){
+      return this.utils.getTranslation("home.vm_creation_state.3");;
+    }
+    if (this.progress >= 12){
+      return this.utils.getTranslation("home.vm_creation_state.2");;
+    }
+    if (this.progress >= 0){
+      return this.utils.getTranslation("home.vm_creation_state.1");;
+    }
+  }
+
 
   progress_bar(): void{
     this.interval = setInterval(() => {
+    this.creation_state = this.get_creation_state();
+    
       if (this.progress < 95) {
-        console.log(this.progress)
         const max = 5
         const min = 1
         this.progress = this.progress +  (Math.random() * (max - min) + min) / 18;
