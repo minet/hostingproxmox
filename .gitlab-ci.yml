@@ -31,7 +31,7 @@ angular_code_quality:
   before_script:
     - cd frontend
     - NG_CLI_ANALYTICS=ci
-    - npm install -g @angular/cli
+    - npm install
   script:
     - ng add @angular-eslint/schematics --skip-confirmation
     - ng lint --force > code_quality.txt
