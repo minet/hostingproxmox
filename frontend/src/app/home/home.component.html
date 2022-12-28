@@ -181,14 +181,12 @@
                         <p *ngIf="progress == 100">{{'home.createVm.success_1' | translate}} <a [routerLink]="['vms']">{{'home.createVm.success_2' | translate}}</a></p>
                     </div>
 
-                    <div class="progress" *ngIf="loading">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                             aria-valuemin="0" aria-valuemax="100" style="width: {{progress}}%"></div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
     </div>
+    
     <div *ngIf="user.admin" class="adminmenu">
         <p>{{'home.admin.description_1' | translate}}<br>
             {{'home.admin.description_2' | translate}}</p>
