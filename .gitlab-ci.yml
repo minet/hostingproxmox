@@ -31,8 +31,9 @@ angular_code_quality:
   before_script:
     - cd frontend
     - NG_CLI_ANALYTICS=ci
-    - npm install
+    - npm install -g @angular/cli
   script:
+    - ng add @angular-eslint/schematics
     - ng lint > code_quality.txt
   artifacts:
     paths:
