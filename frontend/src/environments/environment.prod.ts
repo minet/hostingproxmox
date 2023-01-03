@@ -1,8 +1,8 @@
 
 
 function getBackendURL(){
-  var url = window.location.hostname;
-  var backendURL = "https://backprox.minet.net";
+  const url = window.location.hostname;
+  let backendURL = "https://backprox.minet.net";
     
     switch(url){
       case "hosting-dev.minet.net" : {

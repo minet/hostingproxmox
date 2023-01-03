@@ -118,7 +118,7 @@ export class VmComponent implements OnInit, OnDestroy {
     delete_vm(): void {
         this.deletionStatus = "deleting";
         this.errorDescription = "";
-        var url = this.authService.SERVER_URL + '/vm/' + this.vmid;
+        let url = this.authService.SERVER_URL + '/vm/' + this.vmid;
         if(this.vm_has_error ){
             url = this.authService.SERVER_URL + '/vmWithError/' + this.vmid;
         }
@@ -294,7 +294,7 @@ export class VmComponent implements OnInit, OnDestroy {
         });
     }
 
-    displayError(errorcode): String {
+    displayError(errorcode): string {
         this.loading = false; // de toute manière on va pas charger pendant 106 ans
         switch(errorcode) {
             case 500:

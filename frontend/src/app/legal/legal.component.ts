@@ -7,12 +7,8 @@ import {CookieService} from "ngx-cookie-service";
   templateUrl: './legal.component.html',
   styleUrls: ['./legal.component.css']
 })
-export class LegalComponent implements OnInit {
+export class LegalComponent {
 
-  constructor(
-  ) { }
-
-  ngOnInit(): void {
-  }
+  
 
 }

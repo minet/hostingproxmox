@@ -79,7 +79,7 @@ export class UserService {
                 this.user.name = user.given_name;
                 this.user.admin = false;
                 this.oauthService.loadUserProfile().then(r => {
-                    if (!!r.attributes['memberOf']) {
+                    if (r.attributes['memberOf']) {
                         if (r.attributes['memberOf'].indexOf(this.authService.adminDn) > -1) {
                             this.user.admin = true;
                         }

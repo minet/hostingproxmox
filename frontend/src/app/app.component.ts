@@ -15,7 +15,7 @@ export class AppComponent implements OnInit{
 
 
   constructor(public userService: UserService, public router: Router, private titleService: Title, public cookie: CookieService) {
-    var url = window.location.hostname;
+    const url = window.location.hostname;
     this.title = "Hosting";
     
     switch(url){
