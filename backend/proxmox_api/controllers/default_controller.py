@@ -203,19 +203,6 @@ def delete_vm_id(vmid):  # noqa: E501
    
     if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
         return {"status": "cotisation expired"}, 403
-
-    user_id = slugify(cas['sub'].replace('_', '-'))
-    body,statusCode = proxmox.get_freeze_state(user_id)
-    if statusCode != 200:
-        return body, statusCode
-    try:
-        freezeAccountState = int(body["freezeState"])
-    except Exception as e:
-        return {"error": "error while getting freeze state"}, 500
-   
-    if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
-        return {"status": "cotisation expired"}, 403
-
     
     node = proxmox.get_node_from_vm(vmid)
     if not node : #doesn't exist
@@ -698,7 +685,6 @@ def patch_vm(vmid, body=None):  # noqa: E501
     """
     if connexion.request.is_json:
         requetsBody = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
-
     try:
         vmid = int(vmid)
     except:
@@ -735,7 +721,7 @@ def patch_vm(vmid, body=None):  # noqa: E501
 
     user_id = slugify(cas['sub'].replace('_', '-'))
 
-    if vmid in map(int, proxmox.get_vm(user_id)[0]) or admin:
+    if admin or dbfct.get_vm_userid(vmid) == user_id : # if not admin, we check if the user is the owner of the vm
         node = proxmox.get_node_from_vm(vmid)
         if not node:
             return {"status": "vm not exists"}, 404
@@ -938,14 +924,14 @@ def get_account_state(username):
     user_id = slugify(cas['sub'].replace('_', '-'))
     username = username.replace('_', '-')
     admin = False
-    print(user_id, username)
 
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    if not admin and user_id != username:
+    if admin and user_id == username: 
+        return {"freezeState" : "0"}, 200 # we fake it
+    elif admin or user_id == username:
+        return proxmox.get_freeze_state(username)
+    else :
         return {"error": "You are not allowed to check this account"}, 403
-    elif admin : 
-        return {"freezeState" : "0"}, 200
-    return proxmox.get_freeze_state(username)
