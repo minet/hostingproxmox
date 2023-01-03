@@ -157,7 +157,7 @@ def _deserialize_dict(data, boxed_type):
     :rtype: bool
 """
 def check_password_strength(password:str) -> bool:
-    special = "[`!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~]"
+    special = "[`!@#$%^&*()_+-=[\]{};':\"\\|,.<>/?~]"
     upper = "[A-Z]"
     number = "[0-9]"
     # Return true if and only if there are at least 12 char, 1 spec char, 1 uppercase letter and 1 lowercase letter
