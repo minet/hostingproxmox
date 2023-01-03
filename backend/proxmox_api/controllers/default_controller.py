@@ -85,7 +85,7 @@ def create_vm(body=None):  # noqa: E501
         return {"error": "Your are not allowed to be here"}, 403
 
     user_id = slugify(cas['sub'].replace('_', '-'))
-
+    
     admin = False
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
@@ -138,6 +138,8 @@ def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error oc
                 admin = True;
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -186,6 +188,8 @@ def delete_vm_id(vmid):  # noqa: E501
                 admin = True;
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -430,8 +434,9 @@ def get_vm_id(vmid):  # noqa: E501
 
 
     node = proxmox.get_node_from_vm(vmid)
-
-    if node == None and not admin: # exist in the db but not in proxmox. It's a error
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
+    elif node == None and not admin: # exist in the db but not in proxmox. It's a error
         return {"error": "VM not found in proxmox"}, 500
     elif node == None and  admin:
         return {'error' : "VM no found"} , 404
@@ -538,6 +543,8 @@ def renew_ip():
                 admin = True;
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :
@@ -585,6 +592,8 @@ def delete_dns_id(dnsid):  # noqa: E501
             if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_entry_userid(dnsid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -634,6 +643,8 @@ def get_dns_id(dnsid):  # noqa: E501
             if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_entry_userid(dnsid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -706,6 +717,8 @@ def patch_vm(vmid, body=None):  # noqa: E501
                 admin = True
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -832,6 +845,8 @@ def update_credentials():
                 admin = True;
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :
@@ -871,7 +886,7 @@ def get_need_to_be_restored(vmid):
 
     user_id = slugify(cas['sub'].replace('_', '-'))
     admin = False
-
+    
     try:
         vmid = int(vmid)
     except:
@@ -881,7 +896,8 @@ def get_need_to_be_restored(vmid):
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :

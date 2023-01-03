@@ -65,5 +65,5 @@ DNS_ENTRY_TTL = 14400
 MAIN_DNS_SERVER_IP = "192.168.104.28"
 
 
-
 VM_CREATION_STATUS_JSON = "proxmox_api/config/vm_creation_status.json" # json file of all vm creating and there status. If an error occur during the creation, the vm is deleted and the error code is kepts until the user get it. This is a informationnal dictionnary and cannot be trust at 100%.
+
