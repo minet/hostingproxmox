@@ -34,7 +34,8 @@ angular_code_quality:
     - npm install -g @angular/cli
   script:
     - ng add @angular-eslint/schematics --skip-confirmation
-    - ng lint > code_quality.txt
+    - ng lint --force > code_quality.txt
+    - cat code_quality.txt
   artifacts:
     paths:
       - frontend/code_quality.txt
