@@ -96,22 +96,22 @@ export class HomeComponent implements OnInit {
       return this.utils.getTranslation("home.vm_creation_state.7");
     }
     if (this.progress >= 84){
-      return this.utils.getTranslation("home.vm_creation_state.6");;
+      return this.utils.getTranslation("home.vm_creation_state.6");
     }
     if (this.progress >= 76){
-      return this.utils.getTranslation("home.vm_creation_state.5");;
+      return this.utils.getTranslation("home.vm_creation_state.5");
     }
     if (this.progress >= 67){
-      return this.utils.getTranslation("home.vm_creation_state.4");;
+      return this.utils.getTranslation("home.vm_creation_state.4");
     }
     if (this.progress >= 47){
-      return this.utils.getTranslation("home.vm_creation_state.3");;
+      return this.utils.getTranslation("home.vm_creation_state.3");
     }
     if (this.progress >= 12){
-      return this.utils.getTranslation("home.vm_creation_state.2");;
+      return this.utils.getTranslation("home.vm_creation_state.2");
     }
     if (this.progress >= 0){
-      return this.utils.getTranslation("home.vm_creation_state.1");;
+      return this.utils.getTranslation("home.vm_creation_state.1");
     }
   }
 
@@ -144,11 +144,11 @@ export class HomeComponent implements OnInit {
   
   // check if the password respect the CNIL specs It is check after the box check and after that, after each new char modification
   check_password(vm):boolean{
-    var special = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-    var upper = /[A-Z]/;
-    var number = /[0-9]/;
+    const special = /[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~]/;
+    const upper = /[A-Z]/;
+    const number = /[0-9]/;
     this.passwordErrorMessage = "";
-    var isOk = true;
+    let isOk = true;
 
     if (vm.password.length<=11){
       this.passwordErrorMessage += this.utils.getTranslation("home.password.length") + "<br>";
@@ -167,7 +167,7 @@ export class HomeComponent implements OnInit {
     
 
     if(!number.test(vm.password)){
-      this.passwordErrorMessage += this.utils.getTranslation("home.password.digit") + "<br>";;
+      this.passwordErrorMessage += this.utils.getTranslation("home.password.digit") + "<br>";
       isOk = false;
     }
 
@@ -181,7 +181,7 @@ export class HomeComponent implements OnInit {
 
   // check with a regex if the ssh key has a correct format. It is check after the box check and after that, after each new char modification
   checkSSHkey(vm: Vm):boolean{
-    var rule = /^[a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]*/
+    const rule = /^[a-zA-Z0-9[()[\].{\-}_+*""/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""/%$&#@=:?]*/
     return rule.test(vm.sshKey)
   }
 
@@ -225,8 +225,8 @@ export class HomeComponent implements OnInit {
         };
       this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).   subscribe(rep => {
         this.errorMessage = ""
-          var id = rep.body["vmId"]
-          var isStarted = false;
+          const id = rep.body["vmId"]
+          let isStarted = false;
 
 
           // The vm is creating we check if it is up and started

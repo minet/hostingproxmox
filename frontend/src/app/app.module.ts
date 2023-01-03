@@ -76,6 +76,4 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
 })
 export class AppModule {
 
-  constructor() {
-  }
 }

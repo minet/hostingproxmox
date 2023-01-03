@@ -7,11 +7,7 @@ import {CookieService} from "ngx-cookie-service";
   templateUrl: './ssh.component.html',
   styleUrls: ['./ssh.component.css']
 })
-export class SshComponent implements OnInit {
+export class SshComponent  {
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
 
 }
