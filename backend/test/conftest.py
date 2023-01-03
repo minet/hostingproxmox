@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from proxmox_api import util
 import proxmox_api.config.configuration as configuration
 from proxmoxer import ProxmoxAPI
-
+from proxmox_api.__main__ import app as flask_app
 
 #@pytest.fixture
 #def client():
@@ -17,10 +17,9 @@ from proxmoxer import ProxmoxAPI
 def init_user_database():
     if configuration.ENV != "DEV":
         raise Exception("You must set the environnement to DEV to run the tests")
-    app = util.create_app()
     db = SQLAlchemy()
-    db.init_app(app.app)
-    with app.app.app_context():
+    db.init_app(flask_app.app)
+    with flask_app.app.app_context():
         # Create the database and the database table
         #model.User.query.delete()
         db.session.query(model.User).delete()
@@ -65,10 +64,9 @@ def init_user_database():
 def init_vm_database():
     if configuration.ENV != "DEV":
         raise Exception("You must set the environnement to DEV to run the tests")
-    app = util.create_app()
     db = SQLAlchemy()
-    db.init_app(app.app)
-    with app.app.app_context():
+    db.init_app(flask_app.app)
+    with flask_app.app.app_context():
         try:
             db.session.query(model.Vm).delete()
         except:
@@ -120,4 +118,9 @@ def proxmoxAPI():
     return ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER
                      , token_name=configuration.PROXMOX_API_KEY_NAME
                      , token_value=configuration.PROXMOX_API_KEY, verify_ssl=False)
-    
+
+
+@pytest.fixture(scope='module')
+def client():
+    with flask_app.app.test_client() as c:
+        yield c
