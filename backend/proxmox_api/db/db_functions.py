@@ -42,7 +42,7 @@ def get_user_list(user_id=None, searchItem = None): # filter is for the user nam
     else : 
         return User.query.all()
 
-
+# Return all the VM of an user
 def get_vm_list(user_id=""): 
     if user_id != "":  # dans ce cas on affiche ce qui est lié à l'user
         if User.query.filter_by(id=user_id).first() is None:

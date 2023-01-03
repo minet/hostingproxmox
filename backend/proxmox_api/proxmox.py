@@ -459,6 +459,10 @@ def get_vm_ip(vmid, node):
         logging.error("Problem in get_vm_ip(" + str(vmid) + ") when getting VM infos: " + str(e))
         return {"error ": "Impossible to get info about your vm"}, 500
 
+######
+## DEPRECATED
+######
+
 def get_vm_hardware_address(vmid, node):
     # récupération de l'adresse mac de la nouvelle vm
     return proxmox.nodes(node).qemu(vmid).agent.get("network-get-interfaces")['result'][1]['hardware-address']  
