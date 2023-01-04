@@ -214,7 +214,7 @@ def check_dns_entry(entry:str) -> bool:
     :rtype:  Tuple[str, str, str]
 """
 def get_vm_state(vmid) :
-    with open(config.VM_CREATION_STATUS_JSON, mode='a+') as jsonFile:
+    with open(config.VM_CREATION_STATUS_JSON, mode='a') as jsonFile:
         jsonObject = json.load(jsonFile)
         jsonFile.close()
     try :
@@ -251,7 +251,7 @@ def get_vm_state(vmid) :
     :rtype: bool
 """
 def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
-    with open(config.VM_CREATION_STATUS_JSON, mode='a+') as jsonFile:
+    with open(config.VM_CREATION_STATUS_JSON, mode='a') as jsonFile:
         jsonObject = json.load(jsonFile)
         jsonFile.close()
 
@@ -266,7 +266,7 @@ def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
                 jsonObject[vmid]["status"] = "error"
                 jsonObject[vmid]["httpErrorCode"] = str(errorCode) 
                 jsonObject[vmid]["errorMessage"] = message
-        with open(config.VM_CREATION_STATUS_JSON, "w+") as outfile:
+        with open(config.VM_CREATION_STATUS_JSON, "w") as outfile:
             json.dump(jsonObject, outfile)
             outfile.close()
         return True
