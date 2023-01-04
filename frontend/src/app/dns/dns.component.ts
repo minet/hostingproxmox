@@ -159,16 +159,16 @@ export class DnsComponent implements OnInit, OnDestroy {
 
     // Check if the DNS entry is correct and respect minet rules
     // TO DO : make a manual validation
-    check_dns_entry(entry):Boolean{
-        let forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"];
-        let authorized_entry = /^[a-zA-Z0-9]*$/;
+    check_dns_entry(entry):boolean{
+        const forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"];
+        const authorized_entry = /^[a-zA-Z0-9]*$/;
         return authorized_entry.test(entry) && !(entry in forbidden_entries);
     }
 
     // Check if the ip is for hosting
     // TO DO : make a local check if the user owns the ip
-    check_dns_ip(ip):Boolean{
-        let authorized_ip = /^157\.159\.195\.([1-9][0-9]|1[0-9][0-9]|2[0-5][0-5])$/; // At least 157.159.40.xxx > 10 < 255. The backend then checks if the user own the ip
+    check_dns_ip(ip):boolean{
+        const authorized_ip = /^157\.159\.195\.([1-9][0-9]|1[0-9][0-9]|2[0-5][0-5])$/; // At least 157.159.40.xxx > 10 < 255. The backend then checks if the user own the ip
         return authorized_ip.test(ip.trim())
     }
 

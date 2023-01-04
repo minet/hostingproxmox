@@ -8,16 +8,13 @@ import {CookieService} from "ngx-cookie-service";
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.css']
 })
-export class FooterComponent implements OnInit {
+export class FooterComponent  {
   date: Date = new Date();
 
   constructor(
       public cookie: CookieService
   ) {
 
-  }
-
-  ngOnInit(): void {
   }
 
 

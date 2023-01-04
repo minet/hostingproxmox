@@ -90,98 +90,6 @@ def is_admin(memberOf):
     return configuration.ADMIN_DN in memberOf
 
 
-##########################
-####### DEPRECATED #######
-##########################
-
-"""delete a vm by id and node from proxmox and in the database
-
-    :param vmid: vmid to delete
-    :type vmid: string
-
-    :param node: node of the vmid to delete
-    :type node: string
-
-    :param dueToError: if the deletion is triggered (by the client or the server) after an error, the verification of the deletion isn't the same than a classic deletion.
-    :type dueToError: bool (False by default)
-
-    :param updateVMStatus: if set to true the VM status JSON file is updated during the deletion
-    :type updateVMStatus: bool (True by default)
-
-    :rtype: VmItem
-    """
-"""
-def delete_vm(vmid, node, dueToError = False, updateVMStatus=True):
-    # First we delete the vm from proxmox
-    print("deletion due to error : " + str(dueToError))
-    isProxmoxDeleted = True
-    isDatabaseDeleted = True
-    
-    if not updateVMStatus : # if not due to an error, then we return to the user the current state of the deletion
-        update_vm_state(vmid, "deleting")
-
-    if dueToError : # we wait for the vm to start in case if it was a problem during the creation
-        sleep(3)
-
-    # First we delete the vm from proxmox if exist
-    try:
-        if get_proxmox_vm_status(vmid, node)[0]['status'] == 'stopped':
-            print("vm is stopped")
-            proxmox.nodes(node).qemu(vmid).delete()
-        else:
-            sync = False
-            while not sync:  # Synchronisation
-                try:
-                    if "lock" not in get_proxmox_vm_status(vmid, node)[0]['status']:  # Si lockée, on attend
-                        sync = True
-                        sleep(1)
-                except ResourceException:  # Exception si pas encore synchronisés
-                    sleep(1)
-            stop_vm(vmid, node)
-            print("status",  get_proxmox_vm_status(vmid, node)[0]['status'])
-            while get_proxmox_vm_status(vmid, node)[0]['status'] != 'stopped' :  # Si lockée, on attend:
-                print("status",  get_proxmox_vm_status(vmid, node)[0]['status'])
-                sleep(1)
-                print("sleep")
-            
-            proxmox.nodes(node).qemu(vmid).delete() # need to wait for the deletion but work
-            sync = False # we wait for the deletion to be done
-            counter = 0 # after 2 min of sync, we timeout
-            while not sync:
-                if counter >= 120 :
-                    print("Deleting the vm " , vmid, " timed out")
-                    return {"error": "Timeout while deleting the vm"}, 500
-                try:
-                    get_proxmox_vm_status(vmid, node)[0]['status']
-                    counter += 1
-                    sleep(1)
-                except ResourceException: # The VM cannot be retrieved : it is deleted
-                    sync = True
-
-            print("isProxmoxDeleted: " + str(isProxmoxDeleted))
-    except Exception as e:
-        print("Problem in delete_vm: " + str(e))
-        logging.error("Problem in delete_vm: " + str(e))
-        isProxmoxDeleted = False 
-
-    # Then we delete friom the database
-    
-    if updateVMStatus :
-        if (isDatabaseDeleted and isProxmoxDeleted and not dueToError) or ((isDatabaseDeleted or isProxmoxDeleted) and dueToError) : # In case of error, if at least one vm is deleted then its ok (in case of an error during the creation for example, or both if the vm il fully created)
-            print("vm deleted")
-            update_vm_state(vmid, node, "deleted", deleteEntry=True)
-        else : # an error occured 
-            print("vm not deleted : ", "An unkonwn error occured while deleting your vm(vmid ="+str(vmid) +"). Please ask an admin to verify the deletion state for your vm id")
-            update_vm_state(vmid,"An unkonwn error occured while deleting your vm(vmid ="+str(vmid) +"). Please ask an admin to verify the deletion state for your vm id", errorCode=500)
-    else : # the vm status should not be updated
-        if (isDatabaseDeleted and isProxmoxDeleted and not dueToError) or ((isDatabaseDeleted or isProxmoxDeleted) and dueToError) : 
-            return {"state": "vm deleted"}, 201
-        else : 
-            return {"error": "VM not found. Impossible to delete it"}, 404
-"""
-####### DEPRECATED #######
-##########################
-
 """delete a vm by id in the database
 :param vmid: vmid to delete
 :type vmid: string
@@ -551,29 +459,15 @@ def get_vm_ip(vmid, node):
         logging.error("Problem in get_vm_ip(" + str(vmid) + ") when getting VM infos: " + str(e))
         return {"error ": "Impossible to get info about your vm"}, 500
 
+######
+## DEPRECATED
+######
+
 def get_vm_hardware_address(vmid, node):
     # récupération de l'adresse mac de la nouvelle vm
     return proxmox.nodes(node).qemu(vmid).agent.get("network-get-interfaces")['result'][1]['hardware-address']  
 
 
-
-
-##########################
-####### DEPRECATED #######
-##########################
-def get_vm_autoreboot(vmid, node): # renvoie si la VM est en mode reboot auto au démarrage du noeud
-    try:
-        if "onboot" in proxmox.nodes(node).qemu(vmid).config.get():
-            if proxmox.nodes(node).qemu(vmid).config.get()['onboot'] == 1:
-                autoreboot = 1
-            else:
-                autoreboot = 0
-        else:
-            autoreboot = 0
-        return {"autoreboot": autoreboot}, 201
-    except Exception as e:
-        logging.error("Problem in get_vm_name(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
-        return {"name": "error"}, 500
 
 
 
@@ -750,64 +644,6 @@ def get_vm_current_status(vmid, node):
 
 
 
-##########################
-####### DEPRECATED #######
-##########################
-def get_vm_cpu(vmid, node):
-    try:
-        cpu = proxmox.nodes(node).qemu(vmid).config.get()['sockets'] * \
-              proxmox.nodes(node).qemu(vmid).config.get()['cores']
-        return {"cpu": cpu}, 201
-    except Exception as e:
-        logging.error("Problem in get_vm_cpu(" + str(vmid) + ") when getting VM cpu: " + str(e))
-        return {"cpu": "error"}, 500
-
-
-##########################
-####### DEPRECATED #######
-##########################
-def get_vm_cpu_usage(vmid, node):
-    try:
-        cpu_usage = round(float(proxmox.nodes(node).qemu(vmid).status.current.get()['cpu'] * 100), 1)
-        return {"cpu_usage": cpu_usage}, 201
-    except Exception as e:
-        logging.error("Problem in get_vm_cpu_usage(" + str(vmid) + ") when getting VM cpu usage: " + str(e))
-        return {"cpu_usage": "error"}, 500
-
-
-##########################
-####### DEPRECATED #######
-##########################
-def get_vm_disk(vmid, node):
-    try:
-        disk = int(proxmox.nodes(node).qemu(vmid).config.get()['scsi0'].split('=')[-1].replace('G', ''))
-        return {"disk": disk}, 201
-    except Exception as e:
-        logging.error("Problem in get_vm_disk(" + str(vmid) + ") when getting VM disk size: " + str(e))
-        return {"disk": "error"}, 500
-
-##########################
-####### DEPRECATED #######
-##########################
-def get_vm_ram(vmid, node):
-    try:
-        ram = proxmox.nodes(node).qemu(vmid).config.get()['memory']
-        return {"ram": ram}, 201
-    except:
-        return {"ram": "error"}, 500
-
-
-##########################
-####### DEPRECATED #######
-##########################
-def get_vm_ram_usage(vmid, node):
-    try:
-        ram_usage = round(float(proxmox.nodes(node).qemu(vmid).status.current.get()['mem'] * 100/proxmox.nodes(node).qemu(vmid).status.current.get()['maxmem']), 1)
-        return {"ram_usage": ram_usage}, 201
-    except:
-        return {"ram_usage": "error"}, 500
-
-
 
 
 def get_proxmox_vm_status(vmid, node):
@@ -839,76 +675,6 @@ def get_proxmox_vm_status(vmid, node):
         logging.error("Problem in get_proxmox_vm_status(" + str(vmid) + ") when getting VM status: " + str(e))
         return {"status": "error"}, 500
 
-
-##########################
-####### DEPRECATED #######
-##########################
-def get_vm_uptime(vmid, node):
-    try:
-        uptime = proxmox.nodes(node).qemu(vmid).status.current.get()["uptime"]
-        return {"uptime": uptime}, 201
-    except Exception as e:
-        logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
-        return {"error": "Impossible to retrieve uptime "}, 500
-
-
-
-##########################
-####### DEPRECATED #######
-##########################
-def update_vm_ips_job(app):    # Job (schedules each 10s) to update all VMs' ip
-    #start = time.time()
-    #
-    # print("test")
-    with app.app_context():    # Needs application context
-        for j in proxmox.cluster.resources.get(type="vm"):
-            #print("j=", j)
-            vm = Vm.query.filter_by(id=j['vmid']).first()
-            if vm != None:
-                #print("vm =", vm)
-                node = j["node"]
-                #print("ip updating ...")
-                try:
-                    update_vm_ip_address(vm, node)
-                except Exception as e:
-                    break
-
-
-##########################
-####### DEPRECATED #######
-##########################
-# Update the VM ip address
-# The debug mode is optionnal and test if a ip was well updated
-def update_vm_ip_address(vm, node, debug=False):
-    #print("update vm ip", vm, node, debug)
-    if vm is not None and (vm.ip == "En attente" or vm.mac == "En attente"):
-        vm.mac = get_vm_hardware_address(vm.id, node)
-        network = IPv4Network('157.159.195.0/24')
-        reserved = {'157.159.195.1', '157.159.195.2', '157.159.195.3', '157.159.195.4', '157.159.195.5',
-                    '157.159.195.6', '157.159.195.7', '157.159.195.8', '157.159.195.9',
-                    '157.159.195.10'}
-        hosts_iterator = (host for host in network.hosts() if str(host) not in reserved)
-        for host in hosts_iterator:
-            if database.is_ip_available(host) == True:
-                vm.ip = host
-                if debug:
-                    print("DEBUG : attribution of " + host + "for vm" + vm.id )
-                break
-        if vm.ip == "En attente":
-            print("WARNING : THERE IS NO IP AVAILABLE")
-            return {"error": "No ip available"}, 500
-        for k in proxmox.nodes(node).qemu(vm.id).firewall.ipset("hosting").get():  # on vire d'abord toutes leip set
-            cidr = k['cidr']
-            proxmox.nodes(node).qemu(vm.id).firewall.ipset("hosting").delete(cidr)
-        proxmox.nodes(node).qemu(vm.id).firewall.ipset("hosting").create(cidr=vm.ip)  # on met l'ipset à jour
-        database.session.commit()
-        return {"status": "Success"}, 201
-    else : 
-        if vm is None :
-            if debug:
-                print("DEBUG : Error while updating a VM. vm = None. This error must be investigate and lead to unable a VM to get an ip address.")
-            return {"error": "Impossible to set the vm ip address"}, 500
-    return {"error": "Impossible to set the vm ip address (no info)"}, 500
 
 
 # Select the next available ip address and set up in the proxmox firewall

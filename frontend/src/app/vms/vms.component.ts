@@ -88,7 +88,7 @@ export class VmsComponent implements OnInit, OnDestroy {
         if(this.user.chartevalidated || this.user.admin) {
             this.loading = true;
             let vmList: Array<string>;
-            var url = this.authService.SERVER_URL + '/vm'
+            let url = this.authService.SERVER_URL + '/vm'
             if(this.searchFilter != ""){
                 url += '?search=' + this.searchFilter
             }
@@ -107,7 +107,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                     }
 
                     this.totalVm = vmList.length;
-                    var lastVmDisplayedOnPage = vmList.length
+                    let lastVmDisplayedOnPage = vmList.length
 
                     if (this.pageSize*this.page < vmList.length){
                         lastVmDisplayedOnPage = this.page*this.pageSize
@@ -136,7 +136,7 @@ export class VmsComponent implements OnInit, OnDestroy {
 
 
     async get_vm(id: number, last: boolean) {
-        let vm = this.user.vms[id]
+        const vm = this.user.vms[id]
         const vmid = vm.id;
         const newTimer = timer(0, 30000).pipe(
             mergeMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
@@ -185,7 +185,7 @@ export class VmsComponent implements OnInit, OnDestroy {
         if (!this.pagesAlreadyLoaded.includes(this.page)){
             this.loading = true;
             this.totalVm = this.user.vms.length;
-            var lastVmDisplayedOnPage = this.user.vms.length
+            let lastVmDisplayedOnPage = this.user.vms.length
             if (this.pageSize*this.page < this.user.vms.length){
                 lastVmDisplayedOnPage = this.page*this.pageSize
             } 

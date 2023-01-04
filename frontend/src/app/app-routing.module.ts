@@ -20,6 +20,7 @@ const routes: Routes = [
   {path: '**', redirectTo: ''},
 ];
 
+
 @NgModule({
   imports: [RouterModule.forRoot(routes, {relativeLinkResolution: 'legacy'})],
   exports: [RouterModule]

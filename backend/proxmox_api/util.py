@@ -157,7 +157,7 @@ def _deserialize_dict(data, boxed_type):
     :rtype: bool
 """
 def check_password_strength(password:str) -> bool:
-    special = "[`!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~]"
+    special = "[`!@#$%^&*()_+-=[\]{};':\"\\|,.<>/?~]"
     upper = "[A-Z]"
     number = "[0-9]"
     # Return true if and only if there are at least 12 char, 1 spec char, 1 uppercase letter and 1 lowercase letter
@@ -213,7 +213,7 @@ def check_dns_entry(entry:str) -> bool:
     :rtype:  Tuple[str, str, str]
 """
 def get_vm_state(vmid) :
-    with open(config.VM_CREATION_STATUS_JSON) as jsonFile:
+    with open(config.VM_CREATION_STATUS_JSON, mode='r') as jsonFile:
         jsonObject = json.load(jsonFile)
         jsonFile.close()
     try :
@@ -250,7 +250,7 @@ def get_vm_state(vmid) :
     :rtype: bool
 """
 def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
-    with open(config.VM_CREATION_STATUS_JSON) as jsonFile:
+    with open(config.VM_CREATION_STATUS_JSON, mode='r') as jsonFile:
         jsonObject = json.load(jsonFile)
         jsonFile.close()
 
@@ -267,6 +267,7 @@ def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
                 jsonObject[vmid]["errorMessage"] = message
         with open(config.VM_CREATION_STATUS_JSON, "w") as outfile:
             json.dump(jsonObject, outfile)
+            outfile.close()
         return True
     except Exception as e:
         print("An error occured while updating the vm creation status dict : " , e)

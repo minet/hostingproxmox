@@ -85,7 +85,7 @@ def create_vm(body=None):  # noqa: E501
         return {"error": "Your are not allowed to be here"}, 403
 
     user_id = slugify(cas['sub'].replace('_', '-'))
-
+    
     admin = False
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
@@ -138,6 +138,8 @@ def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error oc
                 admin = True;
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -186,6 +188,8 @@ def delete_vm_id(vmid):  # noqa: E501
                 admin = True;
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -199,19 +203,6 @@ def delete_vm_id(vmid):  # noqa: E501
    
     if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
         return {"status": "cotisation expired"}, 403
-
-    user_id = slugify(cas['sub'].replace('_', '-'))
-    body,statusCode = proxmox.get_freeze_state(user_id)
-    if statusCode != 200:
-        return body, statusCode
-    try:
-        freezeAccountState = int(body["freezeState"])
-    except Exception as e:
-        return {"error": "error while getting freeze state"}, 500
-   
-    if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
-        return {"status": "cotisation expired"}, 403
-
     
     node = proxmox.get_node_from_vm(vmid)
     if not node : #doesn't exist
@@ -263,43 +254,10 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
     node = proxmox.get_node_from_vm(vmid)
     if not node:
         return {"status": "vm not exists"}, 404
-    if "attributes" in cas:
-        if "memberOf" in cas["attributes"]:
-            if is_admin(cas["attributes"]["memberOf"]):
-                return proxmox.delete_vm(vmid, node)
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
         return proxmox.delete_vm(vmid, node)
     else:
         return {"status": "error"}, 500
-
-
-################
-## DEPRECATED ##
-################
-# Reason : must be remplaced by the freeze state
-def is_cotisation_uptodate():
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
-    status_code, cas = util.check_cas_token(headers)
-    if status_code != 200:
-        return {"Error": "You are UNAUTHORIZED to connect to CAS"}, 403
-    if "attributes" in cas:
-        if "memberOf" in cas["attributes"]:
-            if is_admin(cas["attributes"]["memberOf"]):
-                return {"status": "function denied for admin"}, 403
-
-    id = cas['attributes']['id']
-
-    r = requests.get("https://adh6.minet.net/api/member/" + id, headers=headers)
-
-    if status_code != 200:
-        return {"Error": "You are UNAUTHORIZED to connect to adh6"}, 403
-
-    strdate = cas['departureDate']
-    date = datetime.strptime(strdate, '%Y-%m-%d')
-    if date > datetime.today():
-        return {"uptodate": 1}, 201;
-    else:
-        return {"uptodate": 0}, 201;
 
 
 def get_dns():  # noqa: E501
@@ -463,8 +421,9 @@ def get_vm_id(vmid):  # noqa: E501
 
 
     node = proxmox.get_node_from_vm(vmid)
-
-    if node == None and not admin: # exist in the db but not in proxmox. It's a error
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
+    elif node == None and not admin: # exist in the db but not in proxmox. It's a error
         return {"error": "VM not found in proxmox"}, 500
     elif node == None and  admin:
         return {'error' : "VM no found"} , 404
@@ -571,6 +530,8 @@ def renew_ip():
                 admin = True;
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :
@@ -618,6 +579,8 @@ def delete_dns_id(dnsid):  # noqa: E501
             if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_entry_userid(dnsid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -667,6 +630,8 @@ def get_dns_id(dnsid):  # noqa: E501
             if is_admin(cas["attributes"]["memberOf"]):
                 admin = True;
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_entry_userid(dnsid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -720,7 +685,6 @@ def patch_vm(vmid, body=None):  # noqa: E501
     """
     if connexion.request.is_json:
         requetsBody = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
-
     try:
         vmid = int(vmid)
     except:
@@ -739,6 +703,8 @@ def patch_vm(vmid, body=None):  # noqa: E501
                 admin = True
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin: 
         freezeAccountState = 0
     else: 
@@ -755,7 +721,7 @@ def patch_vm(vmid, body=None):  # noqa: E501
 
     user_id = slugify(cas['sub'].replace('_', '-'))
 
-    if vmid in map(int, proxmox.get_vm(user_id)[0]) or admin:
+    if admin or dbfct.get_vm_userid(vmid) == user_id : # if not admin, we check if the user is the owner of the vm
         node = proxmox.get_node_from_vm(vmid)
         if not node:
             return {"status": "vm not exists"}, 404
@@ -865,6 +831,8 @@ def update_credentials():
                 admin = True;
 
     user_id = slugify(cas['sub'].replace('_', '-'))
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :
@@ -904,7 +872,7 @@ def get_need_to_be_restored(vmid):
 
     user_id = slugify(cas['sub'].replace('_', '-'))
     admin = False
-
+    
     try:
         vmid = int(vmid)
     except:
@@ -914,7 +882,8 @@ def get_need_to_be_restored(vmid):
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    
+    if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
+        return {'error' : "Forbidden"} , 403
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :
@@ -955,14 +924,14 @@ def get_account_state(username):
     user_id = slugify(cas['sub'].replace('_', '-'))
     username = username.replace('_', '-')
     admin = False
-    print(user_id, username)
 
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    if not admin and user_id != username:
+    if admin and user_id == username: 
+        return {"freezeState" : "0"}, 200 # we fake it
+    elif admin or user_id == username:
+        return proxmox.get_freeze_state(username)
+    else :
         return {"error": "You are not allowed to check this account"}, 403
-    elif admin : 
-        return {"freezeState" : "0"}, 200
-    return proxmox.get_freeze_state(username)

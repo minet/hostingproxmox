@@ -1,6 +1,6 @@
 <footer class="footer bg-dark text-white p-3 mt-5">
     <div class="text-center">
         <p class="m-0">{{'footer.powered' | translate}} <a href="https://minet.net">MiNET</a></p>
-        <p class="m-0"><a [routerLink]="[cookie.get('lang'), 'legal']">{{'footer.legal' | translate}}</a> | {{date.getFullYear()}}</p>
+        <p class="m-0"><a [routerLink]="'legal'">{{'footer.legal' | translate}}</a> | {{date.getFullYear()}}</p>
     </div>
 </footer>
