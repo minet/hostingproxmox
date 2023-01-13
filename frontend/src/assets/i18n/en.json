@@ -92,7 +92,7 @@
   "home.createVm.form.error.password": "todo ahahahah",
   "home.createVm.form.agree_1": "I agree with MiNET's and MiNET's Hosting service",
   "home.createVm.form.agree_2": "rules",
-  "home.createVm.form.submit": "Submit",
+  "home.createVm.form.submit": "Configure",
   "home.createVm.loading": "Your VM is being created, please wait. It can take few minutes.",
   "home.createVm.success_1": "Your VM has been created, click",
   "home.createVm.success_2": "here",

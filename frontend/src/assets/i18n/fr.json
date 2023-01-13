@@ -92,7 +92,7 @@
   "home.createVm.form.error.password": "todo ahahahah",
   "home.createVm.form.agree_1": "J'approuve les règles d'utilisation du réseau MiNET et du service d'hébergement Hosting.",
   "home.createVm.form.agree_2": "Parcourir les règles",
-  "home.createVm.form.submit": "Créer",
+  "home.createVm.form.submit": "Configurer",
   "home.createVm.loading": "Votre VM est en cours de création, merci de patienter. Cela pourra prendre quelques minutes..",
   "home.createVm.success_1": "Votre VM a bien été créée,",
   "home.createVm.success_2": "cliquez-ici",
