@@ -47,6 +47,12 @@ export class HomeComponent implements OnInit {
   nb_error_resquest = 0; // Count the number of SUCCESSIVE error returned by a same request
   isVmCreated = false; // true doesn't mean the VM is started 
   confirmPassword = "";
+  show_configuration_form = false;
+   // Max number of storage available for user in total. The avaible ressources for a specific user are stored in User model
+  nb_storage_max = 30;
+  nb_cpu_max = 6;
+  nb_ram_max = 6;
+
 
  
 
@@ -84,6 +90,7 @@ export class HomeComponent implements OnInit {
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
+      console.log((this.nb_cpu_max - this.user.availableCPU)*100/this.nb_cpu_max)
   }
 
   images = [
@@ -196,6 +203,20 @@ export class HomeComponent implements OnInit {
     return vm.password == this.confirmPassword;
   }
 
+
+  //configuration form 
+  configurationForm(vm:Vm):void{
+    this.errorMessage = ""
+    this.errorcode = -1
+    this.progress = 0
+    // first of all check parameter : 
+    const isPasswordOk = this.check_password(this.vm)
+    if (isPasswordOk) {
+      
+      this.show_configuration_form = !this.show_configuration_form;
+    }
+  }
+
   /*
   Create a vm.
   The first step is to check if the password is strong enough. The other arg are check while typing and by the backend 
@@ -204,12 +225,7 @@ export class HomeComponent implements OnInit {
   After, we check every second if the vm is up and started. It means it is well configurated. Else we wait. If there is no vm anymore then a error occured
   */
   create_vm(vm: Vm): void {
-    this.errorMessage = ""
-    this.errorcode = -1
-    this.progress = 0
-    // first of all check parameter : 
-    const isPasswordOk = this.check_password(this.vm)
-    if (isPasswordOk) {
+   
        
       this.loading = true;
       this.progress_bar();
@@ -264,7 +280,6 @@ export class HomeComponent implements OnInit {
             this.errorMessage = error.error["error"];
             console.log(error)
         });
-      }
   }
 
 
