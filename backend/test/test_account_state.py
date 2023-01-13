@@ -60,7 +60,7 @@ def test_expired_account_freezed_1(monkeypatch, init_user_database):
     freeze state of 1
     """
     def fake_adh6_check(username, headers):
-        return {}
+        return {'username' : username}
     def fake_adh6_search_user(username, headers):
         return [0]
 
@@ -82,7 +82,7 @@ def test_expired_account_freezed_2(monkeypatch, init_user_database):
     """
 
     def fake_adh6_check(username, headers):
-        return {}
+        return {"username":username}
     def fake_adh6_search_user(username, headers):
         return [0]
 
@@ -104,7 +104,7 @@ def test_expired_account_freezed_3(monkeypatch, init_user_database):
     """
 
     def fake_adh6_check(username, headers):
-        return {}
+        return {'username' : username}
     def fake_adh6_search_user(username, headers):
         return [0]
 
@@ -126,7 +126,7 @@ def test_expired_account_freezed_4(monkeypatch,init_user_database):
     """
 
     def fake_adh6_check(username, headers):
-        return {}
+        return {'username' : username}
     def fake_adh6_search_user(username, headers):
         return [0]
 
@@ -149,7 +149,7 @@ def test_new_account_to_be_checked(monkeypatch, init_user_database):
     """
 
     def fake_adh6_check(username, headers):
-        return {'ip': "127.0.0.1", "departureDate" : "2199-01-01"}
+        return {'ip': "127.0.0.1", "departureDate" : "2199-01-01", 'username' : username}
     def fake_adh6_search_user(username, headers):
         return [0]
 
