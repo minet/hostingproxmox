@@ -324,8 +324,8 @@ def check_cas_token(headers):
     
 
 
-
-def check_adh6_membership(headers, userId):
+# heck_adh6_membership
+def get_adh6_account(headers, userId):
     response = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
     return response.json()
 
