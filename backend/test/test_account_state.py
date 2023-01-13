@@ -59,7 +59,8 @@ def test_expired_account_freezed_1(monkeypatch, init_user_database):
 
     freeze state of 1
     """
-    def fake_adh6_check(username, headers):
+    username = "expired-user-1"
+    def fake_adh6_check(headers, userId):
         return {'username' : username}
     def fake_adh6_search_user(username, headers):
         return [0]
@@ -70,7 +71,7 @@ def test_expired_account_freezed_1(monkeypatch, init_user_database):
     with app.app.app_context():
         monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
-        r = proxmox.get_freeze_state("expired-user-1")
+        r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200
         assert dict['freezeState'] == '1'
@@ -81,7 +82,8 @@ def test_expired_account_freezed_2(monkeypatch, init_user_database):
     freeze state of 2
     """
 
-    def fake_adh6_check(username, headers):
+    username = "expired-user-2"
+    def fake_adh6_check(headers, userId):
         return {"username":username}
     def fake_adh6_search_user(username, headers):
         return [0]
@@ -92,7 +94,7 @@ def test_expired_account_freezed_2(monkeypatch, init_user_database):
     with app.app.app_context():
         monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
-        r = proxmox.get_freeze_state("expired-user-2")
+        r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200
         assert dict['freezeState'] == '2'
@@ -103,7 +105,8 @@ def test_expired_account_freezed_3(monkeypatch, init_user_database):
     freeze state of 3
     """
 
-    def fake_adh6_check(username, headers):
+    username = "expired-user-3"
+    def fake_adh6_check(headers, userId):
         return {'username' : username}
     def fake_adh6_search_user(username, headers):
         return [0]
@@ -114,7 +117,7 @@ def test_expired_account_freezed_3(monkeypatch, init_user_database):
     with app.app.app_context():
         monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
-        r = proxmox.get_freeze_state("expired-user-3")
+        r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200
         assert dict['freezeState'] == '3'
@@ -125,7 +128,8 @@ def test_expired_account_freezed_4(monkeypatch,init_user_database):
     freeze state of 4
     """
 
-    def fake_adh6_check(username, headers):
+    username = "expired-user-4"
+    def fake_adh6_check(headers, userId):
         return {'username' : username}
     def fake_adh6_search_user(username, headers):
         return [0]
@@ -136,7 +140,7 @@ def test_expired_account_freezed_4(monkeypatch,init_user_database):
     with app.app.app_context():
         monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
-        r = proxmox.get_freeze_state("expired-user-4")
+        r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200 
         assert dict['freezeState'] == '4'
@@ -148,7 +152,8 @@ def test_new_account_to_be_checked(monkeypatch, init_user_database):
     Account that must be checked by adh6
     """
 
-    def fake_adh6_check(username, headers):
+    username = "new-user-to-be-checked"
+    def fake_adh6_check(headers, userId):
         return {'ip': "127.0.0.1", "departureDate" : "2199-01-01", 'username' : username}
     def fake_adh6_search_user(username, headers):
         return [0]
@@ -161,7 +166,7 @@ def test_new_account_to_be_checked(monkeypatch, init_user_database):
     with app.app.app_context():
         monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
-        r = proxmox.get_freeze_state("new-user-to-be-checked")
+        r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200
         assert dict['freezeState'] == '0'
