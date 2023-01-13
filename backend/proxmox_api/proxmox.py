@@ -826,8 +826,6 @@ def check_update_cotisation(username, createEntry=False):
     #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
     userInfoJson = util.adh6_search_user(username, headers)
     print(userInfoJson)
-    if (len(userInfoJson) > 1 ):
-        return {"error": "Impossible to retrieve the user info"}, 404
     if userInfoJson is None or userInfoJson  == []: # not found
         if "-" in username:
             print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
@@ -844,16 +842,23 @@ def check_update_cotisation(username, createEntry=False):
             print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
             return {"error" : "the user " + username + " failed to be retrieved"}, 404
     else : 
+        userId = None
+        for id in userInfoJson:
+            account = util.get_adh6_account(headers, userId)
+            if account["username"] == username:
+                userId = id
+                break
+
+        if (userId is None ):
+            return {"error": "Impossible to retrieve the user info"}, 404
         username = username.replace("_", "-") # hosting replace by default _ and .  with -.
-        userId = userInfoJson[0] 
-        membership_dict = util.check_adh6_membership(headers, userId)
-        print(membership_dict)
+        print("Adh6 account", account)
         today =  date.today()
-        if "ip" not in membership_dict: # Cotisation expired
+        if "ip" not in account: # Cotisation expired
             #print(username , "cotisation expired", membership.json())
             print(username , "cotisation expired (no ip)")
             
-            #return expiredCotisation(username, userEmail) #, datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date())
+            #return expiredCotisation(username, userEmail) #, datetime.strptime(account["departureDate"], "%Y-%m-%d").date())
             
             status = database.getFreezeState(username)
             if status is None:
@@ -864,7 +869,7 @@ def check_update_cotisation(username, createEntry=False):
         else :  # we check anyway if the departure date is in the future
             #print(membership.json()["ip"])
             #print(membership.json()["departureDate"], end='\n\n')
-            departureDate = datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date()
+            departureDate = datetime.strptime(account["departureDate"], "%Y-%m-%d").date()
             if departureDate < today: # Cotisation expired:
                 print(username , "cotisation expired (departure date)")
                 status = database.getFreezeState(username)

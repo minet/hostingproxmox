@@ -68,7 +68,7 @@ def test_expired_account_freezed_1(monkeypatch, init_user_database):
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
         r = proxmox.get_freeze_state("expired-user-1")
         dict,status_code = r
@@ -90,7 +90,7 @@ def test_expired_account_freezed_2(monkeypatch, init_user_database):
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
         r = proxmox.get_freeze_state("expired-user-2")
         dict,status_code = r
@@ -112,7 +112,7 @@ def test_expired_account_freezed_3(monkeypatch, init_user_database):
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
         r = proxmox.get_freeze_state("expired-user-3")
         dict,status_code = r
@@ -134,7 +134,7 @@ def test_expired_account_freezed_4(monkeypatch,init_user_database):
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
         r = proxmox.get_freeze_state("expired-user-4")
         dict,status_code = r
@@ -159,7 +159,7 @@ def test_new_account_to_be_checked(monkeypatch, init_user_database):
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'check_adh6_membership', fake_adh6_check)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
         monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
         r = proxmox.get_freeze_state("new-user-to-be-checked")
         dict,status_code = r
