@@ -311,7 +311,7 @@ def create_app():
 
 
 def check_cas_token(headers):
-    #if config.ENV == "DEV":
+    #if config.ENV == "TEST":
     #    if headers["Fake-User"] == "admin":
     #        return 200, {'sub': 'fake-admin', "attributes" : {"memberOf" : 'cn=cluster-hosting,ou=groups,dc=minet,dc=net'}}
     #    else :

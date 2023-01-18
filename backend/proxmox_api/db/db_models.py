@@ -38,7 +38,7 @@ class History(db.Model):
     date = db.Column(db.TIMESTAMP,default=db.func.current_timestamp(),  nullable=False)
 
 
-if ENV != "DEV":
+if ENV != "TEST":
 ### Trigger for ip tracking
     TRIGGER_CREATION =  """
             CREATE TRIGGER history_insert_vm AFTER UPDATE ON vm
