@@ -881,19 +881,7 @@ def check_update_cotisation(username, createEntry=False):
             else :
                 print(username, "cotisation up to date")
                 database.updateFreezeState(username, "0.0")
-                return  {"freezeState": "0"}, 200
-
-            
-
-            
-#####
-# For the jenkins script
-####
-
-
-    
-
-        
+                return  {"freezeState": "0"}, 200  
 
 
 def next_available_vmid():# determine the next available vmid from both db and proxmox
@@ -905,3 +893,22 @@ def next_available_vmid():# determine the next available vmid from both db and p
        
         is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
     return next_vmid_db
+
+
+    """_summary_ : This function is called by the job to stop expired vm when the account freeze state is 2.x or 3.1
+    """
+def stop_expired_vm(app):
+    print("Executing expired vm jobs ...")
+    with app.app_context():    # Needs application context
+        users = database.get_expired_users(minimumFreezeState=2)
+        
+        for user in users:
+            print("Checking vm for user : ", user)
+            userVms = database.get_vm_list(user_id=user)
+            for vmid in userVms:
+                node = get_node_from_vm(vmid)
+                status,_ = get_proxmox_vm_status(vmid, node)
+                if status["status"] == "running":
+                    print("Stopping vm", vmid , "which was running")
+                    stop_vm(vmid, node)
+            print("VMs stopped for user", user)
