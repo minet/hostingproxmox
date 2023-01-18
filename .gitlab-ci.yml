@@ -55,7 +55,7 @@ test_backend:
     - export no_proxy="192.168.104.7"
     - apt update 
     - apt install sqlite3
-    - export ENVIRONMENT='DEV'
+    - export ENVIRONMENT='TEST'
     - export KEYRING_DNS_SECRET=$KEYRING_DNS_SECRET
     - export PROXMOX_API_KEY_NAME=$PROXMOX_API_KEY_NAME
     - export PROXMOX_API_KEY=$PROXMOX_API_KEY
