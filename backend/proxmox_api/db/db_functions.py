@@ -217,4 +217,15 @@ def setNeedToBeRestored(vmid, needToBeRestored):
     vm.needToBeRestored = needToBeRestored
     db.session.commit()
 
+
+# Return expired users with a freezeState >= minimumFreezeState
+def get_expired_users(minimumFreezeState = 1):
+    list = []
+    for user in User.query.all():
+        if user.freezeState !=None:
+            state = user.freezeState.split(".")[0]
+            if int(state) >= minimumFreezeState:
+                list.append(user.id)
+    return list
+
 #######
