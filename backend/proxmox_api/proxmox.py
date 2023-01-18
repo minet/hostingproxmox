@@ -222,6 +222,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
             newid=next_vmid,
             target=node,
             full=1,
+            storage="tmp_replicated_2_times"
         )
 
 
@@ -493,7 +494,7 @@ def get_vm(user_id = 0, search=None):
             for user in user_filtered:
                 vm_filtered_list += database.get_vm_list(user_id = user.id)
             start = time.time()
-            vm_list = database.get_vm_list() # only id
+            vm_list = database.get_vm_list() # get all vm vut only id
             for vmid in vm_list:
                 node = get_node_from_vm(vmid)
                 if vmid not in vm_filtered_list :
