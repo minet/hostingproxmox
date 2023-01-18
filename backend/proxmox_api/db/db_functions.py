@@ -42,6 +42,11 @@ def get_user_list(user_id=None, searchItem = None): # filter is for the user nam
     else : 
         return User.query.all()
 
+def update_vm_userid(vmid, userid):
+    vm = Vm.query.filter_by(id=vmid).first()
+    vm.userId = userid
+    db.session.commit()
+
 # Return all the VM of an user
 def get_vm_list(user_id=""): 
     if user_id != "":  # dans ce cas on affiche ce qui est lié à l'user
