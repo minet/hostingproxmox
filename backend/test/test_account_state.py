@@ -60,17 +60,15 @@ def test_expired_account_freezed_1(monkeypatch, init_user_database):
     freeze state of 1
     """
     username = "expired-user-1"
-    def fake_adh6_check(headers, userId):
-        return {'username' : username}
-    def fake_adh6_search_user(username, headers):
-        return [0]
+    def fake_get_adh6_account(username):
+        return {'username' : username},200
+
 
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
-        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_get_adh6_account)
         r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200
@@ -83,17 +81,14 @@ def test_expired_account_freezed_2(monkeypatch, init_user_database):
     """
 
     username = "expired-user-2"
-    def fake_adh6_check(headers, userId):
-        return {"username":username}
-    def fake_adh6_search_user(username, headers):
-        return [0]
+    def fake_get_adh6_account(username):
+        return {"username":username},200
 
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
-        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_get_adh6_account)
         r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200
@@ -106,17 +101,15 @@ def test_expired_account_freezed_3(monkeypatch, init_user_database):
     """
 
     username = "expired-user-3"
-    def fake_adh6_check(headers, userId):
-        return {'username' : username}
-    def fake_adh6_search_user(username, headers):
-        return [0]
+    def fake_get_adh6_account(username):
+        return {'username' : username},200
 
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
-        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_get_adh6_account)
+
         r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200
@@ -129,17 +122,14 @@ def test_expired_account_freezed_4(monkeypatch,init_user_database):
     """
 
     username = "expired-user-4"
-    def fake_adh6_check(headers, userId):
-        return {'username' : username}
-    def fake_adh6_search_user(username, headers):
-        return [0]
+    def fake_get_adh6_account(username):
+        return {'username' : username}, 200
 
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
-        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_get_adh6_account)
         r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200 
@@ -153,10 +143,8 @@ def test_new_account_to_be_checked(monkeypatch, init_user_database):
     """
 
     username = "new-user-to-be-checked"
-    def fake_adh6_check(headers, userId):
-        return {'ip': "127.0.0.1", "departureDate" : "2199-01-01", 'username' : username}
-    def fake_adh6_search_user(username, headers):
-        return [0]
+    def fake_get_adh6_account(username):
+        return {'ip': "127.0.0.1", "departureDate" : "2199-01-01", 'username' : username}, 200
 
     
     
@@ -164,8 +152,7 @@ def test_new_account_to_be_checked(monkeypatch, init_user_database):
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        monkeypatch.setattr(util, 'get_adh6_account', fake_adh6_check)
-        monkeypatch.setattr(util, 'adh6_search_user', fake_adh6_search_user)
+        monkeypatch.setattr(util, 'get_adh6_account', fake_get_adh6_account)
         r = proxmox.get_freeze_state(username)
         dict,status_code = r
         assert status_code == 200
