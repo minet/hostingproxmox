@@ -42,7 +42,7 @@ export class VmComponent implements OnInit, OnDestroy {
     renew_vm_status = "";
     new_user_to_transfer="";
     transfering_ownership=false;
-    transfering_error_message="";
+    transfering_request_message="";
 
 
     constructor(
@@ -173,12 +173,12 @@ export class VmComponent implements OnInit, OnDestroy {
         };
         this.transfering_ownership = true;
         this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(rep => {
-            this.transfering_ownership = false;
-            this.transfering_error_message = "";
-            this.router.navigate(['#']);
+            this.transfering_request_message = "success";
+            setTimeout(() => {this.transfering_ownership = false;
+            this.transfering_request_message = ""}, 1000);
         }, error => {
             this.transfering_ownership = false;
-            this.transfering_error_message = error.error["error"];
+            this.transfering_request_message = error.error["error"];
         });
     }
 

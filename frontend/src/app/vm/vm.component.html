@@ -256,16 +256,19 @@ document.onload = loaded();
                           <input type="text" class="form-control" id="username" placeholder="Login adhérent" [(ngModel)]="this.new_user_to_transfer">
                         </div>
                         <div style="width:25%">
-                            <button type="submit" class="btn btn-primary mb-3" [disabled]="transfering_ownership">  
+                            <button type="submit" class="btn mb-3" [disabled]="transfering_ownership" [ngClass]="{
+                              'btn-success': transfering_request_message == 'success',
+                              'btn-primary': transfering_request_message != 'success'
+                                }">  
                               <span [hidden]="!transfering_ownership"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading ...</span>
                               <span [hidden]="transfering_ownership">Transférer la propriété</span></button>
                         </div>
                     </div>     
                   </div>
                 </form>
-                <div class="alert alert-danger" role="alert" *ngIf="!transfering_ownership && transfering_error_message != ''">
+                <div class="alert alert-danger" role="alert" *ngIf="!transfering_ownership && transfering_request_message != '' && transfering_request_message != 'success'">
                   <div>
-                    {{transfering_error_message}}
+                    {{transfering_request_message}}
                   </div>
                 </div>        
               </div>
@@ -327,7 +330,4 @@ document.onload = loaded();
     <b>{{'vm.charter.notsigned_1' | translate}}</b>
     <p>{{'vm.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'vm.charter.notsigned_3' | translate}}</a> {{'vm.charter.notsigned_4' | translate}}</p>
 </div>
-
-
-
 
