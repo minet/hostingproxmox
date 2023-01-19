@@ -246,9 +246,9 @@ document.onload = loaded();
       <div class="col-12">
           <div class="card">
               <div class="card-body">
-                <form class="row g-3" (ngSubmit)="transfer_vm_ownership()">
+                <form (ngSubmit)="transfer_vm_ownership()">
                   <div>
-                    <div>
+                    <div class="d-flex justify-content-center">
                       <span><strong>Compte actuel :</strong> {{user.vms[0].user}}</span><br>
                     </div>     
                     <div class="d-flex justify-content-center" style="margin-top:20px">
