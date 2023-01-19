@@ -911,6 +911,8 @@ def transfer_ownership(vmid, node, newowner):
         if len(userVms) >= 3:
             return {"error": "User already has 3 VMs"}, 400
     database.update_vm_userid(vmid, userid)
+    ip  = database.get_vm_ip(vmid)
+    database.add_ip_to_history(ip, vmid, userid)
     return {"status": "ok"}, 201
 
     
