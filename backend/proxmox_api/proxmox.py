@@ -398,7 +398,9 @@ def reboot_vm(vmid, node):
         return {"status": "An error occur while rebooting the vm"}, 500
 
 def renew_ip(vmid):
-    node = get_node_from_vm(vmid)
+    node, status = get_node_from_vm(vmid)
+    if status != 200:
+        return node, status
     try:
         ip = database.get_vm_ip(vmid)
         proxmox.nodes(node).qemu(vmid).config.post(
@@ -412,7 +414,9 @@ def renew_ip(vmid):
         return {"status": "error updating your ip address."}, 500
 
 def update_vm_credentials(vmid,username, password, sshKey):
-    node = get_node_from_vm(vmid)
+    node,status = get_node_from_vm(vmid)
+    if status != 200:
+        return node, status
     try :
         ip = database.get_vm_ip(vmid)
         proxmox.nodes(node).qemu(vmid).config.post(
@@ -496,7 +500,10 @@ def get_vm(user_id = 0, search=None):
             start = time.time()
             vm_list = database.get_vm_list() # get all vm vut only id
             for vmid in vm_list:
-                node = get_node_from_vm(vmid)
+                node, status = get_node_from_vm(vmid)
+                if status == 200:
+                    if status != 200:
+                        return node, status
                 if vmid not in vm_filtered_list :
                     infos,_ = get_vm_name(vmid, node)
                     name = infos["name"]
@@ -538,7 +545,7 @@ def get_node_from_vm(vmid):
         for vm in proxmox.cluster.resources.get(type="vm"):
             if vm["vmid"] == vmid:
                 try:
-                    node = vm['node']
+                    node = vm['node'], 200
                 except Exception as e:
                     logging.error("Problem in get_node_from_vm(" + str(vmid) + ") when getting VM node: " + str(e))
                     return {"cpu": "error"}, 500
@@ -745,7 +752,9 @@ def get_user_ip_list(user_id) :
         vm_id_list = database.get_vm_list(user_id)
         ip_list = [] # ip of the user
         for vmid in vm_id_list:
-            node = get_node_from_vm(vmid)
+            node,status = get_node_from_vm(vmid)
+            if status != 200:
+                return None
             vm_ip, status = get_vm_ip(vmid, node)
             if status == 200:
                 ip_list += vm_ip["vm_ip"]
@@ -881,7 +890,7 @@ def stop_expired_vm(app):
             print("Checking vm for user : ", user)
             userVms = database.get_vm_list(user_id=user)
             for vmid in userVms:
-                node = get_node_from_vm(vmid)
+                node, _ = get_node_from_vm(vmid)
                 status,_ = get_proxmox_vm_status(vmid, node)
                 if status["status"] == "running":
                     print("Stopping vm", vmid , "which was running")

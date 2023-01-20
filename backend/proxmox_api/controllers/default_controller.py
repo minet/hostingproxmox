@@ -204,8 +204,8 @@ def delete_vm_id(vmid):  # noqa: E501
     if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
         return {"status": "cotisation expired"}, 403
     
-    node = proxmox.get_node_from_vm(vmid)
-    if not node : #doesn't exist
+    node,status = proxmox.get_node_from_vm(vmid)
+    if status != 200 : #doesn't exist
         return {"error": "VM doesn't exist"}, 404
     
     Thread(target=delete_vm_in_thread, args=(vmid, user_id, node,False,)).start()
@@ -251,8 +251,8 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
     #if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
     #    return {"status": "cotisation expired"}, 403
 
-    node = proxmox.get_node_from_vm(vmid)
-    if not node:
+    node,status = proxmox.get_node_from_vm(vmid)
+    if status != 200: 
         return {"status": "vm not exists"}, 404
     if vmid in map(int, proxmox.get_vm(user_id)[0]):
         return proxmox.delete_vm(vmid, node)
@@ -420,12 +420,14 @@ def get_vm_id(vmid):  # noqa: E501
             return {"error": "Unknown vm status"}, 400
 
 
-    node = proxmox.get_node_from_vm(vmid)
+    node,status = proxmox.get_node_from_vm(vmid)
+    
+
     if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
         return {'error' : "Forbidden"} , 403
-    elif node == None and not admin: # exist in the db but not in proxmox. It's a error
+    elif status != 200 and not admin: # exist in the db but not in proxmox. It's a error
         return {"error": "VM not found in proxmox"}, 500
-    elif node == None and  admin:
+    elif status != 200 and  admin:
         return {'error' : "VM no found"} , 404
 
 
@@ -722,8 +724,8 @@ def patch_vm(vmid, body=None):  # noqa: E501
     user_id = slugify(cas['sub'].replace('_', '-'))
 
     if admin or dbfct.get_vm_userid(vmid) == user_id : # if not admin, we check if the user is the owner of the vm
-        node = proxmox.get_node_from_vm(vmid)
-        if not node:
+        node,status = proxmox.get_node_from_vm(vmid)
+        if status != 200:
             return {"status": "vm not exists"}, 404
         if requetsBody.status == "start":
             return proxmox.start_vm(vmid, node)

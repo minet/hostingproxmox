@@ -15,7 +15,7 @@ def fake_check_cas_token_fail(headers):
 def fake_check_cas_admin(headers):
     return 200, {"sub": "admin", "attributes" : {"memberOf" : 'cn=cluster-hosting,ou=groups,dc=minet,dc=net'}}
 def fake_get_node_from_vm(vmid):
-    return "wammu"
+    return "wammu",200
 def fake_get_proxmox_vm_status(vmid, node):
     return "running"
 def fake_get_vm_config(vmid, node):

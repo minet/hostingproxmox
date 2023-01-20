@@ -10,7 +10,7 @@ def mock_stop_vm(vm_id, node):
     return True
 
 def mock_get_node_from_vm(vmid):
-    return "node1"
+    return "node1",200
 
 def mock_get_proxmox_vm_status(vmid, node):
     if vmid == 5 :
