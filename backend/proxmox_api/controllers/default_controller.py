@@ -735,9 +735,12 @@ def patch_vm(vmid, body=None):  # noqa: E501
             return proxmox.stop_vm(vmid, node)
         elif requetsBody.status == "switch_autoreboot":
             return proxmox.switch_autoreboot(vmid, node)
-        elif requetsBody.status == "transfering_ownership" and admin:
-            new_owner = slugify(requetsBody.user.replace('_', '-'))
-            return proxmox.transfer_ownership(vmid, node, newowner=new_owner)
+        elif requetsBody.status == "transfering_ownership":
+            if admin : 
+                new_owner = slugify(requetsBody.user.replace('_', '-'))
+                return proxmox.transfer_ownership(vmid, new_owner)
+            else: 
+                return {"status": "Permission denied"}, 403
         else:
             return {"status": "uknown status"}, 500
     else:

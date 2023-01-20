@@ -150,6 +150,11 @@ def fake_stop_vm(vmide, node):
 def fake_switch_autoreboot(vmide, node):
     return {"status": "switch autoreboot OK"},200
 
+def fake_transfer_ownership(vmid, new_owner):
+    if new_owner == "" or new_owner == None :
+        return {"error": "No login given"}, 400
+    return {"status": "OK"},200
+
 def  test_valid_patch_vm_start(client, init_user_database, init_vm_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
@@ -223,6 +228,26 @@ def test_admin_patch_vm(client, init_user_database, init_vm_database, monkeypatc
     assert vm2.status_code == 200
     assert vm2.json == {"status": "start OK"}
 
+# Try to transfert the VM as an admin
+def test_admin_transfer_ownership(client, init_user_database, init_vm_database, monkeypatch):
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_admin)
+    monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+    monkeypatch.setattr(proxmox, "transfer_ownership", fake_transfer_ownership)
+    
+    vm1 = client.patch('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "transfering_ownership", "user" : "user-1"})
+    assert vm1.status_code == 200
+    assert vm1.json == {"status": "OK"}
+
+# Try to transfert the VM as an a non admin
+def test_non_admin_transfer_ownership(client, init_user_database, init_vm_database, monkeypatch):
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+    monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+    monkeypatch.setattr(proxmox, "transfer_ownership", fake_transfer_ownership)
+    
+    vm1 = client.patch('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "transfering_ownership", "user" : "user-1"})
+    assert vm1.status_code == 403
+    assert vm1.json == {"status": "Permission denied"}
+
 # Try to patch with an invalid token
 def test_invalid_patch_vm(client, init_user_database, init_vm_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token_fail)
@@ -291,4 +316,3 @@ def test_admin_get_other_account_state(client, init_user_database, monkeypatch):
     assert user1.json == {"freeze_state": "state"}
     assert user2.status_code == 200
     assert user2.json == {"freeze_state": "state"}
-    

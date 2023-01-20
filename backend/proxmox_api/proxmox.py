@@ -898,7 +898,7 @@ def stop_expired_vm(app):
             print("VMs stopped for user", user)
 
 # Transfer the ownership of a vm to another user.
-def transfer_ownership(vmid, node, newowner):
+def transfer_ownership(vmid, newowner):
     if newowner == "" or newowner == None :
         return {"error": "No login given"}, 400
     
