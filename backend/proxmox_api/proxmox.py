@@ -545,7 +545,7 @@ def get_node_from_vm(vmid):
         for vm in proxmox.cluster.resources.get(type="vm"):
             if vm["vmid"] == vmid:
                 try:
-                    node = vm['node'], 200
+                    node = vm['node']
                 except Exception as e:
                     logging.error("Problem in get_node_from_vm(" + str(vmid) + ") when getting VM node: " + str(e))
                     return {"cpu": "error"}, 500
@@ -553,7 +553,7 @@ def get_node_from_vm(vmid):
         if node == "":
             return {"get_node": "Vm not found"}, 404 
         else : 
-            return node
+            return node, 200
     else:
         return {"get_node": "Vmid incorrect"}, 404
 
