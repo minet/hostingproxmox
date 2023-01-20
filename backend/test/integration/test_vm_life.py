@@ -19,7 +19,7 @@ def test_old_vm_deletion(init_vm_database):
     db.init_app(app.app)
     doesVMexist = False
     with app.app.app_context():
-        if status != 200:
+        if status == 200:
             doesVMexist = True
         if doesVMexist:
             assert node == "kars" or node == "wammu"
