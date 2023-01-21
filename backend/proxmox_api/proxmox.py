@@ -195,6 +195,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 
     template_node = ""
     try:
+        print("oui")
         template_id = -1
         if vm_type == "bare_vm":
             template_id = 10003
@@ -214,9 +215,12 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
                 database.add_ip_to_history(ip, next_vmid, user_id)
             else:
                 return {"error": "error, can not create more VMs"}, 500
+        
         for vm in proxmox.cluster.resources.get(type="vm"):
             if vm["vmid"] == template_id:
                 template_node = vm["node"]
+        print("template_node", template_node)
+        print("template_id", template_id)
         proxmox.nodes(template_node).qemu(template_id).clone.create(
             name=name,
             newid=next_vmid,
@@ -228,10 +232,10 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 
 
     except Exception as e:
-        delete_from_db(next_vmid)
-        delete_from_proxmox(next_vmid, node)
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
+        delete_from_db(next_vmid)
+        delete_from_proxmox(next_vmid, node)
         return {"error": "Impossible to create the VM (cloning)"}, 500
 
 
@@ -239,6 +243,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         print("Problem while updating the vm status")
         return {"error": "Impossible to update the VM status"}, 500
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key,ip,  )).start()
+    
     return {"vmId": next_vmid}, 201
 
 
@@ -247,7 +252,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 When the VM is up, the password, vm user name and ssh key are set up
 """
 def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
-    
+    print("configuring vm")
     sync = False
     vm = proxmox.nodes(node).qemu(vmid)
     while not sync:  # Synchronisation
@@ -268,11 +273,11 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
             cipassword=password
         )
     except Exception as e:
+        logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
         util.update_vm_state(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
-        logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
-        print("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
 
 
     try:
