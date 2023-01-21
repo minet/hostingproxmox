@@ -15,7 +15,13 @@ KEYRING_DNS_SECRET : clé pour utiliser le ddns (ajouter / supprimer des entrée
 PROXMOX_API_KEY_NAME : nom de la clé pour accéder à l'api proxmox
 PROXMOX_API_KEY : clé pour utiliser l'api proxmox
 PROXMOX_BACK_DB : mysql:// lien vers la db contenant le passwd, user, nom de la database et bien sûr ip de celle-ci
+ENVIRONMENT="DEV" ou "TEST" (ou "PROD")
 ```
+L'environnement conditionne certains composants de l'application. 
+1. "PROD" est réservé à l'execution de l'application dans un environnement de production. C'est par exemple au sein de cet environment que les cron jobs s'executeront. Il est impératif que seul l'env de PROD soit en charge de ce genre d'opérations
+2. "DEV" désactive certaines fonctionnalités réservées à la prod, comme les cron jobs. Mais il utilise la même pas de données la production. C'est l'environment à utiliser en local ou sur hosting-dev
+3. "TEST" est l'environment utilisé pour effectuer les tests unitaires et d'intégrations du backend. Il déploie un base de donnée particulière réservée aux tests.
+
 - vous ensuite devez vous rendre dans backend/ et exécuter la commande `python3 -m proxmox_api`. Le serveur se lance alors. *Assurez vous qu'il est joignable via le port 8080 de votre machine pour qu'il puisse être joint par le `frontend`*
 
 

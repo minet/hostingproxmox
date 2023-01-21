@@ -31,10 +31,13 @@ ADH6_API_KEY = os.environ.get('ADH6_API_KEY')
 """Be sure to set "set global log_bin_trust_function_creators=1"; in the database if mysql"""
 
 
-if os.environ.get('ENVIRONMENT') == 'DEV':
-    ENV = "DEV"
+if os.environ.get('ENVIRONMENT') == 'TEST':
+    ENV = "TEST"
     #DATABASE_URI = os.environ.get('PROXMOX_BACK_DB_DEV')
     DATABASE_URI = 'sqlite:///proxmox_dev.db'
+elif os.environ.get('ENVIRONMENT') == 'DEV':
+    ENV = "DEV"
+    DATABASE_URI = os.environ.get('PROXMOX_BACK_DB')
 else :
     ENV = "PROD"
     DATABASE_URI = os.environ.get('PROXMOX_BACK_DB')

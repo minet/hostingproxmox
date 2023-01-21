@@ -10,13 +10,13 @@ from proxmox_api.__main__ import app as flask_app
 
 #@pytest.fixture
 #def client():
-#    os.environ.update({"ENVIRONNMENT": "dev"})
+#    os.environ.update({"ENVIRONNMENT": "TEST"})
 #
 #
 @pytest.fixture()
 def init_user_database():
-    if configuration.ENV != "DEV":
-        raise Exception("You must set the environnement to DEV to run the tests")
+    if configuration.ENV != "TEST":
+        raise Exception("You must set the environnement to TEST to run the tests")
     db = SQLAlchemy()
     db.init_app(flask_app.app)
     with flask_app.app.app_context():
@@ -62,8 +62,8 @@ def init_user_database():
 
 @pytest.fixture()
 def init_vm_database():
-    if configuration.ENV != "DEV":
-        raise Exception("You must set the environnement to DEV to run the tests")
+    if configuration.ENV != "TEST":
+        raise Exception("You must set the environnement to TEST to run the tests")
     db = SQLAlchemy()
     db.init_app(flask_app.app)
     with flask_app.app.app_context():
@@ -107,6 +107,51 @@ def init_vm_database():
         db.session.commit()
 
 
+@pytest.fixture()
+def init_expired_vm_database():
+    if configuration.ENV != "TEST":
+        raise Exception("You must set the environnement to TEST to run the tests")
+    db = SQLAlchemy()
+    db.init_app(flask_app.app)
+    with flask_app.app.app_context():
+        try:
+            db.session.query(model.Vm).delete()
+        except:
+            print("No VM to delete")
+        db.create_all()
+
+        # List of test VM
+        test_vms = [
+            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
+            {"id" : 2, "userId" : "expired-user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
+            {"id" : 3, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
+            {"id" : 4, "userId" : "expired-user-3", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
+            {"id" : 5, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False}
+        ]
+
+
+        # Convert the list of dictionaries to a list of User    objects
+        def create_user_model(user):
+            return model.User(**user)
+        def create_vm_model(vms):
+            return model.Vm(**vms)
+        
+        # Create a list of objects
+        mapped_vms = map(create_vm_model, test_vms)
+        t_vms = list(mapped_vms)
+
+        db.session.add_all(t_vms)
+
+        # Commit the changes for the users
+        db.session.commit()
+
+        yield db  # this is where the testing happens!
+        db.session.remove()  # looks like db.session.close() would  work as well
+        # Drop the database table
+        #model.User.query.delete()
+        db.session.query(model.User).delete()
+        db.session.query(model.Vm).delete()
+        db.session.commit()
 
 @pytest.fixture()
 def proxmoxAPI():

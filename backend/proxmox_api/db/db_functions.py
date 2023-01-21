@@ -42,6 +42,11 @@ def get_user_list(user_id=None, searchItem = None): # filter is for the user nam
     else : 
         return User.query.all()
 
+def update_vm_userid(vmid, userid):
+    vm = Vm.query.filter_by(id=vmid).first()
+    vm.userId = userid
+    db.session.commit()
+
 # Return all the VM of an user
 def get_vm_list(user_id=""): 
     if user_id != "":  # dans ce cas on affiche ce qui est lié à l'user
@@ -216,5 +221,16 @@ def setNeedToBeRestored(vmid, needToBeRestored):
     vm = Vm.query.filter_by(id=vmid).first()
     vm.needToBeRestored = needToBeRestored
     db.session.commit()
+
+
+# Return expired users with a freezeState >= minimumFreezeState
+def get_expired_users(minimumFreezeState = 1):
+    list = []
+    for user in User.query.all():
+        if user.freezeState !=None:
+            state = user.freezeState.split(".")[0]
+            if int(state) >= minimumFreezeState:
+                list.append(user.id)
+    return list
 
 #######

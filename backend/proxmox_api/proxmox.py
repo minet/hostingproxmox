@@ -195,6 +195,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 
     template_node = ""
     try:
+        print("oui")
         template_id = -1
         if vm_type == "bare_vm":
             template_id = 10003
@@ -214,23 +215,27 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
                 database.add_ip_to_history(ip, next_vmid, user_id)
             else:
                 return {"error": "error, can not create more VMs"}, 500
+        
         for vm in proxmox.cluster.resources.get(type="vm"):
             if vm["vmid"] == template_id:
                 template_node = vm["node"]
+        print("template_node", template_node)
+        print("template_id", template_id)
         proxmox.nodes(template_node).qemu(template_id).clone.create(
             name=name,
             newid=next_vmid,
             target=node,
             full=1,
+            storage="tmp_replicated_2_times"
         )
 
 
 
     except Exception as e:
-        delete_from_db(next_vmid)
-        delete_from_proxmox(next_vmid, node)
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
+        delete_from_db(next_vmid)
+        delete_from_proxmox(next_vmid, node)
         return {"error": "Impossible to create the VM (cloning)"}, 500
 
 
@@ -238,6 +243,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         print("Problem while updating the vm status")
         return {"error": "Impossible to update the VM status"}, 500
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key,ip,  )).start()
+    
     return {"vmId": next_vmid}, 201
 
 
@@ -246,7 +252,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 When the VM is up, the password, vm user name and ssh key are set up
 """
 def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
-    
+    print("configuring vm")
     sync = False
     vm = proxmox.nodes(node).qemu(vmid)
     while not sync:  # Synchronisation
@@ -267,11 +273,11 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
             cipassword=password
         )
     except Exception as e:
+        logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
         util.update_vm_state(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
-        logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
-        print("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
 
 
     try:
@@ -397,7 +403,9 @@ def reboot_vm(vmid, node):
         return {"status": "An error occur while rebooting the vm"}, 500
 
 def renew_ip(vmid):
-    node = get_node_from_vm(vmid)
+    node, status = get_node_from_vm(vmid)
+    if status != 200:
+        return node, status
     try:
         ip = database.get_vm_ip(vmid)
         proxmox.nodes(node).qemu(vmid).config.post(
@@ -411,7 +419,9 @@ def renew_ip(vmid):
         return {"status": "error updating your ip address."}, 500
 
 def update_vm_credentials(vmid,username, password, sshKey):
-    node = get_node_from_vm(vmid)
+    node,status = get_node_from_vm(vmid)
+    if status != 200:
+        return node, status
     try :
         ip = database.get_vm_ip(vmid)
         proxmox.nodes(node).qemu(vmid).config.post(
@@ -493,9 +503,12 @@ def get_vm(user_id = 0, search=None):
             for user in user_filtered:
                 vm_filtered_list += database.get_vm_list(user_id = user.id)
             start = time.time()
-            vm_list = database.get_vm_list() # only id
+            vm_list = database.get_vm_list() # get all vm vut only id
             for vmid in vm_list:
-                node = get_node_from_vm(vmid)
+                node, status = get_node_from_vm(vmid)
+                if status == 200:
+                    if status != 200:
+                        return node, status
                 if vmid not in vm_filtered_list :
                     infos,_ = get_vm_name(vmid, node)
                     name = infos["name"]
@@ -545,7 +558,7 @@ def get_node_from_vm(vmid):
         if node == "":
             return {"get_node": "Vm not found"}, 404 
         else : 
-            return node
+            return node, 200
     else:
         return {"get_node": "Vmid incorrect"}, 404
 
@@ -744,7 +757,9 @@ def get_user_ip_list(user_id) :
         vm_id_list = database.get_vm_list(user_id)
         ip_list = [] # ip of the user
         for vmid in vm_id_list:
-            node = get_node_from_vm(vmid)
+            node,status = get_node_from_vm(vmid)
+            if status != 200:
+                return None
             vm_ip, status = get_vm_ip(vmid, node)
             if status == 200:
                 ip_list += vm_ip["vm_ip"]
@@ -822,73 +837,40 @@ def check_update_cotisation(username, createEntry=False):
         
     print("check cotisation of", username)
     #headers = {"Authorization": req_headers}
-    headers = {"X-API-KEY": configuration.ADH6_API_KEY}
-    #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
-    userInfoJson = util.adh6_search_user(username, headers)
-    print(userInfoJson)
-    if (len(userInfoJson) > 1 ):
+    account, status = util.get_adh6_account(username)
+    if (account is None):
         return {"error": "Impossible to retrieve the user info"}, 404
-    if userInfoJson is None or userInfoJson  == []: # not found
-        if "-" in username:
-            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
-            new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
-            print("'"+new_username+"'")
-            return check_update_cotisation(new_username)
-            
-        elif "_" in username: # same
-            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
-            new_username = username.replace("_",".").strip() # hosting replace by default _ with -. So we try if not found
-            print("'"+new_username+"'")
-            return check_update_cotisation(new_username)
-        else :
-            print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
-            return {"error" : "the user " + username + " failed to be retrieved"}, 404
-    else : 
-        username = username.replace("_", "-") # hosting replace by default _ and .  with -.
-        userId = userInfoJson[0] 
-        membership_dict = util.check_adh6_membership(headers, userId)
-        print(membership_dict)
-        today =  date.today()
-        if "ip" not in membership_dict: # Cotisation expired
-            #print(username , "cotisation expired", membership.json())
-            print(username , "cotisation expired (no ip)")
-            
-            #return expiredCotisation(username, userEmail) #, datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date())
-            
+    username = username.replace("_", "-") # hostingreplace by default _ and .  with -.
+    print("Adh6 account", account)
+    today =  date.today()
+    if "ip" not in account: # Cotisation expired
+        #print(username , "cotisation expired", membership.json())
+        print(username , "cotisation expired (no ip)")
+        
+        #return expiredCotisation(username, userEmail) #, datetime.strptime(account["departureDate"], "%Y-%m-%d").date())
+        
+        status = database.getFreezeState(username)
+        if status is None:
+            status = '1'
+            database.updateFreezeState(username, "1.0")
+        return {"freezeState": status}, 200
+
+    else :  # we check anyway if the departure date is inthe future
+        #print(membership.json()["ip"])
+        #print(membership.json()["departureDate"], end='\n\n')
+        departureDate = datetime.strptime(account["departureDate"], "%Y-%m-%d").date()
+        if departureDate < today: # Cotisation expired:
+            print(username , "cotisation expired (departure date)")
             status = database.getFreezeState(username)
             if status is None:
                 status = '1'
                 database.updateFreezeState(username, "1.0")
             return {"freezeState": status}, 200
 
-        else :  # we check anyway if the departure date is in the future
-            #print(membership.json()["ip"])
-            #print(membership.json()["departureDate"], end='\n\n')
-            departureDate = datetime.strptime(membership_dict["departureDate"], "%Y-%m-%d").date()
-            if departureDate < today: # Cotisation expired:
-                print(username , "cotisation expired (departure date)")
-                status = database.getFreezeState(username)
-                if status is None:
-                    status = '1'
-                    database.updateFreezeState(username, "1.0")
-                return {"freezeState": status}, 200
-
-            else :
-                print(username, "cotisation up to date")
-                database.updateFreezeState(username, "0.0")
-                return  {"freezeState": "0"}, 200
-
-            
-
-            
-#####
-# For the jenkins script
-####
-
-
-    
-
-        
+        else :
+            print(username, "cotisation up to date")
+            database.updateFreezeState(username, "0.0")
+            return  {"freezeState": "0"}, 200  
 
 
 def next_available_vmid():# determine the next available vmid from both db and proxmox
@@ -900,3 +882,51 @@ def next_available_vmid():# determine the next available vmid from both db and p
        
         is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
     return next_vmid_db
+
+
+    """_summary_ : This function is called by the job to stop expired vm when the account freeze state is 2.x or 3.1
+    """
+def stop_expired_vm(app):
+    print("Executing expired vm jobs ...")
+    with app.app_context():    # Needs application context
+        users = database.get_expired_users(minimumFreezeState=2)
+        
+        for user in users:
+            print("Checking vm for user : ", user)
+            userVms = database.get_vm_list(user_id=user)
+            for vmid in userVms:
+                node, _ = get_node_from_vm(vmid)
+                status,_ = get_proxmox_vm_status(vmid, node)
+                if status["status"] == "running":
+                    print("Stopping vm", vmid , "which was running")
+                    stop_vm(vmid, node)
+            print("VMs stopped for user", user)
+
+# Transfer the ownership of a vm to another user.
+def transfer_ownership(vmid, newowner):
+    if newowner == "" or newowner == None :
+        return {"error": "No login given"}, 400
+    
+    user = database.get_user_list(user_id=newowner)
+    if user == None: # We search it in ADH6
+        account, status = util.get_adh6_account(newowner)
+        if status != 200:
+            return account, status
+        if account is None:
+            return {"error": "User not found"}, 404
+        else:
+            print("account", account)
+            userid = account["username"]
+            # We add the user in the database
+            database.add_user(userid)
+    else: 
+        userid = newowner
+        userVms = database.get_vm_list(user_id=userid)
+        if len(userVms) >= 3:
+            return {"error": "User already has 3 VMs"}, 400
+    database.update_vm_userid(vmid, userid)
+    ip  = database.get_vm_ip(vmid)
+    database.add_ip_to_history(ip, vmid, userid)
+    return {"status": "ok"}, 201
+
+    

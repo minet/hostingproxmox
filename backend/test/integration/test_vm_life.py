@@ -12,16 +12,15 @@ VMID = 9998
 def test_old_vm_deletion(init_vm_database):
     """Test in charge of destroying all vm test created in the past.
     """
-    node = proxmox.get_node_from_vm(VMID)
+    node,status = proxmox.get_node_from_vm(VMID)
     print(node)
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
     doesVMexist = False
     with app.app.app_context():
-        if len(node) >= 2:
-            if node[1] != 404:
-                doesVMexist = True
+        if status == 200:
+            doesVMexist = True
         if doesVMexist:
             assert node == "kars" or node == "wammu"
             r = proxmox.delete_from_proxmox(VMID, node)
@@ -69,9 +68,10 @@ def test_vm_start():
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        node = proxmox.get_node_from_vm(VMID)
-        body, status = proxmox.start_vm(VMID, node)
-        assert status == 201
+        node,status_node = proxmox.get_node_from_vm(VMID)
+        body, status_start = proxmox.start_vm(VMID, node)
+        assert status_node == 200
+        assert status_start == 201
 
 # If previous test fail, we do not try to start it
 @pytest.mark.dependency(name="stop", depends=["clean", "creation", "start"])
@@ -82,9 +82,10 @@ def test_vm_stop():
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        node = proxmox.get_node_from_vm(VMID)
-        body, status = proxmox.stop_vm(VMID, node)
-        assert status == 201
+        node,status_node = proxmox.get_node_from_vm(VMID)
+        body, status_stop = proxmox.stop_vm(VMID, node)
+        assert status_node == 200
+        assert status_stop == 201
 
 # If previous test fail, we do not try to start it
 @pytest.mark.dependency(name="delete", depends=["clean", "creation", "start", "stop"])
@@ -95,9 +96,10 @@ def test_vm_deletion():
     db = SQLAlchemy()
     db.init_app(app.app)
     with app.app.app_context():
-        node = proxmox.get_node_from_vm(VMID)
+        node,status_node = proxmox.get_node_from_vm(VMID)
         isProxmoxDeleted = proxmox.delete_from_proxmox(VMID, node)
         isDbDeleted = proxmox.delete_from_db(VMID)
+        assert status_node == 200
         assert isProxmoxDeleted
         assert isDbDeleted
 

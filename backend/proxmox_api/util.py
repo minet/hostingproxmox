@@ -311,7 +311,7 @@ def create_app():
 
 
 def check_cas_token(headers):
-    #if config.ENV == "DEV":
+    #if config.ENV == "TEST":
     #    if headers["Fake-User"] == "admin":
     #        return 200, {'sub': 'fake-admin', "attributes" : {"memberOf" : 'cn=cluster-hosting,ou=groups,dc=minet,dc=net'}}
     #    else :
@@ -319,15 +319,40 @@ def check_cas_token(headers):
     #elif config.ENV == "PROD":
     autorization = {"Authorization": headers["Authorization"]}
     r = requests.get("https://cas.minet.net/oidc/profile", headers=autorization)
-    print("return =", r.json())
     return r.status_code, r.json()
     
 
 
 
-def check_adh6_membership(headers, userId):
-    response = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
-    return response.json()
+def get_adh6_account(username):
+    headers = {"X-API-KEY": config.ADH6_API_KEY}
+    #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
+    userInfoJson = adh6_search_user(username, headers)
+    print(userInfoJson)
+    if userInfoJson is None or userInfoJson  == []: # not found
+        if "-" in username:
+            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+            new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
+            print("'"+new_username+"'")
+            return get_adh6_account(new_username)
+            
+        elif "_" in username: # same
+            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+            new_username = username.replace("_",".").strip() # hosting replace by default _ with -. So we try if not found
+            print("'"+new_username+"'")
+            return get_adh6_account(new_username)
+        else :
+            print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
+            return {"error" : "the user " + username + " failed to be retrieved"}, 404
+    else : 
+        account = None
+        for id in userInfoJson:
+            accountJson = requests.get("https://adh6.minet.net/api/member/"+str(id), headers=headers) # memership info
+            tmp_account = accountJson.json()
+            if tmp_account["username"] == username:
+                account = tmp_account
+        print("account : ", account)
+        return account, 200
 
 def adh6_search_user(username, headers):
     response = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 

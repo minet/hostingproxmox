@@ -8,11 +8,11 @@ from proxmox_api.db.db_models import db
 
 
 print("config = ",  config.ENV)
-if config.ENV == "DEV":
+if config.ENV == "TEST":
     print("**************************************************")
     print("**************************************************")
     print("**************************************************")
-    print("************* ENTERING IN DEV MODE ***************")
+    print("************* ENTERING IN TEST MODE ***************")
     print("********* NOT DESIGNED FOR PRODUCTION ************")
     print("**************************************************")
     print("**************************************************")
@@ -32,27 +32,24 @@ def create_app():
 
 
 def conf_jobs(app):
+    app.app.config['JOBS'] = JOBS
     app.app.config['SCHEDULER_API_ENABLE'] = False
-
-
-
-
-
 
 ## init db
 app, scheduler = create_app()
 
-#JOBS = [
-#        {
-#            "id": "update_vm_ips",
-#            "func": "proxmox_api.proxmox:update_vm_ips_job",
-#            "args": (app.app,),
-#            "trigger": "interval",
-#            "seconds": 120,
-#        }
-#    ]
-#
-#conf_jobs(app)
+JOBS = [
+        {
+            "id": "stop_expired_vm",
+            "func": "proxmox_api.proxmox:stop_expired_vm",
+            "args": (app.app,),
+            "trigger": "interval",
+            'seconds': 86400,# 1 day
+        }
+    ]
+
+if config.ENV == "PROD":
+    conf_jobs(app)
 
 
 db.init_app(app.app)

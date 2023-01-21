@@ -3,7 +3,7 @@
     <router-outlet *ngIf="(validToken$ | async)  || router.url === this.cookie.get('lang')+'/manual' || router.url === '/legal'; else landing"></router-outlet>
     <ng-template #landing>
         <div class="text-center">
-            <img id="logo" class="mb-3" style="height: 150px" src="assets/images/minet_light_noel.png">
+            <img id="logo" class="mb-3" style="height: 150px" src="assets/images/minet.png">
             <div class="alert alert-success" role="alert">
                 <p>Welcome to MiNET's new hosting service. It is still in beta, please report any problem
                     to our <a href="mailto:webmaster@listes.minet.net"> webmaster</a>.</p>
