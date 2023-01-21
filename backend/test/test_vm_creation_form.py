@@ -94,6 +94,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database)
 """
         #monkeypatch.setattr(proxmox.proxmox.nodes("kars").qemu(10003).clone,'create', fake_proxmox_clone_vm)
         node="kars"
+        realProxmox = proxmox.proxmox
         proxmox.proxmox = _ProxmoxAPI(node, monkeypatch)
         
         #monkeypatch.setattr(proxmox.proxmox, "nodes", lambda self, node: _ProxmoxAPI(node, monkeypatch))
@@ -104,6 +105,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database)
 
         userId = "new-user6"
         body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", userId, password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
+        proxmox.proxmox = realProxmox
         assert status == 201
         userVms = db_functions.get_vm_list(user_id=userId)
         assert len(userVms) == 1
