@@ -305,14 +305,17 @@ export class HomeComponent implements OnInit {
         });
   }
 
+
+  get_vm_configuration(vmid: number) : void {
+
+  }
+
   count_vm(): void {
-   
-
-
       let vmList: Array<string>;
       this.countvm = 0;
        this.countactivevm = 0;
       this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
+        console.log(rep)
         vmList = rep.body as Array<string>;
         for (let i = 0; i < vmList.length; i++) {
           const vmid = vmList[i];

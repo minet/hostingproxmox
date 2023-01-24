@@ -205,29 +205,37 @@
                                 </div>
                             </div>
                         <br>
-
+                        <hr>
+                    <p class="lead">Configurer votre VM</p>
                     <form (ngSubmit)="create_m(vm)" #vmForm="ngForm">
-                        <h5><label for="customRange3" class="form-label">Nombre de CPU : <span class="badge text-bg-primary">4</span>
-                        </label></h5>
-                        <input type="range" class="form-range" min="0" max="5" step="1" id="nb_cpu">
                         <div class="d-flex justify-content-between">
-                            <div><small class="text-secondary">0</small></div>
-                            <div><small class="text-secondary">6 CPUs</small></div>
-                        </div>
-
-                        <h5><label for="customRange3" class="form-label">RAM : <span class="badge text-bg-primary">6 GO</span>
-                        </label></h5>
-                        <input type="range" class="form-range" min="0" max="5" step="1" id="customRange3">
-                        <div class="d-flex justify-content-between">
-                            <div><small class="text-secondary">0</small></div>
-                            <div><small class="text-secondary">6 Go</small></div>
-                        </div>
-                        <h5><label for="customRange3" class="form-label">Stockage : <span class="badge text-bg-primary">20 GO</span>
-                        </label></h5>
-                        <input type="range" class="form-range" min="0" max="30" step="10" id="customRange3">
-                        <div class="d-flex justify-content-between">
-                            <div><small class="text-secondary">0</small></div>
-                            <div><small class="text-secondary">30 Go</small></div>
+                            <div>
+                                <h5><label for="customRange3" class="form-label">Nombre de CPU : <span class="badge         text-bg-primary">4</span>
+                                </label></h5>
+                                <input type="range" class="form-range" min="0" max="5" step="1" id="nb_cpu">
+                                <div class="d-flex justify-content-between">
+                                    <div><small class="text-secondary">0</small></div>
+                                    <div><small class="text-secondary">6 CPUs</small></div>
+                                </div>
+                            </div>
+                            <div>
+                                <h5><label for="customRange3" class="form-label">RAM : <span class="badge text-bg-primary">6    GO</   span>
+                                </label></h5>
+                                <input type="range" class="form-range" min="0" max="5" step="1" id="customRange3">
+                                <div class="d-flex justify-content-between">
+                                    <div><small class="text-secondary">0</small></div>
+                                    <div><small class="text-secondary">6 Go</small></div>
+                                </div>
+                            </div>
+                            <div>
+                                <h5><label for="customRange3" class="form-label">Stockage : <span class="badge  text-bg-primary">20  GO</span>
+                                </label></h5>
+                                <input type="range" class="form-range" min="0" max="30" step="10" id="customRange3">
+                                <div class="d-flex justify-content-between">
+                                    <div><small class="text-secondary">0</small></div>
+                                    <div><small class="text-secondary">30 Go</small></div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                     </div>
