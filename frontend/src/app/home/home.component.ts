@@ -51,7 +51,12 @@ export class HomeComponent implements OnInit {
    // Max number of storage available for user in total. The avaible ressources for a specific user are stored in User model
   nb_storage_max = 30;
   nb_cpu_max = 6;
-  nb_ram_max = 6;
+  nb_ram_max = 12;
+  // Selected in the range
+  nb_storage_selected = 0;
+  nb_cpu_selected = 0;
+  nb_ram_selected = 0;
+  
 
 
  
@@ -85,12 +90,15 @@ export class HomeComponent implements OnInit {
           console.log(this.user.freezeState)
         console.log("error code =" , this.userService.errorMessage)
         }
+        this.user.usedCPU = 0;
+        this.user.usedRAM = 0;
+        this.user.usedStorage =0;
         this.count_vm();
       }
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
-      console.log((this.nb_cpu_max - this.user.availableCPU)*100/this.nb_cpu_max)
+      console.log((this.nb_cpu_max - this.user.usedCPU)*100/this.nb_cpu_max)
   }
 
   images = [
@@ -302,12 +310,55 @@ export class HomeComponent implements OnInit {
         });
   }
 
+  slider_change():void{
+    const cpu_selected  = +((<HTMLInputElement>document.getElementById("cpu_slider")).value)
+    this.nb_cpu_selected = cpu_selected
+    if (this.nb_cpu_max - this.user.usedCPU < this.nb_cpu_selected ){
+      
+      (<HTMLInputElement>document.getElementById("cpu_slider")).value = String(this.nb_cpu_max - this.user.usedCPU)
+        
+      this.nb_cpu_selected = this.nb_cpu_max - this.user.usedCPU
+    } 
+    
 
-  get_vm_configuration(vmid: number) : void {
+    const ram_selected  = +((<HTMLInputElement>document.getElementById("ram_slider")).value)
+    this.nb_ram_selected = ram_selected
+    if (this.nb_ram_max - this.user.usedRAM < ram_selected){
+        (<HTMLInputElement>document.getElementById("ram_slider")).value = String(this.nb_ram_max - this.user.usedRAM)
+        this.nb_ram_selected = this.nb_ram_max - this.user.usedRAM
+    } 
 
+    const storage_selected  = +((<HTMLInputElement>document.getElementById("storage_slider")).value)
+    this.nb_storage_selected = storage_selected
+    if (this.nb_storage_max - this.user.usedStorage < storage_selected){
+          (<HTMLInputElement>document.getElementById("storage_slider")).value = String(this.nb_storage_max - this.user.usedStorage)
+          this.nb_storage_selected = this.nb_storage_max - this.user.usedStorage
+    }
   }
 
+  //cpu_slider_change():void{
+  //  
+  //  
+  //  console.log("cpu",this.nb_cpu_selected)
+  //  console.log("ram",this.nb_ram_selected)
+  //}
+  //ram_slider_change():void{
+  //  console.log("ram", this.nb_ram_max - this.user.usedRAM)
+  //  if (this.nb_ram_max - this.user.usedRAM < this.nb_ram_selected){
+  //        this.nb_ram_selected = this.nb_ram_max - this.user.usedRAM
+  //      }
+  //}
+  //storage_slider_change():void{
+  //  if (this.nb_storage_max - this.user.usedStorage < this.nb_storage_selected){
+  //      this.nb_storage_selected = this.nb_storage_max - this.user.usedStorage
+  //    }
+  //}
+
+
+
+
   count_vm(): void {
+    console.log("cpu", this.nb_cpu_max -  this.user.usedCPU)
       let vmList: Array<string>;
       this.countvm = 0;
        this.countactivevm = 0;
@@ -336,6 +387,11 @@ export class HomeComponent implements OnInit {
     vm.id = vmid;
     this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {
         this.vmstate = rep.body['status'];
+        this.user.usedCPU += rep.body['cpu'];
+        this.user.usedRAM += Math.floor(rep.body['ram']/1000);
+        this.user.usedStorage += rep.body['disk'];
+
+       
         if(rep.body['status'] === "running")
           this.countactivevm++;
         },
