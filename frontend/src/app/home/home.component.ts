@@ -98,7 +98,7 @@ export class HomeComponent implements OnInit {
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
-      console.log((this.nb_cpu_max - this.user.usedCPU)*100/this.nb_cpu_max)
+
   }
 
   images = [
