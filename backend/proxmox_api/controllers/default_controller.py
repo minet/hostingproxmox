@@ -937,9 +937,9 @@ def get_account_state(username):
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    if admin and user_id == username: 
+    if admin and user_id.lower() == username.lower(): 
         return {"freezeState" : "0"}, 200 # we fake it
-    elif admin or user_id == username:
+    elif admin or user_id.lower() == username.lower():
         return proxmox.get_freeze_state(username)
     else :
         return {"error": "You are not allowed to check this account"}, 403

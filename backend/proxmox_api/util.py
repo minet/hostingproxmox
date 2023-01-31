@@ -349,7 +349,7 @@ def get_adh6_account(username):
         for id in userInfoJson:
             accountJson = requests.get("https://adh6.minet.net/api/member/"+str(id), headers=headers) # memership info
             tmp_account = accountJson.json()
-            if tmp_account["username"] == username:
+            if tmp_account["username"].lower() == username.lower():
                 account = tmp_account
         print("account : ", account)
         return account, 200
