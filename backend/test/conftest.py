@@ -16,7 +16,7 @@ from proxmox_api.__main__ import app as flask_app
 @pytest.fixture()
 def init_user_database():
     if configuration.ENV != "TEST":
-        raise Exception("You must set the environnement to TEST to run the tests")
+        raise Exception("You must set the environnement to TEST to run tests")
     db = SQLAlchemy()
     db.init_app(flask_app.app)
     with flask_app.app.app_context():
@@ -63,7 +63,7 @@ def init_user_database():
 @pytest.fixture()
 def init_vm_database():
     if configuration.ENV != "TEST":
-        raise Exception("You must set the environnement to TEST to run the tests")
+        raise Exception("You must set the environnement to TEST to run tests")
     db = SQLAlchemy()
     db.init_app(flask_app.app)
     with flask_app.app.app_context():
@@ -110,7 +110,7 @@ def init_vm_database():
 @pytest.fixture()
 def init_expired_vm_database():
     if configuration.ENV != "TEST":
-        raise Exception("You must set the environnement to TEST to run the tests")
+        raise Exception("You must set the environnement to TEST to run tests")
     db = SQLAlchemy()
     db.init_app(flask_app.app)
     with flask_app.app.app_context():
