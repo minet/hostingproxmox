@@ -325,7 +325,6 @@ def check_cas_token(headers):
     
 
 
-<<<<<<< HEAD
 
 def get_adh6_account(username):
     headers = {"X-API-KEY": config.ADH6_API_KEY}
@@ -356,12 +355,6 @@ def get_adh6_account(username):
                 account = tmp_account
         print("account : ", account)
         return account, 200
-=======
-# heck_adh6_membership
-def get_adh6_account(headers, userId):
-    response = requests.get("https://adh6.minet.net/api/member/"+str(userId), headers=headers) # memership info
-    return response.json()
->>>>>>> 38a30ee (The adh6 check account is now able to pick the correct account, if more than one were retrieved during the research)
 
 def adh6_search_user(username, headers):
     response = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 

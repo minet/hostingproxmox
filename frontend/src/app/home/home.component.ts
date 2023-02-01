@@ -47,7 +47,6 @@ export class HomeComponent implements OnInit {
   nb_error_resquest = 0; // Count the number of SUCCESSIVE error returned by a same request
   isVmCreated = false; // true doesn't mean the VM is started 
   confirmPassword = "";
-  show_configuration_form = false;
    // Max number of storage available for user in total. The avaible ressources for a specific user are stored in User model
   nb_storage_max = 30;
   nb_cpu_max = 6;
@@ -56,6 +55,7 @@ export class HomeComponent implements OnInit {
   nb_storage_selected = 0;
   nb_cpu_selected = 0;
   nb_ram_selected = 0;
+  display_ressource_configuration = false; 
   
 
 
@@ -211,6 +211,10 @@ export class HomeComponent implements OnInit {
     return vm.password == this.confirmPassword;
   }
 
+  back_from_ressource_conf_page():void{
+    this.display_ressource_configuration = !this.display_ressource_configuration;
+  }
+
 
   //configuration form 
   configurationForm(vm:Vm):void{
@@ -221,7 +225,7 @@ export class HomeComponent implements OnInit {
     const isPasswordOk = this.check_password(this.vm)
     if (isPasswordOk) {
       
-      this.show_configuration_form = !this.show_configuration_form;
+      this.display_ressource_configuration = !this.display_ressource_configuration;
     }
   }
 
@@ -245,7 +249,9 @@ export class HomeComponent implements OnInit {
           sshKey: vm.sshKey,
           user: this.slugifyPipe.transform(vm.user),
           ssh: true,
-
+          cpu: this.nb_cpu_selected,
+          ram: this.nb_ram_selected,
+          storage: this.nb_storage_selected
         };
       this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).   subscribe(rep => {
         this.errorMessage = ""

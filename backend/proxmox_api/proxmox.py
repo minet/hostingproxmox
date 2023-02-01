@@ -837,7 +837,6 @@ def check_update_cotisation(username, createEntry=False):
         
     print("check cotisation of", username)
     #headers = {"Authorization": req_headers}
-<<<<<<< HEAD
     account, status = util.get_adh6_account(username)
     if (account is None):
         return {"error": "Impossible to retrieve the user info"}, 404
@@ -862,87 +861,16 @@ def check_update_cotisation(username, createEntry=False):
         departureDate = datetime.strptime(account["departureDate"], "%Y-%m-%d").date()
         if departureDate < today: # Cotisation expired:
             print(username , "cotisation expired (departure date)")
-=======
-    headers = {"X-API-KEY": configuration.ADH6_API_KEY}
-    #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
-    userInfoJson = util.adh6_search_user(username, headers)
-    print(userInfoJson)
-    if userInfoJson is None or userInfoJson  == []: # not found
-        if "-" in username:
-            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
-            new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
-            print("'"+new_username+"'")
-            return check_update_cotisation(new_username)
-            
-        elif "_" in username: # same
-            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
-            new_username = username.replace("_",".").strip() # hosting replace by default _ with -. So we try if not found
-            print("'"+new_username+"'")
-            return check_update_cotisation(new_username)
-        else :
-            print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
-            return {"error" : "the user " + username + " failed to be retrieved"}, 404
-    else : 
-        userId = None
-        for id in userInfoJson:
-            account = util.get_adh6_account(headers, userId)
-            if account["username"] == username:
-                userId = id
-                break
-
-        if (userId is None ):
-            return {"error": "Impossible to retrieve the user info"}, 404
-        username = username.replace("_", "-") # hosting replace by default _ and .  with -.
-        print("Adh6 account", account)
-        today =  date.today()
-        if "ip" not in account: # Cotisation expired
-            #print(username , "cotisation expired", membership.json())
-            print(username , "cotisation expired (no ip)")
-            
-            #return expiredCotisation(username, userEmail) #, datetime.strptime(account["departureDate"], "%Y-%m-%d").date())
-            
->>>>>>> 38a30ee (The adh6 check account is now able to pick the correct account, if more than one were retrieved during the research)
             status = database.getFreezeState(username)
             if status is None:
                 status = '1'
                 database.updateFreezeState(username, "1.0")
             return {"freezeState": status}, 200
 
-<<<<<<< HEAD
         else :
             print(username, "cotisation up to date")
             database.updateFreezeState(username, "0.0")
             return  {"freezeState": "0"}, 200  
-=======
-        else :  # we check anyway if the departure date is in the future
-            #print(membership.json()["ip"])
-            #print(membership.json()["departureDate"], end='\n\n')
-            departureDate = datetime.strptime(account["departureDate"], "%Y-%m-%d").date()
-            if departureDate < today: # Cotisation expired:
-                print(username , "cotisation expired (departure date)")
-                status = database.getFreezeState(username)
-                if status is None:
-                    status = '1'
-                    database.updateFreezeState(username, "1.0")
-                return {"freezeState": status}, 200
-
-            else :
-                print(username, "cotisation up to date")
-                database.updateFreezeState(username, "0.0")
-                return  {"freezeState": "0"}, 200
-
-            
-
-            
-#####
-# For the jenkins script
-####
-
-
-    
-
-        
->>>>>>> 38a30ee (The adh6 check account is now able to pick the correct account, if more than one were retrieved during the research)
 
 
 def next_available_vmid():# determine the next available vmid from both db and proxmox
