@@ -13,7 +13,13 @@ export class User {
     public vms?: Array<Vm>;
     public dns?: Array<Dns>;
     public ips?: Array<string>;
+<<<<<<< HEAD
     public usedCPU?: number;
     public usedRAM?: number;
     public usedStorage?: number;
+=======
+    public availableCPU?: number;
+    public availableRAM?: number;
+    public availableStorage?: number;
+>>>>>>> 6ce4559 (Add prototype of dynamix ressources form in hom component)
 }
