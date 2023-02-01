@@ -84,6 +84,10 @@ export class HomeComponent implements OnInit {
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
+<<<<<<< HEAD
+=======
+      this.progress_bar()
+>>>>>>> 3788ccf (Add pourcentage label on progress bar and an approximative description label of the current task)
   }
 
   images = [
