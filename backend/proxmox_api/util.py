@@ -10,6 +10,7 @@ from flask_cors import CORS
 import proxmox_api.config.configuration as  config 
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
+from proxmox_api.db.db_models import db
 
 
 def _deserialize(data, klass):
@@ -306,6 +307,7 @@ def create_app():
 
     app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
     app.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db.init_app(app.app)  
 
     return app
 
