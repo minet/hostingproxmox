@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_sqlalchemy import event
+#from flask_sqlalchemy import event
 from proxmox_api.config.configuration import ENV
+#from sqlalchemy import event
 
 db = SQLAlchemy()
 
@@ -51,11 +52,11 @@ if ENV != "TEST":
 else :
     TRIGGER_CREATION = ""
 
-event.listen(
-    Vm.__table__,
-    "after_create",
-    db.DDL(
-       TRIGGER_CREATION
-    )
-)
-
+#event.listen(
+#    Vm.__table__,
+#    "after_create",
+#    db.DDL(
+#       TRIGGER_CREATION
+#    )
+#)
+#
