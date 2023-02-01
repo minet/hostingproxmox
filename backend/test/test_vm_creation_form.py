@@ -71,7 +71,7 @@ class _ProxmoxAPI:
     
 
 
-def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database):
+def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database, client):
     """Test case for creation of VM by a new user
     The creation does not concern proxmox
     """
@@ -80,10 +80,8 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database)
     
     
 
-    app = util.create_app()
-    db = SQLAlchemy()
-    db.init_app(app.app)
-    with app.app.app_context():
+  
+    with client:
         # Mocking 
         monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
         monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)

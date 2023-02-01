@@ -7,7 +7,8 @@ from proxmox_api import util
 import proxmox_api.config.configuration as configuration
 from proxmoxer import ProxmoxAPI
 from proxmox_api.__main__ import app as flask_app
-
+from proxmox_api import __main__ as main
+from proxmox_api.db.db_models import db
 #@pytest.fixture
 #def client():
 #    os.environ.update({"ENVIRONNMENT": "TEST"})
@@ -167,5 +168,8 @@ def proxmoxAPI():
 
 @pytest.fixture(scope='module')
 def client():
-    with flask_app.app.test_client() as c:
-        yield c
+    app, scheduler = main.create_app()
+    db.init_app(app.app) 
+    #return flask_app.app.test_client()
+    return app.app.test_client()
+         

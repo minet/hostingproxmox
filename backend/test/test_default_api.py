@@ -31,21 +31,18 @@ def fake_get_vm_config(vmid, node):
 
 # Valid user with valid token. Not admin.
 def test_valid_get_vm_id(client, init_user_database, init_vm_database, monkeypatch):
-
-    
-
+    print("client1", client)
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(proxmox, "get_proxmox_vm_status", fake_get_proxmox_vm_status)
     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
-
     response = client.get('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     assert response.status_code == 200
 
 # Valid user with not valid token. Not admin.
 def test_false_token_get_vm_id(client, init_user_database, init_vm_database, monkeypatch):
 
-    
+    print("client2", client)
 
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token_fail)
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
