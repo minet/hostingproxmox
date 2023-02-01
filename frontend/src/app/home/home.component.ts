@@ -51,16 +51,12 @@ export class HomeComponent implements OnInit {
    // Max number of storage available for user in total. The avaible ressources for a specific user are stored in User model
   nb_storage_max = 30;
   nb_cpu_max = 6;
-<<<<<<< HEAD
   nb_ram_max = 12;
   // Selected in the range
   nb_storage_selected = 0;
   nb_cpu_selected = 0;
   nb_ram_selected = 0;
   
-=======
-  nb_ram_max = 6;
->>>>>>> 6ce4559 (Add prototype of dynamix ressources form in hom component)
 
 
  
@@ -102,11 +98,7 @@ export class HomeComponent implements OnInit {
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
-<<<<<<< HEAD
       console.log((this.nb_cpu_max - this.user.usedCPU)*100/this.nb_cpu_max)
-=======
-      console.log((this.nb_cpu_max - this.user.availableCPU)*100/this.nb_cpu_max)
->>>>>>> 6ce4559 (Add prototype of dynamix ressources form in hom component)
   }
 
   images = [
