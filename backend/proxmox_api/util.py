@@ -251,7 +251,11 @@ def get_vm_state(vmid) :
     :rtype: bool
 """
 def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
+<<<<<<< HEAD
     with open(config.VM_CREATION_STATUS_JSON, mode='r') as jsonFile:
+=======
+    with open(config.VM_CREATION_STATUS_JSON, mode='r+') as jsonFile:
+>>>>>>> 6e5ad3c (make vm_creation_status.json be created if it doesn't exist)
         jsonObject = json.load(jsonFile)
         jsonFile.close()
 
@@ -266,7 +270,7 @@ def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
                 jsonObject[vmid]["status"] = "error"
                 jsonObject[vmid]["httpErrorCode"] = str(errorCode) 
                 jsonObject[vmid]["errorMessage"] = message
-        with open(config.VM_CREATION_STATUS_JSON, "w") as outfile:
+        with open(config.VM_CREATION_STATUS_JSON, "w+") as outfile:
             json.dump(jsonObject, outfile)
             outfile.close()
         return True
