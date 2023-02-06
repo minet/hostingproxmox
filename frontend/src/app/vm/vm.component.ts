@@ -299,16 +299,23 @@ export class VmComponent implements OnInit, OnDestroy {
         
       this.http.post(this.authService.SERVER_URL + '/updateCredentials', data, {observe: 'response'}).subscribe(rep => {
         console.log("success")
-        document.getElementById('openModalButton').click();
-        document.getElementById('openUpdateButton').click();
+        if(this.need_to_be_restored){
+            document.getElementById('openModalButton').click();
+            document.getElementById('openUpdateButton').click();
+        } else {
+            
+            document.getElementById('updateCloseButton').click()
+        }
         this.popUpShowed = false;
         this.popUpLoading = false;
         this.popUpErrorCode = 0;
         this.popUpErrorMessage = "";
-        this.router.navigate(['/vms/' + this.vmid]);
+        this.commit_edit("reboot")
+        console.log("success2")
         }, error => {
             this.popUpErrorCode = error.status;
-            this.popUpErrorMessage = error.error["error"];
+            const httpError = this.utils.getHttpErrorMessage(error.status);
+            this.popUpErrorMessage = "<b>Error " + this.popUpErrorCode + " : "+ httpError + "</b><br><br>" + error.error["status"];
             this.popUpLoading = false;
         });
     }
