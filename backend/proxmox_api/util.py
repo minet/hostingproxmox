@@ -363,6 +363,7 @@ def adh6_search_user(username, headers):
 
 # Subscribe on adh6 a user to the hosting mailing list
 def subscribe_to_hosting_ML(username):
+    print("Subscribe to hosting ML : " + username)
     headers = {"X-API-KEY": config.ADH6_API_KEY}
     userInfoJson = adh6_search_user(username, headers)
     if userInfoJson is None or userInfoJson  == []: # not found
@@ -381,7 +382,6 @@ def subscribe_to_hosting_ML(username):
             print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
             return {"error" : "the user " + username + " failed to be retrieved"}, 404
     else : 
-        account = None
         for id in userInfoJson:
             accountJson = requests.get("https://adh6.minet.net/api/member/"+str(id), headers=headers) # memership info
             tmp_account = accountJson.json()
@@ -389,6 +389,7 @@ def subscribe_to_hosting_ML(username):
                 current_ML_status = tmp_account["mailinglist"]
                 new_ML_status = int(str(bin(current_ML_status))[:-2] + "1" + str(bin(current_ML_status))[-1], 2) # Add 1 to the bit before the last one, no matter the old value
                 response  = requests.put("https://adh6.minet.net/api/mailinglist/member/"+str(id), headers=headers, data={"value": new_ML_status})
+                print("adh6 response : ", response)
                 return response
     
     return {"error" : "the user " + username + " failed to be retrieved"}, 404
