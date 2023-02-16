@@ -3,6 +3,7 @@ from proxmox_api import proxmox
 from test.conftest import *
 from proxmox_api.db import db_functions
 from proxmoxer import ProxmoxAPI
+from proxmox_api import util
 
 def fake_next_available_vmid():
         return "999"
@@ -19,6 +20,10 @@ def fake_vm_config(vmid, node, password, vm_usermain_ssh_key, ip):
     return True
 def fake_check_update_cotisation(user_id):
     return {"freezeState": "1"}, 200
+
+
+def fake_subscribe_to_hosting_ML(username):
+    return 200, {"status": "ok"}
 
 
 
@@ -84,6 +89,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database,
     with client:
         # Mocking 
         monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
+        monkeypatch.setattr(util, 'subscribe_to_hosting_ML', fake_subscribe_to_hosting_ML)
         monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)
         
         """proxmoxapi = ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER

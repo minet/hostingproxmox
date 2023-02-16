@@ -7,6 +7,8 @@ from time import sleep
 
 
 VMID = 9998
+def fake_subscribe_to_hosting_ML(username):
+    return 200, {"status": "ok"}
 
 @pytest.mark.dependency(name="clean")
 def test_old_vm_deletion(init_vm_database):
@@ -47,6 +49,7 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
         # Mocking
         monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
         monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)
+        monkeypatch.setattr(util, 'subscribe_to_hosting_ML', fake_subscribe_to_hosting_ML)
 
 
 
