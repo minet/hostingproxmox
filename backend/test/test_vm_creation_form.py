@@ -21,8 +21,10 @@ def fake_vm_config(vmid, node, password, vm_usermain_ssh_key, ip):
 def fake_check_update_cotisation(user_id):
     return {"freezeState": "1"}, 200
 
+SUBSCRIBED_TO_ML = False
 
 def fake_subscribe_to_hosting_ML(username):
+    SUBSCRIBED_TO_ML = True
     return 200, {"status": "ok"}
 
 
@@ -113,6 +115,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database,
         assert status == 201
         userVms = db_functions.get_vm_list(user_id=userId)
         assert len(userVms) == 1
+        assert SUBSCRIBED_TO_ML == True
 
 
 
