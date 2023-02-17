@@ -387,9 +387,14 @@ def subscribe_to_hosting_ML(username):
             tmp_account = accountJson.json()
             if tmp_account["username"].lower() == username.lower():
                 current_ML_status = tmp_account["mailinglist"]
+                print("current_ML_status", current_ML_status)
                 new_ML_status = int(str(bin(current_ML_status))[:-2] + "1" + str(bin(current_ML_status))[-1], 2) # Add 1 to the bit before the last one, no matter the old value
-                response  = requests.put("https://adh6.minet.net/api/mailinglist/member/"+str(id), headers=headers, data={"value": new_ML_status})
-                print("adh6 response : ", response)
-                return response
+                headers["Content-Type"] = "application/json"
+                response  = requests.put("https://adh6.minet.net/api/mailinglist/member/"+str(id), headers=headers, data=json.dumps({"value": new_ML_status}))
+                print("adh6 response : ", response.status_code)
+                status = "OK"
+                if response.status_code != 200:
+                    status = "An unknown error occured"
+                return status, response.status_code
     
     return {"error" : "the user " + username + " failed to be retrieved"}, 404
