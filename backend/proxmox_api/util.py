@@ -385,7 +385,7 @@ def subscribe_to_hosting_ML(username):
         for id in userInfoJson:
             accountJson = requests.get("https://adh6.minet.net/api/member/"+str(id), headers=headers) # memership info
             tmp_account = accountJson.json()
-            print("tmp_account", tmp_account)
+            print("tmp_account", tmp_account, id)
             if tmp_account["username"].lower() == username.lower():
                 current_ML_status = tmp_account["mailinglist"]
                 print("current_ML_status", current_ML_status)
