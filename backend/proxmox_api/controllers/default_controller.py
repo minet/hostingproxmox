@@ -820,10 +820,10 @@ def get_ip_list():
 def update_credentials():
 
     if connexion.request.is_json:
-        body = connexion.request.get_json()  # noqa: E50
+        update_body = connexion.request.get_json()  # noqa: E50
 
     try:
-        vmid = int(body['vmid'])
+        vmid = int(update_body['vmid'])
     except:
         return {"error": "Bad vmid"}, 400
     headers = {"Authorization": connexion.request.headers["Authorization"]}
@@ -836,11 +836,11 @@ def update_credentials():
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):
-                admin = True;
+                admin = True
 
     user_id = slugify(cas['sub'].replace('_', '-'))
     if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
-        return {'error' : "Forbidden"} , 403
+        return {'status' : "Forbidden"} , 403
     if admin :
         freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
     else :
@@ -850,24 +850,26 @@ def update_credentials():
         try:
             freezeAccountState = int(body["freezeState"])
         except Exception as e:
-            return {"error": "error while getting freeze state"}, 500
+            return {"status": "error while getting freeze state"}, 500
     
     if freezeAccountState >= 3: # if freeze state 1 or 2 the user can access to proxmox
         return {"status": "cotisation expired"}, 403
     if not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin:
-        return {"error": "You don't have the right permissions"}, 403
-
+        return {"status": "You don't have the right permissions"}, 403
+    print("body =", update_body)
+    if not "password" in update_body or not "sshKey" in update_body or not "username" in update_body:
+        return {"status" : "Missing parameters. You must provide a username, a password and a valid public ssh key"}, 400
 
     
 
-    if not util.check_password_strength(body['password']):
-        return {"error" : "Incorrect password format. Your password must contain at least 1 special char, 1 uppercase letter, 1 number and 8 chars in total."}, 400
-    if not util.check_ssh_key(body['sshKey']):
-        return {"error" : "Incorrect ssh key format"}, 400
-    if not util.check_username(body['username']):
-        return {"error" : "Incorrect vm user format"}, 400
+    if not util.check_password_strength(update_body['password']):
+        return {"status" : "Incorrect password format. Your password must contain at least 1 special char, 1 uppercase letter, 1 number and 8 chars in total."}, 400
+    if not util.check_ssh_key(update_body['sshKey']):
+        return {"status" : "Incorrect ssh key format"}, 400
+    if not util.check_username(update_body['username']):
+        return {"status" : "Incorrect vm user format"}, 400
     
-    return proxmox.update_vm_credentials(vmid, body['username'], body['password'], body['sshKey'])
+    return proxmox.update_vm_credentials(vmid, update_body['username'], update_body['password'], update_body['sshKey'])
 
     
 
@@ -937,9 +939,9 @@ def get_account_state(username):
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
-    if admin and user_id == username: 
+    if admin and user_id.lower() == username.lower(): 
         return {"freezeState" : "0"}, 200 # we fake it
-    elif admin or user_id == username:
+    elif admin or user_id.lower() == username.lower():
         return proxmox.get_freeze_state(username)
     else :
         return {"error": "You are not allowed to check this account"}, 403

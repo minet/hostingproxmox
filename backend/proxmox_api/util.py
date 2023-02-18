@@ -10,6 +10,10 @@ from flask_cors import CORS
 import proxmox_api.config.configuration as  config 
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
+from proxmox_api.db.db_models import db
+
+if not bool(config.ADH6_API_KEY):
+    raise Exception("NO ADH6 API KEY GIVEN")
 
 
 def _deserialize(data, klass):
@@ -306,6 +310,7 @@ def create_app():
 
     app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
     app.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db.init_app(app.app)  
 
     return app
 
@@ -349,7 +354,7 @@ def get_adh6_account(username):
         for id in userInfoJson:
             accountJson = requests.get("https://adh6.minet.net/api/member/"+str(id), headers=headers) # memership info
             tmp_account = accountJson.json()
-            if tmp_account["username"] == username:
+            if tmp_account["username"].lower() == username.lower():
                 account = tmp_account
         print("account : ", account)
         return account, 200
@@ -357,3 +362,40 @@ def get_adh6_account(username):
 def adh6_search_user(username, headers):
     response = requests.get("https://adh6.minet.net/api/member/?limit=25&terms="+str(username), headers=headers) # [id], from ADH6 
     return None if response is None else response.json()
+
+
+# Subscribe on adh6 a user to the hosting mailing list
+def subscribe_to_hosting_ML(username):
+    print("Subscribe to hosting ML : " + username)
+    headers = {"X-API-KEY": config.ADH6_API_KEY}
+    userInfoJson = adh6_search_user(username, headers)
+    if userInfoJson is None or userInfoJson  == []: # not found
+        if "-" in username:
+            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+            new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
+            print("'"+new_username+"'")
+            return get_adh6_account(new_username)
+            
+        elif "_" in username: # same
+            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
+            new_username = username.replace("_",".").strip() # hosting replace by default _ with -. So we try if not found
+            print("'"+new_username+"'")
+            return get_adh6_account(new_username)
+        else :
+            print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
+            return {"error" : "the user " + username + " failed to be retrieved"}, 404
+    else : 
+        for id in userInfoJson:
+            accountJson = requests.get("https://adh6.minet.net/api/member/"+str(id), headers=headers) # memership info
+            tmp_account = accountJson.json()
+            if tmp_account["username"].lower() == username.lower():
+                current_ML_status = tmp_account["mailinglist"]
+                new_ML_status = int(str(bin(current_ML_status))[:-2] + "1" + str(bin(current_ML_status))[-1], 2) # Add 1 to the bit before the last one, no matter the old value
+                headers["Content-Type"] = "application/json"
+                response  = requests.put("https://adh6.minet.net/api/mailinglist/member/"+str(id), headers=headers, data=json.dumps({"value": new_ML_status}))
+                status = "OK"
+                if response.status_code != 200:
+                    status = "An unknown error occured"
+                return status, response.status_code
+    
+    return {"error" : "the user " + username + " failed to be retrieved"}, 404

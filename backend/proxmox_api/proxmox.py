@@ -191,8 +191,6 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
     if ip is None : 
         return {"error": "Impossible to attribute your IP address."}, 500
 
-
-
     template_node = ""
     try:
         print("oui")
@@ -209,7 +207,9 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
             database.add_user(user_id)
             check_update_cotisation(user_id)
             database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
+            util.subscribe_to_hosting_ML(user_id)
         else:
+            util.subscribe_to_hosting_ML(user_id)
             if len(database.get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(database.get_vm_list()) < configuration.TOTAL_VM_LIMIT:
                 database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
                 database.add_ip_to_history(ip, next_vmid, user_id)

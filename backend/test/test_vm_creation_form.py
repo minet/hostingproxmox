@@ -3,6 +3,8 @@ from proxmox_api import proxmox
 from test.conftest import *
 from proxmox_api.db import db_functions
 from proxmoxer import ProxmoxAPI
+from proxmox_api import util
+from unittest.mock import Mock
 
 def fake_next_available_vmid():
         return "999"
@@ -19,6 +21,9 @@ def fake_vm_config(vmid, node, password, vm_usermain_ssh_key, ip):
     return True
 def fake_check_update_cotisation(user_id):
     return {"freezeState": "1"}, 200
+
+
+
 
 
 
@@ -71,7 +76,7 @@ class _ProxmoxAPI:
     
 
 
-def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database):
+def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database, client):
     """Test case for creation of VM by a new user
     The creation does not concern proxmox
     """
@@ -80,12 +85,12 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database)
     
     
 
-    app = util.create_app()
-    db = SQLAlchemy()
-    db.init_app(app.app)
-    with app.app.app_context():
+  
+    with client:
         # Mocking 
+        fake_subscribe_to_hosting_ML = Mock()
         monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
+        monkeypatch.setattr(util, 'subscribe_to_hosting_ML', fake_subscribe_to_hosting_ML)
         monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)
         
         """proxmoxapi = ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER
@@ -96,6 +101,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database)
         node="kars"
         realProxmox = proxmox.proxmox
         proxmox.proxmox = _ProxmoxAPI(node, monkeypatch)
+        
         
         #monkeypatch.setattr(proxmox.proxmox, "nodes", lambda self, node: _ProxmoxAPI(node, monkeypatch))
         monkeypatch.setattr(proxmox, 'load_balance_server', fake_load_balance_server)
@@ -109,6 +115,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database)
         assert status == 201
         userVms = db_functions.get_vm_list(user_id=userId)
         assert len(userVms) == 1
+        fake_subscribe_to_hosting_ML.assert_called_once()
 
 
 

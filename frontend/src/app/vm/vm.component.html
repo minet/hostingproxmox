@@ -62,7 +62,7 @@ document.onload = loaded();
 
     </div>
 
-    <button id="openModalButton" data-toggle="modal" data-target="#restoreLabel" [hidden]="true">Open popup</button>
+    <button id="openModalButton" data-bs-toggle="modal" data-bs-target="#restoreLabel" [hidden]="true">Open popup</button>
     <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="restoreLabel" aria-hidden="true" id = "restoreLabel" data-show="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
@@ -76,8 +76,8 @@ document.onload = loaded();
             <p [innerHtml]="'vm.backup.popup.description.3' | translate" *ngIf="this.vm_has_proxmox_error || errorcode == 404"></p>
         </div>
         <div class="modal-footer .center">
-            <p><button type="button" class="btn btn-primary btn btn-danger" data-toggle="modal" data-target="#deleteVMModal">{{ 'vm.backup.popup.button.delete' | translate }}</button></p>
-            <p><button type="button" class="btn btn-primary btn btn-success" data-toggle="modal" data-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{ 'vm.backup.popup.button.restore' | translate }}</button></p>
+            <p><button type="button" class="btn btn-primary btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteVMModal">{{ 'vm.backup.popup.button.delete' | translate }}</button></p>
+            <p><button type="button" class="btn btn-primary btn btn-success" data-bs-toggle="modal" data-bs-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{ 'vm.backup.popup.button.restore' | translate }}</button></p>
             <p><a href="/vms"><button type="button" class="btn btn-secondary" >{{ 'vm.backup.popup.button.cancel' | translate }}</button></a></p>
         </div>
       </div>
@@ -89,15 +89,15 @@ document.onload = loaded();
   <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="restoreModalLabel">{{ "vm.backup.popup.title" | translate }} </h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <h3 class="modal-title" id="restoreModalLabel">{{ "vm.updateCreds.title" | translate }} </h3>
+        <button type="button" class="close" id="updateCloseButton" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p><strong class="text-alert">{{ "vm.backup.popup.button.explanation" | translate }}</strong> </p>
+        <p><strong class="text-alert" *ngIf="need_to_be_restored">{{ "vm.backup.popup.button.explanation" | translate }}</strong> </p>
         <div class="alert alert-danger" *ngIf="popUpErrorCode != 0">
-          <b>Error {{popUpErrorCode}} : {{popUpErrorMessage}}</b>
+          <p [innerHtml] = "popUpErrorMessage"></p>
         </div>
         <form (ngSubmit)="update_vm()">
           <div class="form-group">
@@ -114,13 +114,18 @@ document.onload = loaded();
           </div>
         </form>
 
-        <div class="alert alert-primary">
+        <div class="alert alert-primary" *ngIf="need_to_be_restored">
           <p [innerHtml]="'vm.updateCreds.charte' | translate"></p>
         </div>
+        <div class="alert alert-primary" *ngIf="!need_to_be_restored">
+          <p>{{ 'vm.updateCreds.info' | translate }}</p>
+        </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal" [disabled]="popUpLoading">{{ "vm.backup.popup.button.cancel" |translate }}</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" [disabled]="popUpLoading">{{ "vm.backup.popup.button.cancel" |translate }}</button>
   
-          <button  class="btn btn-success w-50" [disabled]="popUpLoading" (click)="update_vm_credentials()"><span [hidden]="popUpLoading" >{{ "vm.backup.popup.button.restore" | translate }}</span> <div class="spinner-border spinner-border-sm text-light" role="status" *ngIf="popUpLoading">
+          <button  class="btn btn-success w-50" [disabled]="popUpLoading" (click)="update_vm_credentials()">
+            <span [hidden]="popUpLoading" *ngIf="need_to_be_restored">{{ "vm.backup.popup.button.restore" | translate }}</span>
+            <span *ngIf="!need_to_be_restored">{{ "vm.backup.popup.button.update" | translate }}</span> <div class="spinner-border spinner-border-sm text-light" role="status" *ngIf="popUpLoading">
             <span class="sr-only">Loading...</span>
           </div></button>
         </div>
@@ -150,6 +155,7 @@ document.onload = loaded();
                                 <input type="checkbox" (change)="commit_edit('switch_autoreboot')" [checked]="user.vms[0].autoreboot === 1" class="custom-control-input" id="customSwitches">
                                 <label class="custom-control-label" for="customSwitches">{{'vm.startOnBootDescription' | translate}}</label>
                             </div>
+                            
                         </div>
                         <div class="col-6 text-left">
                             <p *ngIf="user.admin"><b>{{'vm.owner' | translate}} :</b> {{ user.vms[0].user }}</p>
@@ -158,6 +164,7 @@ document.onload = loaded();
 
                             <p *ngIf="user.vms[0].status == 'running'"><b>{{'vm.upTime' | translate}} :</b> {{secondsToDhms( user.vms[0].uptime )}}</p>
                         </div>
+                        <p><br><br><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{'vm.updateCreds.button' | translate}}</button></p>
                     </div>
                 </div>
             </div>
@@ -227,7 +234,7 @@ document.onload = loaded();
                 <div class="card-body">
                     <div class="btn-group">
                         <button type="button" *ngIf="(!vm_has_error && user.vms[0].status != 'creating') || vm_has_proxmox_error" class="btn btn-danger" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
-                        data-toggle="modal" data-target="#deleteVMModal">{{'vm.delete' | translate}}
+                        data-bs-toggle="modal" data-bs-target="#deleteVMModal">{{'vm.delete' | translate}}
                         </button>
                         <!-- <button type="button" class="btn btn-primary" *ngIf="!editing" (click)="edit()">Edit</button> -->
                         <!--<button type="button" class="btn btn-primary" *ngIf="editing" (click)="editing = false;">Confirm</button>-->
@@ -280,7 +287,7 @@ document.onload = loaded();
           <div class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title" id="popUpAlertTitle"> {{ 'vm.delete.popup.title' | translate }} {{ this.vmid }}</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -293,8 +300,8 @@ document.onload = loaded();
                   </form>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary btn-danger" [disabled]="this.input_vm_id != this.vmid" (click)="delete_vm()" data-dismiss="modal" >{{"vm.delete" | translate}} </button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary btn-danger" [disabled]="this.input_vm_id != this.vmid" (click)="delete_vm()" data-bs-dismiss="modal" >{{"vm.delete" | translate}} </button>
             </div>
           </div>
         </div>
