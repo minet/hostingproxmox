@@ -4,6 +4,7 @@ from test.conftest import *
 from proxmox_api.db import db_functions
 from proxmoxer import ProxmoxAPI
 from proxmox_api import util
+from unittest.mock import Mock
 
 def fake_next_available_vmid():
         return "999"
@@ -21,11 +22,8 @@ def fake_vm_config(vmid, node, password, vm_usermain_ssh_key, ip):
 def fake_check_update_cotisation(user_id):
     return {"freezeState": "1"}, 200
 
-SUBSCRIBED_TO_ML = False
 
-def fake_subscribe_to_hosting_ML(username):
-    SUBSCRIBED_TO_ML = True
-    return 200, {"status": "ok"}
+
 
 
 
@@ -90,6 +88,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database,
   
     with client:
         # Mocking 
+        fake_subscribe_to_hosting_ML = Mock()
         monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
         monkeypatch.setattr(util, 'subscribe_to_hosting_ML', fake_subscribe_to_hosting_ML)
         monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)
@@ -103,6 +102,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database,
         realProxmox = proxmox.proxmox
         proxmox.proxmox = _ProxmoxAPI(node, monkeypatch)
         
+        
         #monkeypatch.setattr(proxmox.proxmox, "nodes", lambda self, node: _ProxmoxAPI(node, monkeypatch))
         monkeypatch.setattr(proxmox, 'load_balance_server', fake_load_balance_server)
         monkeypatch.setattr(proxmox, 'config_vm', fake_vm_config)
@@ -115,7 +115,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database,
         assert status == 201
         userVms = db_functions.get_vm_list(user_id=userId)
         assert len(userVms) == 1
-        assert SUBSCRIBED_TO_ML == True
+        fake_subscribe_to_hosting_ML.assert_called_once()
 
 
 
