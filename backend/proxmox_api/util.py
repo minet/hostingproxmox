@@ -12,6 +12,9 @@ import proxmox_api.config.configuration as config
 from proxmox_api import encoder
 from proxmox_api.db.db_models import db
 
+if not bool(config.ADH6_API_KEY ):
+    raise Exception("NO ADH6 API KEY GIVEN")
+
 
 def _deserialize(data, klass):
     """Deserializes dict, list, str into an object.
