@@ -60,6 +60,7 @@ test_backend:
     - export PROXMOX_API_KEY_NAME=$PROXMOX_API_KEY_NAME
     - export PROXMOX_API_KEY=$PROXMOX_API_KEY
     - export PROXMOX_BACK_DB_DEV=$PROXMOX_BACK_DB_DEV
+    - export ADH6_API_KEY=$ADH6_API_KEY
     - cd backend/
     - export PYTHONPATH=$(pwd)
     - pip3 install -r requirements.txt
