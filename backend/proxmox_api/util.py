@@ -382,6 +382,7 @@ def subscribe_to_hosting_ML(username):
             print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
             return {"error" : "the user " + username + " failed to be retrieved"}, 404
     else : 
+        print("userInfoJson", userInfoJson)
         for id in userInfoJson:
             accountJson = requests.get("https://adh6.minet.net/api/member/"+str(id), headers=headers) # memership info
             tmp_account = accountJson.json()
