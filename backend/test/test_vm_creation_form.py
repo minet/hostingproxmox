@@ -23,7 +23,7 @@ def fake_check_update_cotisation(user_id):
 def fake_get_node_from_vm(vmid):
     return "node1",200
 
-def fake_config_vm(next_vmid, node, password, vm_user, main_ssh_key,ip):
+def fake_config_vm(next_vmid, node, password, cpu, ram, disk, vm_user, main_ssh_key,ip):
     return True
 
 class _ProxmoxAPIRessources:
