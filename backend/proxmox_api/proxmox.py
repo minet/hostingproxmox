@@ -170,7 +170,8 @@ def delete_from_proxmox(vmid, node) -> bool :
         Return 201 status code and continue to wait for the vm to be up.
         When it's up the VM is configurate. if there is an error while configurating, the
     """
-def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="no"):
+def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="", main_ssh_key="no"):
+    print("cpu, ram, disk", cpu, ram, disk)
     if not util.check_password_strength(password):
         return {"error" : "Incorrect password format"}, 400
     if not util.check_ssh_key(main_ssh_key):
@@ -195,14 +196,18 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 
     template_node = ""
     try:
-        print("oui")
         template_id = -1
-        if vm_type == "bare_vm":
-            template_id = 10003
+        if vm_type == "bare_vm" and disk == 10:
+            template_id = 1010
+        elif vm_type == "bare_vm" and disk == 20:
+            template_id = 1020
+        elif vm_type == "bare_vm" and disk == 30:
+            template_id = 1021
         elif vm_type == "nginx_vm":
             template_id = 10001
         else :
             return {"error": "vm type not defines"}, 400
+        print("template_id", template_id)
 
         user = database.get_user_list(user_id=user_id)
         if user is None:
@@ -216,11 +221,10 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
             else:
                 return {"error": "error, can not create more VMs"}, 500
         
-        for vm in proxmox.cluster.resources.get(type="vm"):
-            if vm["vmid"] == template_id:
-                template_node = vm["node"]
-        print("template_node", template_node)
-        print("template_id", template_id)
+        template_node, status =  get_node_from_vm(template_id)
+        if status != 200:
+            return {"error": "Impossible to find the template"}, 500
+        print("befire clone")
         proxmox.nodes(template_node).qemu(template_id).clone.create(
             name=name,
             newid=next_vmid,
@@ -228,21 +232,23 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
             full=1,
             storage="tmp_replicated_2_times"
         )
+        print("after clone")
+
 
 
 
     except Exception as e:
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
-        delete_from_db(next_vmid)
         delete_from_proxmox(next_vmid, node)
+        delete_from_db(next_vmid)
         return {"error": "Impossible to create the VM (cloning)"}, 500
 
 
     if not util.update_vm_state(next_vmid, "creating"):
         print("Problem while updating the vm status")
         return {"error": "Impossible to update the VM status"}, 500
-    Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key,ip,  )).start()
+    Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key,ip,cpu, ram, )).start()
     
     return {"vmId": next_vmid}, 201
 
@@ -251,7 +257,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
 """After the vm creation (ie the vm clone) we wait for it to be up to config it
 When the VM is up, the password, vm user name and ssh key are set up
 """
-def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
+def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
     print("configuring vm")
     sync = False
     vm = proxmox.nodes(node).qemu(vmid)
@@ -264,87 +270,34 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
         except ResourceException:  # Exception si pas encore synchronisés
             sleep(1)
 
-
-
-
-
+    if cpu == 2 or cpu % 2 == 1:
+        vm_socket = 1
+        vm_cores = cpu
+    else :
+        vm_socket = 2
+        vm_cores = int(cpu//2)
+    vm_ram = int(float(ram))*1024
+    print("vm_socket, vm_cores, vm_ram", vm_socket, vm_cores, vm_ram)
     try:
         vm.config.create(
-            cipassword=password
-        )
-    except Exception as e:
-        logging.error("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
-        print("Problem in create_vm(" + str(vmid) + ") when setting password: " + str(e))
-        delete_from_db(vmid)
-        delete_from_proxmox(vmid, node)
-        util.update_vm_state(vmid,"An error occured while setting your password (vmid ="+str(vmid) +")", errorCode=500)
-
-
-    try:
-        vm.config.create(
-            ciuser=vm_user
-        )
-    except Exception as e:
-        delete_from_db(vmid)
-        delete_from_proxmox(vmid, node)
-        util.update_vm_state(vmid,"An error occured while creating the user  (vmid ="+str(vmid) +")", errorCode=500)
-        logging.error("Problem in create_vm(" + str(vmid) + ") when setting user: " + str(e))
-        print("Problem in create_vm(" + str(vmid) + ") when setting user: " + str(e))
-    
-    try:
-        vm.config.create(
+            cipassword=password,
+            ciuser=vm_user,
             searchdomain="minet.net",
-            nameserver="157.159.195.51"
+            nameserver="157.159.195.51",
+            ipconfig0= "ip=" + str(ip)+"/24,gw=157.159.195.1",
+            sshkeys=urllib.parse.quote(main_ssh_key, safe=''),
+            sockets=vm_socket,
+            cores=vm_cores,
+            memory=vm_ram
         )
     except Exception as e:
+        logging.error("Problem in create_vm(" + str(vmid) + ") when configuring vm: " + str(e))
+        print("Problem in create_vm(" + str(vmid) + ") when configuring vm: " + str(e))
         delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
-        util.update_vm_state(vmid,"An error occured while setting the DNS (vmid ="+str(vmid) +")", errorCode=500)
-        logging.error("Problem in create_vm(" + str(vmid) + ") when setting DNS: " + str(e))
-        print("Problem in create_vm(" + str(vmid) + ") when setting DNS: " + str(e))
+        util.update_vm_state(vmid,"An error occured while configuring vm (vmid ="+str(vmid) +")", errorCode=500)
 
-    try:
-        vm.config.create(
-            ipconfig0= "ip=" + str(ip)+"/24,gw=157.159.195.1"
-        )
-    except Exception as e:
-        delete_from_db(vmid)
-        delete_from_proxmox(vmid, node)
-        util.update_vm_state(vmid,"An error occured while setting the ip (vmid ="+str(vmid) +")", errorCode=500)
-        logging.error("Problem in create_vm(" + str(vmid) + ") when setting ip: " + str(e))
-        print("Problem in create_vm(" + str(vmid) + ") when setting ip: " + str(e))
-
-
-    try:
-        vm.config.create(
-            sshkeys=urllib.parse.quote(main_ssh_key, safe='')
-        )
-    except Exception as e:
-        delete_from_db(vmid)
-        delete_from_proxmox(vmid, node)
-        util.update_vm_state(vmid,"An error occured while setting your ssh key (vmid ="+str(vmid) +")", errorCode=500)
-        logging.error("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
-        print("Problem in create_vm(" + str(vmid) + ") when setting ssh key: " + str(e))
-
-    # We give an ip to the VM before it starts
-    #try :
-    #        dbVM = get_vm_db_info()
-    #        print("dbVM = " , dbVM)
-    #        (body, status) = update_vm_ip_address(dbVM, node, debug=True)
-    #        if status != 201:
-    #            update_vm_state(vmid,"An error" + str(status) + " occured while setting your ip #address (vmid ="+str(vmid) +")",errorCode=500)
-    #            logging.error("Problem in create_vm(" + str(vmid) + ") when updating ips")
-    #            print("Problem in create_vm(" + str(vmid) + ") when updating ips: " ,body, status )
-    #            with app.app.app_context():
-                    #return delete_vm(vmid, node, dueToError=True)
-    #       
-    #except Exception as e: 
-    #    update_vm_state(vmid,"An unkonwn error occured while setting your ip address (vmid ="+str#(vmid) +")", errorCode=500)
-    #    logging.error("Problem in create_vm(" + str(vmid) + ") when updating ips." )
-    #    print("Problem in create_vm(" + str(vmid) + ") when updating ips: ", e )
-    #    #with app.app.app_context():
-            #return delete_vm(vmid, node, dueToError=True)
-    #    return 1
+    print("vm configured")
 
     try:
         vm.status.start.create()
@@ -355,12 +308,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
         util.update_vm_state(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
-
-
-    
-    #mac = get_vm_hardware_address(vmid, node)
-    #update_vm_mac(vmid, mac)
-
+    print("vm started")
     try : 
         for k in proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").get():  # on vire d'abord toutes leip set
             cidr = k['cidr']
@@ -374,7 +322,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
         util.update_vm_state(vmid,"An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
-
+    print("firewall set")
 
     # if we are here then the VM is well created
     util.update_vm_state(vmid, "created")
