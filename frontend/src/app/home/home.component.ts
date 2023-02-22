@@ -251,7 +251,7 @@ export class HomeComponent implements OnInit {
           ssh: true,
           cpu: this.nb_cpu_selected,
           ram: this.nb_ram_selected,
-          storage: this.nb_storage_selected
+          disk: this.nb_storage_selected
         };
       this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).   subscribe(rep => {
         this.errorMessage = ""
