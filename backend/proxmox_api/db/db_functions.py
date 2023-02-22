@@ -129,7 +129,6 @@ def add_vm(id, user_id, type, mac, ip):
 
 
 def del_vm_list(del_vmid):
-    print("del vm list")
     Vm.query.filter_by(id=del_vmid).delete()
     db.session.commit()
 
