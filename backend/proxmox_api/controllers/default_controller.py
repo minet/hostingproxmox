@@ -108,7 +108,35 @@ def create_vm(body=None):  # noqa: E501
 
     if connexion.request.is_json:
         body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
-    return proxmox.create_vm(body.name, body.type, user_id, body.password, body.user, body.ssh_key)
+        print(body)
+    try :
+        if body.cpu == 0 or body.ram == 0 or body.disk == 0:
+            return {"error": "Impossible to create a VM without CPU, RAM or disk"}, 400
+    except Exception as e:
+        return {"error": "Impossible to create a VM without CPU, RAM or disk. No data transmitted"}, 400
+    
+    alreadyUsedCPU = 0
+    alreadyUsedRAM = 0
+    alreadyUsedDisk = 0
+    userVms, status = proxmox.get_vm(user_id=user_id)
+    if status != 200:
+        return {"error": "Error while getting your other VMs"}, 500
+    for vmid in userVms:
+        node, status = proxmox.get_node_from_vm(vmid)
+        if status != 200:
+            return {"error": "Error while getting your other VMs ressources"}, 500
+        vm, status = proxmox.get_vm_config(vmid, node)
+        print("vm, status", vm, status)
+        if status != 201:
+            return vm, status
+        alreadyUsedCPU += vm["cpu"]
+        alreadyUsedRAM += vm["ram"]
+        alreadyUsedDisk += vm["disk"]
+    print(alreadyUsedCPU, alreadyUsedRAM, alreadyUsedDisk)
+    if alreadyUsedCPU + body.cpu > 6 and alreadyUsedRAM + body.ram > 8 and alreadyUsedDisk + body.disk > 30:
+        return {"error": "You have already used all your resources"}, 403
+
+    return proxmox.create_vm(body.name, body.type, user_id, body.cpu, body.ram, body.disk, body.password, body.user, body.ssh_key, )
 
 def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error occured
     """delete vm by id where an error occured
