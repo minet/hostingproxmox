@@ -7,7 +7,7 @@ from time import sleep
 
 
 VMID = 9998
-DISK_SIZE = 20
+DISK_SIZE = 30
 
 @pytest.mark.dependency(name="clean")
 def test_old_vm_deletion(init_vm_database):
