@@ -224,7 +224,6 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
         template_node, status =  get_node_from_vm(template_id)
         if status != 200:
             return {"error": "Impossible to find the template"}, 500
-        print("befire clone")
         proxmox.nodes(template_node).qemu(template_id).clone.create(
             name=name,
             newid=next_vmid,
@@ -232,7 +231,6 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
             full=1,
             storage="tmp_replicated_2_times"
         )
-        print("after clone")
 
 
 
