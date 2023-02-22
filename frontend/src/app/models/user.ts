@@ -16,15 +16,7 @@ export class User {
     public usedCPU?: number;
     public usedRAM?: number;
     public usedStorage?: number;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
     public availableCPU?: number;
     public availableRAM?: number;
     public availableStorage?: number;
->>>>>>> 6ce4559 (Add prototype of dynamix ressources form in hom component)
-=======
->>>>>>> 2e6418c (Add two pages when creating a vm, the cm creation works but there is no consequences)
-=======
->>>>>>> 6bb94d6407cbe15e33090edc40c1fa820cb5a6bc
 }
