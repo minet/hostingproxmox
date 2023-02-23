@@ -212,10 +212,10 @@
                         </div>
                         
                         
-                    <div [hidden]="!display_ressource_configuration">
+                    <div [hidden]="!display_ressource_configuration || loading">
                         
                     <p class="lead">Configurer votre VM</p>
-                    <form (ngSubmit)="create_vm(vm)" #vmForm="ngForm">
+                    <form #vmForm="ngForm">
                         <div class="d-flex justify-content-between">
                             <div>
                                 <h5><label for="customRange3" class="form-label">Nombre de CPU : <span class="badge         text-bg-primary">{{nb_cpu_selected}} CPUs</span>
@@ -254,8 +254,8 @@
                             </div>
 
                             <br><br><button class="btn btn-secondary text-center" style="margin-right: 10px;" (click)="back_from_ressource_conf_page()" [disabled]="loading">Retour</button>
-                            <button [disabled]="nb_storage_selected == 0 || nb_ram_selected == 0 || nb_ram_selected == 0" type="submit"
-                                    class="btn btn-primary text-center" [disabled]="loading">Créer ma VM
+                            <button [disabled]="nb_storage_selected == 0 || nb_ram_selected == 0 || nb_cpu_selected == 0 || loading" type="submit"
+                                    class="btn btn-primary text-center" (click)="create_vm(vm)" >Créer ma VM
                             </button>
                             
                         </div>
