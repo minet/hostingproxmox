@@ -93,7 +93,7 @@ export class HomeComponent implements OnInit {
         this.user.usedCPU = 0;
         this.user.usedRAM = 0;
         this.user.usedStorage =0;
-        this.count_vm();
+        this.count_ressources();
       }
       if(this.user.admin) {
         this.count_dns();
@@ -363,10 +363,10 @@ export class HomeComponent implements OnInit {
 
 
 
-  count_vm(): void {
+  count_ressources(): void {
     console.log("cpu", this.nb_cpu_max -  this.user.usedCPU)
       let vmList: Array<string>;
-      this.countvm = 0;
+
        this.countactivevm = 0;
       this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
         console.log(rep)
@@ -374,7 +374,7 @@ export class HomeComponent implements OnInit {
         for (let i = 0; i < vmList.length; i++) {
           const vmid = vmList[i];
           this.countvm++;
-          this.new_vmstatus(vmid);
+          this.new_vmconfig(vmid);
         }
       },
 
@@ -386,9 +386,9 @@ export class HomeComponent implements OnInit {
   }
 
   /*
-    Check the vm status (vmid). If it's started, the number of active vm is added to 1
+    Check the vm status (vmid). If it's started, the number of active vm is added to 1 and the ressource is added
   */
-  new_vmstatus(vmid: string): void {
+    new_vmconfig(vmid: string): void {
     const vm = new Vm();
     vm.id = vmid;
     this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {

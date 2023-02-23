@@ -75,15 +75,12 @@
                 </div>
             <br>
             <hr>
-            <div class="alert alert-warning text-center" *ngIf="countvm >= maxVmPerUser">
-                <b>{{'home.createVm.error.maxVmAlready_1' | translate}} {{ countvm }} {{'home.createVm.error.maxVmAlready_2' | translate}}</b>
-                <p>{{'home.createVm.error.maxVmAlready_3' | translate}}
-            </div>
-            <div class="alert alert-secondary text-center" *ngIf="countvm < maxVmPerUser">
-                <b>{{'home.createVm.numberMoreVm_1' | translate}} {{ maxVmPerUser - countvm}} {{'home.createVm.numberMoreVm_2' | translate}}</b>
+            <div class="alert alert-warning text-center" *ngIf="this.user.usedCPU == nb_cpu_max or this.user.usedRAM == nb_ram_max or  this.user.usedStorage == nb_storage_max">
+                <b>{{'home.createVm.error.maxVmAlready_1' | translate}} </b>
+                <p>{{'home.createVm.error.maxVmAlready_2' | translate}}
             </div>
 
-            <div class="card mb-3" *ngIf="countvm < maxVmPerUser">
+            <div class="card mb-3" *ngIf="this.user.usedCPU != nb_cpu_max && this.user.usedRAM != nb_ram_max &&  this.user.usedStorage != nb_storage_max">
                 <h4 class="card-header">
                     {{'home.createVm.form.title' | translate}}
                 </h4>
