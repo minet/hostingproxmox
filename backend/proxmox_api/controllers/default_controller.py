@@ -64,7 +64,18 @@ def create_dns(body=None):  # noqa: E501
     if not util.check_dns_entry(body.entry):
         print("INCIDENT REPORT : The user ( id " , str(user_id) , ") overrided frontend security to submit a forbidden DNS entry : " , body.entry, "for ip", body.ip  )
         return {"error" : "This DNS entry is forbidden. This incident will be reported."}, 403
-
+    
+    isOk = proxmox.check_dns_ip_entry(user_id, body.ip)
+    if isOk is None :
+        return {"error": "An error occured while checking your ip addresses. Please try again."}, 500
+    elif not isOk and not admin:
+        return {"error": "This ip address isn't associated to one of your vms. This is illegal. This incident will be reported."}, 403
+    elif admin : 
+        vmWithIp = get_vm_from_ip(body.ip)
+        if vmWithIp is None :
+            return {"error": "This ip address isn't associated to one vms."}, 400
+        print(vmWithIp)
+        user_id = vmWithIp.userId
     return proxmox.add_user_dns(user_id, body.entry, body.ip)
 
 

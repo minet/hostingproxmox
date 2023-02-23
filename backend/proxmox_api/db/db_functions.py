@@ -47,6 +47,11 @@ def update_vm_userid(vmid, userid):
     vm.userId = userid
     db.session.commit()
 
+# Retrieve the VM from the DB using the IP
+def get_vm_from_ip(ip):
+    return Vm.query.filter_by(ip=ip).first()
+
+
 # Return all the VM of an user
 def get_vm_list(user_id=""): 
     if user_id != "":  # dans ce cas on affiche ce qui est lié à l'user
