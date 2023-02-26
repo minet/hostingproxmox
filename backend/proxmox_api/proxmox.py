@@ -171,7 +171,6 @@ def delete_from_proxmox(vmid, node) -> bool :
         When it's up the VM is configurate. if there is an error while configurating, the
     """
 def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="", main_ssh_key="no"):
-    print("cpu, ram, disk", cpu, ram, disk)
     if not util.check_password_strength(password):
         return {"error" : "Incorrect password format"}, 400
     if not util.check_ssh_key(main_ssh_key):
@@ -207,7 +206,6 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
             template_id = 10001
         else :
             return {"error": "vm type not defines"}, 400
-        print("template_id", template_id)
 
         user = database.get_user_list(user_id=user_id)
         if user is None:
@@ -256,7 +254,7 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
 When the VM is up, the password, vm user name and ssh key are set up
 """
 def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
-    print("configuring vm")
+    success = True
     sync = False
     vm = proxmox.nodes(node).qemu(vmid)
     while not sync:  # Synchronisation
@@ -275,7 +273,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         vm_socket = 2
         vm_cores = int(cpu//2)
     vm_ram = int(float(ram))*1024
-    print("vm_socket, vm_cores, vm_ram", vm_socket, vm_cores, vm_ram)
     try:
         vm.config.create(
             cipassword=password,
@@ -289,10 +286,11 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
             memory=vm_ram
         )
     except Exception as e:
+        success = False
         logging.error("Problem in create_vm(" + str(vmid) + ") when configuring vm: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when configuring vm: " + str(e))
-        delete_from_db(vmid)
         delete_from_proxmox(vmid, node)
+        delete_from_db(vmid)
         util.update_vm_state(vmid,"An error occured while configuring vm (vmid ="+str(vmid) +")", errorCode=500)
 
     print("vm configured")
@@ -301,8 +299,9 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         vm.status.start.create()
 
     except Exception as e:
-        delete_from_db(vmid)
+        success = False
         delete_from_proxmox(vmid, node)
+        delete_from_db(vmid)
         util.update_vm_state(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
@@ -315,15 +314,18 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").create(cidr=ip)
         #db.session.commit()
     except Exception as e:
-        delete_from_db(vmid)
+        success = False
         delete_from_proxmox(vmid, node)
+        delete_from_db(vmid)
         util.update_vm_state(vmid,"An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
     print("firewall set")
 
-    # if we are here then the VM is well created
-    util.update_vm_state(vmid, "created")
+    if success:
+        util.update_vm_state(vmid, "created")
+    else : 
+        util.update_vm_state(vmid, "An error occured while creating your vm", errorCode=500)
 
 
 def start_vm(vmid, node):
@@ -728,12 +730,10 @@ def get_freeze_state(username):
     #print(msg)
     #sendMail("nathanstchepinsky@gmail.com", msg)
     user = database.get_user_list(user_id=username)
-    print(username, user)
     if user is None:
         return {"freezeState" : "0"}, 200 # user doesn't exist so we fake the freezestatus
     try :
         freezeState = database.getFreezeState(username)
-        print("freezeState : ", freezeState)
     except Exception as e :
         print(e)
         return {"freeztatus" : "unknown"}, 404 # User doesn't exist, we fake the freeze state to 0.0
@@ -743,11 +743,9 @@ def get_freeze_state(username):
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
     else:
-        print(freezeState)
         check_update_cotisation(username)
         freezeState = database.getFreezeState(username) # if expired with update in case of re-cotisation
         status = freezeState.split(".")[0]
-        print(status)
         return {"freezeState" : status}, 200
 
 """func called by jobs. For all user, it calls a function to check if the user has a cotisation. 
