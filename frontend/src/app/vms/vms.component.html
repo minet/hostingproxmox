@@ -52,8 +52,8 @@
         <div *ngIf="user.admin">
         <div class="input-group">
             <br><br>
-            <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" [(ngModel)]="this.searchFilter" />
-            <button type="button" class="btn btn-outline-primary" (click)="get_vms()">search</button>
+            <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" [(ngModel)]="this.searchFilter"  />
+            <button type="button" class="btn btn-outline-primary" (click)="get_vms()" [disabled]="loading" >Search <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" *ngIf="loading"></span></button>
             <br>
         </div>
           </div>

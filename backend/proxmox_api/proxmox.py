@@ -499,8 +499,12 @@ def get_vm(user_id = 0, search=None):
             for user in user_filtered:
                 vm_filtered_list += database.get_vm_list(user_id = user.id)
             start = time.time()
-            vm_list = database.get_vm_list() # get all vm vut only id
+            vm_list = database.get_vm_list() # get all vm but only id
             for vmid in vm_list:
+                print("vmid = ", vmid)
+                print("search = ", search)
+                if search in str(vmid):
+                    vm_filtered_list.append(vmid)
                 node, status = get_node_from_vm(vmid)
                 if status == 200:
                     if status != 200:
