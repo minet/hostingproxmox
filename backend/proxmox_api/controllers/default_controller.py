@@ -108,7 +108,6 @@ def create_vm(body=None):  # noqa: E501
 
     if connexion.request.is_json:
         body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
-        print(body)
     try :
         if body.cpu == 0 or body.ram == 0 or body.disk == 0:
             return {"error": "Impossible to create a VM without CPU, RAM or disk"}, 400
@@ -126,13 +125,11 @@ def create_vm(body=None):  # noqa: E501
         if status != 200:
             return {"error": "Error while getting your other VMs ressources"}, 500
         vm, status = proxmox.get_vm_config(vmid, node)
-        print("vm, status", vm, status)
         if status != 201:
             return vm, status
         alreadyUsedCPU += vm["cpu"]
         alreadyUsedRAM += vm["ram"]
         alreadyUsedDisk += vm["disk"]
-    print(alreadyUsedCPU, alreadyUsedRAM, alreadyUsedDisk)
     if alreadyUsedCPU + body.cpu > 6 and alreadyUsedRAM + body.ram > 8 and alreadyUsedDisk + body.disk > 30:
         return {"error": "You have already used all your resources"}, 403
 
@@ -424,14 +421,16 @@ def get_vm_id(vmid):  # noqa: E501
 
     
     vm_state = util.get_vm_state(vmid)
+    print("vm_state : ", vm_state)
     if vm_state != None : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
+        
         (status, httpErrorCode, errorMessage) = vm_state 
         if status == "error":
             util.update_vm_state(vmid, "delete", deleteEntry= True) # We send to the user and delete here
             try : 
-                return {"error", errorMessage}, httpErrorCode
+                return {"error": errorMessage}, int(httpErrorCode)
             except: 
-                return {"error", "An unknown error occured"}, 500
+                return {"error":  "An unknown error occured"}, 500
         elif not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin: # we authorize to consult error message
             return {"error": "You don't have the right permissions"}, 403
         elif status == "creating" : 
