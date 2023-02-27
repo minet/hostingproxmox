@@ -33,12 +33,8 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(nam
 
 
 def add_user_dns(user_id, entry, ip):
-    # First we check if the user own the ip
-    isOk = check_dns_ip_entry(user_id, ip)
-    if isOk is None :
-        return {"error": "An error occured while checking your ip addresses. Please try again."}, 500
-    elif not isOk :
-        return {"error": "This ip address isn't associated to one of your vms. This is illegal. This incident will be reported."}, 403
+    
+    
 
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
@@ -503,8 +499,12 @@ def get_vm(user_id = 0, search=None):
             for user in user_filtered:
                 vm_filtered_list += database.get_vm_list(user_id = user.id)
             start = time.time()
-            vm_list = database.get_vm_list() # get all vm vut only id
+            vm_list = database.get_vm_list() # get all vm but only id
             for vmid in vm_list:
+                print("vmid = ", vmid)
+                print("search = ", search)
+                if search in str(vmid):
+                    vm_filtered_list.append(vmid)
                 node, status = get_node_from_vm(vmid)
                 if status == 200:
                     if status != 200:
@@ -554,7 +554,6 @@ def get_node_from_vm(vmid):
                 except Exception as e:
                     logging.error("Problem in get_node_from_vm(" + str(vmid) + ") when getting VM node: " + str(e))
                     return {"cpu": "error"}, 500
-        print("node = ", node)
         if node == "":
             return {"get_node": "Vm not found"}, 404 
         else : 
@@ -782,12 +781,10 @@ def get_freeze_state(username):
     #print(msg)
     #sendMail("nathanstchepinsky@gmail.com", msg)
     user = database.get_user_list(user_id=username)
-    print(username, user)
     if user is None:
         return {"freezeState" : "0"}, 200 # user doesn't exist so we fake the freezestatus
     try :
         freezeState = database.getFreezeState(username)
-        print("freezeState : ", freezeState)
     except Exception as e :
         print(e)
         return {"freeztatus" : "unknown"}, 404 # User doesn't exist, we fake the freeze state to 0.0
@@ -797,11 +794,9 @@ def get_freeze_state(username):
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
     else:
-        print(freezeState)
         check_update_cotisation(username)
         freezeState = database.getFreezeState(username) # if expired with update in case of re-cotisation
         status = freezeState.split(".")[0]
-        print(status)
         return {"freezeState" : status}, 200
 
 """func called by jobs. For all user, it calls a function to check if the user has a cotisation. 

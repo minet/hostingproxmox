@@ -101,7 +101,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text" id="ip-address-prepend">{{'dns.form.ip' | translate}}</span>
                 </div>
-                <select class="form-control" id="ip"
+                <select class="form-control" id="ip" *ngIf="!user.admin"
                                             aria-label="IP Address"
                                             aria-describedby="ip-address-prepend"
                                             required="required"
@@ -110,10 +110,16 @@
                       <option *ngFor="let myip of ipList" [value]="myip">{{myip}}</option>
                                         
                   </select>
+                  <input type="text" class="form-control" id="ip" *ngIf="user.admin"
+                                            aria-label="IP Address"
+                                            aria-describedby="ip-address-prepend"
+                                            required="required"
+                                            [(ngModel)]="newDns.ip" name="ip"
+                                            #ip="ngModel">
 
               </div>
 
-              <div [hidden]="ip.valid || ip.pristine" class="alert alert-danger">
+              <div [hidden]="ip.valid || ip.pristine" class="alert alert-danger" *ngIf="!user.admin">
                 {{'dns.form.error.ip' | translate}}
               </div>
             </div>
