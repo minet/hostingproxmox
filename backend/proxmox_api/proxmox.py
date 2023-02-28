@@ -212,11 +212,10 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
             else:
                 return {"error": "error, can not create more VMs"}, 500
         
-        for vm in proxmox.cluster.resources.get(type="vm"):
-            if vm["vmid"] == template_id:
-                template_node = vm["node"]
-        print("template_node", template_node)
-        print("template_id", template_id)
+        template_node, status =  get_node_from_vm(template_id)
+        if status != 200:
+            return {"error": "Impossible to find the template"}, 500
+
         proxmox.nodes(template_node).qemu(template_id).clone.create(
             name=name,
             newid=next_vmid,
