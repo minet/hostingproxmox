@@ -23,7 +23,8 @@ def fake_check_update_cotisation(user_id):
     return {"freezeState": "1"}, 200
 
 
-
+def fake_get_node_from_vm(vmid):
+    return "wammu",200
 
 
 
@@ -108,10 +109,13 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database,
         monkeypatch.setattr(proxmox, 'config_vm', fake_vm_config)
         monkeypatch.setattr(proxmox, 'check_update_cotisation', fake_check_update_cotisation)
         monkeypatch.setattr(proxmox, 'config_vm', fake_config_vm)
+        monkeypatch.setattr(proxmox, 'config_vm', fake_config_vm)
+        monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
 
         userId = "new-user6"
         body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", userId, password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
         proxmox.proxmox = realProxmox
+        print("body=",body)
         assert status == 201
         userVms = db_functions.get_vm_list(user_id=userId)
         assert len(userVms) == 1
