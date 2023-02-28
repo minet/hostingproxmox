@@ -361,7 +361,14 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip):
             cidr = k['cidr']
             proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").delete(cidr)
          # on met l'ipset à jour :
-        proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").create(cidr=ip)
+        try:
+            proxmox.nodes(node).qemu(vmid).firewall.ipset.hosting.get()
+        except:
+            proxmox.nodes(node).qemu(vmid).firewall.ipset.create(name="hosting")
+        try:
+            proxmox.nodes(node).qemu(vmid).firewall.ipset.hosting(ip).get()
+        except:
+            proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").create(cidr=ip)
         #db.session.commit()
     except Exception as e:
         delete_from_db(vmid)
