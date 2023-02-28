@@ -192,7 +192,7 @@ def create_vm(name, vm_type, user_id, password="no", vm_user="", main_ssh_key="n
         print("oui")
         template_id = -1
         if vm_type == "bare_vm":
-            template_id = 10003
+            template_id = 1010
         elif vm_type == "nginx_vm":
             template_id = 10001
         else :
