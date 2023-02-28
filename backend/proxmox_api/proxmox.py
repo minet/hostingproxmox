@@ -307,9 +307,9 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         print("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
     print("vm started")
     try : 
-        for k in proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").get():  # on vire d'abord toutes leip set
-            cidr = k['cidr']
-            proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").delete(cidr)
+        #for k in proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").get():  # on vire d'abord toutes leip set
+        #    cidr = k['cidr']
+        #    proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").delete(cidr)
          # on met l'ipset à jour :
         proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").create(cidr=ip)
         #db.session.commit()
