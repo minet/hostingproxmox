@@ -84,8 +84,8 @@ install_dependencies_angular:
   before_script:
     - npm config rm proxy
     - npm config rm https-proxy
-    - npm config set proxy "http://192.168.102.61:82/"
-    - npm config set https-proxy "http://192.168.102.61:82/"
+    - npm config set proxy "$HTTP_PROXY"
+    - npm config set https-proxy "$HTTPS_PROXY"
     - cd frontend
   script:
     - npm ci --prefer-offline --no-audit
@@ -105,8 +105,8 @@ angular_build:
     - npm cache clean --force  
     - npm config rm proxy
     - npm config rm https-proxy
-    - npm config set proxy "http://192.168.102.61:82/"
-    - npm config set https-proxy "http://192.168.102.61:82/"
+    - npm config set proxy "$HTTP_PROXY"
+    - npm config set https-proxy "$HTTP_PROXY"
     - npm cache clear --force
     - cd frontend
     - NG_CLI_ANALYTICS=ci
@@ -124,8 +124,8 @@ deploy_backend:
   needs :
     - angular_build
   before_script:
-    - export http_proxy="http://192.168.104.61:82/"
-    - export https_proxy="http://192.168.104.61:82/"
+    - export http_proxy="$HTTP_PROXY"
+    - export https_proxy="$HTTPS_PROXY"
     - cd backend
     - pip3 install -r requirements.txt
     - sudo /bin/systemctl stop proxmox_api
@@ -163,8 +163,8 @@ deploy_backend_dev:
   needs:
     - angular_build
   before_script:
-    - export http_proxy="http://192.168.104.61:82/"
-    - export https_proxy="http://192.168.104.61:82/"
+    - export http_proxy="$HTTP_PROXY"
+    - export https_proxy="$HTTPS_PROXY"
     - cd backend
     - pip3 install -r requirements.txt 
     - sudo /bin/systemctl stop proxmox_api
