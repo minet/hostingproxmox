@@ -5,12 +5,11 @@
         <div class="text-center">
             <img id="logo" class="mb-3" style="height: 150px" src="assets/images/minet.png">
             <div class="alert alert-success" role="alert">
-                <p>Welcome to MiNET's new hosting service. It is still in beta, please report any problem
-                    to our <a href="mailto:webmaster@listes.minet.net"> webmaster</a>.</p>
-                <p>This service is free if you already own a MiNET account. Otherwise, please use <a
-                        href="https://payment.minet.net"> payment.minet.net </a> to get a subscription.
+                <p>{{'app.component.welcom' | translate }} <a href="mailto:webmaster@listes.minet.net"> webmaster</a>!</p>
+                <p>{{'app.component.pricing' | translate }} <a
+                        href="https://payment.minet.net"> payment.minet.net </a> {{ 'app.component.getsub' | translate }}
                 </p>
-                <a href="#" class="btn btn-primary" role="button" (click)="userService.login()">Get started</a>
+                <a href="#" class="btn btn-primary" role="button" (click)="userService.login()">{{ 'app.component.getstarted' | translate }}</a>
             </div>
         </div>
         <hr>
@@ -19,7 +18,7 @@
                 <div class="card">
                     <div class="card-body text-center p-5">
                         <img style="height: 55px" class="mb-3" src="assets/images/server.png">
-                        <p>Create a Virtual Machine or a Web Server ready to use.</p>
+                        <p>{{ 'app.component.boxfeature1' | translate}}</p>
                     </div>
                 </div>
             </div>
@@ -27,7 +26,7 @@
                 <div class="card">
                     <div class="card-body text-center p-5">
                         <img style="height: 55px" class="mb-3" src="assets/images/domain.png">
-                        <p>Register a DNS record pointing to your Virtual Machine.</p>
+                        <p>{{ 'app.component.boxfeature2' | translate}}</p>
                     </div>
                 </div>
             </div>
@@ -35,7 +34,7 @@
                 <div class="card">
                     <div class="card-body text-center p-5">
                         <img style="height: 55px" class="mb-3" src="assets/images/question.png">
-                        <p>Contact our <a href="mailto:webmaster@listes.minet.net"> webmaster</a> for any information.</p>
+                        <p>{{ 'app.component.boxfeature3-1' | translate}}<a href="mailto:webmaster@listes.minet.net"> webmaster</a> {{ 'app.component.boxfeature3-2' | translate}}</p>
                     </div>
                 </div>
             </div>
