@@ -165,6 +165,7 @@ deploy_backend_dev:
   before_script:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
+    - export no_proxy="gitlabint.priv.minet.net,192.168.102.2"
     - cd backend
     - pip3 install -r requirements.txt 
     - sudo /bin/systemctl stop proxmox_api
