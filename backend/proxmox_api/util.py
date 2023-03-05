@@ -201,7 +201,7 @@ def check_username(username:str) -> bool:
 """
 def check_dns_entry(entry:str) -> bool:
     forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"]
-    allowed = "^[a-zA-Z0-9]*$"
+    allowed = "^[a-zA-Z0-9-._]*$"
     return entry != "" and re.search(allowed, entry) and entry not in forbidden_entries
 
 
