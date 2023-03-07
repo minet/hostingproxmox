@@ -16,6 +16,7 @@ export class Vm {
     public cpuUsage?: string,
     public uptime?: string,
     public createdOn?: string,
+    public isUnsecure?: boolean,
 
   ) { }
 
