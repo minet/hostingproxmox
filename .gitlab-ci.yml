@@ -79,7 +79,6 @@ install_dependencies_angular:
   stage: dependencies
   image: node
   needs : 
-   - test_backend
    - angular_code_quality
   before_script:
     - npm config rm proxy
@@ -123,6 +122,7 @@ deploy_backend:
   stage: deploy
   needs :
     - angular_build
+    - test_backend
   before_script:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
@@ -162,6 +162,7 @@ deploy_backend_dev:
   stage: deploy
   needs:
     - angular_build
+    - test_backend
   before_script:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
