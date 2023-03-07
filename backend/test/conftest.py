@@ -29,6 +29,7 @@ def init_user_database():
         test_users = [
             {"id": "user-1", "freezeState": "0.0",  "lastNotificationDate": None},
             {"id": "user-2", "freezeState": "0.0",  "lastNotificationDate": None},
+            {"id": "user-with-unsecure-vm", "freezeState": "0.0",  "lastNotificationDate": None},
             {"id": "valid-user", "freezeState": "0.0",  "lastNotificationDate": None},
              {"id": "expired-user-1", "freezeState": "1.0",    "lastNotificationDate": None},
             {"id": "expired-user-2", "freezeState": "2.0",    "lastNotificationDate": None},
@@ -76,11 +77,12 @@ def init_vm_database():
 
         # List of test VM
         test_vms = [
-            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
-            {"id" : 2, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
-            {"id" : 3, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
-            {"id" : 4, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
-            {"id" : 5, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False}
+            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
+            {"id" : 2, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
+            {"id" : 3, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
+            {"id" : 4, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
+            {"id" : 5, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
+            {"id" : 6, "userId" : "user-with-unsecure-vm", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":True}
         ]
 
 
@@ -123,11 +125,11 @@ def init_expired_vm_database():
 
         # List of test VM
         test_vms = [
-            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
-            {"id" : 2, "userId" : "expired-user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
-            {"id" : 3, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
-            {"id" : 4, "userId" : "expired-user-3", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False},
-            {"id" : 5, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False}
+            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
+            {"id" : 2, "userId" : "expired-user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
+            {"id" : 3, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
+            {"id" : 4, "userId" : "expired-user-3", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
+            {"id" : 5, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False}
         ]
 
 

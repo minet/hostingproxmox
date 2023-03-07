@@ -39,6 +39,15 @@ def test_valid_get_vm_id(client, init_user_database, init_vm_database, monkeypat
     response = client.get('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     assert response.status_code == 200
 
+def test_valid_valid_get_vm_id_with_unsecure(client, init_user_database, init_vm_database, monkeypatch):
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+    monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+    monkeypatch.setattr(proxmox, "get_proxmox_vm_status", fake_get_proxmox_vm_status)
+    monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+    response = client.get('/api/1.0.0/vm/6', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    assert response.status_code == 200
+    assert response.json['unsecure'] == True
+
 # Valid user with not valid token. Not admin.
 def test_false_token_get_vm_id(client, init_user_database, init_vm_database, monkeypatch):
 
