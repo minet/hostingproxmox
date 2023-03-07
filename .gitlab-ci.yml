@@ -165,7 +165,7 @@ deploy_backend_dev:
   before_script:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
-    - export no_proxy="gitlabint.priv.minet.net,192.168.102.2"
+    - export no_proxy="$NO_PROXY"
     - cd backend
     - pip3 install -r requirements.txt 
     - sudo /bin/systemctl stop proxmox_api
@@ -187,7 +187,7 @@ deploy_frontend_dev:
   needs:
     - angular_build
   script:
-    - export no_proxy="gitlabint.priv.minet.net,192.168.102.2"
+    - export no_proxy="$NO_PROXY"
     - rm -rf /var/www/proxmox_dashboard
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
   environment:
