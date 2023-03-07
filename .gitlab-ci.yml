@@ -187,6 +187,7 @@ deploy_frontend_dev:
   needs:
     - angular_build
   script:
+    - export no_proxy="gitlabint.priv.minet.net,192.168.102.2"
     - rm -rf /var/www/proxmox_dashboard
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
   environment:
