@@ -47,6 +47,17 @@ export class HomeComponent implements OnInit {
   nb_error_resquest = 0; // Count the number of SUCCESSIVE error returned by a same request
   isVmCreated = false; // true doesn't mean the VM is started 
   confirmPassword = "";
+   // Max number of storage available for user in total. The avaible ressources for a specific user are stored in User model
+  nb_storage_max = 30;
+  nb_cpu_max = 6;
+  nb_ram_max = 12;
+  // Selected in the range
+  nb_storage_selected = 0;
+  nb_cpu_selected = 0;
+  nb_ram_selected = 0;
+  display_ressource_configuration = false; 
+  
+
 
  
 
@@ -79,11 +90,15 @@ export class HomeComponent implements OnInit {
           console.log(this.user.freezeState)
         console.log("error code =" , this.userService.errorMessage)
         }
-        this.count_vm();
+        this.user.usedCPU = 0;
+        this.user.usedRAM = 0;
+        this.user.usedStorage =0;
+        this.count_ressources();
       }
       if(this.user.admin) {
         this.count_dns();
       }}, 1000);
+      console.log((this.nb_cpu_max - this.user.usedCPU)*100/this.nb_cpu_max)
   }
 
   images = [
@@ -196,6 +211,24 @@ export class HomeComponent implements OnInit {
     return vm.password == this.confirmPassword;
   }
 
+  back_from_ressource_conf_page():void{
+    this.display_ressource_configuration = !this.display_ressource_configuration;
+  }
+
+
+  //configuration form 
+  configurationForm(vm:Vm):void{
+    this.errorMessage = ""
+    this.errorcode = -1
+    this.progress = 0
+    // first of all check parameter : 
+    const isPasswordOk = this.check_password(this.vm)
+    if (isPasswordOk) {
+      
+      this.display_ressource_configuration = !this.display_ressource_configuration;
+    }
+  }
+
   /*
   Create a vm.
   The first step is to check if the password is strong enough. The other arg are check while typing and by the backend 
@@ -204,12 +237,7 @@ export class HomeComponent implements OnInit {
   After, we check every second if the vm is up and started. It means it is well configurated. Else we wait. If there is no vm anymore then a error occured
   */
   create_vm(vm: Vm): void {
-    this.errorMessage = ""
-    this.errorcode = -1
-    this.progress = 0
-    // first of all check parameter : 
-    const isPasswordOk = this.check_password(this.vm)
-    if (isPasswordOk) {
+   
        
       this.loading = true;
       this.progress_bar();
@@ -221,7 +249,9 @@ export class HomeComponent implements OnInit {
           sshKey: vm.sshKey,
           user: this.slugifyPipe.transform(vm.user),
           ssh: true,
-
+          cpu: this.nb_cpu_selected,
+          ram: this.nb_ram_selected,
+          disk: this.nb_storage_selected
         };
       this.http.post(this.authService.SERVER_URL + '/vm', data, {observe: 'response'}).   subscribe(rep => {
         this.errorMessage = ""
@@ -264,7 +294,6 @@ export class HomeComponent implements OnInit {
             this.errorMessage = error.error["error"];
             console.log(error)
         });
-      }
   }
 
 
@@ -287,19 +316,65 @@ export class HomeComponent implements OnInit {
         });
   }
 
-  count_vm(): void {
-   
+  slider_change():void{
+    const cpu_selected  = +((<HTMLInputElement>document.getElementById("cpu_slider")).value)
+    this.nb_cpu_selected = cpu_selected
+    if (this.nb_cpu_max - this.user.usedCPU < this.nb_cpu_selected ){
+      
+      (<HTMLInputElement>document.getElementById("cpu_slider")).value = String(this.nb_cpu_max - this.user.usedCPU)
+        
+      this.nb_cpu_selected = this.nb_cpu_max - this.user.usedCPU
+    } 
+    
+
+    const ram_selected  = +((<HTMLInputElement>document.getElementById("ram_slider")).value)
+    this.nb_ram_selected = ram_selected
+    if (this.nb_ram_max - this.user.usedRAM < ram_selected){
+        (<HTMLInputElement>document.getElementById("ram_slider")).value = String(this.nb_ram_max - this.user.usedRAM)
+        this.nb_ram_selected = this.nb_ram_max - this.user.usedRAM
+    } 
+
+    const storage_selected  = +((<HTMLInputElement>document.getElementById("storage_slider")).value)
+    this.nb_storage_selected = storage_selected
+    if (this.nb_storage_max - this.user.usedStorage < storage_selected){
+          (<HTMLInputElement>document.getElementById("storage_slider")).value = String(this.nb_storage_max - this.user.usedStorage)
+          this.nb_storage_selected = this.nb_storage_max - this.user.usedStorage
+    }
+  }
+
+  //cpu_slider_change():void{
+  //  
+  //  
+  //  console.log("cpu",this.nb_cpu_selected)
+  //  console.log("ram",this.nb_ram_selected)
+  //}
+  //ram_slider_change():void{
+  //  console.log("ram", this.nb_ram_max - this.user.usedRAM)
+  //  if (this.nb_ram_max - this.user.usedRAM < this.nb_ram_selected){
+  //        this.nb_ram_selected = this.nb_ram_max - this.user.usedRAM
+  //      }
+  //}
+  //storage_slider_change():void{
+  //  if (this.nb_storage_max - this.user.usedStorage < this.nb_storage_selected){
+  //      this.nb_storage_selected = this.nb_storage_max - this.user.usedStorage
+  //    }
+  //}
 
 
+
+
+  count_ressources(): void {
+    console.log("cpu", this.nb_cpu_max -  this.user.usedCPU)
       let vmList: Array<string>;
-      this.countvm = 0;
+
        this.countactivevm = 0;
       this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
+        console.log(rep)
         vmList = rep.body as Array<string>;
         for (let i = 0; i < vmList.length; i++) {
           const vmid = vmList[i];
           this.countvm++;
-          this.new_vmstatus(vmid);
+          this.new_vmconfig(vmid);
         }
       },
 
@@ -311,13 +386,18 @@ export class HomeComponent implements OnInit {
   }
 
   /*
-    Check the vm status (vmid). If it's started, the number of active vm is added to 1
+    Check the vm status (vmid). If it's started, the number of active vm is added to 1 and the ressource is added
   */
-  new_vmstatus(vmid: string): void {
+    new_vmconfig(vmid: string): void {
     const vm = new Vm();
     vm.id = vmid;
     this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {
         this.vmstate = rep.body['status'];
+        this.user.usedCPU += rep.body['cpu'];
+        this.user.usedRAM += Math.floor(rep.body['ram']/1000);
+        this.user.usedStorage += rep.body['disk'];
+
+       
         if(rep.body['status'] === "running")
           this.countactivevm++;
         },

@@ -22,6 +22,8 @@ def fake_vm_config(vmid, node, password, vm_usermain_ssh_key, ip):
 def fake_check_update_cotisation(user_id):
     return {"freezeState": "1"}, 200
 
+def fake_get_node_from_vm(vmid):
+    return "node1",200
 
 def fake_get_node_from_vm(vmid):
     return "wammu",200
@@ -77,7 +79,7 @@ class _ProxmoxAPI:
     
 
 
-def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database, client):
+def test_creation_for_new_user_10G(monkeypatch,init_user_database, init_vm_database, client):
     """Test case for creation of VM by a new user
     The creation does not concern proxmox
     """
@@ -113,7 +115,7 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database,
         monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
 
         userId = "new-user6"
-        body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", userId, password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
+        body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", userId, 2, 8, 10, password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
         proxmox.proxmox = realProxmox
         print("body=",body)
         assert status == 201
@@ -121,11 +123,121 @@ def test_creation_for_new_user(monkeypatch,init_user_database, init_vm_database,
         assert len(userVms) == 1
         fake_subscribe_to_hosting_ML.assert_called_once()
 
+def test_creation_for_new_user_20G(monkeypatch,init_user_database, init_vm_database, client):
+    """Test case for creation of VM by a new user
+    The creation does not concern proxmox
+    """
 
-
+    node = "wammu"
+    
     
 
+  
+    with client:
+        # Mocking 
+        monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
+        monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)
+        
+        """proxmoxapi = ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER
+                     , token_name=configuration.PROXMOX_API_KEY_NAME
+                     , token_value=configuration.PROXMOX_API_KEY, verify_ssl=False)
+"""
+        #monkeypatch.setattr(proxmox.proxmox.nodes("kars").qemu(10003).clone,'create', fake_proxmox_clone_vm)
+        node="kars"
+        realProxmox = proxmox.proxmox
+        proxmox.proxmox = _ProxmoxAPI(node, monkeypatch)
+        
+        #monkeypatch.setattr(proxmox.proxmox, "nodes", lambda self, node: _ProxmoxAPI(node, monkeypatch))
+        monkeypatch.setattr(proxmox, 'load_balance_server', fake_load_balance_server)
+        monkeypatch.setattr(proxmox, 'config_vm', fake_vm_config)
+        monkeypatch.setattr(proxmox, 'check_update_cotisation', fake_check_update_cotisation)
+        monkeypatch.setattr(proxmox, 'config_vm', fake_config_vm)
+        monkeypatch.setattr(proxmox, 'get_node_from_vm', fake_get_node_from_vm)
 
+        userId = "new-user6"
+        body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", userId, 2, 8, 20, password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
+        proxmox.proxmox = realProxmox
+        assert status == 201
+        userVms = db_functions.get_vm_list(user_id=userId)
+        assert len(userVms) == 1
+
+def test_creation_for_new_user_30G(monkeypatch,init_user_database, init_vm_database, client):
+    """Test case for creation of VM by a new user
+    The creation does not concern proxmox
+    """
+
+    node = "wammu"
+    
+    
+
+  
+    with client:
+        # Mocking 
+        monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
+        monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)
+        
+        """proxmoxapi = ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER
+                     , token_name=configuration.PROXMOX_API_KEY_NAME
+                     , token_value=configuration.PROXMOX_API_KEY, verify_ssl=False)
+"""
+        #monkeypatch.setattr(proxmox.proxmox.nodes("kars").qemu(10003).clone,'create', fake_proxmox_clone_vm)
+        node="kars"
+        realProxmox = proxmox.proxmox
+        proxmox.proxmox = _ProxmoxAPI(node, monkeypatch)
+        
+        #monkeypatch.setattr(proxmox.proxmox, "nodes", lambda self, node: _ProxmoxAPI(node, monkeypatch))
+        monkeypatch.setattr(proxmox, 'load_balance_server', fake_load_balance_server)
+        monkeypatch.setattr(proxmox, 'config_vm', fake_vm_config)
+        monkeypatch.setattr(proxmox, 'check_update_cotisation', fake_check_update_cotisation)
+        monkeypatch.setattr(proxmox, 'config_vm', fake_config_vm)
+        monkeypatch.setattr(proxmox, 'get_node_from_vm', fake_get_node_from_vm)
+
+        userId = "new-user6"
+        body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", userId, 2, 8, 30, password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
+        proxmox.proxmox = realProxmox
+        assert status == 201
+        userVms = db_functions.get_vm_list(user_id=userId)
+        assert len(userVms) == 1
+    
+
+def test_creation_for_new_user_incorrect_storage(monkeypatch,init_user_database, init_vm_database, client):
+    """Test case for creation of VM by a new user
+    The creation does not concern proxmox
+    """
+
+    node = "wammu"
+    
+    
+
+  
+    with client:
+        # Mocking 
+        monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
+        monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)
+        
+        """proxmoxapi = ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER
+                     , token_name=configuration.PROXMOX_API_KEY_NAME
+                     , token_value=configuration.PROXMOX_API_KEY, verify_ssl=False)
+"""
+        #monkeypatch.setattr(proxmox.proxmox.nodes("kars").qemu(10003).clone,'create', fake_proxmox_clone_vm)
+        node="kars"
+        realProxmox = proxmox.proxmox
+        proxmox.proxmox = _ProxmoxAPI(node, monkeypatch)
+        
+        #monkeypatch.setattr(proxmox.proxmox, "nodes", lambda self, node: _ProxmoxAPI(node, monkeypatch))
+        monkeypatch.setattr(proxmox, 'load_balance_server', fake_load_balance_server)
+        monkeypatch.setattr(proxmox, 'config_vm', fake_vm_config)
+        monkeypatch.setattr(proxmox, 'check_update_cotisation', fake_check_update_cotisation)
+        monkeypatch.setattr(proxmox, 'config_vm', fake_config_vm)
+        monkeypatch.setattr(proxmox, 'get_node_from_vm', fake_get_node_from_vm)
+
+        userId = "new-user6"
+        body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", userId, 2, 8, 45, password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
+        proxmox.proxmox = realProxmox
+        print("body= ", body)
+        assert status == 400
+        userVms = db_functions.get_vm_list(user_id=userId)
+        assert len(userVms) == 0
 
     
 

@@ -53,33 +53,62 @@
         </div>
 
         <div class="userok" *ngIf='this.user.freezeState == 0 && this.user.chartevalidated'>
-            <div class="alert alert-warning text-center" *ngIf="countvm >= maxVmPerUser">
-                <b>{{'home.createVm.error.maxVmAlready_1' | translate}} {{ countvm }} {{'home.createVm.error.maxVmAlready_2' | translate}}</b>
-                <p>{{'home.createVm.error.maxVmAlready_3' | translate}}
-            </div>
-            <div class="alert alert-secondary text-center" *ngIf="countvm < maxVmPerUser">
-                <b>{{'home.createVm.numberMoreVm_1' | translate}} {{ maxVmPerUser - countvm}} {{'home.createVm.numberMoreVm_2' | translate}}</b>
+            <div class="d-flex justify-content-evenly flex-wrap">
+                <div>
+                    <strong class="text-center" [ngStyle]="{'color' : (nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) >= 0) ? 'black' : '#ffc107'}">{{nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) > 0 ? nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) : 0 }} CPUs restant</strong>
+                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-success" style="width: {{(nb_cpu_max - (this.user.usedCPU +nb_cpu_selected))*100/nb_cpu_max}}%"></div>
+                    </div>
+                </div>
+                    <div>
+                        <strong class="text-center" [ngStyle]="{'color' : (nb_ram_max - (this.user.usedRAM +nb_ram_selected) >= 0) ? 'black' : '#ffc107'}">{{nb_ram_max - (this.user.usedRAM +nb_ram_selected) > 0 ? nb_ram_max - (this.user.usedRAM +nb_ram_selected) : 0}} GO de RAM restant</strong>
+                        <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar bg-success" style="width: {{(nb_ram_max - (this.user.usedRAM +nb_ram_selected))*100/nb_ram_max}}%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <strong class="text-center" [ngStyle]="{'color' : (nb_storage_max - (this.user.usedStorage +nb_storage_selected) >= 0) ? 'black' : '#ffc107'}">{{nb_storage_max - (this.user.usedStorage +nb_storage_selected) > 0 ? nb_storage_max - (this.user.usedStorage +nb_storage_selected) : 0}} GO de stockage restant</strong>
+                        <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar bg-success" style="width: {{(nb_storage_max - (this.user.usedStorage +nb_storage_selected))*100/nb_storage_max}}%"></div>
+                        </div>
+                    </div>
+                </div>
+            <br>
+            <hr>
+            <div class="alert alert-warning text-center" *ngIf="this.user.usedCPU == nb_cpu_max or this.user.usedRAM == nb_ram_max or  this.user.usedStorage == nb_storage_max">
+                <b>{{'home.createVm.error.maxVmAlready_1' | translate}} </b>
+                <p>{{'home.createVm.error.maxVmAlready_2' | translate}}
             </div>
 
-            <div class="card mb-3" *ngIf="countvm < maxVmPerUser">
+            <div class="card mb-3" *ngIf="this.user.usedCPU != nb_cpu_max && this.user.usedRAM != nb_ram_max &&  this.user.usedStorage != nb_storage_max">
                 <h4 class="card-header">
                     {{'home.createVm.form.title' | translate}}
                 </h4>
                 <div class="card-body">
-                    <p class="lead">{{'home.createVm.form.overview' | translate}}</p>
-                    <dl>
-                        <dt>{{'home.vm_type.bare' | translate}}</dt>
-                        <dd>{{'home.vm_desc.bare' | translate}}</dd>
-                        <dt><s>{{'home.vm_type.web' | translate}}</s></dt>
-                        <dd><s>{{'home.vm_desc.web' | translate}}</s></dd>
-                    </dl>
+                    <div [hidden]="display_ressource_configuration">
+                        <p class="lead">{{'home.createVm.form.overview' | translate}}</p>
+                        <dl>
+                            <dt>{{'home.vm_type.bare' | translate}}</dt>
+                            <dd>{{'home.vm_desc.bare' | translate}}</dd>
+                            <dt><s>{{'home.vm_type.web' | translate}}</s></dt>
+                            <dd><s>{{'home.vm_desc.web' | translate}}</s></dd>
+                        </dl>
+                    </div>
+                    <div [hidden]="!display_ressource_configuration">
+                        <p class="lead">Vous disposez de ressources gratuite que vous pouvez attribuer à 1, 2 ou 3 machines virtuelles</p>
+                        <dl>
+                            <dt>6 CPUs</dt>
+                            <dt>8 GO de RAM</dt>
+                            <dt>30 GO de stockage</dt>
+                        </dl>
+                    </div>
                     <hr>
-                    <div>
+                    <div [hidden]="display_ressource_configuration">
                         <div class="alert alert-danger text-center" *ngIf="errorcode != 201 && errorcode != -1">
                             <b>{{'home.createVm.form.error' | translate}} </b><br/>
                             {{ errorMessage }}
                         </div>
-                        <form (ngSubmit)="create_vm(vm)" #vmForm="ngForm">
+                        <form (ngSubmit)="configurationForm(vm)" #vmForm="ngForm">
                             <div *ngIf="!loading && errorcode !=201">
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
@@ -174,6 +203,64 @@
                                 </div>
                             </div>
                         </form>
+                        
+                    </div>
+                    <div>
+                        <div class="alert alert-danger text-center" *ngIf="errorcode != 201 && errorcode != -1">
+                            <b>{{'home.createVm.form.error' | translate}} </b><br/>
+                            {{ errorMessage }}
+                        </div>
+                        
+                        
+                    <div [hidden]="!display_ressource_configuration || loading">
+                        
+                    <p class="lead">Configurer votre VM</p>
+                    <form #vmForm="ngForm">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5><label for="customRange3" class="form-label">Nombre de CPU : <span class="badge         text-bg-primary">{{nb_cpu_selected}} CPUs</span>
+                                </label></h5>
+                                <input type="range" class="form-range" min="0" max="{{nb_cpu_max}}" step="1" id="cpu_slider"    (change)="slider_change()" value="0" [disabled]="loading"><!--[(value)]="nb_cpu_selected" [(ngModel)]="nb_cpu_selected"-->
+                                <div class="d-flex justify-content-between">
+                                    <div><small class="text-secondary">0</small></div>
+                                    <div><small class="text-secondary">{{nb_cpu_max}} CPUs</small></div>
+                                </div>
+                            </div>
+                            <div>
+                                <h5><label for="customRange3" class="form-label">RAM : <span class="badge text-bg-primary">{{nb_ram_selected}} GO</   span>
+                                </label></h5>
+                                <input type="range" class="form-range" min="0" max="{{nb_ram_max}}" step="1" id="ram_slider"   (change)="slider_change()"  value="0"[disabled]="loading" ><!--value="{{nb_ram_selected}}"  [(ngModel)]="nb_ram_selected"-->
+                                <div class="d-flex justify-content-between">
+                                    <div><small class="text-secondary">0</small></div>
+                                    <div><small class="text-secondary">{{nb_ram_max}} Go</small></div>
+                                </div>
+                            </div>
+                            <div>
+                                <h5><label for="customRange3" class="form-label">Stockage : <span class="badge  text-bg-primary">{{nb_storage_selected}}  GO</span>
+                                </label></h5>
+                                <input type="range" class="form-range" min="0" max="{{nb_storage_max}}" step="10" id="storage_slider"   (change)="slider_change()" value="0" [disabled]="loading"><!--value="{{nb_storage_selected}}" [(ngModel)]="nb_storage_selected"-->
+                                <div class="d-flex justify-content-between">
+                                    <div><small class="text-secondary">0</small></div>
+                                    <div><small class="text-secondary">{{nb_storage_max}} Go</small></div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="text-center">
+                            <br><br>
+                            <div class="alert alert-warning text-center" >
+                                <b>Attention, une fois créée, il n'est plus possible de ré-allouer les ressources !</b><br/>
+                                Il faudra supprimer les machines pour les rendre accessible de nouveau
+                            </div>
+
+                            <br><br><button class="btn btn-secondary text-center" style="margin-right: 10px;" (click)="back_from_ressource_conf_page()" [disabled]="loading">Retour</button>
+                            <button [disabled]="nb_storage_selected == 0 || nb_ram_selected == 0 || nb_cpu_selected == 0 || loading" type="submit"
+                                    class="btn btn-primary text-center" (click)="create_vm(vm)" >Créer ma VM
+                            </button>
+                            
+                        </div>
+                    </form>
+                    </div>
                     </div>
                     <div class="text-center" *ngIf="loading">
                         {{'home.createVm.loading' | translate}}
@@ -193,7 +280,7 @@
     
     <div *ngIf="user.admin" class="adminmenu">
         <p>{{'home.admin.description_1' | translate}}<br>
-            {{'home.admin.description_2' | translate}}</p>
+            {{'home.admin.description_2' | translate}}</p>bg 
         <h2>{{'home.admin.stats.title' | translate}}</h2>
         <br>
         <div class="card-deck mb-3">

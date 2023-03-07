@@ -35,6 +35,8 @@ export class UserService {
         window.location.href = this.oauthService.logoutUrl;
     }
 
+    
+
     validToken(): Observable<boolean> {
         const tokenObservable$: Observable<boolean> = new Observable<boolean>((sub) => {
             if (this.oauthService.hasValidAccessToken()) {
