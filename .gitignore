@@ -7,6 +7,8 @@ frontend/node_modules/
 frontend/dist/
 frontend/tmp/ 
 frontend/out-tsc/ 
+.env/
+/backend/venv/
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output

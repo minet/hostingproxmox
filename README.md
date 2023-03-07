@@ -15,6 +15,7 @@ KEYRING_DNS_SECRET : clé pour utiliser le ddns (ajouter / supprimer des entrée
 PROXMOX_API_KEY_NAME : nom de la clé pour accéder à l'api proxmox
 PROXMOX_API_KEY : clé pour utiliser l'api proxmox
 PROXMOX_BACK_DB : mysql:// lien vers la db contenant le passwd, user, nom de la database et bien sûr ip de celle-ci
+ADH6_API_KEY : clé pour utiliser l'api adh6
 ENVIRONMENT="DEV" ou "TEST" (ou "PROD")
 ```
 L'environnement conditionne certains composants de l'application. 
@@ -35,4 +36,8 @@ Vous devez donc
 
 2. Lancer dans le dossier `frontend`
 
- ` ng serve --host=127.0.0.1 --disable-host-check`.
+ ` npm install `
+
+3. Puis
+
+ `ng serve --host=127.0.0.1 --disable-host-check`.

@@ -307,5 +307,13 @@
   "account.nocharter.title" : "La charte n'est pas signée !" ,
   "account.nocharter.desc.1" : "Vous devez signer la charte d'hosting. ",
   "account.nocharter.desc.a" : "Cliquez-ici",
-  "account.nocharter.desc.2" : "pour signer les règles d'utilisation"
+  "account.nocharter.desc.2" : "pour signer les règles d'utilisation",
+  "app.component.welcom" : "Bienvenue sur le nouveau service d'hébergement de MiNET. Il est encore en phase bêta, veuillez signaler tout problème à notre",
+  "app.component.pricing" : "Ce service est gratuit si vous possédez déjà un compte MiNET. Autrement, veuillez utiliser",
+  "app.component.getsub" : "pour vous abonner.",
+  "app.component.boxfeature1" : "Créez une machine virtuelle ou un serveur Web prêt à l'emploi.",
+  "app.component.boxfeature2" : "Créer un enregistrement DNS pointant vers votre machine virtuelle.",
+  "app.component.boxfeature3-1" : "Contactez notre",
+  "app.component.boxfeature3-2" : "pour toute information.",
+  "app.component.getstarted" : "Démarrer"
 }

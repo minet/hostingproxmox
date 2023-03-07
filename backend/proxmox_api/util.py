@@ -5,6 +5,8 @@ import re
 import json
 import requests
 import connexion
+import tempfile
+import subprocess
 from flask_apscheduler import APScheduler
 from flask_cors import CORS
 import proxmox_api.config.configuration as  config 
@@ -168,15 +170,41 @@ def check_password_strength(password:str) -> bool:
     return len(password) >= 12 and re.search(special, password) is not  None  and re.search(upper, password) is not None and  re.search(number, password) is not None
 
 
-"""Check if the user ssh key has a correct format
-
-    :param key: the ssh key to check
-
-    :return: True if the ssh key has a correct format
-    :rtype: bool
 """
-def check_ssh_key(key:str) -> bool:
-    return not not re.search("^[a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]* [a-zA-Z0-9[()[\].{\-}_+*""\/%$&#@=:?]*", key)
+Translation of the following Perl script originating from proxmox's pve-common package:
+https://github.com/proxmox/pve-common/blob/12a0ec1888e4c423dbe890b65460a703afb91c47/src/PVE/Tools.pm#L1667
+
+sub validate_ssh_public_keys {
+    my ($raw) = @_;
+    my @lines = split(/\n/, $raw);
+
+    foreach my $line (@lines) {
+	next if $line =~ m/^\s*$/;
+	eval {
+	    my ($filename, $handle) = tempfile_contents($line);
+	    run_command(["ssh-keygen", "-l", "-f", $filename],
+			outfunc => sub {}, errfunc => sub {});
+	};
+	die "SSH public key validation error\n" if $@;
+    }
+}
+
+"""
+def check_ssh_key(raw: str) -> bool:
+    lines = raw.split("\n")
+    for line in lines:
+        if re.match(r"^\s*$", line):
+            continue
+        try:
+            with tempfile.NamedTemporaryFile() as tmp_file:
+                tmp_file.write(line.encode())
+                tmp_file.flush()
+                subprocess.run(["ssh-keygen", "-l", "-f", tmp_file.name], 
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+                               check=True)
+        except subprocess.CalledProcessError:
+            return False
+    return True
 
 
 
@@ -201,7 +229,7 @@ def check_username(username:str) -> bool:
 """
 def check_dns_entry(entry:str) -> bool:
     forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"]
-    allowed = "^[a-zA-Z0-9]*$"
+    allowed = "^[a-zA-Z0-9-._]*$"
     return entry != "" and re.search(allowed, entry) and entry not in forbidden_entries
 
 

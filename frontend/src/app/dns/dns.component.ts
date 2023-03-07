@@ -161,7 +161,7 @@ export class DnsComponent implements OnInit, OnDestroy {
     // TO DO : make a manual validation
     check_dns_entry(entry):boolean{
         const forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"];
-        const authorized_entry = /^[a-zA-Z0-9]*$/;
+        const authorized_entry = /^[a-zA-Z0-9-._]*$/;
         return authorized_entry.test(entry) && !(entry in forbidden_entries);
     }
 

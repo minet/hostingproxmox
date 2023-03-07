@@ -11,8 +11,8 @@ python_code_quality:
   before_script:
     - cd backend
     - export PYTHONPATH=$(pwd)
-    - export http_proxy="http://192.168.102.61:82/"
-    - export https_proxy="http://192.168.102.61:82/"
+    - export http_proxy="$HTTP_PROXY"
+    - export https_proxy="$HTTPS_PROXY"
     - pip3 install pylint
   script:
     - pylint --fail-under=1 proxmox_api/*.py > code_quality.txt
@@ -50,8 +50,8 @@ test_backend:
   needs : 
    - python_code_quality
   before_script:
-    - export http_proxy="http://192.168.102.61:82/"
-    - export https_proxy="http://192.168.102.61:82/"
+    - export http_proxy="$HTTP_PROXY"
+    - export https_proxy="$HTTPS_PROXY"
     - export no_proxy="192.168.104.7"
     - apt update 
     - apt install sqlite3
@@ -79,13 +79,12 @@ install_dependencies_angular:
   stage: dependencies
   image: node
   needs : 
-   - test_backend
    - angular_code_quality
   before_script:
     - npm config rm proxy
     - npm config rm https-proxy
-    - npm config set proxy "http://192.168.102.61:82/"
-    - npm config set https-proxy "http://192.168.102.61:82/"
+    - npm config set proxy "$HTTP_PROXY"
+    - npm config set https-proxy "$HTTPS_PROXY"
     - cd frontend
   script:
     - npm ci --prefer-offline --no-audit
@@ -105,8 +104,8 @@ angular_build:
     - npm cache clean --force  
     - npm config rm proxy
     - npm config rm https-proxy
-    - npm config set proxy "http://192.168.102.61:82/"
-    - npm config set https-proxy "http://192.168.102.61:82/"
+    - npm config set proxy "$HTTP_PROXY"
+    - npm config set https-proxy "$HTTP_PROXY"
     - npm cache clear --force
     - cd frontend
     - NG_CLI_ANALYTICS=ci
@@ -123,9 +122,11 @@ deploy_backend:
   stage: deploy
   needs :
     - angular_build
+    - test_backend
   before_script:
-    - export http_proxy="http://192.168.104.61:82/"
-    - export https_proxy="http://192.168.104.61:82/"
+    - export http_proxy="$HTTP_PROXY"
+    - export https_proxy="$HTTPS_PROXY"
+    - export no_proxy="$NO_PROXY"
     - cd backend
     - pip3 install -r requirements.txt
     - sudo /bin/systemctl stop proxmox_api
@@ -146,7 +147,9 @@ deploy_frontend:
   stage: deploy
   needs:
     - angular_build
+    - test_backend
   script:
+    - export no_proxy="$NO_PROXY"
     - rm -rf /var/www/proxmox_dashboard
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
   tags:
@@ -162,9 +165,11 @@ deploy_backend_dev:
   stage: deploy
   needs:
     - angular_build
+    - test_backend
   before_script:
-    - export http_proxy="http://192.168.104.61:82/"
-    - export https_proxy="http://192.168.104.61:82/"
+    - export http_proxy="$HTTP_PROXY"
+    - export https_proxy="$HTTPS_PROXY"
+    - export no_proxy="$NO_PROXY"
     - cd backend
     - pip3 install -r requirements.txt 
     - sudo /bin/systemctl stop proxmox_api
@@ -185,7 +190,9 @@ deploy_frontend_dev:
   stage: deploy
   needs:
     - angular_build
+    - test_backend
   script:
+    - export no_proxy="$NO_PROXY"
     - rm -rf /var/www/proxmox_dashboard
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
   environment:
