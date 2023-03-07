@@ -146,6 +146,7 @@ deploy_frontend:
   stage: deploy
   needs:
     - angular_build
+    - test_backend
   script:
     - rm -rf /var/www/proxmox_dashboard
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
@@ -187,6 +188,7 @@ deploy_frontend_dev:
   stage: deploy
   needs:
     - angular_build
+    - test_backend
   script:
     - export no_proxy="$NO_PROXY"
     - rm -rf /var/www/proxmox_dashboard
