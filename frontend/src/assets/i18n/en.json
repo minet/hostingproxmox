@@ -297,7 +297,7 @@
   "vms.charter.notsigned_4": "to sign the rules",
   "account.freeze.title" : "Your account is frozen !",
   "account.freeze.1.description" : "Your membership has expired ! You will still be able to manage your vm for few days. After 30 days of expiration your vm will be shutdown and after 60 days, they will be definitively destroyed",
-  "account.freeze.1.description.string" : "WARNING : you have only 30 days to renew your cotisation before the shutdown of your vm !",
+  "account.freeze.1.description.strong" : "WARNING : you have only 30 days to renew your cotisation before the shutdown of your vm !",
   "account.freeze.2.description.1" : "Your cotisation has expired since at least ",
   "account.freeze.2.description.1.strong" : "30 days !",
   "account.freeze.2.description.2" : "You will still be able to backup your vm for few days.  After 60 days (in less than 30 days now), they will be definitively destroyed.",

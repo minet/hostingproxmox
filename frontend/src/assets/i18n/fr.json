@@ -294,7 +294,7 @@
   "vms.charter.notsigned_4": "pour signer la charte",
   "account.freeze.title" : "Votre compte est gelé !",
   "account.freeze.1.description" : "Votre cotisation a expiré ! Vous pourrez toujours gérer vos VMs pendant plusieurs jours. Après 30 jours d'expiration, vos VMs seront éteintes. Après 60 jours, elles seront définitivement détruites.",
-  "account.freeze.1.description.string" :"ATTENTION : vous avez seulement 30 jours pour renouveler votre cotisation, avant l'exctinction de vos VMs",
+  "account.freeze.1.description.strong" :"ATTENTION : vous avez seulement 30 jours pour renouveler votre cotisation, avant l'exctinction de vos VMs",
   "account.freeze.2.description.1" : "Votre cotisation a expiré depuis au moins ",
   "account.freeze.2.description.1.strong" : "30 jours !",
   "account.freeze.2.description.2" : "Vous pourrez toujours sauvergarder votre VM pour quelques jours. Après 60 jours (d'ici moins de 30 jours) d'expiration, votre VM sera définitivement supprimée",
