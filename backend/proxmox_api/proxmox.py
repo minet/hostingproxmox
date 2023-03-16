@@ -264,7 +264,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
 
     if cpu == 2 or cpu % 2 == 1:
         vm_socket = 1
-        vm_cores = cpu
+        vm_cores = int(cpu)
     else :
         vm_socket = 2
         vm_cores = int(cpu//2)
