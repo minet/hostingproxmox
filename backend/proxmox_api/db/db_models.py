@@ -19,6 +19,7 @@ class DomainName(db.Model):
     userId = db.Column(db.String(254), db.ForeignKey("user.id"), nullable=True)
     entry = db.Column(db.Text, nullable=True)
     ip = db.Column(db.String(15), nullable=True)
+    validator = db.Column(db.String(254), nullable=True)
 
 class Vm(db.Model):
     __tablename__ = 'vm'

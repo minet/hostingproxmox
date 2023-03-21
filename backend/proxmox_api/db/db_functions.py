@@ -238,3 +238,13 @@ def get_expired_users(minimumFreezeState = 1):
     return list
 
 #######
+#DOMAINE NAME
+#######
+
+def get_domain_name_validator(entry_id):
+    return DomainName.query.filter_by(id=entry_id).first().validator
+
+def set_domain_name_validator(entry_id, validator):
+    entry = DomainName.query.filter_by(id=entry_id).first()
+    entry.validator = validator
+    db.session.commit()
