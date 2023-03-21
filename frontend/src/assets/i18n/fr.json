@@ -227,7 +227,7 @@
   "vm.uptime": "Uptime",
   "vm.systemInformation": "Informations sur le Système",
   "vm.cpu": "CPU",
-  "vm.ram": "RAM (MB)",
+  "vm.ram": "RAM (GB)",
   "vm.diskSpace": "Espace disque (GB)",
   "vm.delete": "Supprimer",
   "vm.delete.popup.desc" :"Supprimer la VM détruira complètement toutes les données qu'elle contient. Êtes-vous sûr de vouloir la supprimer ? Cette action est irrévocable.",

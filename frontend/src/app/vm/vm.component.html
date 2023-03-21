@@ -215,7 +215,7 @@ document.onload = loaded();
                         </div>
                         <span *ngIf="user.vms[0].ramUsage" style="float: right"
                               class="text-info">{{user.vms[0].ram * (user.vms[0].ramUsage / 100) | number:'1.1-2'}}
-                            /{{user.vms[0].ram}} MB</span>
+                            /{{user.vms[0].ram}} GB</span>
                         <!-- <p *ngIf="editing">{{newVm.disk}}<button (click)="add('disk')" class="btn btn-primary btn-sm">+</button></p> -->
                         <p *ngIf="!editing" style="padding-top: 5%"><b>{{'vm.diskSpace' | translate}} :</b>&nbsp; {{ user.vms[0].disk }}
                         </p>

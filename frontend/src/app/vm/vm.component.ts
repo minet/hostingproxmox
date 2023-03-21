@@ -197,7 +197,7 @@ export class VmComponent implements OnInit, OnDestroy {
                         this.get_ip_history(vmid);
                     vm.name = rep.body['name'];
                     vm.status = rep.body['status'];
-                    vm.ram = rep.body['ram'];
+                    vm.ram = String(Math.floor(rep.body['ram']/1000));
                     vm.disk = rep.body['disk'];
                     vm.cpu = rep.body['cpu'];
                     vm.user = rep.body['user'];

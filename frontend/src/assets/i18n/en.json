@@ -227,7 +227,7 @@
   "vm.uptime": "Uptime",
   "vm.systemInformation": "System Information",
   "vm.cpu": "CPU",
-  "vm.ram": "RAM (MB)",
+  "vm.ram": "RAM (GB)",
   "vm.diskSpace": "Disk space (GB)",
   "vm.delete": "Delete",
   "vm.delete.popup.title" :"Delete the VM",
