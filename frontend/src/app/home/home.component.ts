@@ -90,9 +90,9 @@ export class HomeComponent implements OnInit {
           console.log(this.user.freezeState)
         console.log("error code =" , this.userService.errorMessage)
         }
-        this.user.usedCPU = 0;
-        this.user.usedRAM = 0;
-        this.user.usedStorage =0;
+        this.user.usedCPU = -1;
+        this.user.usedRAM = -1;
+        this.user.usedStorage =-1;
         this.count_ressources();
       }
       if(this.user.admin) {
@@ -376,6 +376,9 @@ export class HomeComponent implements OnInit {
           this.countvm++;
           this.new_vmconfig(vmid);
         }
+        this.user.usedCPU = 0;
+        this.user.usedRAM = 0;
+        this.user.usedStorage =0;
       },
 
       error => {

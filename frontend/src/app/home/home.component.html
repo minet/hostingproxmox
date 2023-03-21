@@ -55,21 +55,29 @@
         <div class="userok" *ngIf='this.user.freezeState == 0 && this.user.chartevalidated'>
             <div class="d-flex justify-content-evenly flex-wrap">
                 <div>
-                    <strong class="text-center" [ngStyle]="{'color' : (nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) >= 0) ? 'black' : '#ffc107'}">{{nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) > 0 ? nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) : 0 }} CPUs restant</strong>
-                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100">
+                    <strong class="text-center" >{{nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) > 0 ? nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) : 0 }} CPUs restant</strong>
+                    <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.user.usedCPU == -1">
+                      </div>
+                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100"  *ngIf="this.user.usedCPU != -1">
                         <div class="progress-bar bg-success" style="width: {{(nb_cpu_max - (this.user.usedCPU +nb_cpu_selected))*100/nb_cpu_max}}%"></div>
                     </div>
                 </div>
                     <div>
-                        <strong class="text-center" [ngStyle]="{'color' : (nb_ram_max - (this.user.usedRAM +nb_ram_selected) >= 0) ? 'black' : '#ffc107'}">{{nb_ram_max - (this.user.usedRAM +nb_ram_selected) > 0 ? nb_ram_max - (this.user.usedRAM +nb_ram_selected) : 0}} GO de RAM restant</strong>
-                        <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar bg-success" style="width: {{(nb_ram_max - (this.user.usedRAM +nb_ram_selected))*100/nb_ram_max}}%"></div>
-                        </div>
+                        <strong class="text-center">{{nb_ram_max - (this.user.usedRAM +nb_ram_selected) > 0 ? nb_ram_max - (this.user.usedRAM +nb_ram_selected) : 0}} GO de RAM restant</strong>
+                        <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.user.usedRAM == -1">
+                          </div>
+                            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100" *ngIf="this.user.usedRAM != -1">
+                                
+                                <div class="progress-bar bg-success" style="width: {{(nb_ram_max - (this.user.usedRAM +nb_ram_selected))*100/nb_ram_max}}%"></div>
+                            </div>
                     </div>
                     <div>
-                        <strong class="text-center" [ngStyle]="{'color' : (nb_storage_max - (this.user.usedStorage +nb_storage_selected) >= 0) ? 'black' : '#ffc107'}">{{nb_storage_max - (this.user.usedStorage +nb_storage_selected) > 0 ? nb_storage_max - (this.user.usedStorage +nb_storage_selected) : 0}} GO de stockage restant</strong>
-                        <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar bg-success" style="width: {{(nb_storage_max - (this.user.usedStorage +nb_storage_selected))*100/nb_storage_max}}%"></div>
+                        <strong class="text-center">{{nb_storage_max - (this.user.usedStorage +nb_storage_selected) > 0 ? nb_storage_max - (this.user.usedStorage +nb_storage_selected) : 0}} GO de stockage restant</strong>
+                        <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.user.usedStorage == -1">
+                          </div>
+                        <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" *ngIf="this.user.usedStorage != -1">
+                            
+                            <div class="progress-bar bg-success" style="width: {{(nb_storage_max - (this.user.usedStorage +nb_storage_selected))*100/nb_storage_max}}%" ></div>
                         </div>
                     </div>
                 </div>
