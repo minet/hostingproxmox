@@ -30,7 +30,56 @@
 <h1 class="text-center mb-2" *ngIf="!user.admin">{{'dns.title.user' | translate}}</h1>
 <h1 class="text-center mb-2" *ngIf="user.admin">{{'dns.title.admin' | translate}}</h1>
 
-<div class="dns container" *ngIf="!loading && ((user.chartevalidated && user.freezeState < 3) || user.admin)">
+<div class="modal fade" id="confirmVMModal" tabindex="-1" role="dialog" aria-labelledby="confirmVMModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="popUpAlertTitle">Valider le rejet de l'entrée DNS</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <form>
+              <div class="form-group">
+                <label for="input_vm_id" class="col-form-label">Commentaire :</label>
+                <input type="text" class="form-control" id="input_vm_id" name="input_vm_id" placeholder="(optionnel)" value=""/>
+              </div>
+            </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary btn-danger" data-bs-dismiss="modal" >Rejeter</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="dns container" *ngIf="!loading && ((user.chartevalidated && user.freezeState < 3) || user.admin)"><br>
+  <hr>
+  <button type="button" class="btn btn-light position-relative">
+    <h5>Entrées DNS en attende de modération </h5>
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+      3
+    </span>
+  </button><br>
+  <div class="d-flex justify-content-around flex-wrap">
+    <div *ngFor="let dns of user.dns"  class="card" style="width:25%;margin:10px 20px">
+      <div class="card-body">
+        <h5 class="card-title"><a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}.h.minet.net</a></h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{dns.ip}}</h6>
+        <p class="card-text">{{dns.user}}</p>
+        <div class="d-flex justify-content-around flex-wrap">
+          <button class="btn btn-danger"  data-bs-toggle="modal" data-bs-target="#confirmVMModal">Rejeter</button>
+          <button class="btn btn-success">Accepter</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  
+
   <ng-container *ngIf="user.dns.length == 0; else dnsEntries">
   <hr>
   <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noEntries.user' | translate}}</h4>
