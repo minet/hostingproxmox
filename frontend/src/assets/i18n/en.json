@@ -310,12 +310,11 @@
   "account.nocharter.desc.1" : "You have to sign the hosting charter !",
   "account.nocharter.desc.a" : "Click here",
   "account.nocharter.desc.2" : "to sign the rules",
-  "app.component.welcom" : "Welcome to MiNET's new hosting service. It is still in beta, please report any problem to our",
+  "app.component.welcom" : "Welcome to MiNET's new hosting service. In cas of any issue, please open a issue on ",
   "app.component.pricing" : "This service is free if you already own a MiNET account. Otherwise, please use",
   "app.component.getsub" : "to get a subscription.",
   "app.component.boxfeature1" : "Create a Virtual Machine or a Web Server ready to use.",
   "app.component.boxfeature2" : "Register a DNS record pointing to your Virtual Machine.",
-  "app.component.boxfeature3-1" : "Contact our",
-  "app.component.boxfeature3-2" : "for any information.",
+  "app.component.boxfeature3-1" : "uptime in 2023",
   "app.component.getstarted" : "Get started"
 }
