@@ -9,6 +9,7 @@ from time import sleep
 VMID = 9998
 def fake_subscribe_to_hosting_ML(username):
     return 200, {"status": "ok"}
+DISK_SIZE = 10
 
 @pytest.mark.dependency(name="clean")
 def test_old_vm_deletion(init_vm_database):
@@ -53,7 +54,7 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
 
 
 
-        body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", "valid-user", password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
+        body,status = proxmox.create_vm("INTEGRATION-TEST-VM",  "bare_vm", "valid-user", 2,4,DISK_SIZE, password="1A#aaaaaaaaa",  vm_user="user", main_ssh_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key")
         assert status == 201 
         start_time = time.time()
         configuration_state = "creating"

@@ -24,7 +24,7 @@ rm /tmp/rules.txt
 rm /tmp/users.txt
 
 if grep -q NOPASSWD /etc/sudoers.d/90-cloud-init-users; then
-	echo [*] An error occured. Please contact webmaster@minet.net
+	echo [*] An error occured. Please open a ticket on ticket.minet.net
 else
 	echo [*] Patch applied with success
 fi
