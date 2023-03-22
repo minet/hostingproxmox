@@ -790,7 +790,6 @@ def check_update_cotisation(username, createEntry=False):
     account, status = util.get_adh6_account(username)
     if (account is None):
         return {"error": "Impossible to retrieve the user info"}, 404
-    username = username.replace("_", "-") # hostingreplace by default _ and .  with -.
     print("Adh6 account", account)
     today =  date.today()
     if "ip" not in account: # Cotisation expired
