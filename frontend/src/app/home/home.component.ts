@@ -371,9 +371,9 @@ export class HomeComponent implements OnInit {
       this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
         console.log(rep)
         vmList = rep.body as Array<string>;
+        this.countvm = vmList.length;
         for (let i = 0; i < vmList.length; i++) {
           const vmid = vmList[i];
-          this.countvm++;
           this.new_vmconfig(vmid);
         }
         this.user.usedCPU = 0;

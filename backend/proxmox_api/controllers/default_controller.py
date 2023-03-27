@@ -339,7 +339,7 @@ def get_dns():  # noqa: E501
 
     return proxmox.get_user_dns(user_id)
 
-
+# /vms
 def get_vm(search= ""):  # noqa: E501
     """get all user vms
 
@@ -381,7 +381,7 @@ def get_vm(search= ""):  # noqa: E501
  
     return proxmox.get_vm(user_id=user_id)
 
-
+# /vm/{vmid}
 def get_vm_id(vmid):  # noqa: E501
     """get a vm by id
 
@@ -392,7 +392,6 @@ def get_vm_id(vmid):  # noqa: E501
 
     :rtype: VmItem
     """
-    start = time.time()
 
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
@@ -456,8 +455,7 @@ def get_vm_id(vmid):  # noqa: E501
             return {"status": "created"}, 201
         else :
             return {"error": "Unknown vm status"}, 400
-
-
+    
     node,status = proxmox.get_node_from_vm(vmid)
     
 
@@ -497,11 +495,12 @@ def get_vm_id(vmid):  # noqa: E501
     except Exception as e:
         print("error while getting config : " + str(e))
         return {"error": "error while getting config : " + str(e)}, 500
-
-
-
-    proxmoxStart = time.time()
-
+    
+    try:
+        vm = get_vm_db_info(vmid)
+        isUnsecure = vm.unsecure
+    except:
+        isUnsecure = None
 
    # print("recieved config response (" ,vmid ,") ok. Took" , str(time.time() - start))
 
@@ -510,7 +509,7 @@ def get_vm_id(vmid):  # noqa: E501
     if status[0]["status"] != 'running':
         return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": "", "status": status[0]["status"],
                 "ram": ram, "cpu": cpu, "disk": disk, "type": type[0]["type"],
-                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"]}, 201
+                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"], "unsecure" : isUnsecure}, 201
     else:
         ip = proxmox.get_vm_ip(vmid, node)
         current_status,response = proxmox.get_vm_current_status(vmid, node)
@@ -540,7 +539,7 @@ def get_vm_id(vmid):  # noqa: E501
                    , "status": status[0]["status"], "ram": ram
                    , "cpu": cpu, "disk": disk, "type": type[0]["type"]
                    , "ram_usage": ram_usage, "cpu_usage": cpu_usage
-                   , "uptime": uptime, "created_on": created_on[0]["created_on"]}, 201
+                   , "uptime": uptime, "created_on": created_on[0]["created_on"], "secure":isUnsecure}, 201
 
     elif   status[1] == 404 or type[1] == 404  :
         return {"error": "vm not found"}, 404
@@ -954,7 +953,6 @@ def get_need_to_be_restored(vmid):
     
     try : 
         value =  dbfct.getNeedToBeRestored(vmid)
-        print(value)
         return {"need_to_be_restored": value}, 200
     except :
         return {"error": "Impossible to check the restore status of the vm"}, 500

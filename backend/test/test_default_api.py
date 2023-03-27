@@ -17,9 +17,13 @@ def fake_check_cas_admin(headers):
 def fake_get_node_from_vm(vmid):
     return "wammu",200
 def fake_get_proxmox_vm_status(vmid, node):
-    return "running"
+    return {"status": "running"}, 201
 def fake_get_vm_config(vmid, node):
-        return  {"name": "test"},200
+        return  {"name": "test", "ram" : "4G", "cpu":"2", "autoreboot" : "1", "disk" : "30G"},201
+def fake_get_vm_current_status(vmid, node):
+        return  {"cpu_usage": "2", "ram_usage" : "4", "uptime":"2"},201
+def fake_get_vm_ip(vmid, node):
+        return  {"vm_ip": "157.159.195.256"},201
 
 
 
@@ -36,8 +40,23 @@ def test_valid_get_vm_id(client, init_user_database, init_vm_database, monkeypat
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(proxmox, "get_proxmox_vm_status", fake_get_proxmox_vm_status)
     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+    monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
+    monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
     response = client.get('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
-    assert response.status_code == 200
+    print(response.json)
+    assert response.status_code == 201
+
+def test_valid_valid_get_vm_id_with_unsecure(client, init_user_database, init_vm_database, monkeypatch):
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+    monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+    monkeypatch.setattr(proxmox, "get_proxmox_vm_status", fake_get_proxmox_vm_status)
+    monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+    monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
+    monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
+    response = client.get('/api/1.0.0/vm/6', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    print("json=" ,response.json)
+    assert response.status_code == 201
+    assert response.json['secure'] == True
 
 # Valid user with not valid token. Not admin.
 def test_false_token_get_vm_id(client, init_user_database, init_vm_database, monkeypatch):
@@ -48,6 +67,8 @@ def test_false_token_get_vm_id(client, init_user_database, init_vm_database, mon
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(proxmox, "get_proxmox_vm_status", fake_get_proxmox_vm_status)
     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+    monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
+    monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
 
     response = client.get('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     assert response.status_code == 403
@@ -61,6 +82,8 @@ def test_foreign_get_vm_id(client, init_user_database, init_vm_database, monkeyp
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(proxmox, "get_proxmox_vm_status", fake_get_proxmox_vm_status)
     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+    monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
+    monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
 
     response = client.get('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     assert response.status_code == 403
@@ -74,11 +97,13 @@ def test_admin_get_vm_id(client, init_user_database, init_vm_database, monkeypat
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(proxmox, "get_proxmox_vm_status", fake_get_proxmox_vm_status)
     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+    monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
+    monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
 
     vm1 = client.get('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     vm2 = client.get('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
-    assert vm1.status_code == 200
-    assert vm2.status_code == 200
+    assert vm1.status_code == 201
+    assert vm2.status_code == 201
 
 
 
