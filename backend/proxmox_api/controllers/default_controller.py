@@ -428,8 +428,7 @@ def get_vm_id(vmid):  # noqa: E501
             return {"status": "created"}, 201
         else :
             return {"error": "Unknown vm status"}, 400
-
-
+    
     node,status = proxmox.get_node_from_vm(vmid)
     
 
