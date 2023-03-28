@@ -56,7 +56,7 @@ def test_valid_valid_get_vm_id_with_unsecure(client, init_user_database, init_vm
     response = client.get('/api/1.0.0/vm/6', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     print("json=" ,response.json)
     assert response.status_code == 201
-    assert response.json['secure'] == True
+    assert response.json['unsecure'] == True
 
 # Valid user with not valid token. Not admin.
 def test_false_token_get_vm_id(client, init_user_database, init_vm_database, monkeypatch):
