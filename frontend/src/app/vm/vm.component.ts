@@ -205,7 +205,7 @@ export class VmComponent implements OnInit, OnDestroy {
                     vm.ramUsage = rep.body['ram_usage'];
                     vm.cpuUsage = rep.body['cpu_usage'];
                     vm.uptime = rep.body['uptime'];
-                    vm.isUnsecure = rep.body["unsecure"];
+                    vm.isUnsecure = Boolean(rep.body["unsecure"]);
                     if (rep.body['ip'] == ""){
                         vm.ip = ""
                     } else {
