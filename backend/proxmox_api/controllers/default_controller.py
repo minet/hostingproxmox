@@ -539,7 +539,7 @@ def get_vm_id(vmid):  # noqa: E501
                    , "status": status[0]["status"], "ram": ram
                    , "cpu": cpu, "disk": disk, "type": type[0]["type"]
                    , "ram_usage": ram_usage, "cpu_usage": cpu_usage
-                   , "uptime": uptime, "created_on": created_on[0]["created_on"], "secure":isUnsecure}, 201
+                   , "uptime": uptime, "created_on": created_on[0]["created_on"], "unsecure":isUnsecure}, 201
 
     elif   status[1] == 404 or type[1] == 404  :
         return {"error": "vm not found"}, 404

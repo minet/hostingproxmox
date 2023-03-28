@@ -229,7 +229,7 @@ document.onload = loaded();
     </div>
 
     <div class="row">
-      <div class="alert alert-warning text-center">
+      <div class="alert alert-warning text-center" *ngIf="user.vms[0].isUnsecure">
         <b>Ta VM a été eteinte car elle n'est pas sécurisée !</b><br><br>
         Pour des raisons de sécurité, la connexion SSH par mot de passe aux VMs est interdite. Seule l'authentification par clé doit être autorisée. Afin de prévenir tout risque de sécurité, votre VM a été automatiquement éteinte.<br><br>
 
