@@ -177,6 +177,9 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
     next_vmid = int(next_available_vmid())
     node = load_balance_server()
 
+    if configuration.ENVIRONMENT == "DEV":
+        name = "hosting-dev-" + name
+
    
     if node[1] != 201:
         return {"error": "Impossible to find an available server"}, 500
@@ -250,6 +253,7 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
 When the VM is up, the password, vm user name and ssh key are set up
 """
 def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
+    
     success = True
     sync = False
     vm = proxmox.nodes(node).qemu(vmid)
@@ -646,20 +650,23 @@ def get_proxmox_vm_status(vmid, node):
 
 # Select the next available ip address and set up in the proxmox firewall
 def set_new_vm_ip(vmid, node):
-    network = IPv4Network('157.159.195.0/24')
-    reserved = {'157.159.195.1', '157.159.195.2', '157.159.195.3', '157.159.195.4', '157.159.195.5',
-                    '157.159.195.6', '157.159.195.7', '157.159.195.8', '157.159.195.9',
-                    '157.159.195.10'}
-    hosts_iterator = (host for host in network.hosts() if str(host) not in reserved)
-    ip = ""
-    for host in hosts_iterator:
-        if database.is_ip_available(host) == True:
-            ip = host
-            break
-    if ip != "":
-        return ip 
-    else :
-        return None # no ip available
+    if configuration.ENVIRONMENT == "DEV":
+        return "157.159.195.9"
+    else:
+        network = IPv4Network('157.159.195.0/24')
+        reserved = {'157.159.195.1', '157.159.195.2', '157.159.195.3', '157.159.195.4', '157.159.195.5',
+                        '157.159.195.6', '157.159.195.7', '157.159.195.8', '157.159.195.9',
+                        '157.159.195.10'}
+        hosts_iterator = (host for host in network.hosts() if str(host) not in reserved)
+        ip = ""
+        for host in hosts_iterator:
+            if database.is_ip_available(host) == True:
+                ip = host
+                break
+        if ip != "":
+            return ip 
+        else :
+            return None # no ip available
 
 
 

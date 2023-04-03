@@ -963,7 +963,6 @@ def get_need_to_be_restored(vmid):
 def get_account_state(username):
     headers = connexion.request.headers
     status_code, cas = util.check_cas_token(headers)
-    
     print("cas", cas)
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403

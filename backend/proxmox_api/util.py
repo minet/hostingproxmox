@@ -363,18 +363,6 @@ def get_adh6_account(username):
     userInfoJson = adh6_search_user(username, headers)
     print(userInfoJson)
     if userInfoJson is None or userInfoJson  == []: # not found
-        if "-" in username:
-            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
-            new_username = username.replace("-","_") # hosting replace by default _ with -. So we try if not found
-            print("'"+new_username+"'")
-            return get_adh6_account(new_username)
-            
-        elif "_" in username: # same
-            print("ERROR : the user " + username + " is not found in ADH6. Try with", end='')
-            new_username = username.replace("_",".").strip() # hosting replace by default _ with -. So we try if not found
-            print("'"+new_username+"'")
-            return get_adh6_account(new_username)
-        else :
             print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
             return {"error" : "the user " + username + " failed to be retrieved"}, 404
     else : 
