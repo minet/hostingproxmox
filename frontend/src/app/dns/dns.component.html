@@ -38,6 +38,7 @@
     <div class="card-body">
       <div>
         <form (ngSubmit)="create_dns(newDns)" #vmForm="ngForm">
+          <!-- Début du form qui créer une entrée dns -->
           <div *ngIf="vmForm.submitted && errorMessage == ''">
             {{'dns.create.request' | translate}}
           </div>
@@ -95,7 +96,9 @@
               </div>
             </div>
             <div class="text-center mt-3">
-              <button type="submit" class="btn btn-primary">{{'dns.form.submit' | translate}}</button>
+              <button type="submit" class="btn btn-primary">{{'dns.form.submit' | translate}}</button> 
+              <!-- Le bouton qui sert submit le nouveau dns -->
+              
             </div>
           </ng-container>
         </form>
@@ -118,6 +121,9 @@
         <th scope="col">{{'dns.item.host' | translate}}</th>
         <th scope="col">{{'dns.item.destination' | translate}}</th>
         <th scope="col">{{'dns.item.manage' | translate}}</th>
+        <th scope="col">Ajout</th>
+        
+        
       </tr>
       </thead>
       <tbody>
@@ -125,7 +131,18 @@
         <td *ngIf="user.admin">{{dns.user}}</td>
         <td><a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a></td>
         <td>{{dns.ip}}</td>
-        <td><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button></td>
+        
+        
+          
+          
+          <ng-container *ngIf="!dns.validated">
+            
+            <td><button class="btn btn-success" (click)="validate_dns(dns)" >Ajouter</button></td>
+          
+          </ng-container>
+          <td><button class="btn btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button></td> 
+
+         
       </tr>
       </tbody>
     </table>
@@ -144,3 +161,26 @@
   <p>{{'dns.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'dns.charter.notsigned_3' | translate}}</a> {{'dns.charter.notsigned_4' | translate}}</p>
 </div>
 
+<div class="alert alert-warning">
+
+  feur
+
+</div>  
+
+<table>
+  <tr>
+    <th>Company</th>
+    <th>Contact</th>
+    <th>Country</th>
+  </tr>
+  <tr>
+    <td>Alfreds Futterkiste</td>
+    <td>Maria Anders</td>
+    <td>Germany</td>
+  </tr>
+  <tr>
+    <td>Centro comercial Moctezuma</td>
+    <td>Francisco Chang</td>
+    <td>Mexico</td>
+  </tr>
+</table>   

@@ -106,6 +106,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                     dns.entry = rep.body['entry'];
                     dns.ip = rep.body['ip'];
                     dns.user = rep.body['user'];
+                    dns.validated = rep.body['validated'];
                     if (last) {
                         this.loading = false;
                     }
@@ -136,7 +137,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                 this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
             } else {
                 let data = {};
-                data = {entry: dns.entry, ip: dns.ip};
+                data = {entry: dns.entry, ip: dns.ip, validated: false};
                 this.http.post(this.authService.SERVER_URL + '/dns', data, {observe: 'response'}).subscribe(
                     (rep) => {
                         if (rep.status === 201) {
@@ -155,6 +156,30 @@ export class DnsComponent implements OnInit, OnDestroy {
             }
         }
     }
+
+    validate_dns(dns: Dns): void {
+                this.delete_entry(dns.id);
+                let data = {};
+                data = {entry: dns.entry, ip: dns.ip, validated: true};
+                this.http.post(this.authService.SERVER_URL + '/dns', data, {observe: 'response'}).subscribe(
+                    (rep) => {
+                        if (rep.status === 201) {
+                            this.success = true;
+                            window.location.reload();
+                        }  else {
+                            this.errorcode = rep.status;
+                        }
+
+                    },
+                    (error_rep) => {
+                        this.errorcode = error_rep.status;
+                        this.errorMessage = error_rep.error["error"]
+                        this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+                    });
+            }
+        
+    
+
 
 
     // Check if the DNS entry is correct and respect minet rules
