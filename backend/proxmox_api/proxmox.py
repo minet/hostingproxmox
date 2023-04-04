@@ -463,7 +463,8 @@ def get_vm(user_id = 0, search=None):
                 print("vmid = ", vmid)
                 print("search = ", search)
                 if search in str(vmid):
-                    vm_filtered_list.append(vmid)
+                    if vmid not in vm_filtered_list:
+                        vm_filtered_list.append(vmid)
                 node, status = get_node_from_vm(vmid)
                 if status == 200:
                     if status != 200:
@@ -473,7 +474,8 @@ def get_vm(user_id = 0, search=None):
                     name = infos["name"]
                     print("name = ", name)
                     if search in name :
-                        vm_filtered_list.append(vmid)
+                        if vmid not in vm_filtered_list:
+                            vm_filtered_list.append(vmid)
             print("time to filter proxmxo = ", time.time() - start)
             return vm_filtered_list, 200
 
