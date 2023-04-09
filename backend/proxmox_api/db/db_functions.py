@@ -226,6 +226,12 @@ def setNeedToBeRestored(vmid, needToBeRestored):
     vm.needToBeRestored = needToBeRestored
     db.session.commit()
 
+# Update all the dns records owner for an ip
+def update_all_ip_dns_record(ip, new_owner):
+    for dns in DomainName.query.filter_by(ip=ip).all():
+        dns.userId = new_owner
+        db.session.commit()
+
 
 # Return expired users with a freezeState >= minimumFreezeState
 def get_expired_users(minimumFreezeState = 1):

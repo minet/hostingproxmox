@@ -885,6 +885,7 @@ def transfer_ownership(vmid, newowner):
     database.update_vm_userid(vmid, userid)
     ip  = database.get_vm_ip(vmid)
     database.add_ip_to_history(ip, vmid, userid)
+    database.update_all_ip_dns_record(ip, userid)
     return {"status": "ok"}, 201
 
     
