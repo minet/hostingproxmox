@@ -70,8 +70,8 @@ def get_vm_list(user_id=""):
         return list
 
 
-def add_dns_entry(user, entry, ip):
-    new_entry = DomainName(userId=user, entry=entry, ip=ip)
+def add_dns_entry(user, entry, ip, validated):
+    new_entry = DomainName(userId=user, entry=entry, ip=ip, validated = validated)
     db.session.add(new_entry)
     db.session.commit()
 
@@ -119,6 +119,10 @@ def get_entry_host(id):
 def get_entry_userid(dnsid):
     userid = DomainName.query.filter_by(id=dnsid).first().userId
     return userid
+
+def get_entry_validated(validated):
+    validated = DomainName.query.filter_by(validated=validated).first().validated
+    return validated
 
 
 def add_user(user):

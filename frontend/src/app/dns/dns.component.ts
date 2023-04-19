@@ -137,7 +137,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                 this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
             } else {
                 let data = {};
-                data = {entry: dns.entry, ip: dns.ip, validated: false};
+                data = {entry: dns.entry, ip: dns.ip, validated: 1};
                 this.http.post(this.authService.SERVER_URL + '/dns', data, {observe: 'response'}).subscribe(
                     (rep) => {
                         if (rep.status === 201) {

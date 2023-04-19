@@ -136,11 +136,13 @@
           
           
           <ng-container *ngIf="!dns.validated">
+
             
-            <td><button class="btn btn-success" (click)="validate_dns(dns)" >Ajouter</button></td>
+            <td><button class="btn btn-success" (click)="validate_dns(dns)" >{{dns.validated}}</button></td>
           
           </ng-container>
           <td><button class="btn btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button></td> 
+         
 
          
       </tr>
@@ -167,20 +169,3 @@
 
 </div>  
 
-<table>
-  <tr>
-    <th>Company</th>
-    <th>Contact</th>
-    <th>Country</th>
-  </tr>
-  <tr>
-    <td>Alfreds Futterkiste</td>
-    <td>Maria Anders</td>
-    <td>Germany</td>
-  </tr>
-  <tr>
-    <td>Centro comercial Moctezuma</td>
-    <td>Francisco Chang</td>
-    <td>Mexico</td>
-  </tr>
-</table>   
