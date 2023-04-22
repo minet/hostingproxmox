@@ -86,11 +86,9 @@ def is_admin(memberOf):
     return configuration.ADMIN_DN in memberOf
 
 
-"""delete a vm by id in the database
+"""delete a vm by id in the database and its dns entires
 :param vmid: vmid to delete
 :type vmid: string
-:param node: node of the vmid to delete
-:type node: string
 :rtype: True if success else False
 """
 def delete_from_db(vmid) -> bool:
@@ -104,6 +102,31 @@ def delete_from_db(vmid) -> bool:
         print("Problem in delete_vm: " + str(e))
         logging.error("Problem in delete_vm: " + str(e))
         return False
+
+
+"""delete a dns record by ip in the database and DNS when a vm is deleted
+:param vmid: vmid related 
+:type vmid: string
+:rtype:None
+"""
+def delete_from_dns(vmid):
+    try:
+        app = util.create_app() # we need the context to delete the vm if there is an error
+        db_models.db.init_app(app.app)
+        with app.app.app_context():
+           
+            ip = database.get_vm_ip(vmid)
+            dns_entries = database.get_dns_entry_from_ip(ip)
+            print("delete_from_dns ip = " ,ip, " dns_entries = ", dns_entries)
+            for id in dns_entries:
+                del_user_dns(id)
+            database.delete_ip_dns_record(ip)
+            return True
+    except Exception as e :
+        print("Problem in delete_vm: " + str(e))
+        logging.error("Problem in delete_vm: " + str(e))
+        return False
+
 
 
 """delete a vm by id and node from proxmox
@@ -236,6 +259,7 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         delete_from_proxmox(next_vmid, node)
+        delete_from_dns(next_vmid)
         delete_from_db(next_vmid)
         return {"error": "Impossible to create the VM (cloning)"}, 500
 
@@ -290,6 +314,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         logging.error("Problem in create_vm(" + str(vmid) + ") when configuring vm: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when configuring vm: " + str(e))
         delete_from_proxmox(vmid, node)
+        delete_from_dns(vmid)
         delete_from_db(vmid)
         util.update_vm_state(vmid,"An error occured while configuring vm (vmid ="+str(vmid) +")", errorCode=500)
 
@@ -301,6 +326,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
     except Exception as e:
         success = False
         delete_from_proxmox(vmid, node)
+        delete_from_dns(vmid)
         delete_from_db(vmid)
         util.update_vm_state(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
@@ -323,6 +349,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
     except Exception as e:
         success = False
         delete_from_proxmox(vmid, node)
+        delete_from_dns(vmid)
         delete_from_db(vmid)
         util.update_vm_state(vmid,"An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")", errorCode=500)
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
