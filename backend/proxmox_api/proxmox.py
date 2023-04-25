@@ -333,10 +333,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         print("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
     print("vm started")
     try : 
-        #for k in proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").get():  # on vire d'abord toutes leip set
-        #    cidr = k['cidr']
-        #    proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").delete(cidr)
-         # on met l'ipset à jour :
+
         try:
             proxmox.nodes(node).qemu(vmid).firewall.ipset.hosting.get()
         except:
@@ -345,6 +342,15 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
             proxmox.nodes(node).qemu(vmid).firewall.ipset.hosting(ip).get()
         except:
             proxmox.nodes(node).qemu(vmid).firewall.ipset("hosting").create(cidr=ip)
+        
+        proxmox.nodes(node).qemu(vmid).firewall.options.put(enable=1)
+        proxmox.nodes(node).qemu(vmid).firewall.options.put(ipfilter=0)
+        proxmox.nodes(node).qemu(vmid).firewall.options.put(policy_in="ACCEPT")
+        proxmox.nodes(node).qemu(vmid).firewall.rules.post(action="DROP", type="out", log="nolog", enable=1) # OUT DROP -log nolog
+        proxmox.nodes(node).qemu(vmid).firewall.rules.post(action="DROP", type="in", log="nolog", enable=1) # IN DROP -log nolog
+        proxmox.nodes(node).qemu(vmid).firewall.rules.post(action="ACCEPT", type="out", source="+hosting", log="nolog", enable=1) # OUT ACCEPT -source +hosting -log nolog
+        proxmox.nodes(node).qemu(vmid).firewall.rules.post(action="ACCEPT", type="in", dest="+hosting", log="nolog", enable=1) # IN ACCEPT -dest +hosting -log nolog
+        
         #db.session.commit()
     except Exception as e:
         success = False
