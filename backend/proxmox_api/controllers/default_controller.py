@@ -974,3 +974,12 @@ def get_account_state(username):
         return proxmox.get_freeze_state(username)
     else :
         return {"error": "You are not allowed to check this account"}, 403
+
+
+
+def get_notification():
+    notif = dbfct.get_notification()
+    if notif == None:
+        return {}, 204 # no content
+    else:
+        return notif, 200
