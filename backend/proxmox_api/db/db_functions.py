@@ -276,7 +276,7 @@ def get_notification():
     notif = Notification.query.first()
     if notif is not None:
         if notif.active:
-            return {"title": notif.title, "message": notif.message}
+            return {"title": notif.title, "message": notif.message, "criticity": notif.criticity}
         return None
     return None
 
