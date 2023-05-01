@@ -47,3 +47,13 @@
     </ul>
   </div>
 </nav>
+<div class="alert alert-warning alert-dismissible fade show text-center" role="alert" *ngIf="notificationTitle != null && notificationTitle != ''"
+[ngClass]="{
+  'alert-success': notificationCriticity == '0',
+  'alert-primary' : notificationCriticity == '1',
+  'alert-danger' : notificationCriticity == '3'
+          }">
+  <b>{{notificationTitle}}</b><br>
+  {{notificationMessage}}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
