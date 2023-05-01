@@ -3,8 +3,9 @@ import proxmox_api.config.configuration as config
 import time
 import threading
 
-
-#####DB
+###################
+####### VM ########
+###################
 
 
 def update_vm_ip(vmid, vmip):
@@ -30,6 +31,75 @@ def update_vm_mac(vmid, mac):
 def get_vm_db_info(vmid):
     return  Vm.query.filter_by(id=vmid).first()
 
+
+def update_vm_userid(vmid, userid):
+    vm = Vm.query.filter_by(id=vmid).first()
+    vm.userId = userid
+    db.session.commit()
+
+# Retrieve the VM from the DB using the IP
+def get_vm_from_ip(ip):
+    return Vm.query.filter_by(ip=ip).first()
+
+
+
+def add_vm(id, user_id, type, mac, ip):
+    new_vm = Vm(id=id, userId=user_id, type=type, mac=mac, ip=ip)
+    db.session.add(new_vm)
+    db.session.commit()
+
+
+def del_vm_list(del_vmid):
+    Vm.query.filter_by(id=del_vmid).delete()
+    db.session.commit()
+
+
+def get_vm_userid(vmid):
+    userid = Vm.query.filter_by(id=vmid).first().userId
+    return userid
+
+
+def get_vm_type(vmid):
+    type = Vm.query.filter_by(id=vmid).first().type
+
+    if type is not None:
+        return {"type": type}, 201
+    else:
+        return {"type": "vm not found"}, 404
+
+def get_vm_created_on(vmid):
+    created_on = Vm.query.filter_by(id=vmid).first().created_on
+
+    if created_on is not None:
+        return {"created_on": created_on}, 201
+    else:
+        return {"created_on": "vm not found"}, 404
+
+def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
+    if Vm.query.filter_by(ip=ip).first():
+        return False
+    else:
+        return True;
+
+def getNextVmID(min = 110): # get the next vmid available. The minimum whould not be less than 110
+    if min <110 : 
+        min = 110
+    for vmid in (range(min, 999)): # should not exceed 999, if not, we have a problem
+        if Vm.query.filter_by(id=vmid).first() is None:
+            return vmid 
+
+def getNeedToBeRestored(vmid):
+    return Vm.query.filter_by(id=vmid).first().needToBeRestored
+
+def setNeedToBeRestored(vmid, needToBeRestored):
+    vm = Vm.query.filter_by(id=vmid).first()
+    vm.needToBeRestored = needToBeRestored
+    db.session.commit()
+
+###################
+###### USER #######
+###################
+
 def get_user_list(user_id=None, searchItem = None): # filter is for the user name
     if user_id is not None:
         return User.query.filter_by(id=user_id).first()
@@ -41,23 +111,6 @@ def get_user_list(user_id=None, searchItem = None): # filter is for the user nam
         
     else : 
         return User.query.all()
-
-def update_vm_userid(vmid, userid):
-    vm = Vm.query.filter_by(id=vmid).first()
-    vm.userId = userid
-    db.session.commit()
-
-# Retrieve the VM from the DB using the IP
-def get_vm_from_ip(ip):
-    return Vm.query.filter_by(ip=ip).first()
-
-# Retrieve all dns entries from the DB using an IP
-def get_dns_entry_from_ip(ip):
-    list = []
-    for dn in DomainName.query.all():
-        if dn.ip == ip:
-            list.append(dn.id)
-    return list
 
 # Return all the VM of an user
 def get_vm_list(user_id=""): 
@@ -75,6 +128,63 @@ def get_vm_list(user_id=""):
             for j in i.vms:
                     list.append(j.id)
         return list
+
+
+
+def add_user(user):
+    new_user = User(id=user)
+    db.session.add(new_user)
+    db.session.commit()
+
+def updateFreezeState(username, freezeState):
+    user = User.query.filter_by(id=username).first()
+    user.freezeState = freezeState
+    #print("update freeze state", user, username, freezeState)
+    db.session.commit()
+
+def getFreezeState(username):
+    user = User.query.filter_by(id=username).first()
+    if user is None:
+        print("user not found", username)
+        return None
+    return user.freezeState
+
+def getLastNotificationDate(username):
+    user = User.query.filter_by(id=username).first()
+    if user is None:
+        print("user not found", username)
+        return None
+    return user.lastNotificationDate
+
+
+def updateLastNotificationDate(username, date):
+    user = User.query.filter_by(id=username).first()
+    user.lastNotificationDate = date
+    db.session.commit()
+
+
+# Return expired users with a freezeState >= minimumFreezeState
+def get_expired_users(minimumFreezeState = 1):
+    list = []
+    for user in User.query.all():
+        if user.freezeState !=None:
+            state = user.freezeState.split(".")[0]
+            if int(state) >= minimumFreezeState:
+                list.append(user.id)
+    return list
+
+
+###################
+###### DNS ########
+###################
+
+# Retrieve all dns entries from the DB using an IP
+def get_dns_entry_from_ip(ip):
+    list = []
+    for dn in DomainName.query.all():
+        if dn.ip == ip:
+            list.append(dn.id)
+    return list
 
 
 def add_dns_entry(user, entry, ip):
@@ -128,43 +238,19 @@ def get_entry_userid(dnsid):
     return userid
 
 
-def add_user(user):
-    new_user = User(id=user)
-    db.session.add(new_user)
+# Update all the dns records owner for an ip
+def update_all_ip_dns_record(ip, new_owner):
+    for dns in DomainName.query.filter_by(ip=ip).all():
+        dns.userId = new_owner
+        db.session.commit()
+
+# delete all the dns records for an ip
+def delete_ip_dns_record(ip):
+    DomainName.query.filter_by(ip=ip).delete()
     db.session.commit()
-
-
-def add_vm(id, user_id, type, mac, ip):
-    new_vm = Vm(id=id, userId=user_id, type=type, mac=mac, ip=ip)
-    db.session.add(new_vm)
-    db.session.commit()
-
-
-def del_vm_list(del_vmid):
-    Vm.query.filter_by(id=del_vmid).delete()
-    db.session.commit()
-
-
-def get_vm_userid(vmid):
-    userid = Vm.query.filter_by(id=vmid).first().userId
-    return userid
-
-
-def get_vm_type(vmid):
-    type = Vm.query.filter_by(id=vmid).first().type
-
-    if type is not None:
-        return {"type": type}, 201
-    else:
-        return {"type": "vm not found"}, 404
-
-def get_vm_created_on(vmid):
-    created_on = Vm.query.filter_by(id=vmid).first().created_on
-
-    if created_on is not None:
-        return {"created_on": created_on}, 201
-    else:
-        return {"created_on": "vm not found"}, 404
+###################
+##### HISTORY #####
+###################
 
 def get_historyip_fromdb(vmid = ""): # vmid vide si on récupère tt l'historique
     list = []
@@ -181,79 +267,20 @@ def add_ip_to_history(ip, vmid, userid):
     db.session.add(new_ip)
     db.session.commit()
 
-def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
-    if Vm.query.filter_by(ip=ip).first():
-        return False
-    else:
-        return True;
 
-def getNextVmID(min = 110): # get the next vmid available. The minimum whould not be less than 110
-    if min <110 : 
-        min = 110
-    for vmid in (range(min, 999)): # should not exceed 999, if not, we have a problem
-        if Vm.query.filter_by(id=vmid).first() is None:
-            return vmid 
+###################
+## NOTIFICATION ###
+###################
 
-
-
-def updateFreezeState(username, freezeState):
-    user = User.query.filter_by(id=username).first()
-    user.freezeState = freezeState
-    #print("update freeze state", user, username, freezeState)
-    db.session.commit()
-
-def getFreezeState(username):
-    user = User.query.filter_by(id=username).first()
-    if user is None:
-        print("user not found", username)
+def get_notification():
+    notif = Notification.query.first()
+    if notif is not None:
+        if notif.active:
+            return {"title": notif.title, "message": notif.message}
         return None
-    return user.freezeState
-
-def getLastNotificationDate(username):
-    user = User.query.filter_by(id=username).first()
-    if user is None:
-        print("user not found", username)
-        return None
-    return user.lastNotificationDate
-
-
-def updateLastNotificationDate(username, date):
-    user = User.query.filter_by(id=username).first()
-    user.lastNotificationDate = date
-    #print("update last botif date", user, username, date)
-    db.session.commit()
+    return None
 
 
 
-def getNeedToBeRestored(vmid):
-    return Vm.query.filter_by(id=vmid).first().needToBeRestored
-
-def setNeedToBeRestored(vmid, needToBeRestored):
-    vm = Vm.query.filter_by(id=vmid).first()
-    vm.needToBeRestored = needToBeRestored
-    db.session.commit()
-
-# Update all the dns records owner for an ip
-def update_all_ip_dns_record(ip, new_owner):
-    for dns in DomainName.query.filter_by(ip=ip).all():
-        dns.userId = new_owner
-        db.session.commit()
-
-# delete all the dns records for an ip
-def delete_ip_dns_record(ip):
-    DomainName.query.filter_by(ip=ip).delete()
-    db.session.commit()
-    
-
-
-# Return expired users with a freezeState >= minimumFreezeState
-def get_expired_users(minimumFreezeState = 1):
-    list = []
-    for user in User.query.all():
-        if user.freezeState !=None:
-            state = user.freezeState.split(".")[0]
-            if int(state) >= minimumFreezeState:
-                list.append(user.id)
-    return list
 
 #######
