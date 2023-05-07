@@ -29,7 +29,10 @@ export class NavbarComponent implements OnInit {
   public notificationTitle: string; // if NULL, no notification;
   public notificationMessage: string; // if NULL, no notification;
   public notificationCriticity: string; 
+  public isNotificationEnable: boolean; 
   public popUpLoading= false; 
+  public saveButtonLabel = "Enregistrer";
+  public popUpError = "";
 
 
 
@@ -63,9 +66,12 @@ export class NavbarComponent implements OnInit {
   fetchNotification(): void {
     this.http.get(this.authService.SERVER_URL + '/notification', {observe: 'response'}).subscribe(rep => {
       if(rep.status == 200) {
-        this.notificationTitle = rep.body['title'];
+        this.isNotificationEnable = Boolean(rep.body['active']);
+        if(this.isNotificationEnable) {
+          this.notificationTitle = rep.body['title'];
         this.notificationMessage = rep.body['message'];
         this.notificationCriticity = rep.body['criticity'];
+        }
       } else {
         this.notificationTitle = null;
         this.notificationMessage = null;
@@ -78,6 +84,23 @@ export class NavbarComponent implements OnInit {
   }
 
   addNotification(): void {
+    this.popUpError = "";
     this.popUpLoading = true;
+    this.http.patch(this.authService.SERVER_URL + '/notification', {
+      title: this.notificationTitle,
+      message: this.notificationMessage,
+      criticity: this.notificationCriticity,
+      active: true
+    }, {observe: 'response'}).subscribe(rep => {
+      if(rep.status == 201) {
+        this.saveButtonLabel = "Enregistré !";
+        setTimeout(() => {this.popUpLoading = false;
+          this.saveButtonLabel = "Enregistrer";}, 1000);
+      }
+    }, error => {
+      this.popUpLoading = false;
+      this.popUpError = "Erreur" + String(error.status) + " : " + error.error["error"];
+    }
+    );
   }
 }

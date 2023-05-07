@@ -93,7 +93,8 @@
           </div>
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" role="switch" id="active" checked>
+              <input class="form-check-input" type="checkbox" id="active" [(ngModel)]="isNotificationEnable"
+              ng-model="isNotificationEnable" [ngModelOptions]="{standalone: true}" name="isNotificationEnable">
               <label class="form-check-label" for="active">Afficher la notification sur tous les appareils</label>
             </div>
           </div>
@@ -102,9 +103,10 @@
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" [disabled]="popUpLoading">Retour</button>
           <button type="button" class="btn btn-primary" data-bs-dismiss="modal" [disabled]="popUpLoading">Tester en local</button>
           <button  class="btn btn-success w-50" [disabled]="popUpLoading" (click)="addNotification()">
-            <span>Enregistrer</span> <div class="spinner-border spinner-border-sm text-light" role="status" *ngIf="popUpLoading">
+            <span>{{saveButtonLabel}}</span> <div class="spinner-border spinner-border-sm text-light" role="status" *ngIf="popUpLoading">
             <span class="sr-only">Loading...</span>
           </div></button>
+          <div class="alert alert-danger" *ngIf="popUpError != ''">{{popUpError}}</div>
         </div>
       </div>
       
