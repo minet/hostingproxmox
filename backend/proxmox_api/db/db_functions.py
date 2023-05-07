@@ -276,10 +276,22 @@ def get_notification():
     notif = Notification.query.first()
     if notif is not None:
         if notif.active:
-            return {"title": notif.title, "message": notif.message, "criticity": notif.criticity}
+            return {"title": notif.title, "message": notif.message, "criticity": notif.criticity, "active": notif.active}
         return None
     return None
 
+def put_notification(title, message,criticity, active):
+    notif = Notification.query.first()
+    if notif is None:
+        new_notif = Notification(title=title, message=message, criticity=criticity, active=active)
+        db.session.add(new_notif)
+        db.session.commit()
+    else:
+        notif.title = title
+        notif.message = message
+        notif.criticity = criticity
+        notif.active = active
+        db.session.commit()
 
 
 
