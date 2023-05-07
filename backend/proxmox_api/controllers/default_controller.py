@@ -252,40 +252,35 @@ def delete_vm_id(vmid):  # noqa: E501
 def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
     print("Deleting VM " + str(vmid) + ". Is due to an error :", dueToError)
     util.update_vm_state(vmid, "deleting")
-    if node == "" and not dueToError:
-        print("Impossible to find the vm to delete.")
-        util.update_vm_state(vmid, "Impossible to find the vm to delete.", errorCode=404, deleteEntry=True)
-        return 0
-    elif node != "" : 
-        isProxmoxDeleted = proxmox.delete_from_proxmox(vmid, node)
-        print("isProxmoxDeleted : " + str(isProxmoxDeleted))
-        if not isProxmoxDeleted and not dueToError:
-            print("An error occured while deleting the VM from proxmox")
-            util.update_vm_state(vmid, "An error occured while deleting the VM from proxmox", errorCode=500, deleteEntry=True)
+    try :
+        if node == "" and not dueToError:
+            print("Impossible to find the vm to delete.")
+            util.update_vm_state(vmid, "Impossible to find the vm to delete.", errorCode=404, deleteEntry=True)
             return 0
-        # If not isProxmoxDeleted and dueToError then it's fine. 
-    # Now we can delete the entry in the db
-    isDbDeleted = proxmox.delete_from_db(vmid)
-    if (not dueToError and isDbDeleted and isProxmoxDeleted) or (dueToError and (isDbDeleted or not isProxmoxDeleted)):
-        util.update_vm_state(vmid, "deleted", deleteEntry=True)
-        return 1
-    else : 
-        print("An error occured while deleting the VM.")
-        util.update_vm_state(vmid, "An error occured while deleting the VM.", errorCode=500, deleteEntry=True)
-
-    
-    #
-    #body,statusCode = proxmox.get_freeze_state(user_id)
-    #if statusCode != 200:
-    #    return body, statusCode
-    #try:
-    #    freezeAccountState = int(body["freezeState"])
-    #    print(freezeAccountState)
-    #except Exception as e:
-    #    return {"error": "error while getting freeze state"}, 500
-   
-    #if freezeAccountState >= 3 and not admin: # if freeze state 1 or 2 user still have access to proxmox
-    #    return {"status": "cotisation expired"}, 403
+        elif node != "" : 
+            isProxmoxDeleted = proxmox.delete_from_proxmox(vmid, node)
+            print("isProxmoxDeleted : " + str(isProxmoxDeleted))
+            if not isProxmoxDeleted and not dueToError:
+                print("An error occured while deleting the VM from proxmox")
+                util.update_vm_state(vmid, "An error occured while deleting the VM from proxmox", errorCode=500, deleteEntry=True)
+                return 0
+            # If not isProxmoxDeleted and dueToError then it's fine. 
+        # Now we can delete the entry in the db
+        isDNSDeleted = proxmox.delete_from_dns(vmid)
+        if not isDNSDeleted and not dueToError:
+            print("An error occured while deleting the DNS entry")
+            util.update_vm_state(vmid, "An error occured while deleting the DNS entry", errorCode=500, deleteEntry=True)
+            return 0
+        isDbDeleted = proxmox.delete_from_db(vmid)
+        if (not dueToError and isDbDeleted and isProxmoxDeleted) or (dueToError and (isDbDeleted or not isProxmoxDeleted)):
+            util.update_vm_state(vmid, "deleted", deleteEntry=True)
+            return 1
+        else : 
+            print("An error occured while deleting the VM.")
+            util.update_vm_state(vmid, "An error occured while deleting the VM.", errorCode=500, deleteEntry=True)
+    except Exception as e:
+        print("An error occured while deleting the VM. Exception : " + str(e))
+        util.update_vm_state(vmid, "An error occured while deleting the VM. Exception : " + str(e), errorCode=500, deleteEntry=True)
 
     node,status = proxmox.get_node_from_vm(vmid)
     if status != 200: 
@@ -431,7 +426,6 @@ def get_vm_id(vmid):  # noqa: E501
 
     
     vm_state = util.get_vm_state(vmid)
-    print("vm_state : ", vm_state)
     if vm_state != None : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
         
         (status, httpErrorCode, errorMessage) = vm_state 
@@ -963,7 +957,6 @@ def get_need_to_be_restored(vmid):
 def get_account_state(username):
     headers = connexion.request.headers
     status_code, cas = util.check_cas_token(headers)
-    
     print("cas", cas)
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403

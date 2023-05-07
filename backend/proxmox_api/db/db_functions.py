@@ -51,6 +51,13 @@ def update_vm_userid(vmid, userid):
 def get_vm_from_ip(ip):
     return Vm.query.filter_by(ip=ip).first()
 
+# Retrieve all dns entries from the DB using an IP
+def get_dns_entry_from_ip(ip):
+    list = []
+    for dn in DomainName.query.all():
+        if dn.ip == ip:
+            list.append(dn.id)
+    return list
 
 # Return all the VM of an user
 def get_vm_list(user_id=""): 
@@ -225,6 +232,18 @@ def setNeedToBeRestored(vmid, needToBeRestored):
     vm = Vm.query.filter_by(id=vmid).first()
     vm.needToBeRestored = needToBeRestored
     db.session.commit()
+
+# Update all the dns records owner for an ip
+def update_all_ip_dns_record(ip, new_owner):
+    for dns in DomainName.query.filter_by(ip=ip).all():
+        dns.userId = new_owner
+        db.session.commit()
+
+# delete all the dns records for an ip
+def delete_ip_dns_record(ip):
+    DomainName.query.filter_by(ip=ip).delete()
+    db.session.commit()
+    
 
 
 # Return expired users with a freezeState >= minimumFreezeState

@@ -32,8 +32,6 @@ def create_entry(entry, ip_add):
     return {"error": "An unknown error occured while setting the DNS entry"}, 500
 
 
-
-
 def delete_dns_record(entry):
     """ Delete a record with ddns protocole in configuration.MAIN_DNS_SERVER_IP DNS server """
     dns_domain = "%s." % configuration.HOSTING_DOMAIN

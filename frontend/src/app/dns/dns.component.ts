@@ -168,7 +168,7 @@ export class DnsComponent implements OnInit, OnDestroy {
     // Check if the ip is for hosting
     // TO DO : make a local check if the user owns the ip
     check_dns_ip(ip):boolean{
-        const authorized_ip = /^157\.159\.195\.([1-9][0-9]|1[0-9][0-9]|2[0-5][0-5])$/; // At least 157.159.40.xxx > 10 < 255. The backend then checks if the user own the ip
+        const authorized_ip = /^157\.159\.195\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-5][0-5])$/; // At least 157.159.40.xxx > 10 < 255. The backend then checks if the user own the ip
         return authorized_ip.test(ip.trim())
     }
 

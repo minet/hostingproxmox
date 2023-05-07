@@ -30,8 +30,8 @@
         <a href="#" class="nav-link" [routerLink]="['manual']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.guide' | translate}}</a>
       </li>
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" *ngIf="this.cookie.get('lang') == 'fr'" class="nav-link dropdown-toggle">FR</a>
-        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" *ngIf="this.cookie.get('lang') == 'en'" class="nav-link dropdown-toggle">EN</a>
+        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" *ngIf="this.cookie.get('lang') == 'fr'" aria-expanded="false" role="button">FR</a>
+        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" *ngIf="this.cookie.get('lang') == 'en'" aria-expanded="false" role="button">EN</a>
         <div class="dropdown-menu">
           <a class="dropdown-item" *ngIf="this.cookie.get('lang') != 'fr'" (click)="this.changeLanguage('fr');">FR</a>
           <a class="dropdown-item" *ngIf="this.cookie.get('lang') != 'en'" (click)="this.changeLanguage('en');">EN</a>
