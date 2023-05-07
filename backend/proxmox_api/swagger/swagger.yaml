@@ -386,6 +386,25 @@ paths:
         "204":
           description: "No notificaton"
       x-openapi-router-controller: proxmox_api.controllers.default_controller
+    patch:
+        summary: Modify the notification
+        operationId: put_notification
+        tags:
+            - User
+        responses:
+          "201":
+            description: Notification modified
+            content:
+              application/json:
+                schema:
+                  type: array
+                  example: 
+                    - 
+                  x-content-type: application/json
+          "204":
+            description: "No notificaton"
+        x-openapi-router-controller: proxmox_api.controllers.default_controller
+      
   /historyall:
     get:
       summary: get the ip history of all the vm
