@@ -6,6 +6,8 @@ import {Observable} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {HttpClient} from '@angular/common/http';
 import {AuthService} from '../common/services/auth.service';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
@@ -27,6 +29,7 @@ export class NavbarComponent implements OnInit {
   public notificationTitle: string; // if NULL, no notification;
   public notificationMessage: string; // if NULL, no notification;
   public notificationCriticity: string; 
+  public popUpLoading= false; 
 
 
 
@@ -72,5 +75,9 @@ export class NavbarComponent implements OnInit {
       this.notificationTitle = null;
       this.notificationMessage = null;
     });
+  }
+
+  addNotification(): void {
+    this.popUpLoading = true;
   }
 }
