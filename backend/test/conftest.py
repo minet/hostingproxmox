@@ -9,8 +9,10 @@ from proxmoxer import ProxmoxAPI
 from proxmox_api.__main__ import app as flask_app
 from proxmox_api import __main__ as main
 from proxmox_api.db.db_models import db
-#@pytest.fixture
-#def client():
+
+
+# @pytest.fixture
+# def client():
 #    os.environ.update({"ENVIRONNMENT": "TEST"})
 #
 #
@@ -22,20 +24,44 @@ def init_user_database():
     db.init_app(flask_app.app)
     with flask_app.app.app_context():
         # Create the database and the database table
-        #model.User.query.delete()
+        # model.User.query.delete()
         db.session.query(model.User).delete()
         db.create_all()
         # List of test users
         test_users = [
-            {"id": "user-1", "freezeState": "0.0",  "lastNotificationDate": None},
-            {"id": "user-2", "freezeState": "0.0",  "lastNotificationDate": None},
-            {"id": "user-with-unsecure-vm", "freezeState": "0.0",  "lastNotificationDate": None},
-            {"id": "valid-user", "freezeState": "0.0",  "lastNotificationDate": None},
-             {"id": "expired-user-1", "freezeState": "1.0",    "lastNotificationDate": None},
-            {"id": "expired-user-2", "freezeState": "2.0",    "lastNotificationDate": None},
-            {"id": "expired-user-3", "freezeState": "3.0",    "lastNotificationDate": None},
-            {"id": "expired-user-4", "freezeState": "4.0",    "lastNotificationDate": None},
-            {"id": "new-user-to-be-checked", "freezeState": None,    "lastNotificationDate": None},
+            {"id": "user-1", "freezeState": "0.0", "lastNotificationDate": None},
+            {"id": "user-2", "freezeState": "0.0", "lastNotificationDate": None},
+            {
+                "id": "user-with-unsecure-vm",
+                "freezeState": "0.0",
+                "lastNotificationDate": None,
+            },
+            {"id": "valid-user", "freezeState": "0.0", "lastNotificationDate": None},
+            {
+                "id": "expired-user-1",
+                "freezeState": "1.0",
+                "lastNotificationDate": None,
+            },
+            {
+                "id": "expired-user-2",
+                "freezeState": "2.0",
+                "lastNotificationDate": None,
+            },
+            {
+                "id": "expired-user-3",
+                "freezeState": "3.0",
+                "lastNotificationDate": None,
+            },
+            {
+                "id": "expired-user-4",
+                "freezeState": "4.0",
+                "lastNotificationDate": None,
+            },
+            {
+                "id": "new-user-to-be-checked",
+                "freezeState": None,
+                "lastNotificationDate": None,
+            },
         ]
 
         # Convert the list of dictionaries to a list of User    objects
@@ -47,7 +73,7 @@ def init_user_database():
         t_users = list(mapped_users)
 
         # Add the users to the database - add_all() is used #to dd  multiple records
-        
+
         db.session.add_all(t_users)
 
         # Commit the changes for the users
@@ -56,7 +82,7 @@ def init_user_database():
         yield db  # this is where the testing happens!
         db.session.remove()  # looks like db.session.close() would  work as well
         # Drop the database table
-        #model.User.query.delete()
+        # model.User.query.delete()
         db.session.query(model.User).delete()
         db.session.query(model.Vm).delete()
         db.session.commit()
@@ -77,21 +103,69 @@ def init_vm_database():
 
         # List of test VM
         test_vms = [
-            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 2, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 3, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 4, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 5, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 6, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":True}
+            {
+                "id": 1,
+                "userId": "user-1",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
+            {
+                "id": 2,
+                "userId": "user-1",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
+            {
+                "id": 3,
+                "userId": "user-2",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
+            {
+                "id": 4,
+                "userId": "user-2",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
+            {
+                "id": 5,
+                "userId": "user-1",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
+            {
+                "id": 6,
+                "userId": "user-1",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": True,
+            },
         ]
-
 
         # Convert the list of dictionaries to a list of User    objects
         def create_user_model(user):
             return model.User(**user)
+
         def create_vm_model(vms):
             return model.Vm(**vms)
-        
+
         # Create a list of objects
         mapped_vms = map(create_vm_model, test_vms)
         t_vms = list(mapped_vms)
@@ -104,7 +178,7 @@ def init_vm_database():
         yield db  # this is where the testing happens!
         db.session.remove()  # looks like db.session.close() would  work as well
         # Drop the database table
-        #model.User.query.delete()
+        # model.User.query.delete()
         db.session.query(model.User).delete()
         db.session.query(model.Vm).delete()
         db.session.commit()
@@ -125,20 +199,60 @@ def init_expired_vm_database():
 
         # List of test VM
         test_vms = [
-            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 2, "userId" : "expired-user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 3, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 4, "userId" : "expired-user-3", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 5, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False}
+            {
+                "id": 1,
+                "userId": "user-1",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
+            {
+                "id": 2,
+                "userId": "expired-user-1",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
+            {
+                "id": 3,
+                "userId": "expired-user-2",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
+            {
+                "id": 4,
+                "userId": "expired-user-3",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
+            {
+                "id": 5,
+                "userId": "expired-user-2",
+                "type": "bare",
+                "ip": None,
+                "mac": None,
+                "needToBeRestored": False,
+                "unsecure": False,
+            },
         ]
-
 
         # Convert the list of dictionaries to a list of User    objects
         def create_user_model(user):
             return model.User(**user)
+
         def create_vm_model(vms):
             return model.Vm(**vms)
-        
+
         # Create a list of objects
         mapped_vms = map(create_vm_model, test_vms)
         t_vms = list(mapped_vms)
@@ -151,27 +265,31 @@ def init_expired_vm_database():
         yield db  # this is where the testing happens!
         db.session.remove()  # looks like db.session.close() would  work as well
         # Drop the database table
-        #model.User.query.delete()
+        # model.User.query.delete()
         db.session.query(model.User).delete()
         db.session.query(model.Vm).delete()
         db.session.commit()
 
+
 @pytest.fixture()
 def proxmoxAPI():
-    assert configuration.PROXMOX_HOST != None 
+    assert configuration.PROXMOX_HOST != None
     assert configuration.PROXMOX_USER != None
     assert configuration.PROXMOX_API_KEY_NAME != None
     assert configuration.PROXMOX_API_KEY != None
 
-    return ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER
-                     , token_name=configuration.PROXMOX_API_KEY_NAME
-                     , token_value=configuration.PROXMOX_API_KEY, verify_ssl=False)
+    return ProxmoxAPI(
+        host=configuration.PROXMOX_HOST,
+        user=configuration.PROXMOX_USER,
+        token_name=configuration.PROXMOX_API_KEY_NAME,
+        token_value=configuration.PROXMOX_API_KEY,
+        verify_ssl=False,
+    )
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def client():
     app, scheduler = main.create_app()
-    db.init_app(app.app) 
-    #return flask_app.app.test_client()
+    db.init_app(app.app)
+    # return flask_app.app.test_client()
     return app.app.test_client()
-         

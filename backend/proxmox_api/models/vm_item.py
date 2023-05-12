@@ -14,7 +14,25 @@ class VmItem(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, name: str=None, type: str=None, user: str=None, password: str=None, ssh: bool=None, ssh_key: str=None, ip: str=None, cpu: float=None, ram: float=None, disk: float=None, status: str=None, cpu_usage: float=None, ram_usage: float=None, uptime: float=None, created_on: str=None):  # noqa: E501
+
+    def __init__(
+        self,
+        name: str = None,
+        type: str = None,
+        user: str = None,
+        password: str = None,
+        ssh: bool = None,
+        ssh_key: str = None,
+        ip: str = None,
+        cpu: float = None,
+        ram: float = None,
+        disk: float = None,
+        status: str = None,
+        cpu_usage: float = None,
+        ram_usage: float = None,
+        uptime: float = None,
+        created_on: str = None,
+    ):  # noqa: E501
         """VmItem - a model defined in Swagger
 
         :param name: The name of this VmItem.  # noqa: E501
@@ -49,39 +67,39 @@ class VmItem(Model):
         :type created_on: str
         """
         self.swagger_types = {
-            'name': str,
-            'type': str,
-            'user': str,
-            'password': str,
-            'ssh': bool,
-            'ssh_key': str,
-            'ip': str,
-            'cpu': float,
-            'ram': float,
-            'disk': float,
-            'status': str,
-            'cpu_usage': float,
-            'ram_usage': float,
-            'uptime': float,
-            'created_on': str
+            "name": str,
+            "type": str,
+            "user": str,
+            "password": str,
+            "ssh": bool,
+            "ssh_key": str,
+            "ip": str,
+            "cpu": float,
+            "ram": float,
+            "disk": float,
+            "status": str,
+            "cpu_usage": float,
+            "ram_usage": float,
+            "uptime": float,
+            "created_on": str,
         }
 
         self.attribute_map = {
-            'name': 'name',
-            'type': 'type',
-            'user': 'user',
-            'password': 'password',
-            'ssh': 'ssh',
-            'ssh_key': 'sshKey',
-            'ip': 'ip',
-            'cpu': 'cpu',
-            'ram': 'ram',
-            'disk': 'disk',
-            'status': 'status',
-            'cpu_usage': 'cpu_usage',
-            'ram_usage': 'ram_usage',
-            'uptime': 'uptime',
-            'created_on': 'created_on'
+            "name": "name",
+            "type": "type",
+            "user": "user",
+            "password": "password",
+            "ssh": "ssh",
+            "ssh_key": "sshKey",
+            "ip": "ip",
+            "cpu": "cpu",
+            "ram": "ram",
+            "disk": "disk",
+            "status": "status",
+            "cpu_usage": "cpu_usage",
+            "ram_usage": "ram_usage",
+            "uptime": "uptime",
+            "created_on": "created_on",
         }
         self._name = name
         self._type = type
@@ -100,7 +118,7 @@ class VmItem(Model):
         self._created_on = created_on
 
     @classmethod
-    def from_dict(cls, dikt) -> 'VmItem':
+    def from_dict(cls, dikt) -> "VmItem":
         """Returns the dict as a model
 
         :param dikt: A dict.

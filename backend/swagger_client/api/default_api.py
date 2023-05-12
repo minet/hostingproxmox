@@ -46,8 +46,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.create_dns_with_http_info(**kwargs)  # noqa: E501
         else:
             (data) = self.create_dns_with_http_info(**kwargs)  # noqa: E501
@@ -68,21 +68,21 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['body']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["body"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method create_dns" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
 
         collection_formats = {}
 
@@ -96,17 +96,21 @@ class DefaultApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'body' in params:
-            body_params = params['body']
+        if "body" in params:
+            body_params = params["body"]
         # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/json'])  # noqa: E501
+        header_params[
+            "Content-Type"
+        ] = self.api_client.select_header_content_type(  # noqa: E501
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/dns', 'POST',
+            "/dns",
+            "POST",
             path_params,
             query_params,
             header_params,
@@ -115,11 +119,12 @@ class DefaultApi(object):
             files=local_var_files,
             response_type=None,  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def create_vm(self, **kwargs):  # noqa: E501
         """create vm  # noqa: E501
@@ -135,8 +140,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.create_vm_with_http_info(**kwargs)  # noqa: E501
         else:
             (data) = self.create_vm_with_http_info(**kwargs)  # noqa: E501
@@ -157,21 +162,21 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['body']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["body"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method create_vm" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
 
         collection_formats = {}
 
@@ -185,17 +190,21 @@ class DefaultApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'body' in params:
-            body_params = params['body']
+        if "body" in params:
+            body_params = params["body"]
         # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/json'])  # noqa: E501
+        header_params[
+            "Content-Type"
+        ] = self.api_client.select_header_content_type(  # noqa: E501
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/vm', 'POST',
+            "/vm",
+            "POST",
             path_params,
             query_params,
             header_params,
@@ -204,11 +213,12 @@ class DefaultApi(object):
             files=local_var_files,
             response_type=None,  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def delete_dns_id(self, dnsid, **kwargs):  # noqa: E501
         """delete dns entry by id  # noqa: E501
@@ -224,8 +234,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.delete_dns_id_with_http_info(dnsid, **kwargs)  # noqa: E501
         else:
             (data) = self.delete_dns_id_with_http_info(dnsid, **kwargs)  # noqa: E501
@@ -246,31 +256,32 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['dnsid']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["dnsid"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method delete_dns_id" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
         # verify the required parameter 'dnsid' is set
-        if ('dnsid' not in params or
-                params['dnsid'] is None):
-            raise ValueError("Missing the required parameter `dnsid` when calling `delete_dns_id`")  # noqa: E501
+        if "dnsid" not in params or params["dnsid"] is None:
+            raise ValueError(
+                "Missing the required parameter `dnsid` when calling `delete_dns_id`"
+            )  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'dnsid' in params:
-            path_params['dnsid'] = params['dnsid']  # noqa: E501
+        if "dnsid" in params:
+            path_params["dnsid"] = params["dnsid"]  # noqa: E501
 
         query_params = []
 
@@ -281,10 +292,11 @@ class DefaultApi(object):
 
         body_params = None
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/dns/{dnsid}', 'DELETE',
+            "/dns/{dnsid}",
+            "DELETE",
             path_params,
             query_params,
             header_params,
@@ -293,11 +305,12 @@ class DefaultApi(object):
             files=local_var_files,
             response_type=None,  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def delete_vm_id(self, vmid, **kwargs):  # noqa: E501
         """delete vm by id  # noqa: E501
@@ -313,8 +326,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.delete_vm_id_with_http_info(vmid, **kwargs)  # noqa: E501
         else:
             (data) = self.delete_vm_id_with_http_info(vmid, **kwargs)  # noqa: E501
@@ -335,31 +348,32 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['vmid']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["vmid"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method delete_vm_id" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
         # verify the required parameter 'vmid' is set
-        if ('vmid' not in params or
-                params['vmid'] is None):
-            raise ValueError("Missing the required parameter `vmid` when calling `delete_vm_id`")  # noqa: E501
+        if "vmid" not in params or params["vmid"] is None:
+            raise ValueError(
+                "Missing the required parameter `vmid` when calling `delete_vm_id`"
+            )  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'vmid' in params:
-            path_params['vmid'] = params['vmid']  # noqa: E501
+        if "vmid" in params:
+            path_params["vmid"] = params["vmid"]  # noqa: E501
 
         query_params = []
 
@@ -370,10 +384,11 @@ class DefaultApi(object):
 
         body_params = None
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/vm/{vmid}', 'DELETE',
+            "/vm/{vmid}",
+            "DELETE",
             path_params,
             query_params,
             header_params,
@@ -382,11 +397,12 @@ class DefaultApi(object):
             files=local_var_files,
             response_type=None,  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def delete_vm_id_with_error(self, vmid, **kwargs):  # noqa: E501
         """delete_vm_id_with_error  # noqa: E501
@@ -402,11 +418,15 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
-            return self.delete_vm_id_with_error_with_http_info(vmid, **kwargs)  # noqa: E501
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
+            return self.delete_vm_id_with_error_with_http_info(
+                vmid, **kwargs
+            )  # noqa: E501
         else:
-            (data) = self.delete_vm_id_with_error_with_http_info(vmid, **kwargs)  # noqa: E501
+            (data) = self.delete_vm_id_with_error_with_http_info(
+                vmid, **kwargs
+            )  # noqa: E501
             return data
 
     def delete_vm_id_with_error_with_http_info(self, vmid, **kwargs):  # noqa: E501
@@ -424,31 +444,32 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['vmid']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["vmid"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method delete_vm_id_with_error" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
         # verify the required parameter 'vmid' is set
-        if ('vmid' not in params or
-                params['vmid'] is None):
-            raise ValueError("Missing the required parameter `vmid` when calling `delete_vm_id_with_error`")  # noqa: E501
+        if "vmid" not in params or params["vmid"] is None:
+            raise ValueError(
+                "Missing the required parameter `vmid` when calling `delete_vm_id_with_error`"
+            )  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'vmid' in params:
-            path_params['vmid'] = params['vmid']  # noqa: E501
+        if "vmid" in params:
+            path_params["vmid"] = params["vmid"]  # noqa: E501
 
         query_params = []
 
@@ -459,10 +480,11 @@ class DefaultApi(object):
 
         body_params = None
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/vmWithError/{vmid}', 'DELETE',
+            "/vmWithError/{vmid}",
+            "DELETE",
             path_params,
             query_params,
             header_params,
@@ -471,11 +493,12 @@ class DefaultApi(object):
             files=local_var_files,
             response_type=None,  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def get_dns(self, **kwargs):  # noqa: E501
         """get all user's dns entries  # noqa: E501
@@ -490,8 +513,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.get_dns_with_http_info(**kwargs)  # noqa: E501
         else:
             (data) = self.get_dns_with_http_info(**kwargs)  # noqa: E501
@@ -512,20 +535,19 @@ class DefaultApi(object):
         """
 
         all_params = []  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method get_dns" % key
+                    "Got an unexpected keyword argument '%s'" " to method get_dns" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
 
         collection_formats = {}
 
@@ -540,27 +562,30 @@ class DefaultApi(object):
 
         body_params = None
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/dns', 'GET',
+            "/dns",
+            "GET",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[DnsEntryItem]',  # noqa: E501
+            response_type="list[DnsEntryItem]",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def get_dns_id(self, dnsid, **kwargs):  # noqa: E501
         """get a dns entry by id  # noqa: E501
@@ -576,8 +601,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.get_dns_id_with_http_info(dnsid, **kwargs)  # noqa: E501
         else:
             (data) = self.get_dns_id_with_http_info(dnsid, **kwargs)  # noqa: E501
@@ -598,31 +623,32 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['dnsid']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["dnsid"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method get_dns_id" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
         # verify the required parameter 'dnsid' is set
-        if ('dnsid' not in params or
-                params['dnsid'] is None):
-            raise ValueError("Missing the required parameter `dnsid` when calling `get_dns_id`")  # noqa: E501
+        if "dnsid" not in params or params["dnsid"] is None:
+            raise ValueError(
+                "Missing the required parameter `dnsid` when calling `get_dns_id`"
+            )  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'dnsid' in params:
-            path_params['dnsid'] = params['dnsid']  # noqa: E501
+        if "dnsid" in params:
+            path_params["dnsid"] = params["dnsid"]  # noqa: E501
 
         query_params = []
 
@@ -633,27 +659,30 @@ class DefaultApi(object):
 
         body_params = None
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/dns/{dnsid}', 'GET',
+            "/dns/{dnsid}",
+            "GET",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='DnsItem',  # noqa: E501
+            response_type="DnsItem",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def get_historyip(self, vmid, **kwargs):  # noqa: E501
         """get the ip history of a vm  # noqa: E501
@@ -669,8 +698,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.get_historyip_with_http_info(vmid, **kwargs)  # noqa: E501
         else:
             (data) = self.get_historyip_with_http_info(vmid, **kwargs)  # noqa: E501
@@ -691,31 +720,32 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['vmid']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["vmid"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method get_historyip" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
         # verify the required parameter 'vmid' is set
-        if ('vmid' not in params or
-                params['vmid'] is None):
-            raise ValueError("Missing the required parameter `vmid` when calling `get_historyip`")  # noqa: E501
+        if "vmid" not in params or params["vmid"] is None:
+            raise ValueError(
+                "Missing the required parameter `vmid` when calling `get_historyip`"
+            )  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'vmid' in params:
-            path_params['vmid'] = params['vmid']  # noqa: E501
+        if "vmid" in params:
+            path_params["vmid"] = params["vmid"]  # noqa: E501
 
         query_params = []
 
@@ -726,27 +756,30 @@ class DefaultApi(object):
 
         body_params = None
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/history/{vmid}', 'GET',
+            "/history/{vmid}",
+            "GET",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[HistoryIdItem]',  # noqa: E501
+            response_type="list[HistoryIdItem]",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def get_historyipall(self, **kwargs):  # noqa: E501
         """get the ip history of all the vm  # noqa: E501
@@ -761,8 +794,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.get_historyipall_with_http_info(**kwargs)  # noqa: E501
         else:
             (data) = self.get_historyipall_with_http_info(**kwargs)  # noqa: E501
@@ -783,20 +816,20 @@ class DefaultApi(object):
         """
 
         all_params = []  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method get_historyipall" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
 
         collection_formats = {}
 
@@ -811,27 +844,30 @@ class DefaultApi(object):
 
         body_params = None
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/historyall', 'GET',
+            "/historyall",
+            "GET",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[HistoryIdItem]',  # noqa: E501
+            response_type="list[HistoryIdItem]",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def get_ip_list(self, **kwargs):  # noqa: E501
         """get the list of a users ip addresses  # noqa: E501
@@ -846,8 +882,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.get_ip_list_with_http_info(**kwargs)  # noqa: E501
         else:
             (data) = self.get_ip_list_with_http_info(**kwargs)  # noqa: E501
@@ -868,20 +904,20 @@ class DefaultApi(object):
         """
 
         all_params = []  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method get_ip_list" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
 
         collection_formats = {}
 
@@ -896,27 +932,30 @@ class DefaultApi(object):
 
         body_params = None
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/ips', 'GET',
+            "/ips",
+            "GET",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[HistoryIdItem]',  # noqa: E501
+            response_type="list[HistoryIdItem]",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def get_vm(self, filter, **kwargs):  # noqa: E501
         """get all user vms  # noqa: E501
@@ -932,8 +971,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.get_vm_with_http_info(filter, **kwargs)  # noqa: E501
         else:
             (data) = self.get_vm_with_http_info(filter, **kwargs)  # noqa: E501
@@ -954,33 +993,33 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['filter']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["filter"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
-                    "Got an unexpected keyword argument '%s'"
-                    " to method get_vm" % key
+                    "Got an unexpected keyword argument '%s'" " to method get_vm" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
         # verify the required parameter 'filter' is set
-        if ('filter' not in params or
-                params['filter'] is None):
-            raise ValueError("Missing the required parameter `filter` when calling `get_vm`")  # noqa: E501
+        if "filter" not in params or params["filter"] is None:
+            raise ValueError(
+                "Missing the required parameter `filter` when calling `get_vm`"
+            )  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
 
         query_params = []
-        if 'filter' in params:
-            query_params.append(('filter', params['filter']))  # noqa: E501
+        if "filter" in params:
+            query_params.append(("filter", params["filter"]))  # noqa: E501
 
         header_params = {}
 
@@ -989,27 +1028,30 @@ class DefaultApi(object):
 
         body_params = None
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/vm', 'GET',
+            "/vm",
+            "GET",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='list[VmIdItem]',  # noqa: E501
+            response_type="list[VmIdItem]",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def get_vm_id(self, vmid, **kwargs):  # noqa: E501
         """get a vm by id  # noqa: E501
@@ -1025,8 +1067,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.get_vm_id_with_http_info(vmid, **kwargs)  # noqa: E501
         else:
             (data) = self.get_vm_id_with_http_info(vmid, **kwargs)  # noqa: E501
@@ -1047,31 +1089,32 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['vmid']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["vmid"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method get_vm_id" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
         # verify the required parameter 'vmid' is set
-        if ('vmid' not in params or
-                params['vmid'] is None):
-            raise ValueError("Missing the required parameter `vmid` when calling `get_vm_id`")  # noqa: E501
+        if "vmid" not in params or params["vmid"] is None:
+            raise ValueError(
+                "Missing the required parameter `vmid` when calling `get_vm_id`"
+            )  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'vmid' in params:
-            path_params['vmid'] = params['vmid']  # noqa: E501
+        if "vmid" in params:
+            path_params["vmid"] = params["vmid"]  # noqa: E501
 
         query_params = []
 
@@ -1082,27 +1125,30 @@ class DefaultApi(object):
 
         body_params = None
         # HTTP header `Accept`
-        header_params['Accept'] = self.api_client.select_header_accept(
-            ['application/json'])  # noqa: E501
+        header_params["Accept"] = self.api_client.select_header_accept(
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/vm/{vmid}', 'GET',
+            "/vm/{vmid}",
+            "GET",
             path_params,
             query_params,
             header_params,
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='VmItem',  # noqa: E501
+            response_type="VmItem",  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def is_cotisation_uptodate(self, **kwargs):  # noqa: E501
         """check is the cotisation is up to date for a user  # noqa: E501
@@ -1117,8 +1163,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.is_cotisation_uptodate_with_http_info(**kwargs)  # noqa: E501
         else:
             (data) = self.is_cotisation_uptodate_with_http_info(**kwargs)  # noqa: E501
@@ -1139,20 +1185,20 @@ class DefaultApi(object):
         """
 
         all_params = []  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method is_cotisation_uptodate" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
 
         collection_formats = {}
 
@@ -1167,10 +1213,11 @@ class DefaultApi(object):
 
         body_params = None
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/cotisation', 'GET',
+            "/cotisation",
+            "GET",
             path_params,
             query_params,
             header_params,
@@ -1179,11 +1226,12 @@ class DefaultApi(object):
             files=local_var_files,
             response_type=None,  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )
 
     def patch_vm(self, vmid, **kwargs):  # noqa: E501
         """update a vm  # noqa: E501
@@ -1200,8 +1248,8 @@ class DefaultApi(object):
                  If the method is called asynchronously,
                  returns the request thread.
         """
-        kwargs['_return_http_data_only'] = True
-        if kwargs.get('async_req'):
+        kwargs["_return_http_data_only"] = True
+        if kwargs.get("async_req"):
             return self.patch_vm_with_http_info(vmid, **kwargs)  # noqa: E501
         else:
             (data) = self.patch_vm_with_http_info(vmid, **kwargs)  # noqa: E501
@@ -1223,31 +1271,32 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['vmid', 'body']  # noqa: E501
-        all_params.append('async_req')
-        all_params.append('_return_http_data_only')
-        all_params.append('_preload_content')
-        all_params.append('_request_timeout')
+        all_params = ["vmid", "body"]  # noqa: E501
+        all_params.append("async_req")
+        all_params.append("_return_http_data_only")
+        all_params.append("_preload_content")
+        all_params.append("_request_timeout")
 
         params = locals()
-        for key, val in six.iteritems(params['kwargs']):
+        for key, val in six.iteritems(params["kwargs"]):
             if key not in all_params:
                 raise TypeError(
                     "Got an unexpected keyword argument '%s'"
                     " to method patch_vm" % key
                 )
             params[key] = val
-        del params['kwargs']
+        del params["kwargs"]
         # verify the required parameter 'vmid' is set
-        if ('vmid' not in params or
-                params['vmid'] is None):
-            raise ValueError("Missing the required parameter `vmid` when calling `patch_vm`")  # noqa: E501
+        if "vmid" not in params or params["vmid"] is None:
+            raise ValueError(
+                "Missing the required parameter `vmid` when calling `patch_vm`"
+            )  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
-        if 'vmid' in params:
-            path_params['vmid'] = params['vmid']  # noqa: E501
+        if "vmid" in params:
+            path_params["vmid"] = params["vmid"]  # noqa: E501
 
         query_params = []
 
@@ -1257,17 +1306,21 @@ class DefaultApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'body' in params:
-            body_params = params['body']
+        if "body" in params:
+            body_params = params["body"]
         # HTTP header `Content-Type`
-        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
-            ['application/json'])  # noqa: E501
+        header_params[
+            "Content-Type"
+        ] = self.api_client.select_header_content_type(  # noqa: E501
+            ["application/json"]
+        )  # noqa: E501
 
         # Authentication setting
-        auth_settings = ['OAuth2']  # noqa: E501
+        auth_settings = ["OAuth2"]  # noqa: E501
 
         return self.api_client.call_api(
-            '/vm/{vmid}', 'PATCH',
+            "/vm/{vmid}",
+            "PATCH",
             path_params,
             query_params,
             header_params,
@@ -1276,8 +1329,9 @@ class DefaultApi(object):
             files=local_var_files,
             response_type=None,  # noqa: E501
             auth_settings=auth_settings,
-            async_req=params.get('async_req'),
-            _return_http_data_only=params.get('_return_http_data_only'),
-            _preload_content=params.get('_preload_content', True),
-            _request_timeout=params.get('_request_timeout'),
-            collection_formats=collection_formats)
+            async_req=params.get("async_req"),
+            _return_http_data_only=params.get("_return_http_data_only"),
+            _preload_content=params.get("_preload_content", True),
+            _request_timeout=params.get("_request_timeout"),
+            collection_formats=collection_formats,
+        )

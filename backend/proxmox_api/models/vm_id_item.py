@@ -14,23 +14,20 @@ class VmIdItem(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: float=None):  # noqa: E501
+
+    def __init__(self, id: float = None):  # noqa: E501
         """VmIdItem - a model defined in Swagger
 
         :param id: The id of this VmIdItem.  # noqa: E501
         :type id: float
         """
-        self.swagger_types = {
-            'id': float
-        }
+        self.swagger_types = {"id": float}
 
-        self.attribute_map = {
-            'id': 'id'
-        }
+        self.attribute_map = {"id": "id"}
         self._id = id
 
     @classmethod
-    def from_dict(cls, dikt) -> 'VmIdItem':
+    def from_dict(cls, dikt) -> "VmIdItem":
         """Returns the dict as a model
 
         :param dikt: A dict.

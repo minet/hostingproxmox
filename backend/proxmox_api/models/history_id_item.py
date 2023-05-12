@@ -14,7 +14,14 @@ class HistoryIdItem(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, ip: str=None, _date: str=None, user_id: float=None, vm_id: float=None):  # noqa: E501
+
+    def __init__(
+        self,
+        ip: str = None,
+        _date: str = None,
+        user_id: float = None,
+        vm_id: float = None,
+    ):  # noqa: E501
         """HistoryIdItem - a model defined in Swagger
 
         :param ip: The ip of this HistoryIdItem.  # noqa: E501
@@ -26,18 +33,13 @@ class HistoryIdItem(Model):
         :param vm_id: The vm_id of this HistoryIdItem.  # noqa: E501
         :type vm_id: float
         """
-        self.swagger_types = {
-            'ip': str,
-            '_date': str,
-            'user_id': float,
-            'vm_id': float
-        }
+        self.swagger_types = {"ip": str, "_date": str, "user_id": float, "vm_id": float}
 
         self.attribute_map = {
-            'ip': 'ip',
-            '_date': 'date',
-            'user_id': 'userId',
-            'vm_id': 'VmId'
+            "ip": "ip",
+            "_date": "date",
+            "user_id": "userId",
+            "vm_id": "VmId",
         }
         self._ip = ip
         self.__date = _date
@@ -45,7 +47,7 @@ class HistoryIdItem(Model):
         self._vm_id = vm_id
 
     @classmethod
-    def from_dict(cls, dikt) -> 'HistoryIdItem':
+    def from_dict(cls, dikt) -> "HistoryIdItem":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -101,7 +103,9 @@ class HistoryIdItem(Model):
         :type _date: str
         """
         if _date is None:
-            raise ValueError("Invalid value for `_date`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `_date`, must not be `None`"
+            )  # noqa: E501
 
         self.__date = _date
 

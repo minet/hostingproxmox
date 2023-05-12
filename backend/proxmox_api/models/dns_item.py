@@ -14,7 +14,8 @@ class DnsItem(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, entry: str=None, ip: str=None):  # noqa: E501
+
+    def __init__(self, entry: str = None, ip: str = None):  # noqa: E501
         """DnsItem - a model defined in Swagger
 
         :param entry: The entry of this DnsItem.  # noqa: E501
@@ -22,20 +23,14 @@ class DnsItem(Model):
         :param ip: The ip of this DnsItem.  # noqa: E501
         :type ip: str
         """
-        self.swagger_types = {
-            'entry': str,
-            'ip': str
-        }
+        self.swagger_types = {"entry": str, "ip": str}
 
-        self.attribute_map = {
-            'entry': 'entry',
-            'ip': 'ip'
-        }
+        self.attribute_map = {"entry": "entry", "ip": "ip"}
         self._entry = entry
         self._ip = ip
 
     @classmethod
-    def from_dict(cls, dikt) -> 'DnsItem':
+    def from_dict(cls, dikt) -> "DnsItem":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -66,7 +61,9 @@ class DnsItem(Model):
         :type entry: str
         """
         if entry is None:
-            raise ValueError("Invalid value for `entry`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `entry`, must not be `None`"
+            )  # noqa: E501
 
         self._entry = entry
 

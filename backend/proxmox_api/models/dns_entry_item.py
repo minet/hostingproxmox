@@ -14,23 +14,20 @@ class DnsEntryItem(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, entry: str=None):  # noqa: E501
+
+    def __init__(self, entry: str = None):  # noqa: E501
         """DnsEntryItem - a model defined in Swagger
 
         :param entry: The entry of this DnsEntryItem.  # noqa: E501
         :type entry: str
         """
-        self.swagger_types = {
-            'entry': str
-        }
+        self.swagger_types = {"entry": str}
 
-        self.attribute_map = {
-            'entry': 'entry'
-        }
+        self.attribute_map = {"entry": "entry"}
         self._entry = entry
 
     @classmethod
-    def from_dict(cls, dikt) -> 'DnsEntryItem':
+    def from_dict(cls, dikt) -> "DnsEntryItem":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -61,6 +58,8 @@ class DnsEntryItem(Model):
         :type entry: str
         """
         if entry is None:
-            raise ValueError("Invalid value for `entry`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `entry`, must not be `None`"
+            )  # noqa: E501
 
         self._entry = entry

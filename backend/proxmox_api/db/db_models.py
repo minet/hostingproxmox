@@ -1,27 +1,32 @@
 from flask_sqlalchemy import SQLAlchemy
-#from flask_sqlalchemy import event
+
+# from flask_sqlalchemy import event
 from proxmox_api.config.configuration import ENV
-#from sqlalchemy import event
+
+# from sqlalchemy import event
 
 db = SQLAlchemy()
 
+
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = "user"
     id = db.Column(db.String(254), primary_key=True)
     freezeState = db.Column(db.String(10), nullable=True, default=None)
     lastNotificationDate = db.Column(db.String(254), nullable=True, default=None)
-    vms = db.relationship('Vm', backref="owner", lazy=True)
-    dnsEntries = db.relationship('DomainName', backref="owner", lazy=True)
+    vms = db.relationship("Vm", backref="owner", lazy=True)
+    dnsEntries = db.relationship("DomainName", backref="owner", lazy=True)
+
 
 class DomainName(db.Model):
-    __tablename__ = 'domaineName'
+    __tablename__ = "domaineName"
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.String(254), db.ForeignKey("user.id"), nullable=True)
     entry = db.Column(db.Text, nullable=True)
     ip = db.Column(db.String(15), nullable=True)
 
+
 class Vm(db.Model):
-    __tablename__ = 'vm'
+    __tablename__ = "vm"
     id = db.Column(db.Integer, primary_key=True, autoincrement=False)
     userId = db.Column(db.String(254), db.ForeignKey("user.id"), nullable=True)
     type = db.Column(db.String(254), nullable=False)
@@ -31,16 +36,18 @@ class Vm(db.Model):
     needToBeRestored = db.Column(db.Boolean, nullable=False, default=False)
     unsecure = db.Column(db.Boolean, nullable=False, default=False)
 
+
 class History(db.Model):
-    __tablename__ = 'history'
+    __tablename__ = "history"
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.String(254), db.ForeignKey("user.id"), nullable=True)
     vmId = db.Column(db.Integer, nullable=True)
     ip = db.Column(db.String(15), nullable=True)
-    date = db.Column(db.TIMESTAMP,default=db.func.current_timestamp(),  nullable=False)
+    date = db.Column(db.TIMESTAMP, default=db.func.current_timestamp(), nullable=False)
+
 
 class Notification(db.Model):
-    __tablename__ = 'notification'
+    __tablename__ = "notification"
     id = db.Column(db.Integer, primary_key=True)
     criticity = db.Column(db.String(255), nullable=True)
     title = db.Column(db.String(255), nullable=True)
@@ -49,8 +56,8 @@ class Notification(db.Model):
 
 
 if ENV != "TEST":
-### Trigger for ip tracking
-    TRIGGER_CREATION =  """
+    ### Trigger for ip tracking
+    TRIGGER_CREATION = """
             CREATE TRIGGER history_insert_vm AFTER UPDATE ON vm
             FOR EACH ROW BEGIN
                 IF OLD.ip != NEW.ip THEN
@@ -58,14 +65,14 @@ if ENV != "TEST":
                 END IF;
             END;
             """
-else :
+else:
     TRIGGER_CREATION = ""
 
-#event.listen(
+# event.listen(
 #    Vm.__table__,
 #    "after_create",
 #    db.DDL(
 #       TRIGGER_CREATION
 #    )
-#)
+# )
 #
