@@ -1,5 +1,5 @@
 Flask==2.2.3
-certifi == 2021.10.8
+certifi == 2022.12.7
 six == 1.15.0
 python_dateutil == 2.8.2
 setuptools == 60.9.3
