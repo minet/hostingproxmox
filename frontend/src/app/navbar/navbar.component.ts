@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,  Inject, Injectable} from '@angular/core';
 import { UserService } from '../common/services/user.service';
 import { User } from '../models/user';
 import {CookieService} from 'ngx-cookie-service';
@@ -6,7 +6,7 @@ import {Observable} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
 import {HttpClient} from '@angular/common/http';
 import {AuthService} from '../common/services/auth.service';
-import { FormsModule } from '@angular/forms';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
@@ -21,6 +21,7 @@ export class NavbarComponent implements OnInit {
     public translate: TranslateService,
     private http: HttpClient,
     private authService: AuthService,
+    @Inject(DOCUMENT) private document: Document
     ) {
 
   }
@@ -29,7 +30,8 @@ export class NavbarComponent implements OnInit {
   public notificationTitle: string; // if NULL, no notification;
   public notificationMessage: string; // if NULL, no notification;
   public notificationCriticity: string; 
-  public isNotificationEnable: boolean; 
+  public isNotificationEnable: string;
+  public isNotificationEnableTest: string; 
   public popUpLoading= false; 
   public saveButtonLabel = "Enregistrer";
   public popUpError = "";
@@ -66,12 +68,10 @@ export class NavbarComponent implements OnInit {
   fetchNotification(): void {
     this.http.get(this.authService.SERVER_URL + '/notification', {observe: 'response'}).subscribe(rep => {
       if(rep.status == 200) {
-        this.isNotificationEnable = Boolean(rep.body['active']);
-        if(this.isNotificationEnable) {
+        this.isNotificationEnable = rep.body['active'];
           this.notificationTitle = rep.body['title'];
         this.notificationMessage = rep.body['message'];
         this.notificationCriticity = rep.body['criticity'];
-        }
       } else {
         this.notificationTitle = null;
         this.notificationMessage = null;
@@ -90,7 +90,7 @@ export class NavbarComponent implements OnInit {
       title: this.notificationTitle,
       message: this.notificationMessage,
       criticity: this.notificationCriticity,
-      active: true
+      active: document.getElementById("notificationEnable")['checked']
     }, {observe: 'response'}).subscribe(rep => {
       if(rep.status == 201) {
         this.saveButtonLabel = "Enregistré !";
@@ -103,4 +103,9 @@ export class NavbarComponent implements OnInit {
     }
     );
   }
+
+  local_test():void{
+    this.isNotificationEnableTest = "true";
+  }
+
 }
