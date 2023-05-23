@@ -974,3 +974,57 @@ def get_account_state(username):
         return proxmox.get_freeze_state(username)
     else :
         return {"error": "You are not allowed to check this account"}, 403
+
+
+
+def get_notification():
+    headers = connexion.request.headers
+    try:
+        status_code, cas = util.check_cas_token(headers)
+        if status_code != 200:
+            return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
+
+        admin = False
+
+        if "attributes" in cas:
+            if "memberOf" in cas["attributes"]:
+                if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                    admin = True
+    except:
+        admin = False
+
+    
+    notif = dbfct.get_notification()
+    if admin or notif != None:
+        return notif, 200
+    else:
+        return {}, 204 # no content
+
+
+def put_notification():
+    headers = connexion.request.headers
+    status_code, cas = util.check_cas_token(headers)
+    print("cas", cas)
+    if status_code != 200:
+        return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
+
+    admin = False
+
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+    
+    if not admin:
+        return {"error": "You are not allowed to do this"}, 403
+    try:
+        title = connexion.request.json.get("title")
+        message = connexion.request.json.get("message")
+        criticity = connexion.request.json.get("criticity")
+        active = connexion.request.json.get("active")
+        if title == None or message == None or criticity == None or active == None:
+            return {"error": "Missing parameters"}, 400
+    except Exception as _:
+        return {"error": "Missing parameters"}, 400
+    dbfct.put_notification(title, message, criticity, active)
+    return {}, 201

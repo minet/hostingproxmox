@@ -39,6 +39,14 @@ class History(db.Model):
     ip = db.Column(db.String(15), nullable=True)
     date = db.Column(db.TIMESTAMP,default=db.func.current_timestamp(),  nullable=False)
 
+class Notification(db.Model):
+    __tablename__ = 'notification'
+    id = db.Column(db.Integer, primary_key=True)
+    criticity = db.Column(db.String(255), nullable=True)
+    title = db.Column(db.String(255), nullable=True)
+    message = db.Column(db.String(255), nullable=True)
+    active = db.Column(db.Boolean, nullable=False, default=False)
+
 
 if ENV != "TEST":
 ### Trigger for ip tracking
