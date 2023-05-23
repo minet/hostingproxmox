@@ -371,6 +371,7 @@ paths:
     get:
       summary: Try to fetch a notification to display for the user
       operationId: get_notification
+      security: [] 
       tags:
           - User
       responses:

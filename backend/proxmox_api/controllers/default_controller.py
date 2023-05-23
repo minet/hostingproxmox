@@ -979,17 +979,20 @@ def get_account_state(username):
 
 def get_notification():
     headers = connexion.request.headers
-    status_code, cas = util.check_cas_token(headers)
-    print("cas", cas)
-    if status_code != 200:
-        return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
+    try:
+        status_code, cas = util.check_cas_token(headers)
+        if status_code != 200:
+            return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
-    admin = False
+        admin = False
 
-    if "attributes" in cas:
-        if "memberOf" in cas["attributes"]:
-            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
-                admin = True
+        if "attributes" in cas:
+            if "memberOf" in cas["attributes"]:
+                if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                    admin = True
+    except:
+        admin = False
+
     
     notif = dbfct.get_notification()
     if admin or notif != None:
