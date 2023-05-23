@@ -275,9 +275,7 @@ def add_ip_to_history(ip, vmid, userid):
 def get_notification():
     notif = Notification.query.first()
     if notif is not None:
-        if notif.active:
-            return {"title": notif.title, "message": notif.message, "criticity": notif.criticity, "active": notif.active}
-        return None
+        return {"title": notif.title, "message": notif.message, "criticity": notif.criticity, "active": notif.active}
     return None
 
 def put_notification(title, message,criticity, active):
