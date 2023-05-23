@@ -50,10 +50,11 @@
     </ul>
   </div>
 </nav>
-<div class="alert alert-warning alert-dismissible fade show text-center" role="alert" *ngIf="notificationTitle != null && notificationTitle != ''"
+<div class="alert alert-dismissible fade show text-center" role="alert" *ngIf="this.isNotificationEnable || this.isNotificationEnableTest"
 [ngClass]="{
   'alert-success': notificationCriticity == '0',
   'alert-primary' : notificationCriticity == '1',
+  'alert-primary' : notificationCriticity == '2',
   'alert-danger' : notificationCriticity == '3'
           }">
   <b>{{notificationTitle}}</b><br>
@@ -93,15 +94,15 @@
           </div>
           <div class="form-group">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="active" [(ngModel)]="isNotificationEnable"
-              ng-model="isNotificationEnable" [ngModelOptions]="{standalone: true}" name="isNotificationEnable">
+              <input class="form-check-input" type="checkbox" id="notificationEnable" [(ngModel)]="isNotificationEnable"
+            [ngModelOptions]="{standalone: true}" name="isNotificationEnable">
               <label class="form-check-label" for="active">Afficher la notification sur tous les appareils</label>
             </div>
           </div>
         </form>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" [disabled]="popUpLoading">Retour</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" [disabled]="popUpLoading">Tester en local</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" [disabled]="popUpLoading" (click)="local_test()">Tester en local</button>
           <button  class="btn btn-success w-50" [disabled]="popUpLoading" (click)="addNotification()">
             <span>{{saveButtonLabel}}</span> <div class="spinner-border spinner-border-sm text-light" role="status" *ngIf="popUpLoading">
             <span class="sr-only">Loading...</span>
