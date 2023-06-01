@@ -20,6 +20,12 @@ jobs:
         pip install pylint
         pip install -r backend/requirements.txt
         pip install -r backend/test-requirements.txt
+        export ENVIRONMENT='TEST'
+        export KEYRING_DNS_SECRET=$KEYRING_DNS_SECRET
+        export PROXMOX_API_KEY_NAME=$PROXMOX_API_KEY_NAME
+        export PROXMOX_API_KEY=$PROXMOX_API_KEY
+        export PROXMOX_BACK_DB_DEV=$PROXMOX_BACK_DB_DEV
+        export ADH6_API_KEY=$ADH6_API_KEY
     - name: Analysing the code with pylint
       run: |
         cd backend/
