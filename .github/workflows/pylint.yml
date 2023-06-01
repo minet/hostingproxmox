@@ -22,6 +22,6 @@ jobs:
         pip install -r backend/test-requirements.txt
     - name: Analysing the code with pylint
       run: |
-        export PYTHONPATH=$(pwd)
         cd backend/
+        export PYTHONPATH=$(pwd)
         pytest --cov=proxmox_api --cov-report term-missing --cov-report xml:./coverage_out_report.xml --junitxml=report.xml
