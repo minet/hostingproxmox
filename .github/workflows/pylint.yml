@@ -30,4 +30,5 @@ jobs:
       run: |
         cd backend/
         export PYTHONPATH=$(pwd)
+        export ENVIRONMENT='TEST'
         pytest --cov=proxmox_api --cov-report term-missing --cov-report xml:./coverage_out_report.xml --junitxml=report.xml
