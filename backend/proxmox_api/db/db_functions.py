@@ -293,4 +293,20 @@ def put_notification(title, message,criticity, active):
 
 
 
-#######
+#####################
+### VM_RESSOURCES ###
+#####################
+
+def get_vm_max_ressources():
+    ressources = Account_Max_Ressources.query.all()
+    account_ressources = {}
+    if ressources is not None:
+        for ressource in ressources:
+            if ressource.id == "cpu":
+                account_ressources["cpu_max"] = ressource.ressources
+            elif ressource.id == "ram":
+                account_ressources["ram_max"] = ressource.ressources
+            elif ressource.id == "storage":
+                account_ressources["storage_max"] = ressource.ressources
+        return account_ressources
+    return None
