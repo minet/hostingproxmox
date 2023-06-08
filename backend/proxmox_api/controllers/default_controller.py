@@ -1028,3 +1028,12 @@ def put_notification():
         return {"error": "Missing parameters"}, 400
     dbfct.put_notification(title, message, criticity, active)
     return {}, 201
+
+
+def get_account_max_ressources():
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
+        return {"status": "error"}, 403
+    
+    return get_vm_max_ressources(), 200
