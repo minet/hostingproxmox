@@ -47,6 +47,11 @@ class Notification(db.Model):
     message = db.Column(db.String(255), nullable=True)
     active = db.Column(db.Boolean, nullable=False, default=False)
 
+class Account_Max_Ressources(db.Model): # max ressources a single account can have
+    __tablename__ = 'account_max_ressources'
+    id = db.Column(db.String(255), primary_key=True)
+    ressources = db.Column(db.Integer, nullable=False)
+
 
 if ENV != "TEST":
 ### Trigger for ip tracking
