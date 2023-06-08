@@ -48,9 +48,9 @@ export class HomeComponent implements OnInit {
   isVmCreated = false; // true doesn't mean the VM is started 
   confirmPassword = "";
    // Max number of storage available for user in total. The avaible ressources for a specific user are stored in User model
-  nb_storage_max = 30;
-  nb_cpu_max = 6;
-  nb_ram_max = 12;
+  nb_storage_max = -1;
+  nb_cpu_max = -1;
+  nb_ram_max = -1;
   // Selected in the range
   nb_storage_selected = 0;
   nb_cpu_selected = 0;
@@ -90,6 +90,7 @@ export class HomeComponent implements OnInit {
           console.log(this.user.freezeState)
         console.log("error code =" , this.userService.errorMessage)
         }
+        this.get_account_maximal_ressources();
         this.user.usedCPU = -1;
         this.user.usedRAM = -1;
         this.user.usedStorage =-1;
@@ -141,6 +142,19 @@ export class HomeComponent implements OnInit {
         this.progress = this.progress +  (Math.random() * (max - min) + min) / 18;
       }
     }, 300);
+  }
+
+  get_account_maximal_ressources(): void{ // get the maximal ressources available for A user
+    this.http.get(this.authService.SERVER_URL + '/max_account_ressources', {observe: 'response'}).subscribe(rep => {
+      this.nb_storage_max = rep.body['storage_max'];
+      this.nb_cpu_max = rep.body['cpu_max'];
+      this.nb_ram_max = rep.body['ram_max'];
+    },
+    error => {
+      this.loading = false
+      this.errorcode = error.status;
+      this.errorMessage = error.error["error"];
+    });
   }
 
 
