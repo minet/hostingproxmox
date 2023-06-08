@@ -175,7 +175,29 @@ paths:
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
-
+  /max_account_ressources:
+    get:
+      summary : max ressources a single account can have
+      operationId: get_account_max_ressources
+      tags:
+          - User
+      responses : 
+        "200" :
+          description : 'max ressources a single account can have, {"cpu_max": ressource.cpu, "ram_max": ressource.ram, "storage_max": ressource.storage}'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistoryIdItem'
+                x-content-type: application/json
+        "400":
+          description: "invalid input, object invalid"
+        "403":
+          description: "not enough permissions"
+        "404":
+          description: vm not found
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
   /vmWithError/{vmid}:
     delete:
       summary : delete a VM in the context of an error in proxmox or in th db related to this vm
