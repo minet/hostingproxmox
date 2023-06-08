@@ -157,6 +157,48 @@ def init_expired_vm_database():
         db.session.commit()
 
 @pytest.fixture()
+def init_max_ressources_for_one_user():
+    if configuration.ENV != "TEST":
+        raise Exception("You must set the environnement to TEST to run tests")
+    db = SQLAlchemy()
+    db.init_app(flask_app.app)
+    with flask_app.app.app_context():
+        try:
+            db.session.query(model.Account_Max_Ressources).delete()
+        except:
+            print("No db to delete")
+        db.create_all()
+
+        # List of test VM
+        test_vms = [
+            {"id" : "cpu", "ressources" : 6},
+            {"id" : "ram", "ressources" : 9},
+            {"id" : "storage", "ressources" : 30},
+            
+        ]
+
+
+        # Convert the list of dictionaries to a list of User    objects
+        def create_max_ressources_model(ressources):
+            return model.Account_Max_Ressources(**ressources)
+        
+        # Create a list of objects
+        mapped_ressources = map(create_max_ressources_model, test_vms)
+        ressources = list(mapped_ressources)
+
+        db.session.add_all(ressources)
+
+        # Commit the changes for the users
+        db.session.commit()
+
+        yield db  # this is where the testing happens!
+        db.session.remove()  # looks like db.session.close() would  work as well
+        # Drop the database table
+        #model.User.query.delete()
+        db.session.query(model.Account_Max_Ressources).delete()
+        db.session.commit()
+
+@pytest.fixture()
 def proxmoxAPI():
     assert configuration.PROXMOX_HOST != None 
     assert configuration.PROXMOX_USER != None

@@ -338,3 +338,16 @@ def test_admin_get_other_account_state(client, init_user_database, monkeypatch):
     assert user1.json == {"freeze_state": "state"}
     assert user2.status_code == 200
     assert user2.json == {"freeze_state": "state"}
+
+
+
+#####
+## get_account_max_ressources
+## get /max_account_ressources
+#####
+
+
+def test_valide_ressources_fetchdef(client, init_max_ressources_for_one_user, monkeypatch):
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+    response = client.get('/api/1.0.0/max_account_ressources', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    assert response.status_code == 200
