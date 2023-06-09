@@ -30,6 +30,7 @@ class Vm(db.Model):
     created_on = db.Column(db.Date, nullable=False, default=db.func.date(db.func.now()))
     needToBeRestored = db.Column(db.Boolean, nullable=False, default=False)
     unsecure = db.Column(db.Boolean, nullable=False, default=False)
+    status = db.Column(db.String(254), nullable=True, default=None)
 
 class History(db.Model):
     __tablename__ = 'history'
