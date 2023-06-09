@@ -118,6 +118,8 @@ def set_vm_status(vmid, status, isAnError=False):
     if isAnError:
         status = "error: " + status
     vm = Vm.query.filter_by(id=vmid).first()
+    if vm is None:
+        raise Exception("VM not found")
     vm.status = status
     db.session.commit()
 
