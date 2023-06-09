@@ -4,6 +4,7 @@ import time
 import proxmox_api.util as util
 from flask_sqlalchemy import SQLAlchemy
 from time import sleep
+from proxmox_api.db import db_functions 
 
 
 VMID = 9998
@@ -59,7 +60,7 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
         start_time = time.time()
         configuration_state = "creating"
         while time.time() - start_time <= 600 and   configuration_state == "creating": # timeout after 10min
-            configuration_state,_,_ = util.get_vm_state(VMID)
+            configuration_state = db_functions.get_vm_configuration_state(VMID)
             sleep(1)
         assert configuration_state == "created"
 
