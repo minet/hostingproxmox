@@ -24,7 +24,10 @@ def fake_get_vm_current_status(vmid, node):
         return  {"cpu_usage": "2", "ram_usage" : "4", "uptime":"2"},201
 def fake_get_vm_ip(vmid, node):
         return  {"vm_ip": "157.159.195.256"},201
-
+def fake_get_freeze_state(username):
+    return {"freezeState": "0"}, 200
+def fake_create_vm(name, type, user_id, cpu, ram, disk, password, user, ssh_key ):
+    return "ok", 201
 
 
 #####
@@ -105,6 +108,30 @@ def test_admin_get_vm_id(client, init_user_database, init_vm_database, monkeypat
     assert vm1.status_code == 201
     assert vm2.status_code == 201
 
+
+
+#####
+## create_vm
+## POST /api/1.0.0/vm
+#####
+
+# Valid user with valid token. Not admin.
+def test_valid_create_vm(client, init_user_database, init_vm_database, init_max_ressources_for_one_user,monkeypatch):
+     def fake_get_vm(user_id):
+        return [],200
+     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
+     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+     monkeypatch.setattr(proxmox, "get_vm", fake_get_vm)
+     monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
+     
+     response = client.post(
+         '/api/1.0.0/vm', 
+         headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
+         data=json.dumps({"cpu": 2, "ram": 2, "disk":2, "name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "ssh_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
+        )
+     print("response" ,response.text)
+     assert response.status_code == 201
 
 
 #####
@@ -287,8 +314,7 @@ def test_invalid_patch_vm(client, init_user_database, init_vm_database, monkeypa
 ## get /account_state/{username}
 #####
 
-def fake_get_freeze_state(username):
-    return {"freeze_state": "state"}, 200
+
 
 def test_valid_get_account_state(client, init_user_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
@@ -296,7 +322,7 @@ def test_valid_get_account_state(client, init_user_database, monkeypatch):
     
     response = client.get('/api/1.0.0/account_state/user-1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 200
-    assert response.json == {"freeze_state": "state"}
+    assert response.json == {"freezeState": "0"}
 
 # invalid token
 def test_invalid_get_account_state(client, init_user_database, monkeypatch):
@@ -335,9 +361,9 @@ def test_admin_get_other_account_state(client, init_user_database, monkeypatch):
     user2 = client.get('/api/1.0.0/account_state/user-2', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
     print("user1", user1.json)
     assert user1.status_code == 200
-    assert user1.json == {"freeze_state": "state"}
+    assert user1.json == {"freezeState": "0"}
     assert user2.status_code == 200
-    assert user2.json == {"freeze_state": "state"}
+    assert user2.json == {"freezeState": "0"}
 
 
 

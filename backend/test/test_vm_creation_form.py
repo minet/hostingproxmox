@@ -238,13 +238,3 @@ def test_creation_for_new_user_incorrect_storage(monkeypatch,init_user_database,
         assert status == 400
         userVms = db_functions.get_vm_list(user_id=userId)
         assert len(userVms) == 0
-
-    
-
-
-
-
-
-
-
-    
