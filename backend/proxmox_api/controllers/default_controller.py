@@ -18,6 +18,7 @@ from proxmox_api.proxmox import is_admin
 from proxmox_api.db import db_models
 
 
+
 def create_dns(body=None):  # noqa: E501
     """create dns entry
 

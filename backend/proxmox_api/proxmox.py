@@ -891,8 +891,8 @@ def next_available_vmid():# determine the next available vmid from both db and p
     return next_vmid_db
 
 
-    """_summary_ : This function is called by the job to stop expired vm when the account freeze state is 2.x or 3.1
-    """
+"""_summary_ : This function is called by the job to stop expired vm when the account freeze state is 2.x or 3.1
+"""
 def stop_expired_vm(app):
     print("Executing expired vm jobs ...")
     with app.app_context():    # Needs application context

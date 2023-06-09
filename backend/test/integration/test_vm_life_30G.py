@@ -60,7 +60,7 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
             sleep(1)
         assert configuration_state == "created"
 
-# If previous test fail, we do not try to start it
+## If previous test fail, we do not try to start it
 @pytest.mark.dependency(name="start", depends=["clean", "creation"])
 def test_vm_start():
     """Test case for vm_start
@@ -68,11 +68,18 @@ def test_vm_start():
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
-    with app.app.app_context():
+    with app.app.app_context(): # no need to start the vm, start on boot is enabled
         node,status_node = proxmox.get_node_from_vm(VMID)
-        body, status_start = proxmox.start_vm(VMID, node)
         assert status_node == 200
-        assert status_start == 201
+        vm_status,_ = proxmox.get_proxmox_vm_status(VMID, node)
+        start_time = time.time()
+        while time.time() - start_time <= 120 and vm_status["status"] != "running": # timeout after 2min
+            vm_status,_ = proxmox.get_proxmox_vm_status(VMID, node)
+            sleep(1)
+        if time.time() - start_time >= 120:
+            print("start time out")
+        assert vm_status["status"] == "running"
+        
 
 # If previous test fail, we do not try to start it
 @pytest.mark.dependency(name="stop", depends=["clean", "creation", "start"])
@@ -84,9 +91,19 @@ def test_vm_stop():
     db.init_app(app.app)
     with app.app.app_context():
         node,status_node = proxmox.get_node_from_vm(VMID)
-        body, status_stop = proxmox.stop_vm(VMID, node)
+        _, status_stop = proxmox.stop_vm(VMID, node)
         assert status_node == 200
         assert status_stop == 201
+        vm_status,_ = proxmox.get_proxmox_vm_status(VMID, node)
+        print("vm_status", vm_status)
+        start_time = time.time()
+        while time.time() - start_time <= 120 and vm_status["status"] != "stopped": # timeout after 2min
+            vm_status,_ = proxmox.get_proxmox_vm_status(VMID, node)
+            print("vm_status", vm_status)
+            sleep(1)
+        if time.time() - start_time >= 120:
+            print("stop time out")
+        assert vm_status["status"] == "stopped"
 
 # If previous test fail, we do not try to start it
 @pytest.mark.dependency(name="delete", depends=["clean", "creation", "start", "stop"])
