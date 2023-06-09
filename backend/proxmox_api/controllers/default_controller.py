@@ -89,7 +89,9 @@ def create_vm(body=None):  # noqa: E501
 
     :rtype: None
     """
+    print("create vm started")
     headers = {"Authorization": connexion.request.headers["Authorization"]}
+    print("create vm", headers)
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -116,7 +118,7 @@ def create_vm(body=None):  # noqa: E501
    
     if freezeAccountState != 0 and not admin: # for any other freestate user can't create vm
         return {"error": "Your cotisation has expired"}, 403
-
+    print("data =", connexion.request.get_json())
     if connexion.request.is_json:
         body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
     try :
@@ -141,7 +143,9 @@ def create_vm(body=None):  # noqa: E501
         alreadyUsedCPU += vm["cpu"]
         alreadyUsedRAM += vm["ram"]
         alreadyUsedDisk += vm["disk"]
-    if alreadyUsedCPU + body.cpu > 6 and alreadyUsedRAM + body.ram > 8 and alreadyUsedDisk + body.disk > 30:
+    account_ressources = dbfct.get_vm_max_ressources();
+
+    if alreadyUsedCPU + body.cpu > account_ressources["cpu_max"] and alreadyUsedRAM + body.ram > account_ressources["ram_max"] and alreadyUsedDisk + body.disk > account_ressources["storage_max"]:
         return {"error": "You have already used all your resources"}, 403
 
     return proxmox.create_vm(body.name, body.type, user_id, body.cpu, body.ram, body.disk, body.password, body.user, body.ssh_key, )
