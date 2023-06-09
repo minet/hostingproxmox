@@ -234,76 +234,7 @@ def check_dns_entry(entry:str) -> bool:
 
 
 
-"""Return the vm creation state retrieved in the json file
-    Possible status are created, creating, deleting, deleted and error
-    If status == error,  error code and errorMessage explain the error
-    If not, its are None
 
-    :param entry: vmid of the vm creating
-
-    :return: (status, httpErrorCode, errorMessage)
-    :rtype:  Tuple[str, str, str]
-"""
-def get_vm_state(vmid) :
-    with open(config.VM_CREATION_STATUS_JSON, mode='r') as jsonFile:
-        jsonObject = json.load(jsonFile)
-        jsonFile.close()
-    try :
-        vm = jsonObject[str(vmid)]
-        print(vm)
-        if vm is None :
-            return None
-        else: 
-            status = vm["status"]
-            if status == "error":
-                return (status, vm["httpErrorCode"], vm["errorMessage"])
-            elif status == "creating" or status == "created" or status == "deleting" or status == "deleted" :
-                return (status, None, None)
-            else:
-                return ("error", 500, "Impossible to retrieve the status of the vm")
-    except :
-        return None
-
-
-
-
-
-
-
-"""Update the vm creation state json file
-
-    :param entry: 
-        - vmid : the id of the vm creating
-        - message : message associated to the creation
-        - errorCode (optionnal): httpError code if relevant 
-        - deleteEntry (optionnal): if True, the entry is deleted
-
-    :return: True if success else False
-    :rtype: bool
-"""
-def update_vm_state(vmid, message, errorCode = 0, deleteEntry = False) -> bool:
-    with open(config.VM_CREATION_STATUS_JSON, mode='r') as jsonFile:
-        jsonObject = json.load(jsonFile)
-        jsonFile.close()
-
-    try :
-        if deleteEntry :
-            jsonObject.pop(str(vmid))
-        else :
-           jsonObject[vmid] = {}
-           if not errorCode: # not 0 = 1 = True
-                jsonObject[vmid]["status"] = message
-           else:
-                jsonObject[vmid]["status"] = "error"
-                jsonObject[vmid]["httpErrorCode"] = str(errorCode) 
-                jsonObject[vmid]["errorMessage"] = message
-        with open(config.VM_CREATION_STATUS_JSON, "w") as outfile:
-            json.dump(jsonObject, outfile)
-            outfile.close()
-        return True
-    except Exception as e:
-        print("An error occured while updating the vm creation status dict : " , e)
-        return False
 
 
 """generate the main freeze state (0,1,2 or 3) and the nb of  notification sent  based on the departure date. 
