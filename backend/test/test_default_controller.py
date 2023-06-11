@@ -19,14 +19,16 @@ def fake_get_node_from_vm(vmid):
 def fake_get_proxmox_vm_status(vmid, node):
     return {"status": "running"}, 201
 def fake_get_vm_config(vmid, node):
-        return  {"name": "test", "ram" : "4G", "cpu":"2", "autoreboot" : "1", "disk" : "30G"},201
+        return  {"name": "test", "ram" : "4", "cpu":"2", "autoreboot" : "1", "disk" : "30"},201
 def fake_get_vm_current_status(vmid, node):
         return  {"cpu_usage": "2", "ram_usage" : "4", "uptime":"2"},201
 def fake_get_vm_ip(vmid, node):
         return  {"vm_ip": "157.159.195.256"},201
 def fake_get_freeze_state(username):
     return {"freezeState": "0"}, 200
-def fake_create_vm(name, type, user_id, cpu, ram, disk, password, user, ssh_key ):
+def fake_get_expired_freeze_state(username):
+    return {"freezeState": "1"}, 200
+def fake_create_vm(name, type, user_id, cpu, ram, disk, password, user, sshKey ):
     return "ok", 201
 
 
@@ -121,6 +123,7 @@ def test_valid_create_vm(client, init_user_database, init_vm_database, init_max_
         return [],200
      monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
      monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
+     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
      monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
      monkeypatch.setattr(proxmox, "get_vm", fake_get_vm)
      monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
@@ -128,11 +131,130 @@ def test_valid_create_vm(client, init_user_database, init_vm_database, init_max_
      response = client.post(
          '/api/1.0.0/vm', 
          headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
-         data=json.dumps({"cpu": 2, "ram": 2, "disk":2, "name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "ssh_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
+         data=json.dumps({"cpu": 2, "ram": 2, "disk":2, "name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key",  "user":"test"})
         )
-     print("response" ,response.text)
      assert response.status_code == 201
 
+def test_create_vm_id_with_expired_account(client, init_user_database, init_vm_database, init_max_ressources_for_one_user,monkeypatch):
+     def fake_get_vm(user_id):
+        return [],200
+     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_expired_freeze_state)
+     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+     monkeypatch.setattr(proxmox, "get_vm", fake_get_vm)
+     monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
+     
+     response = client.post(
+         '/api/1.0.0/vm', 
+         headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
+         data=json.dumps({"cpu": 2, "ram": 2, "disk":2, "name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
+        )
+     assert response.status_code == 403
+
+def test_create_vm_without_arg(client, init_user_database, init_vm_database, init_max_ressources_for_one_user,monkeypatch):
+     def fake_get_vm(user_id):
+        return [],200
+     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
+     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+     monkeypatch.setattr(proxmox, "get_vm", fake_get_vm)
+     monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
+     
+     response = client.post(
+         '/api/1.0.0/vm', 
+         headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
+         data=json.dumps({})
+        )
+     assert response.status_code == 400
+
+def test_create_vm_without_ressources(client, init_user_database, init_vm_database, init_max_ressources_for_one_user,monkeypatch):
+     def fake_get_vm(user_id):
+        return [],200
+     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
+     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+     monkeypatch.setattr(proxmox, "get_vm", fake_get_vm)
+     monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
+     
+     response = client.post(
+         '/api/1.0.0/vm', 
+         headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
+         data=json.dumps({"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
+        )
+     assert response.status_code == 400
+
+def test_create_vm_with_too_much_cpu(client, init_user_database, init_vm_database, init_max_ressources_for_one_user,monkeypatch):
+     def fake_get_vm(user_id):
+        return [],200
+     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
+     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+     monkeypatch.setattr(proxmox, "get_vm", fake_get_vm)
+     monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
+     
+     response = client.post(
+         '/api/1.0.0/vm', 
+         headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
+         data=json.dumps({"cpu": 100, "ram": 2, "disk":2,"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
+        )
+     assert response.status_code == 403
+    
+def test_create_vm_with_too_much_ram(client, init_user_database, init_vm_database, init_max_ressources_for_one_user,monkeypatch):
+     def fake_get_vm(user_id):
+        return [],200
+     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
+     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+     monkeypatch.setattr(proxmox, "get_vm", fake_get_vm)
+     monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
+     
+     response = client.post(
+         '/api/1.0.0/vm', 
+         headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
+         data=json.dumps({"cpu": 2, "ram": 200, "disk":2,"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
+        )
+     assert response.status_code == 403
+
+def test_create_vm_with_too_much_storage(client, init_user_database, init_vm_database, init_max_ressources_for_one_user,monkeypatch):
+     def fake_get_vm(user_id):
+        return [],200
+     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
+     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+     monkeypatch.setattr(proxmox, "get_vm", fake_get_vm)
+     monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
+     
+     response = client.post(
+         '/api/1.0.0/vm', 
+         headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
+         data=json.dumps({"cpu": 1, "ram": 2, "disk":200,"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
+        )
+     assert response.status_code == 403
+
+def test_create_vm_with_no_ressources_left(client, init_user_database, init_vm_database, init_max_ressources_for_one_user,monkeypatch):
+     def fake_get_vm(user_id):
+        return [100],200
+     def get_vm_config(vmid, node):
+        return {"cpu": 6, "ram": 9, "disk":30}, 200
+     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
+     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
+     monkeypatch.setattr(proxmox, "get_vm", fake_get_vm)
+     monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
+     
+     response = client.post(
+         '/api/1.0.0/vm', 
+         headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
+         data=json.dumps({"cpu": 1, "ram": 2, "disk":200,"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
+        )
+     assert response.status_code == 403
 
 #####
 ## delete_vm_id

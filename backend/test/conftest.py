@@ -174,7 +174,6 @@ def init_max_ressources_for_one_user():
             {"id" : "cpu", "ressources" : 6},
             {"id" : "ram", "ressources" : 9},
             {"id" : "storage", "ressources" : 30},
-            
         ]
 
 
