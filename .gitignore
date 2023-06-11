@@ -63,4 +63,4 @@ frontend/Thumbs.db
 
 
 # Test db 
-backend/proxmox_api/proxmox_dev.db
+*proxmox_dev.db
