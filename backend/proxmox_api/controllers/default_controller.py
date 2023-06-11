@@ -118,11 +118,10 @@ def create_vm(body=None):  # noqa: E501
    
     if freezeAccountState != 0 and not admin: # for any other freestate user can't create vm
         return {"error": "Your cotisation has expired"}, 403
-
     if connexion.request.is_json:
         body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
     try :
-        if body.cpu == 0 or body.ram == 0 or body.disk == 0:
+        if body.cpu == 0 or body.ram == 0 or body.disk == 0 or body.cpu is None or body.ram is None or body.disk is None:
             return {"error": "Impossible to create a VM without CPU, RAM or disk"}, 400
     except Exception as e:
         return {"error": "Impossible to create a VM without CPU, RAM or disk. No data transmitted"}, 400
@@ -140,12 +139,18 @@ def create_vm(body=None):  # noqa: E501
         vm, status = proxmox.get_vm_config(vmid, node)
         if status != 201:
             return vm, status
-        alreadyUsedCPU += vm["cpu"]
-        alreadyUsedRAM += vm["ram"]
-        alreadyUsedDisk += vm["disk"]
-    if alreadyUsedCPU + body.cpu > 6 and alreadyUsedRAM + body.ram > 8 and alreadyUsedDisk + body.disk > 30:
-        return {"error": "You have already used all your resources"}, 403
+        alreadyUsedCPU += int(vm["cpu"])
+        alreadyUsedRAM += int(vm["ram"])
+        alreadyUsedDisk += int(vm["disk"])
+    account_ressources = dbfct.get_vm_max_ressources();
 
+    if account_ressources is None:
+        return {"error": "Error while getting ressources default"}, 500
+   
+    if alreadyUsedCPU + body.cpu > account_ressources["cpu_max"] or alreadyUsedRAM + body.ram > account_ressources["ram_max"] or alreadyUsedDisk + body.disk > account_ressources["storage_max"]:
+        return {"error": "You have already used all your resources"}, 403
+    if body.name is None or body.type is None or body.password is None or body.user is None or body.ssh_key is None:
+        return {"error": "You have to fill all the fields"}, 400
     return proxmox.create_vm(body.name, body.type, user_id, body.cpu, body.ram, body.disk, body.password, body.user, body.ssh_key, )
 
 def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error occured
@@ -783,7 +788,6 @@ def patch_vm(vmid, body=None):  # noqa: E501
         elif requetsBody.status == "transfering_ownership":
             if admin : 
                 new_owner = requetsBody.user
-                print("new owner : " + new_owner , requetsBody.user)
                 return proxmox.transfer_ownership(vmid, new_owner)
             else: 
                 return {"status": "Permission denied"}, 403
@@ -971,7 +975,6 @@ def get_need_to_be_restored(vmid):
 def get_account_state(username):
     headers = connexion.request.headers
     status_code, cas = util.check_cas_token(headers)
-    print("cas", cas)
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
