@@ -96,6 +96,33 @@ def setNeedToBeRestored(vmid, needToBeRestored):
     vm.needToBeRestored = needToBeRestored
     db.session.commit()
 
+def get_vm_status(vmid): # Return the status of the VM and if there is an error (statusMessae (str), isError (bool)
+    vm = Vm.query.filter_by(id=vmid).first()
+    if vm == None:
+        return "deleted", False
+    status = vm.status
+    if status is None:
+        return "created", False
+    if "error" in status:
+        try : 
+            status = status.split(":")[1]
+            return status, True
+        except:
+            return "Unknown error", True
+    else :
+        print('status', status)
+        return status, False
+
+def set_vm_status(vmid, status, isAnError=False):
+    print('set status', status)
+    if isAnError:
+        status = "error: " + status
+    vm = Vm.query.filter_by(id=vmid).first()
+    if vm is None:
+        return None
+    vm.status = status
+    db.session.commit()
+
 ###################
 ###### USER #######
 ###################

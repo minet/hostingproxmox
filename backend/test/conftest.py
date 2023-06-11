@@ -77,12 +77,12 @@ def init_vm_database():
 
         # List of test VM
         test_vms = [
-            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 2, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 3, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 4, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 5, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 6, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":True}
+            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
+            {"id" : 2, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
+            {"id" : 3, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
+            {"id" : 4, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
+            {"id" : 5, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
+            {"id" : 6, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":True, "status":"created"}
         ]
 
 
@@ -125,11 +125,11 @@ def init_expired_vm_database():
 
         # List of test VM
         test_vms = [
-            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 2, "userId" : "expired-user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 3, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 4, "userId" : "expired-user-3", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False},
-            {"id" : 5, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False}
+            {"id" : 1, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
+            {"id" : 2, "userId" : "expired-user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
+            {"id" : 3, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
+            {"id" : 4, "userId" : "expired-user-3", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
+            {"id" : 5, "userId" : "expired-user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"}
         ]
 
 

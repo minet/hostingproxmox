@@ -304,6 +304,59 @@ def test_admin_delete_vm_id(client, init_user_database, init_vm_database, monkey
     assert vm2.status_code == 200
 
 
+
+
+#####
+## delete_vm_id with error
+## delete /api/1.0.0/vmWithError/{vmid}
+#####
+
+def fake_delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
+    return True
+
+# Valid user with valid token. Not admin.
+def test_valid_delete_vm_with_error_id(client, init_user_database, init_vm_database, monkeypatch):    
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+    monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+    monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
+    
+    response = client.delete('/api/1.0.0/vmWithError/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    assert response.status_code == 200
+
+
+# Valid user with not valid token. Not admin.
+def test_false_token_delete_vm_with_error_id(client, init_user_database, init_vm_database, monkeypatch):
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token_fail)
+    monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+    monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
+    
+    response = client.delete('/api/1.0.0/vmWithError/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    assert response.status_code == 403
+
+#  valid user with a valid token. Not admin. Trying to delete an another's vm.
+def test_foreign_delete_vm_with_error_id(client, init_user_database, init_vm_database, monkeypatch):    
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
+    monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+    monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
+    
+    response = client.delete('/api/1.0.0/vmWithError/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    assert response.status_code == 403
+
+#  admin
+def test_admin_delete_vm_with_error_id(client, init_user_database, init_vm_database, monkeypatch):
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_admin)
+    monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
+    monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
+    
+    vm1 = client.delete('/api/1.0.0/vmWithError/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    vm2 = client.delete('/api/1.0.0/vmWithError/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    assert vm1.status_code == 200
+    assert vm2.status_code == 200
+
+
+
+
+
 #####
 ## patch_vm
 ## patch /api/1.0.0/vm/{vmid}
