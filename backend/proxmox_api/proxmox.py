@@ -149,10 +149,8 @@ def delete_from_proxmox(vmid, node) -> bool :
                 except ResourceException:  # Exception si pas encore synchronisés
                     sleep(1)
             stop_vm(vmid, node)
-            print("status",  get_proxmox_vm_status(vmid, node)[0]['status'])
             # Si lockée, on attend:
             while get_proxmox_vm_status(vmid, node)[0]['status'] != 'stopped' :
-                print("status",  get_proxmox_vm_status(vmid, node)[0]['status'])
                 sleep(1)
                 print("sleep")
         proxmox.nodes(node).qemu(vmid).delete() # need to wait for the deletion but work
