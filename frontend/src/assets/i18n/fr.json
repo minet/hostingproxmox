@@ -64,7 +64,7 @@
   "home.charter.notsigned_2": "Pour créer une machine virtuelle vous devez signer la charte de fonctionnement de Hosting !",
   "home.charter.notsigned_3": "cliquez-ici",
   "home.charter.notsigned_4": "pour signer la charte",
-  "home.createVm.error.maxVmAlready_1": "Vous n'avez plus de ressources disponibkes pour créer une nouvelle VM !",
+  "home.createVm.error.maxVmAlready_1": "Vous n'avez plus de ressources disponibles pour créer une nouvelle VM !",
   "home.createVm.error.maxVmAlready_2": "Si vous souhaitez créer une nouvelle VM vous devez en supprimer une autre",
   "home.createVm.numberMoreVm_1": "Vous pouvez créer",
   "home.createVm.numberMoreVm_2": "machine virtuelle(s) supplémentaire(s)",

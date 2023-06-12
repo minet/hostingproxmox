@@ -431,29 +431,30 @@ def get_vm_id(vmid):  # noqa: E501
 
     
     vm_state = util.get_vm_state(vmid)
-    if vm_state != None : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
+    if vm_state == None : # not found
+        return {"error": "vm not found"}, 404
         
-        (status, httpErrorCode, errorMessage) = vm_state 
-        if status == "error":
-            util.update_vm_state(vmid, "delete", deleteEntry= True) # We send to the user and delete here
-            try : 
-                return {"error": errorMessage}, int(httpErrorCode)
-            except: 
-                return {"error":  "An unknown error occured"}, 500
-        elif not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin: # we authorize to consult error message
-            return {"error": "You don't have the right permissions"}, 403
-        elif status == "creating" : 
-            return {"status" : "creating"}, 200
-        elif status == "deleting":
-            return {"status" : "deleting"}, 200
-        elif status == "deleted":
-            util.update_vm_state(vmid, "deleted", deleteEntry= True) # We send to the user and delete here
-            return {"status": "deleted"}, 200
-        elif  status == "created" : 
-            util.update_vm_state(vmid, "delete", deleteEntry= True) # We send to the user and delete here
-            return {"status": "created"}, 201
-        else :
-            return {"error": "Unknown vm status"}, 400
+    (status, httpErrorCode, errorMessage) = vm_state 
+    if status == "error":
+        util.update_vm_state(vmid, "delete", deleteEntry= True) # We send to the user and delete here
+        try : 
+            return {"error": errorMessage}, int(httpErrorCode)
+        except: 
+            return {"error":  "An unknown error occured"}, 500
+    elif not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin: # we authorize to consult error message
+        return {"error": "You don't have the right permissions"}, 403
+    elif status == "creating" : 
+        return {"status" : "creating"}, 200
+    elif status == "deleting":
+        return {"status" : "deleting"}, 200
+    elif status == "deleted":
+        util.update_vm_state(vmid, "deleted", deleteEntry= True) # We send to the user and delete here
+        return {"status": "deleted"}, 200
+    elif  status == "created" : 
+        util.update_vm_state(vmid, "delete", deleteEntry= True) # We send to the user and delete here
+        return {"status": "created"}, 201
+    else :
+        return {"error": "Unknown vm status"}, 400
     
     node,status = proxmox.get_node_from_vm(vmid)
     
