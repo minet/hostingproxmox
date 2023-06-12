@@ -19,4 +19,5 @@ export class User {
     public availableCPU?: number;
     public availableRAM?: number;
     public availableStorage?: number;
+    public isBanned?: boolean;
 }

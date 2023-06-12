@@ -1,44 +1,75 @@
 <app-navbar></app-navbar>
 <div id="content" style="min-height: 100%" class="container mt-5">
-    <router-outlet *ngIf="(validToken$ | async)  || router.url === this.cookie.get('lang')+'/manual' || router.url === '/legal'; else landing"></router-outlet>
-    <ng-template #landing>
-        <div class="text-center">
-            <img id="logo" class="mb-3" style="height: 150px" src="assets/images/minet.png">
-            <div class="alert alert-success" role="alert">
-                <p>{{'app.component.welcom' | translate }} <a href="https://tickets.minet.net"> webmaster</a>!</p>
-                <p>{{'app.component.pricing' | translate }} <a
-                        href="https://payment.minet.net"> payment.minet.net </a> {{ 'app.component.getsub' | translate }}
-                </p>
-                <a href="#" class="btn btn-primary" role="button" (click)="userService.login()">{{ 'app.component.getstarted' | translate }}</a>
-            </div>
+  <router-outlet
+    *ngIf="
+      (validToken$ | async) ||
+        router.url === this.cookie.get('lang') + '/manual' ||
+        router.url === '/legal';
+      else landing
+    "
+  ></router-outlet>
+  <ng-template #landing>
+    <div class="text-center">
+      <img
+        id="logo"
+        class="mb-3"
+        style="height: 150px"
+        src="assets/images/minet.png"
+      />
+      <div class="alert alert-success" role="alert">
+        <p>
+          {{ "app.component.welcom" | translate }}
+          <a href="https://tickets.minet.net"> webmaster</a>!
+        </p>
+        <p>
+          {{ "app.component.pricing" | translate }}
+          <a href="https://payment.minet.net"> payment.minet.net </a>
+          {{ "app.component.getsub" | translate }}
+        </p>
+        <a
+          href="#"
+          class="btn btn-primary"
+          role="button"
+          (click)="userService.login()"
+          >{{ "app.component.getstarted" | translate }}</a
+        >
+      </div>
+    </div>
+    <hr />
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <div class="card-body text-center p-5">
+            <img
+              style="height: 55px"
+              class="mb-3"
+              src="assets/images/server.png"
+            />
+            <p>{{ "app.component.boxfeature1" | translate }}</p>
+          </div>
         </div>
-        <hr>
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body text-center p-5">
-                        <img style="height: 55px" class="mb-3" src="assets/images/server.png">
-                        <p>{{ 'app.component.boxfeature1' | translate}}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body text-center p-5">
-                        <img style="height: 55px" class="mb-3" src="assets/images/domain.png">
-                        <p>{{ 'app.component.boxfeature2' | translate}}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body text-center p-5">
-                       <h1><a href="https://status.minet.net/">98%</a></h1>
-                        <p>{{'app.component.boxfeature3-1' | translate}}</p>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <div class="card-body text-center p-5">
+            <img
+              style="height: 55px"
+              class="mb-3"
+              src="assets/images/domain.png"
+            />
+            <p>{{ "app.component.boxfeature2" | translate }}</p>
+          </div>
         </div>
-    </ng-template>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          <div class="card-body text-center p-5">
+            <h1><a href="https://status.minet.net/">98%</a></h1>
+            <p>{{ "app.component.boxfeature3-1" | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
 </div>
 <app-footer></app-footer>

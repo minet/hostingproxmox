@@ -25,7 +25,7 @@ export class AppComponent implements OnInit{
       }
       case "hosting-local.minet.net" :{
         this.title = "Hosting local";
-         break;
+          break;
       }
       default: {
         this.title = "Hosting";
