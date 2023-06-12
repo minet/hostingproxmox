@@ -200,6 +200,16 @@ def get_expired_users(minimumFreezeState = 1):
                 list.append(user.id)
     return list
 
+def ban_user(username):
+    user = User.query.filter_by(id=username).first()
+    user.isBanned = True
+    db.session.commit()
+
+def unban_user(username):
+    user = User.query.filter_by(id=username).first()
+    user.isBanned = False
+    db.session.commit()
+
 
 ###################
 ###### DNS ########

@@ -12,6 +12,7 @@ class User(db.Model):
     lastNotificationDate = db.Column(db.String(254), nullable=True, default=None)
     vms = db.relationship('Vm', backref="owner", lazy=True)
     dnsEntries = db.relationship('DomainName', backref="owner", lazy=True)
+    isBanned = db.Column(db.Boolean, nullable=False, default=False)
 
 class DomainName(db.Model):
     __tablename__ = 'domaineName'
