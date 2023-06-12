@@ -1,1 +1,147 @@
-<p>user works!</p>
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
+    <h1>❄️</h1>
+    <h4>{{'account.freeze.title' | translate }}</h4>
+    <p></p>
+    <p>{{'account.freeze.1.description' | translate }}<strong>{{'account.freeze.1.description.strong' | translate }} </strong></p>
+  </div>
+  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
+    <h1>❄️</h1>
+    <h4>{{'account.freeze.title' | translate }}</h4>
+    <p>{{'account.freeze.2.description.1' | translate }}<strong>{{'account.freeze.2.description.1.strong' | translate }}</strong> {{'account.freeze.2.description.2' | translate }}</p>
+    <p><strong>{{'account.freeze.2.description.2.strong' | translate }}</strong></p>
+  </div>
+  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState >= 3 ">
+    <h1>❄️</h1>
+    <h4>{{'account.freeze.title' | translate }}</h4>
+    <p>{{'account.freeze.3.description' | translate }}<br><strong>{{'account.freeze.3.description.strong' | translate }}</strong></p>
+  </div>
+  <div class="alert alert-warning text-center" *ngIf="this.user.freezeState >= 3">
+    <h4>{{'account.expired.title' | translate }}</h4>
+    <p>{{'account.expired.description' | translate }}</p>
+  </div>
+  <div *ngIf="loading && ((user.chartevalidated && user.freezeState < 3) || user.admin)">
+    <div class="d-flex justify-content-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">{{'dns.loading' | translate}}</span>
+      </div>
+    </div>
+  </div>
+  
+  <h1 class="text-center mb-2" *ngIf="!user.admin">{{'dns.title.user' | translate}}</h1>
+  <h1 class="text-center mb-2" *ngIf="user.admin">{{'dns.title.admin' | translate}}</h1>
+  
+  <div class="dns container" *ngIf="!loading && ((user.chartevalidated && user.freezeState < 3) || user.admin)">
+    <div class="text-center">
+      <button class="btn btn-primary" (click)="showForm = !showForm">{{'dns.addEntry' | translate}}</button>
+    </div>
+    <div *ngIf="showForm" class="card text-white mb-3 mt-5">
+      <div class="card-body">
+        <div>
+          <form (ngSubmit)="create_dns(newDns)" #vmForm="ngForm">
+            <div *ngIf="vmForm.submitted && errorMessage == ''">
+              {{'dns.create.request' | translate}}
+            </div>
+            <div [hidden]="errorMessage == ''" class="alert alert-danger">
+              <strong style="text-align: center;">{{'dns.create.error' | translate}} {{errorcode}} : {{httpErrorMessage}}</strong><br><br>
+              {{errorMessage}}
+            </div>
+  
+  
+            <div class="alert-success" *ngIf="success">
+              {{'dns.create.successful' | translate}}
+            </div>
+  
+            <ng-container>
+              <div>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="entry-name-prepend">{{'dns.form.subdomain' | translate}}</span>
+                  </div>
+                  <input type="text" class="form-control" id="dnsEntry" aria-label="Entry" placeholder="{{'dns.entry.placeholder' | translate}}"
+                         aria-describedby="entry-name-prepend"
+                         [(ngModel)]="newDns.entry" name="dnsEntry"
+                         required="required"
+                         #entry="ngModel">
+                </div>
+                <span id="textHelpBlock" class="form-text text-muted">{{'dns.url' | translate}} {{newDns.entry}}.h.minet.net</span>
+                <div [hidden]="entry.valid || entry.pristine" class="alert alert-danger">
+                  {{'dns.form.error.entry' | translate}}
+                </div>
+  
+                <div class="input-group mt-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="ip-address-prepend">{{'dns.form.ip' | translate}}</span>
+                  </div>
+                  <select class="form-control" id="ip" *ngIf="!user.admin"
+                                              aria-label="IP Address"
+                                              aria-describedby="ip-address-prepend"
+                                              required="required"
+                                              [(ngModel)]="newDns.ip" name="ip"
+                                              #ip="ngModel">
+                        <option *ngFor="let myip of ipList" [value]="myip">{{myip}}</option>
+                                          
+                    </select>
+                    <input type="text" class="form-control" id="ip" *ngIf="user.admin"
+                                              aria-label="IP Address"
+                                              aria-describedby="ip-address-prepend"
+                                              required="required"
+                                              [(ngModel)]="newDns.ip" name="ip"
+                                              #ip="ngModel">
+  
+                </div>
+  
+                <div [hidden]="ip.valid || ip.pristine" class="alert alert-danger" *ngIf="!user.admin">
+                  {{'dns.form.error.ip' | translate}}
+                </div>
+              </div>
+              <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary">{{'dns.form.submit' | translate}}</button>
+              </div>
+            </ng-container>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+    <ng-container *ngIf="user.dns.length == 0; else dnsEntries">
+    <hr>
+    <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noEntries.user' | translate}}</h4>
+    <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noEntries.admin' | translate}}</h4>
+    <hr>
+    </ng-container>
+    <ng-template #dnsEntries>
+      <table class="table mt-5">
+        <thead>
+        <tr>
+          <th scope="col" *ngIf="user.admin">{{'dns.item.user' | translate}}</th>
+          <th scope="col">{{'dns.item.host' | translate}}</th>
+          <th scope="col">{{'dns.item.destination' | translate}}</th>
+          <th scope="col">{{'dns.item.manage' | translate}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let dns of user.dns">
+          <td *ngIf="user.admin">{{dns.user}}</td>
+          <td><a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a></td>
+          <td>{{dns.ip}}</td>
+          <td><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button></td>
+        </tr>
+        </tbody>
+      </table>
+    </ng-template>
+  
+    
+  
+  
+  <div class="alert alert-danger text-center" *ngIf=" !user.admin && this.user.freezeState != 0">
+    <b>{{'dns.subscription.expired_1' | translate}}</b>
+    <p>{{'dns.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'dns.subscription.expired_3' | translate}}</a> {{'dns.subscription.expired_4' | translate}}</p>
+  </div>
+  
+  <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.freezeState == 0">
+    <b>{{'dns.charter.notsigned_1' | translate}}</b>
+    <p>{{'dns.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'dns.charter.notsigned_3' | translate}}</a> {{'dns.charter.notsigned_4' | translate}}</p>
+  </div>
+  
+  
