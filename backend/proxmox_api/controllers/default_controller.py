@@ -15,6 +15,8 @@ from proxmox_api.db.db_functions import *
 from datetime import datetime
 import proxmox_api.db.db_functions as dbfct
 from proxmox_api.proxmox import is_admin
+from proxmox_api.db import db_models
+
 
 
 def create_dns(body=None):  # noqa: E501
@@ -116,11 +118,10 @@ def create_vm(body=None):  # noqa: E501
    
     if freezeAccountState != 0 and not admin: # for any other freestate user can't create vm
         return {"error": "Your cotisation has expired"}, 403
-
     if connexion.request.is_json:
         body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
     try :
-        if body.cpu == 0 or body.ram == 0 or body.disk == 0:
+        if body.cpu == 0 or body.ram == 0 or body.disk == 0 or body.cpu is None or body.ram is None or body.disk is None:
             return {"error": "Impossible to create a VM without CPU, RAM or disk"}, 400
     except Exception as e:
         return {"error": "Impossible to create a VM without CPU, RAM or disk. No data transmitted"}, 400
@@ -138,12 +139,18 @@ def create_vm(body=None):  # noqa: E501
         vm, status = proxmox.get_vm_config(vmid, node)
         if status != 201:
             return vm, status
-        alreadyUsedCPU += vm["cpu"]
-        alreadyUsedRAM += vm["ram"]
-        alreadyUsedDisk += vm["disk"]
-    if alreadyUsedCPU + body.cpu > 6 and alreadyUsedRAM + body.ram > 8 and alreadyUsedDisk + body.disk > 30:
-        return {"error": "You have already used all your resources"}, 403
+        alreadyUsedCPU += int(vm["cpu"])
+        alreadyUsedRAM += int(vm["ram"])
+        alreadyUsedDisk += int(vm["disk"])
+    account_ressources = dbfct.get_vm_max_ressources();
 
+    if account_ressources is None:
+        return {"error": "Error while getting ressources default"}, 500
+   
+    if alreadyUsedCPU + body.cpu > account_ressources["cpu_max"] or alreadyUsedRAM + body.ram > account_ressources["ram_max"] or alreadyUsedDisk + body.disk > account_ressources["storage_max"]:
+        return {"error": "You have already used all your resources"}, 403
+    if body.name is None or body.type is None or body.password is None or body.user is None or body.ssh_key is None:
+        return {"error": "You have to fill all the fields"}, 400
     return proxmox.create_vm(body.name, body.type, user_id, body.cpu, body.ram, body.disk, body.password, body.user, body.ssh_key, )
 
 def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error occured
@@ -251,36 +258,54 @@ def delete_vm_id(vmid):  # noqa: E501
 # Delete the vm in a thread after the API endpoint is called. It's a workaround to avoid the timeout of the API endpoint. The behavior is different in the error handling if the deletion is trigger while an error or not
 def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
     print("Deleting VM " + str(vmid) + ". Is due to an error :", dueToError)
-    util.update_vm_state(vmid, "deleting")
+    app = util.create_app() # we need the context to delete the vm if there is an error
+    db_models.db.init_app(app.app)
+    with app.app.app_context():
+        dbfct.set_vm_status(vmid, "deleting")
     try :
         if node == "" and not dueToError:
             print("Impossible to find the vm to delete.")
-            util.update_vm_state(vmid, "Impossible to find the vm to delete.", errorCode=404, deleteEntry=True)
+            app = util.create_app() # we need the context to delete the vm if there is an error
+            db_models.db.init_app(app.app)
+            with app.app.app_context():
+                dbfct.set_vm_status(vmid, "Impossible to find the vm to delete.", isAnError=True)
             return 0
         elif node != "" : 
             isProxmoxDeleted = proxmox.delete_from_proxmox(vmid, node)
             print("isProxmoxDeleted : " + str(isProxmoxDeleted))
             if not isProxmoxDeleted and not dueToError:
                 print("An error occured while deleting the VM from proxmox")
-                util.update_vm_state(vmid, "An error occured while deleting the VM from proxmox", errorCode=500, deleteEntry=True)
+                app = util.create_app() # we need the context to delete the vm if there is an error
+                db_models.db.init_app(app.app)
+                with app.app.app_context():
+                    dbfct.set_vm_status(vmid, "An error occured while deleting the VM from proxmox", isAnError=True)
                 return 0
             # If not isProxmoxDeleted and dueToError then it's fine. 
         # Now we can delete the entry in the db
         isDNSDeleted = proxmox.delete_from_dns(vmid)
         if not isDNSDeleted and not dueToError:
             print("An error occured while deleting the DNS entry")
-            util.update_vm_state(vmid, "An error occured while deleting the DNS entry", errorCode=500, deleteEntry=True)
+            app = util.create_app() # we need the context to delete the vm if there is an error
+            db_models.db.init_app(app.app)
+            with app.app.app_context():
+                dbfct.set_vm_status(vmid, "An error occured while deleting the DNS entry", isAnError=True)
             return 0
         isDbDeleted = proxmox.delete_from_db(vmid)
         if (not dueToError and isDbDeleted and isProxmoxDeleted) or (dueToError and (isDbDeleted or not isProxmoxDeleted)):
-            util.update_vm_state(vmid, "deleted", deleteEntry=True)
             return 1
         else : 
             print("An error occured while deleting the VM.")
-            util.update_vm_state(vmid, "An error occured while deleting the VM.", errorCode=500, deleteEntry=True)
+            app = util.create_app() # we need the context to delete the vm if there is an error
+            db_models.db.init_app(app.app)
+            with app.app.app_context():
+                dbfct.set_vm_status(vmid,  "An error occured while deleting the VM.", isAnError=True)
     except Exception as e:
         print("An error occured while deleting the VM. Exception : " + str(e))
-        util.update_vm_state(vmid, "An error occured while deleting the VM. Exception : " + str(e), errorCode=500, deleteEntry=True)
+        app = util.create_app() # we need the context to delete the vm if there is an error
+        db_models.db.init_app(app.app)
+        with app.app.app_context():
+            dbfct.set_vm_status(vmid,   "An error occured while deleting the VM.", isAnError=True)
+
 
     node,status = proxmox.get_node_from_vm(vmid)
     if status != 200: 
@@ -425,28 +450,22 @@ def get_vm_id(vmid):  # noqa: E501
     
 
     
-    vm_state = util.get_vm_state(vmid)
-    if vm_state != None : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
-        
-        (status, httpErrorCode, errorMessage) = vm_state 
-        if status == "error":
-            util.update_vm_state(vmid, "delete", deleteEntry= True) # We send to the user and delete here
+    vm_status, isAnError = get_vm_status(vmid)
+    if vm_status != None and vm_status != "created" : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
+        if isAnError:
             try : 
-                return {"error": errorMessage}, int(httpErrorCode)
+                errorMessage = vm_status
+                return {"error": errorMessage}, 400
             except: 
                 return {"error":  "An unknown error occured"}, 500
         elif not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin: # we authorize to consult error message
             return {"error": "You don't have the right permissions"}, 403
-        elif status == "creating" : 
+        elif vm_status == "creating" : 
             return {"status" : "creating"}, 200
-        elif status == "deleting":
+        elif vm_status == "deleting":
             return {"status" : "deleting"}, 200
-        elif status == "deleted":
-            util.update_vm_state(vmid, "deleted", deleteEntry= True) # We send to the user and delete here
+        elif vm_status == "deleted":
             return {"status": "deleted"}, 200
-        elif  status == "created" : 
-            util.update_vm_state(vmid, "delete", deleteEntry= True) # We send to the user and delete here
-            return {"status": "created"}, 201
         else :
             return {"error": "Unknown vm status"}, 400
     
@@ -769,7 +788,6 @@ def patch_vm(vmid, body=None):  # noqa: E501
         elif requetsBody.status == "transfering_ownership":
             if admin : 
                 new_owner = requetsBody.user
-                print("new owner : " + new_owner , requetsBody.user)
                 return proxmox.transfer_ownership(vmid, new_owner)
             else: 
                 return {"status": "Permission denied"}, 403
@@ -957,7 +975,6 @@ def get_need_to_be_restored(vmid):
 def get_account_state(username):
     headers = connexion.request.headers
     status_code, cas = util.check_cas_token(headers)
-    print("cas", cas)
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
 
@@ -1028,3 +1045,12 @@ def put_notification():
         return {"error": "Missing parameters"}, 400
     dbfct.put_notification(title, message, criticity, active)
     return {}, 201
+
+
+def get_account_max_ressources():
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
+        return {"status": "error"}, 403
+    
+    return get_vm_max_ressources(), 200

@@ -76,7 +76,7 @@
   "home.vm_type.web": "Simple web server",
   "web_server": "Simple web server",
   "home.vm_desc.web": "Wordpress ready to use with ftps server.",
-  "home.createVm.form.error": "Impossible to create your VM !",
+  "home.createVm.form.error": "An error occured",
   "home.createVm.form.type": "Type",
   "home.createVm.form.error.type": "Type is required",
   "home.createVm.form.vmName": "VM name",

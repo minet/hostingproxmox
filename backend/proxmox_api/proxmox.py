@@ -149,10 +149,8 @@ def delete_from_proxmox(vmid, node) -> bool :
                 except ResourceException:  # Exception si pas encore synchronisés
                     sleep(1)
             stop_vm(vmid, node)
-            print("status",  get_proxmox_vm_status(vmid, node)[0]['status'])
             # Si lockée, on attend:
             while get_proxmox_vm_status(vmid, node)[0]['status'] != 'stopped' :
-                print("status",  get_proxmox_vm_status(vmid, node)[0]['status'])
                 sleep(1)
                 print("sleep")
         proxmox.nodes(node).qemu(vmid).delete() # need to wait for the deletion but work
@@ -263,10 +261,10 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
         delete_from_db(next_vmid)
         return {"error": "Impossible to create the VM (cloning)"}, 500
 
-
-    if not util.update_vm_state(next_vmid, "creating"):
-        print("Problem while updating the vm status")
-        return {"error": "Impossible to update the VM status"}, 500
+    app = util.create_app() # we need the context to delete the vm if there is an error
+    db_models.db.init_app(app.app)
+    with app.app.app_context():
+        database.set_vm_status(next_vmid, "creating")
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key,ip,cpu, ram, )).start()
     
     return {"vmId": next_vmid}, 201
@@ -316,7 +314,10 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         delete_from_proxmox(vmid, node)
         delete_from_dns(vmid)
         delete_from_db(vmid)
-        util.update_vm_state(vmid,"An error occured while configuring vm (vmid ="+str(vmid) +")", errorCode=500)
+        app = util.create_app() # we need the context to delete the vm if there is an error
+        db_models.db.init_app(app.app)
+        with app.app.app_context():
+            database.set_vm_status(vmid, "error:An error occured while configuring vm (vmid ="+str(vmid) +")")
 
     print("vm configured")
 
@@ -328,7 +329,10 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         delete_from_proxmox(vmid, node)
         delete_from_dns(vmid)
         delete_from_db(vmid)
-        util.update_vm_state(vmid,"An unkonwn error occured while starting your vm(vmid ="+str(vmid) +")", errorCode=500)
+        app = util.create_app() # we need the context to delete the vm if there is an error
+        db_models.db.init_app(app.app)
+        with app.app.app_context():
+            database.set_vm_status(vmid, "error:An error occured while configuring vm (vmid ="+str(vmid) +")")
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
     print("vm started")
@@ -358,15 +362,24 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         delete_from_proxmox(vmid, node)
         delete_from_dns(vmid)
         delete_from_db(vmid)
-        util.update_vm_state(vmid,"An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")", errorCode=500)
+        app = util.create_app() # we need the context to delete the vm if there is an error
+        db_models.db.init_app(app.app)
+        with app.app.app_context():
+            database.set_vm_status(vmid, "An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")")
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
     print("firewall set")
 
     if success:
-        util.update_vm_state(vmid, "created")
+        app = util.create_app() # we need the context to delete the vm if there is an error
+        db_models.db.init_app(app.app)
+        with app.app.app_context():
+            database.set_vm_status(vmid, "created")
     else : 
-        util.update_vm_state(vmid, "An error occured while creating your vm", errorCode=500)
+        app = util.create_app() # we need the context to delete the vm if there is an error
+        db_models.db.init_app(app.app)
+        with app.app.app_context():
+            database.set_vm_status(vmid, "error:An error occured while creating your vm")
 
 
 def start_vm(vmid, node):
@@ -876,8 +889,8 @@ def next_available_vmid():# determine the next available vmid from both db and p
     return next_vmid_db
 
 
-    """_summary_ : This function is called by the job to stop expired vm when the account freeze state is 2.x or 3.1
-    """
+"""_summary_ : This function is called by the job to stop expired vm when the account freeze state is 2.x or 3.1
+"""
 def stop_expired_vm(app):
     print("Executing expired vm jobs ...")
     with app.app_context():    # Needs application context

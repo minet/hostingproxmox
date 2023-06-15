@@ -30,6 +30,7 @@ class Vm(db.Model):
     created_on = db.Column(db.Date, nullable=False, default=db.func.date(db.func.now()))
     needToBeRestored = db.Column(db.Boolean, nullable=False, default=False)
     unsecure = db.Column(db.Boolean, nullable=False, default=False)
+    status = db.Column(db.String(254), nullable=True, default=None)
 
 class History(db.Model):
     __tablename__ = 'history'
@@ -46,6 +47,11 @@ class Notification(db.Model):
     title = db.Column(db.String(255), nullable=True)
     message = db.Column(db.String(255), nullable=True)
     active = db.Column(db.Boolean, nullable=False, default=False)
+
+class Account_Max_Ressources(db.Model): # max ressources a single account can have
+    __tablename__ = 'account_max_ressources'
+    id = db.Column(db.String(255), primary_key=True)
+    ressources = db.Column(db.Integer, nullable=False)
 
 
 if ENV != "TEST":

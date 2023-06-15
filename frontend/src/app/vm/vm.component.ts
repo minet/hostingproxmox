@@ -61,7 +61,7 @@ export class VmComponent implements OnInit, OnDestroy {
         setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user); }, 1000);
         this.user.vms = Array<Vm>();
         this.vmid = this.activatedRoute.snapshot.params.vmid;
-        this.get_vm(this.vmid);
+        this.start_get_vm(this.vmid);
     }
 
 
@@ -182,14 +182,19 @@ export class VmComponent implements OnInit, OnDestroy {
         });
     }
 
-
-    get_vm(vmid): void {
+    start_get_vm(vmid){
         const vm = new Vm();
         vm.id = vmid;
         this.user.vms.push(vm);
+        setInterval(()=> { this.get_vm(vmid, vm) }, 3000); // each 3 s
+        if (this.need_to_be_restored == null || !this.popUpShowed){
+            this.get_need_to_be_restored(vmid);
+        }
+    }
 
-        const newTimer = timer(0, 3000).pipe(
-            mergeMap(() => this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})))
+
+    get_vm(vmid, vm): void {
+       this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})
             .subscribe(rep => {
 
                 console.log(rep)
@@ -220,18 +225,10 @@ export class VmComponent implements OnInit, OnDestroy {
                     } else {
                         vm.type = 'not defined';
                     }
-                    if (this.need_to_be_restored == null || !this.popUpShowed){
-                        this.get_need_to_be_restored(vmid);
-                    }
                     this.loading = false;
                     console.log("vm.status", vm.status)
                 },
                 error => {
-                    if (this.need_to_be_restored == null){
-                        console
-                        this.get_need_to_be_restored(vmid);
-                    }
-          
                     if(error.status == 500 && error.error["error"] == "VM not found in proxmox"){
                        this.vm_has_proxmox_error = true;
                     }
@@ -241,7 +238,6 @@ export class VmComponent implements OnInit, OnDestroy {
                     console.log(this.vm_has_error)
                     this.loading = false;
                 });
-        this.intervals.add(newTimer);
     }
 
     get_ip_history(vmid): void {

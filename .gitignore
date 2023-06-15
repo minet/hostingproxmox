@@ -2,7 +2,10 @@
 /dev
 *.log
 *.pyc
-.*
+*.DS_Store
+*.coverage
+*.travis.yml
+*.swagger*
 frontend/node_modules/
 frontend/dist/
 frontend/tmp/ 
@@ -60,4 +63,4 @@ frontend/Thumbs.db
 
 
 # Test db 
-backend/proxmox_api/proxmox_dev.db
+proxmox_dev.db
