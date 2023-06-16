@@ -11,6 +11,10 @@ info:
 servers:
 - url: https://backprox.minet.net/api/1.0.0
   description: Main URL
+- url: https://backprox-dev.minet.net/api/1.0.0
+  description: dev URL
+- url: http://127.0.0.1:8080/api/1.0.0
+  description: local URL
 security:
 - OAuth2: []
 paths:
