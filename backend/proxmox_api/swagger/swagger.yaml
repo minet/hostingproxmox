@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
-  title: Proxmox
-  description: Proxmox VPS provider
+  title: API hosting
+  description: Cloud hosting MiNET plateform
   contact:
-    email: webmaster@listes.minet.net
+    email: webmaster@minet.net
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
