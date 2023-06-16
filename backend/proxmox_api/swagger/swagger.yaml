@@ -16,47 +16,51 @@ security:
 paths:
   /vm:
     get:
-      summary: get all user vms
+      summary: Retrieve the list of all VM of a user. For admin, the returned list is the one of all VMs. The optionnal parameter 'filter' can be used to filter of VM's id, name or owner.
       operationId: get_vm
       tags:
           - VM
       parameters:
       - name: search
         in: query
-        description: filter to use
+        description: optional filter that can be applied on the users list
         required: false
         style: form
         explode: true 
         schema:
           type: string
-          example: "My super VM name"
+          example: "VM's  id, Vm's name or owner's name"
       responses:
-        "201":
-          description: all user vms
+        "200":
+          description: vmid list
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/VmIdItem'
-                x-content-type: application/json
+                  type: integer
+                  description: Array of int
+                example: [1, 2, 3, 4, 5]
+                x-content-type: application/json                
       x-openapi-router-controller: proxmox_api.controllers.default_controller
     post:
-      summary: create vm
+      summary: Create a vm
       tags:
           - VM
       operationId: create_vm
       requestBody:
-        description: VM to create
+        description: Create a VM with the given specifications
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/VmItem'
       responses:
         "201":
-          description: created
+          description: VM creation began
         "400":
-          description: "invalid input, object invalid"
+          description: "invalid input, missing parameters"
+        "403":
+          description: "Forbidden or not enough ressources left"
         "409":
           description: a vm already exists
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -69,24 +73,81 @@ paths:
       parameters:
       - name: vmid
         in: path
-        description: vmid to get
+        description: id of the vm to get
         required: true
         style: simple
         explode: false
         schema:
-          type: string
-          example: "105"
+          type: integer
+          example: 105
       responses:
-        "201":
-          description: get vm by id
+        "200":
+          description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VmItem'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: vm status
+                    example: running
+                  cpu_usage:
+                    type: number
+                    description: cpu usage in percent
+                    example: 20%
+                  ram_usage:
+                    type: number
+                    description: ram usage in percent
+                    example: 10%
+                  uptime:
+                    type: number
+                    description: VM's uptime in sec
+                    example: 87545
+                  created_on:
+                    type: string
+                    description: creation date of the VM
+                    example: 15-05-2021
+                  ip:
+                    type: string
+                    description: vm public ip
+                    example: 157.159.195.0
+                  autoreboot:
+                    type: boolean
+                    description: vm autoreboot value
+                    example: true
+                  name:
+                    type: string
+                    description: Name of the VM
+                    example: my-website
+                  type:
+                    type: string
+                    description: Type of the vm
+                    example: "wordpress or bare_vm"
+                  owner:
+                    type: string
+                    description: owner of the vm
+                    example: adh6_username
+                  cpu:
+                    type: number
+                    description: total VM's cpu.  Ressources must be available in the user's quota
+                    example: 2
+                  ram:
+                    type: number
+                    description: total VM's ram in Mo.  Ressources must be available in the user's quota
+                    example: 1024
+                  disk:
+                    type: number
+                    description: total VM's disk size in Go. It can be 10, 20 or 30. Ressources must be available in the user's quota
+                    example: 20
+                  unsecure:
+                    type: boolean
+                    description: tell if the VM if flagged as unsecure
+                    example: true
         "400":
-          description: "invalid input, object invalid"
-        "404":
-          description: vm not found
+          description: "invalid input, missing parameters"
+        "403":
+          description: "Forbidden"
       x-openapi-router-controller: proxmox_api.controllers.default_controller
     delete:
       summary: delete vm by id
@@ -96,49 +157,62 @@ paths:
       parameters:
       - name: vmid
         in: path
-        description: vmid to get
+        description: vmid to delete
         required: true
         style: simple
         explode: false
         schema:
-          type: string
-          example: "105"
+          type: number
+          example: 105
       responses:
-        "201":
-          description: deleted vm by id
+        "200":
+          description: VM deletion process started
         "400":
-          description: "invalid input, object invalid"
+          description: "invalid input, invalid parameters"
+        "403":
+          description: Forbidden
         "404":
           description: vm not found
         "500":
           description: An internal error occured
       x-openapi-router-controller: proxmox_api.controllers.default_controller
     patch:
-      summary: update a vm
+      summary: Apply modification on a VM
       operationId: patch_vm
       tags:
           - VM
       parameters:
       - name: vmid
         in: path
-        description: vmid to update
+        description: id of the vm
         required: true
         style: simple
         explode: false
         schema:
-          type: string
-          example: "105"
+          type: number
+          example: 105
       requestBody:
-        description: VM to update. Avalaible status are start, reboot, stop, switch_autoreboot, transfer_ownership
+        description: Action to apply on the VM. It can be used to start, reboot or stop the vm, change the start on boot setting, or transfer the ownership of the VM
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VmItem'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: action to apply
+                    example: start, reboot, stop, switch_autoreboot, transfering_ownership
+                  user:
+                     type: string
+                     description: user to transfer the VM to
+                     example: adh6_username (only in case of vm transfer)
       responses:
         "201":
           description: updated
         "400":
-          description: "invalid input, object invalid"
+          description: "invalid input, missing parameters"
+        "403":
+          description: Action forbidden
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -157,16 +231,19 @@ paths:
           explode: false
           schema:
             type: string
-            example: "michel_j"
+            example: "username"
       responses : 
         "200" :
           description : "The freeze state of the account"
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/HistoryIdItem'
+                type: object
+                properties:
+                  freezeState:
+                    type: number
+                    description: freezeState of the user
+                    example: 0
                 x-content-type: application/json
         "400":
           description: "invalid input, object invalid"
@@ -187,38 +264,45 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/HistoryIdItem'
+                type: object
+                properties:
+                  cpu_max:
+                    type: number
+                    description: maximum cpu a user can have in total (quota per account)
+                    example: 6
+                  ram_max:
+                    type: number
+                    description: maximum ram a user can have in total (quota per account) in Go
+                    example: 9
+                  storage_max:
+                    type: number
+                    description: maximum ram a user can have in total (quota per account) in Go
+                    example: 30
                 x-content-type: application/json
-        "400":
-          description: "invalid input, object invalid"
-        "403":
-          description: "not enough permissions"
-        "404":
-          description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
   /vmWithError/{vmid}:
     delete:
-      summary : delete a VM in the context of an error in proxmox or in th db related to this vm
+      summary : delete a VM in the context of an error in proxmox or in th db related to this vm. It uses a different approach of deleting to solve the issue
       operationId: delete_vm_id_with_error
       tags:
           - VM
       parameters:
       - name: vmid
         in: path
-        description: vmid to delete
+        description: id of the vm to delete
         required: true
         style: simple
         explode: false
         schema:
-          type: string
-          example: "105"
+          type: number
+          example: 105
       responses:
         "201":
-          description: deleted vm by id
+          description: deletion process started
         "400":
           description: "invalid input, object invalid"
+        "403":
+          description: "Forbidden"
         "404":
           description: vm not found
         "500":
@@ -226,13 +310,13 @@ paths:
       x-openapi-router-controller: proxmox_api.controllers.default_controller
   /dns:
     get:
-      summary: get all user's dns entries
+      summary: get all user's dns entries. For admin, it returns all dns entries
       operationId: get_dns
       tags:
           - DNS
       responses:
         "201":
-          description: all user's dns entries
+          description: return all dns entries
           content:
             application/json:
               schema:
@@ -242,7 +326,7 @@ paths:
                 x-content-type: application/json
       x-openapi-router-controller: proxmox_api.controllers.default_controller
     post:
-      summary: create dns entry
+      summary: create a dns entry
       operationId: create_dns
       tags:
           - DNS
@@ -262,7 +346,7 @@ paths:
       x-openapi-router-controller: proxmox_api.controllers.default_controller
   /needToBeRestored/{vmid}:
     get:
-      summary : Get the restore status of a vm
+      summary : Get the restore status of a vm. It is used if a VM has been deleted by accident and a backup restore is needed
       operationId : get_need_to_be_restored
       tags:
           - VM
@@ -274,18 +358,20 @@ paths:
           style : simple
           explode : false
           schema :
-            type : string
-            example : "105"
+            type : number
+            example : 105
       responses:
         "200":
-          description: get storage status
+          description: get restore status
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/VmIdItem'
-                x-content-type: application/json
+                type: object
+                properties:
+                  need_to_be_restored:
+                    type: boolean
+                    description: need to be restored boolean status
+                    example: true
         "400":
           description: "invalid input, object invalid"
         "403":
@@ -304,12 +390,31 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VmItem'
+                type: object
+                properties:
+                  vmid:
+                    type: number
+                    description: id of the vm targeted
+                    example: 105
+                  username:
+                    type: string
+                    description: new username
+                    example: "new_username"
+                  password:
+                    type: string
+                    description: new password
+                    example: "new_password"
+                  sshKey:
+                    type: string
+                    description: new ssk key
+                    example: "ssh-rsa ..."
       responses:
         "200":
           description: updated
         "400":
-          description: "invalid input, object invalid"
+          description: "invalid input, missing paramaters or parameters don't match requirements"
+        "403":
+          description: "Forbidden"
         "409":
           description: a vm already exists
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -324,12 +429,19 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VmItem'
+               type: object
+               properties:
+                  vmid:
+                    type: number
+                    description: id of the vm targeted
+                    example: 105
       responses:
         "200":
-          description: renwed
+          description: renewed
         "400":
           description: "invalid input, object invalid"
+        "403":
+          description: "Forbidden"
         "500":
           description: an error occur while renewing the VM
       x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -347,8 +459,8 @@ paths:
           style: simple
           explode: false
           schema:
-            type: string
-            example: "105"
+            type: number
+            example: 105
       responses:
         "201":
           description: get historyip for vmid
@@ -357,7 +469,9 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/HistoryIdItem'
+                    type: string
+                    description: array of array 
+                    example: [157.159.195.X,YYYY-MM-DD,username,vm_id]
                 x-content-type: application/json
         "400":
           description: "invalid input, object invalid"
@@ -368,7 +482,7 @@ paths:
       x-openapi-router-controller: proxmox_api.controllers.default_controller
   /ips:
     get:
-      summary: get the list of a users ip addresses
+      summary: get the list of a user ip addresses
       operationId: get_ip_list
       tags:
           - User
@@ -378,10 +492,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/HistoryIdItem'
-                x-content-type: application/json
+               type: object
+               properties:
+                  ip_list:
+                    type: array
+                    description: List of all IPs of a user
+                    example: ["157.159.195.X", "157.159.195.Y"]
+              x-content-type: application/json
         "400":
           description: "invalid input, object invalid"
         "403":
@@ -401,29 +518,37 @@ paths:
           description: Notification recieved and ready to be displayed
           content:
             application/json:
-              schema:
-                type: array
-                example: 
-                  - 
-                x-content-type: application/json
+             schema:
+               type: object
+               properties:
+                  title:
+                    type: string
+                    description: Title of the notification
+                    example: "Notification title"
+                  message:
+                    type: string
+                    description: Title of the notification
+                    example: "Notification message"
+                  criticity:
+                    type: number
+                    description: Criticity of the Notification (1,2,3 or 4)
+                    example: 3
+                  active:
+                    type: boolean
+                    description: If true, the notification is displayed on all devices
+                    example: true
+               x-content-type: application/json
         "204":
-          description: "No notificaton"
+          description: "No notificaton, used for user only. Admin will always get a 200 response"
       x-openapi-router-controller: proxmox_api.controllers.default_controller
     patch:
-        summary: Modify the notification
+        summary: Modify the notification (for admin only)
         operationId: put_notification
         tags:
             - User
         responses:
           "201":
             description: Notification modified
-            content:
-              application/json:
-                schema:
-                  type: array
-                  example: 
-                    - 
-                  x-content-type: application/json
           "204":
             description: "No notificaton"
         x-openapi-router-controller: proxmox_api.controllers.default_controller
@@ -575,78 +700,36 @@ components:
       properties:
         name:
           type: string
-          description: vm name
-          example: vm
+          description: Name of the VM
+          example: my-website
         type:
           type: string
-          description: type of vm
-          example: "wordpress, bare_vm"
+          description: Type of the vm
+          example: "wordpress or bare_vm"
         user:
           type: string
-          description: user of vm
-          example: user1
+          description: user of the vm
+          example: username
         password:
           type: string
-          description: password of vm
-          example: salut
+          description: password of the vm. It must respect the minimum requirement of a password
+          example: P4ssw0rd#
         sshKey:
           type: string
-          description: ssh pub key for auth
+          description: ssh public key for the user
           example: ssh-rsa ...
-        ip:
-          type: string
-          description: vm public ip
-          example: 192.1.1.1
         cpu:
           type: number
-          description: total VM's cpu
+          description: total VM's cpu.  Ressources must be available in the user's quota
           example: 2
         ram:
           type: number
-          description: total VM's ram in MiO
+          description: total VM's ram in Mo.  Ressources must be available in the user's quota
           example: 1024
         disk:
           type: number
-          description: total VM's disk size in GiO
-          example: 10
-        autoreboot:
-          type: boolean
-          description: vm autoreboot value
-          example: true
-        status:
-          type: string
-          description: vm status
-          example: running
-        cpu_usage:
-          type: number
-          description: cpu usage in percent
-        ram_usage:
-          type: number
-          description: ram usage in percent
-          example: 10
-        uptime:
-          type: number
-          description: VM's uptime in sec
-          example: 87545
-        created_on:
-          type: string
-          description: creation date of the VM
-          example: 15-05-2021
-      example:
-        ip: 192.1.1.1
-        cpu: 2
-        type: "wordpress, bare_vm"
-        uptime: 87545
-        password: salut
-        disk: 10
-        sshKey: ssh-rsa ...
-        ram_usage: 10
-        created_on: 15-05-2021
-        name: vm
-        cpu_usage: 0.8008281904610115
-        user: user1
-        ram: 1024
-        status: running
+          description: total VM's disk size in Go. It can be 10, 20 or 30. Ressources must be available in the user's quota
+          example: 20
   securitySchemes:
     OAuth2:
       type: oauth2
