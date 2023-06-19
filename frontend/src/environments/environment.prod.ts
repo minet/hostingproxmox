@@ -2,11 +2,11 @@
 
 function getBackendURL(){
   const url = window.location.hostname;
-  let backendURL = "https://backprox.minet.net";
+  let backendURL = "https://api.hosting.minet.net";
     
     switch(url){
       case "hosting-dev.minet.net" : {
-        backendURL = "https://backprox-dev.minet.net";
+        backendURL = "https://api-dev.hosting.minet.net";
         break;
       }
       case "hosting-local.minet.net" :{
@@ -14,7 +14,7 @@ function getBackendURL(){
          break;
       }
       default: {
-        backendURL = "https://backprox.minet.net";
+        backendURL = "https://api.hosting.minet.net";
         break;
       } 
     }
