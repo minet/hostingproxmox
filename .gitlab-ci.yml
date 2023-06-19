@@ -91,7 +91,7 @@ angular_build:
     - cd frontend
     - NG_CLI_ANALYTICS=ci
     - export NODE_OPTIONS=--openssl-legacy-provider
-     script:
+  script:
     - npm ci --prefer-offline --no-audit
     - npm install -g @angular/cli
 
