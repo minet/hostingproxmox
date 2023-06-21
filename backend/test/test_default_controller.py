@@ -34,7 +34,7 @@ def fake_create_vm(name, type, user_id, cpu, ram, disk, password, user, sshKey )
 
 #####
 ## get_vm_id
-## GET /api/1.0.0/vm/{vmid}
+## GET /2.0/vm/{vmid}
 #####
 
 
@@ -47,7 +47,7 @@ def test_valid_get_vm_id(client, init_user_database, init_vm_database, monkeypat
     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
     monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
     monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
-    response = client.get('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    response = client.get('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     print(response.json)
     assert response.status_code == 201
 
@@ -58,7 +58,7 @@ def test_valid_valid_get_vm_id_with_unsecure(client, init_user_database, init_vm
     monkeypatch.setattr(proxmox, "get_vm_config", fake_get_vm_config)
     monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
     monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
-    response = client.get('/api/1.0.0/vm/6', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    response = client.get('/2.0/vm/6', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     print("json=" ,response.json)
     assert response.status_code == 201
     assert response.json['unsecure'] == True
@@ -75,7 +75,7 @@ def test_false_token_get_vm_id(client, init_user_database, init_vm_database, mon
     monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
     monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
 
-    response = client.get('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    response = client.get('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     assert response.status_code == 403
 
 #  valid user with a valid token. Not admin. Trying to access to another's vm.
@@ -90,7 +90,7 @@ def test_foreign_get_vm_id(client, init_user_database, init_vm_database, monkeyp
     monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
     monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
 
-    response = client.get('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    response = client.get('/2.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     assert response.status_code == 403
 
 #  admin
@@ -105,8 +105,8 @@ def test_admin_get_vm_id(client, init_user_database, init_vm_database, monkeypat
     monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
     monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
 
-    vm1 = client.get('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
-    vm2 = client.get('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    vm1 = client.get('/2.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    vm2 = client.get('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     assert vm1.status_code == 201
     assert vm2.status_code == 201
 
@@ -114,7 +114,7 @@ def test_admin_get_vm_id(client, init_user_database, init_vm_database, monkeypat
 
 #####
 ## create_vm
-## POST /api/1.0.0/vm
+## POST /2.0/vm
 #####
 
 # Valid user with valid token. Not admin.
@@ -129,7 +129,7 @@ def test_valid_create_vm(client, init_user_database, init_vm_database, init_max_
      monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
      
      response = client.post(
-         '/api/1.0.0/vm', 
+         '/2.0/vm', 
          headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
          data=json.dumps({"cpu": 2, "ram": 2, "disk":2, "name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key",  "user":"test"})
         )
@@ -146,7 +146,7 @@ def test_create_vm_id_with_expired_account(client, init_user_database, init_vm_d
      monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
      
      response = client.post(
-         '/api/1.0.0/vm', 
+         '/2.0/vm', 
          headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
          data=json.dumps({"cpu": 2, "ram": 2, "disk":2, "name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
         )
@@ -163,7 +163,7 @@ def test_create_vm_without_arg(client, init_user_database, init_vm_database, ini
      monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
      
      response = client.post(
-         '/api/1.0.0/vm', 
+         '/2.0/vm', 
          headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
          data=json.dumps({})
         )
@@ -180,7 +180,7 @@ def test_create_vm_without_ressources(client, init_user_database, init_vm_databa
      monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
      
      response = client.post(
-         '/api/1.0.0/vm', 
+         '/2.0/vm', 
          headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
          data=json.dumps({"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
         )
@@ -197,7 +197,7 @@ def test_create_vm_with_too_much_cpu(client, init_user_database, init_vm_databas
      monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
      
      response = client.post(
-         '/api/1.0.0/vm', 
+         '/2.0/vm', 
          headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
          data=json.dumps({"cpu": 100, "ram": 2, "disk":2,"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
         )
@@ -214,7 +214,7 @@ def test_create_vm_with_too_much_ram(client, init_user_database, init_vm_databas
      monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
      
      response = client.post(
-         '/api/1.0.0/vm', 
+         '/2.0/vm', 
          headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
          data=json.dumps({"cpu": 2, "ram": 200, "disk":2,"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
         )
@@ -231,7 +231,7 @@ def test_create_vm_with_too_much_storage(client, init_user_database, init_vm_dat
      monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
      
      response = client.post(
-         '/api/1.0.0/vm', 
+         '/2.0/vm', 
          headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
          data=json.dumps({"cpu": 1, "ram": 2, "disk":200,"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
         )
@@ -250,7 +250,7 @@ def test_create_vm_with_no_ressources_left(client, init_user_database, init_vm_d
      monkeypatch.setattr(proxmox, "create_vm", fake_create_vm)
      
      response = client.post(
-         '/api/1.0.0/vm', 
+         '/2.0/vm', 
          headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"}, 
          data=json.dumps({"cpu": 1, "ram": 2, "disk":200,"name":"test", "type":"bare", "password":"#1Aaaaaaaaaaa", "user":"test", "sshKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKWkpOTUuLKpZEQT2CmEsgZwZzegitYCx/8vHICvv261 fake@key"})
         )
@@ -258,7 +258,7 @@ def test_create_vm_with_no_ressources_left(client, init_user_database, init_vm_d
 
 #####
 ## delete_vm_id
-## delete /api/1.0.0/vm/{vmid}
+## delete /2.0/vm/{vmid}
 #####
 
 def fake_delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
@@ -270,7 +270,7 @@ def test_valid_delete_vm_id(client, init_user_database, init_vm_database, monkey
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
     
-    response = client.delete('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    response = client.delete('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 200
 
 
@@ -280,7 +280,7 @@ def test_false_token_delete_vm_id(client, init_user_database, init_vm_database, 
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
     
-    response = client.delete('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    response = client.delete('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 403
 
 #  valid user with a valid token. Not admin. Trying to delete an another's vm.
@@ -289,7 +289,7 @@ def test_foreign_delete_vm_id(client, init_user_database, init_vm_database, monk
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
     
-    response = client.delete('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    response = client.delete('/2.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 403
 
 #  admin
@@ -298,8 +298,8 @@ def test_admin_delete_vm_id(client, init_user_database, init_vm_database, monkey
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
     
-    vm1 = client.delete('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
-    vm2 = client.delete('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    vm1 = client.delete('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    vm2 = client.delete('/2.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert vm1.status_code == 200
     assert vm2.status_code == 200
 
@@ -308,7 +308,7 @@ def test_admin_delete_vm_id(client, init_user_database, init_vm_database, monkey
 
 #####
 ## delete_vm_id with error
-## delete /api/1.0.0/vmWithError/{vmid}
+## delete /2.0/vmWithError/{vmid}
 #####
 
 def fake_delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
@@ -320,7 +320,7 @@ def test_valid_delete_vm_with_error_id(client, init_user_database, init_vm_datab
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
     
-    response = client.delete('/api/1.0.0/vmWithError/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    response = client.delete('/2.0/vmWithError/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 200
 
 
@@ -330,7 +330,7 @@ def test_false_token_delete_vm_with_error_id(client, init_user_database, init_vm
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
     
-    response = client.delete('/api/1.0.0/vmWithError/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    response = client.delete('/2.0/vmWithError/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 403
 
 #  valid user with a valid token. Not admin. Trying to delete an another's vm.
@@ -339,7 +339,7 @@ def test_foreign_delete_vm_with_error_id(client, init_user_database, init_vm_dat
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
     
-    response = client.delete('/api/1.0.0/vmWithError/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    response = client.delete('/2.0/vmWithError/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 403
 
 #  admin
@@ -348,8 +348,8 @@ def test_admin_delete_vm_with_error_id(client, init_user_database, init_vm_datab
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(default_controller, "delete_vm_in_thread", fake_delete_vm_in_thread)
     
-    vm1 = client.delete('/api/1.0.0/vmWithError/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
-    vm2 = client.delete('/api/1.0.0/vmWithError/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    vm1 = client.delete('/2.0/vmWithError/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    vm2 = client.delete('/2.0/vmWithError/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert vm1.status_code == 200
     assert vm2.status_code == 200
 
@@ -359,7 +359,7 @@ def test_admin_delete_vm_with_error_id(client, init_user_database, init_vm_datab
 
 #####
 ## patch_vm
-## patch /api/1.0.0/vm/{vmid}
+## patch /2.0/vm/{vmid}
 #####
 
 def fake_start_vm(vmide, node):
@@ -385,7 +385,7 @@ def  test_valid_patch_vm_start(client, init_user_database, init_vm_database, mon
     monkeypatch.setattr(proxmox, "start_vm", fake_start_vm)
     
     # client patch request with a body
-    response = client.patch('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
+    response = client.patch('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
     assert response.status_code == 200
     assert response.json == {"status": "start OK"}
 
@@ -395,7 +395,7 @@ def  test_valid_patch_vm_reboot(client, init_user_database, init_vm_database, mo
     monkeypatch.setattr(proxmox, "reboot_vm", fake_reboot_vm)
     
     # client patch request with a body
-    response = client.patch('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "reboot"})
+    response = client.patch('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "reboot"})
     assert response.status_code == 200
     assert response.json == {"status": "reboot OK"}
 
@@ -405,7 +405,7 @@ def  test_valid_patch_vm_stop(client, init_user_database, init_vm_database, monk
     monkeypatch.setattr(proxmox, "stop_vm", fake_stop_vm)
     
     # client patch request with a body
-    response = client.patch('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "stop"})
+    response = client.patch('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "stop"})
     assert response.status_code == 200
     assert response.json == {"status": "stop OK"}
 
@@ -415,7 +415,7 @@ def  test_valid_patch_vm_switch_autoreboot(client, init_user_database, init_vm_d
     monkeypatch.setattr(proxmox, "switch_autoreboot", fake_switch_autoreboot)
     
     # client patch request with a body
-    response = client.patch('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "switch_autoreboot"})
+    response = client.patch('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "switch_autoreboot"})
     assert response.status_code == 200
     assert response.json == {"status": "switch autoreboot OK"}
 
@@ -425,7 +425,7 @@ def  test_valid_patch_vm_unknown_status(client, init_user_database, init_vm_data
     monkeypatch.setattr(proxmox, "start_vm", fake_start_vm)
     
     # client patch request with a body
-    response = client.patch('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "unknown"})
+    response = client.patch('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "unknown"})
     assert response.status_code == 500
     assert response.json == {"status": "uknown status"}
 
@@ -436,7 +436,7 @@ def test_foreign_patch_vm(client, init_user_database, init_vm_database, monkeypa
     monkeypatch.setattr(proxmox, "start_vm", fake_start_vm)
     
     # Not his vm
-    response = client.patch('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
+    response = client.patch('/2.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
     assert response.status_code == 403
 
 # Try to patch the VM as an admin
@@ -445,8 +445,8 @@ def test_admin_patch_vm(client, init_user_database, init_vm_database, monkeypatc
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(proxmox, "start_vm", fake_start_vm)
     
-    vm1 = client.patch('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
-    vm2 = client.patch('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
+    vm1 = client.patch('/2.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
+    vm2 = client.patch('/2.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
     assert vm1.status_code == 200
     assert vm1.json == {"status": "start OK"}
     assert vm2.status_code == 200
@@ -458,7 +458,7 @@ def test_admin_transfer_ownership(client, init_user_database, init_vm_database, 
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(proxmox, "transfer_ownership", fake_transfer_ownership)
     
-    vm1 = client.patch('/api/1.0.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "transfering_ownership", "user" : "user-1"})
+    vm1 = client.patch('/2.0/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "transfering_ownership", "user" : "user-1"})
     assert vm1.status_code == 200
     assert vm1.json == {"status": "OK"}
 
@@ -468,7 +468,7 @@ def test_non_admin_transfer_ownership(client, init_user_database, init_vm_databa
     monkeypatch.setattr(proxmox, "get_node_from_vm", fake_get_node_from_vm)
     monkeypatch.setattr(proxmox, "transfer_ownership", fake_transfer_ownership)
     
-    vm1 = client.patch('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "transfering_ownership", "user" : "user-1"})
+    vm1 = client.patch('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "transfering_ownership", "user" : "user-1"})
     assert vm1.status_code == 403
     assert vm1.json == {"status": "Permission denied"}
 
@@ -479,7 +479,7 @@ def test_invalid_patch_vm(client, init_user_database, init_vm_database, monkeypa
     
     
     # Not his vm
-    response = client.patch('/api/1.0.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
+    response = client.patch('/2.0/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
     assert response.status_code == 403
 
 
@@ -495,7 +495,7 @@ def test_valid_get_account_state(client, init_user_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
     
-    response = client.get('/api/1.0.0/account_state/user-1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    response = client.get('/2.0/account_state/user-1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 200
     assert response.json == {"freezeState": "0"}
 
@@ -504,7 +504,7 @@ def test_invalid_get_account_state(client, init_user_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token_fail)
     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
     
-    response = client.get('/api/1.0.0/account_state/user-1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    response = client.get('/2.0/account_state/user-1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 403
     assert response.json == {"error": "Impossible to check your account. Please log into the MiNET cas"}
 
@@ -513,7 +513,7 @@ def test_foreign_get_account_state(client, init_user_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
     
-    response = client.get('/api/1.0.0/account_state/user-2', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
+    response = client.get('/2.0/account_state/user-2', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 403
     assert response.json == {"error": "You are not allowed to check this account"}
 
@@ -522,7 +522,7 @@ def test_admin_get_own_account_state(client, init_user_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_admin)
     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
     
-    response = client.get('/api/1.0.0/account_state/admin', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    response = client.get('/2.0/account_state/admin', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 200
     assert response.json == {"freezeState" : "0"}
 
@@ -532,8 +532,8 @@ def test_admin_get_other_account_state(client, init_user_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_admin)
     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
     
-    user1 = client.get('/api/1.0.0/account_state/user-1', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
-    user2 = client.get('/api/1.0.0/account_state/user-2', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
+    user1 = client.get('/2.0/account_state/user-1', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
+    user2 = client.get('/2.0/account_state/user-2', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
     print("user1", user1.json)
     assert user1.status_code == 200
     assert user1.json == {"freezeState": "0"}
@@ -550,5 +550,5 @@ def test_admin_get_other_account_state(client, init_user_database, monkeypatch):
 
 def test_valide_ressources_fetchdef(client, init_max_ressources_for_one_user, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
-    response = client.get('/api/1.0.0/max_account_ressources', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    response = client.get('/2.0/max_account_ressources', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     assert response.status_code == 200

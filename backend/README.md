@@ -225,7 +225,7 @@ except ApiException as e:
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://backprox.minet.net/api/1.0.0*
+All URIs are relative to *https://api-hosting.minet.net/2.0*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------

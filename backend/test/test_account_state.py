@@ -12,7 +12,7 @@ import proxmox_api.db.db_models as db_models
 from flask_sqlalchemy import SQLAlchemy
 from test.conftest import *
 
-#backendURL = "http://localhost:8080/api/1.0.0";
+#backendURL = "http://localhost:8080/2.0";
 
 
 #@pytest.fixture
