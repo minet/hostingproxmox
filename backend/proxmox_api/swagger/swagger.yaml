@@ -9,9 +9,9 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: "2.0"
 servers:
-- url: https://api.hosting.minet.net/2.0
+- url: https://api-hosting.minet.net/2.0
   description: Main URL
-- url: https://api-dev.hosting.minet.net/2.0
+- url: https://api-hosting-dev.minet.net/2.0
   description: dev URL
 - url: http://127.0.0.1:8080/2.0
   description: local URL

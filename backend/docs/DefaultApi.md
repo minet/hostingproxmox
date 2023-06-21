@@ -1,6 +1,6 @@
 # swagger_client.DefaultApi
 
-All URIs are relative to *https://api.hosting.minet.net/2.0*
+All URIs are relative to *https://api-hosting.minet.net/2.0*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------

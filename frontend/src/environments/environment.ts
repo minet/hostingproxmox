@@ -3,11 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 function getBackendURL(){
   const url = window.location.hostname;
-  let backendURL = "https://api.hosting.minet.net";
+  let backendURL = "https://api-hosting.minet.net";
     
     switch(url){
       case "hosting-dev.minet.net" : {
-        backendURL = "https://api-dev.hosting.minet.net";
+        backendURL = "https://api-hosting-dev.minet.net";
         break;
       }
       case "hosting-local.minet.net" :{
@@ -15,7 +15,7 @@ function getBackendURL(){
          break;
       }
       default: {
-        backendURL = "https://api.hosting.minet.net";
+        backendURL = "https://api-hosting.minet.net";
         break;
       } 
     }
