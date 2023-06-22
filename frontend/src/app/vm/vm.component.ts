@@ -287,7 +287,7 @@ export class VmComponent implements OnInit, OnDestroy {
         console.log("test")
         let data = {};
         data = {
-            vmid: this.vmid,
+            vmid: Number(this.vmid),
           username: this.popUpUsername,
             password: this.popUpPassword,
             sshKey: this.popUpSSHkey,
@@ -296,6 +296,7 @@ export class VmComponent implements OnInit, OnDestroy {
         
       this.http.post(this.authService.SERVER_URL + '/updateCredentials', data, {observe: 'response'}).subscribe(rep => {
         console.log("success")
+        this.popUpLoading = false;
         if(this.need_to_be_restored){
             document.getElementById('openModalButton').click();
             document.getElementById('openUpdateButton').click();
@@ -304,7 +305,6 @@ export class VmComponent implements OnInit, OnDestroy {
             document.getElementById('updateCloseButton').click()
         }
         this.popUpShowed = false;
-        this.popUpLoading = false;
         this.popUpErrorCode = 0;
         this.popUpErrorMessage = "";
         this.commit_edit("reboot")

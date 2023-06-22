@@ -63,7 +63,7 @@ document.onload = loaded();
     </div>
 
     <button id="openModalButton" data-bs-toggle="modal" data-bs-target="#restoreLabel" [hidden]="true">Open popup</button>
-    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="restoreLabel" aria-hidden="true" id = "restoreLabel" data-show="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="restoreLabel" aria-hidden="true" id = "restoreLabel" data-show="true" data-backdrop="static" data-keyboard="false" *ngIf="need_to_be_restored">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         
@@ -102,15 +102,15 @@ document.onload = loaded();
         <form (ngSubmit)="update_vm()">
           <div class="form-group">
             <label for="username" class="col-form-label">{{"vm.updateCreds.username" | translate}}</label>
-            <input type="text" class="form-control" id="username" [(ngModel)]="popUpUsername">
+            <input type="text" class="form-control" id="popUpUsername" [(ngModel)]="popUpUsername" name="popUpUsername">
           </div>
           <div class="form-group">
             <label for="password" class="col-form-label">{{"vm.updateCreds.password" | translate}}</label>
-            <input type="password" class="form-control" id="password" [(ngModel)]="popUpPassword">
+            <input type="password" class="form-control" id="popUpPassword" [(ngModel)]="popUpPassword" name="popUpPassword">
           </div>
           <div class="form-group">
             <label for="sshKey" class="col-form-label">{{"vm.updateCreds.ssh" | translate}}</label>
-            <textarea class="form-control" id="sshKey" [(ngModel)]="popUpSSHkey"></textarea>
+            <textarea class="form-control" id="popUpSSHkey" [(ngModel)]="popUpSSHkey" name="popUpSSHkey"></textarea>
           </div>
         </form>
 
@@ -121,7 +121,7 @@ document.onload = loaded();
           <p>{{ 'vm.updateCreds.info' | translate }}</p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" [disabled]="popUpLoading">{{ "vm.backup.popup.button.cancel" |translate }}</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="backButton" [disabled]="popUpLoading">{{ "vm.backup.popup.button.cancel" |translate }}</button>
   
           <button  class="btn btn-success w-50" [disabled]="popUpLoading" (click)="update_vm_credentials()">
             <span [hidden]="popUpLoading" *ngIf="need_to_be_restored">{{ "vm.backup.popup.button.restore" | translate }}</span>
