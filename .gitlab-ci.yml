@@ -13,6 +13,7 @@ python_code_quality:
     - export PYTHONPATH=$(pwd)
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
+    - export no_proxy="$NO_PROXY"
     - pip3 install pylint
   script:
     - pylint --fail-under=1 proxmox_api/*.py > code_quality.txt
@@ -52,7 +53,7 @@ test_backend:
   before_script:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
-    - export no_proxy="192.168.104.7"
+    - export no_proxy="$NO_PROXY"
     - apt update 
     - apt install sqlite3
     - export ENVIRONMENT='TEST'
