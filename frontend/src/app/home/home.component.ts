@@ -262,7 +262,6 @@ export class HomeComponent implements OnInit {
           password: vm.password,
           sshKey: vm.sshKey,
           user: this.slugifyPipe.transform(vm.user),
-          ssh: true,
           cpu: this.nb_cpu_selected,
           ram: this.nb_ram_selected,
           disk: this.nb_storage_selected

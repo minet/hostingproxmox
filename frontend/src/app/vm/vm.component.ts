@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild, ElementRef} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Vm} from '../models/vm';
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
@@ -11,7 +11,7 @@ import {delay, mergeMap} from 'rxjs/operators';
 import {TranslateService} from "@ngx-translate/core";
 import {CookieService} from "ngx-cookie-service";
 import {Utils} from "../common/utils";
-import { ThisReceiver } from '@angular/compiler';
+
 
 @Component({
     selector: 'app-vm',
@@ -54,8 +54,13 @@ export class VmComponent implements OnInit, OnDestroy {
         public authService: AuthService,
         public slugifyPipe: SlugifyPipe,
         private utils : Utils,
+        
+
     ) {
     }
+    @ViewChild('updateCloseButton') closeUpdatePopUp: ElementRef;
+    @ViewChild('openModalButton') openModalButton: ElementRef;
+    @ViewChild('openUpdateButton') openUpdateButton: ElementRef;
 
     ngOnInit(): void {
         setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user); }, 1000);
@@ -67,7 +72,7 @@ export class VmComponent implements OnInit, OnDestroy {
 
     startPopUp(){
         try {
-            document.getElementById('openModalButton').click();
+            this.openModalButton.nativeElement.click();
             this.popUpShowed = true;
         } catch (error) {
             console.log(error)
@@ -135,7 +140,7 @@ export class VmComponent implements OnInit, OnDestroy {
                         if(vmstate == "deleted"){
                             deletionTimer.unsubscribe();
                             if(this.need_to_be_restored){
-                                document.getElementById('openModalButton').click();
+                                this.openModalButton.nativeElement.click();
                             }
                             this.deletionStatus = "deleted";
                             setTimeout(() =>this.router.navigate(['vms']), 2000);
@@ -287,7 +292,7 @@ export class VmComponent implements OnInit, OnDestroy {
         console.log("test")
         let data = {};
         data = {
-            vmid: this.vmid,
+            vmid: Number(this.vmid),
           username: this.popUpUsername,
             password: this.popUpPassword,
             sshKey: this.popUpSSHkey,
@@ -296,15 +301,15 @@ export class VmComponent implements OnInit, OnDestroy {
         
       this.http.post(this.authService.SERVER_URL + '/updateCredentials', data, {observe: 'response'}).subscribe(rep => {
         console.log("success")
+        this.popUpLoading = false;
         if(this.need_to_be_restored){
-            document.getElementById('openModalButton').click();
-            document.getElementById('openUpdateButton').click();
+            this.openModalButton.nativeElement.click();
+            this.openUpdateButton.nativeElement.click();
         } else {
             
-            document.getElementById('updateCloseButton').click()
+            this.closeUpdatePopUp.nativeElement.click();
         }
         this.popUpShowed = false;
-        this.popUpLoading = false;
         this.popUpErrorCode = 0;
         this.popUpErrorMessage = "";
         this.commit_edit("reboot")

@@ -76,32 +76,12 @@ test_backend:
     reports:
       junit: backend/report.xml
 
-install_dependencies_angular:
-  stage: dependencies
-  image: node
-  needs : 
-   - angular_code_quality
-  before_script:
-    - npm config rm proxy
-    - npm config rm https-proxy
-    - npm config set proxy "$HTTP_PROXY"
-    - npm config set https-proxy "$HTTPS_PROXY"
-    - export no_proxy="$NO_PROXY"
-    - cd frontend
-  script:
-    - npm ci --prefer-offline --no-audit
-  artifacts:
-    paths:
-      - frontend/node_modules
-    expire_in: 1 days
-
-
 
 angular_build:
   stage: build
   image: node
   needs: 
-    - install_dependencies_angular
+    - angular_code_quality
   before_script:
     - npm cache clean --force  
     - npm config rm proxy
@@ -112,8 +92,10 @@ angular_build:
     - cd frontend
     - NG_CLI_ANALYTICS=ci
     - export NODE_OPTIONS=--openssl-legacy-provider
-    - npm install -g @angular/cli
   script:
+    - npm ci --prefer-offline --no-audit
+    - npm install -g @angular/cli
+
     - yarn ng build
   artifacts:
     paths:
