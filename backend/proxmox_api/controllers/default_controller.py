@@ -140,8 +140,7 @@ def create_vm(body=None):  # noqa: E501
         if status != 201:
             return vm, status
         alreadyUsedCPU += int(vm["cpu"])
-        alreadyUsedRAM += int(vm["ram"])/1000
-
+        alreadyUsedRAM += int(vm["ram"])/1024
         alreadyUsedDisk += int(vm["disk"])
     account_ressources = dbfct.get_vm_max_ressources();
 
