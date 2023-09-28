@@ -71,7 +71,7 @@ export class HomeComponent implements OnInit {
               private slugifyPipe: SlugifyPipe,
               private route: ActivatedRoute,
               public translate: TranslateService,
-              private cookie: CookieService, 
+              public cookie: CookieService, 
               ) {
     this.cookie.get('lang') == 'en' ? this.translate.use('en') && this.cookie.set('lang','en') : this.translate.use('fr') && this.cookie.set('lang','fr');
     console.log("cookie =" + this.route.snapshot.paramMap.get('lang'))

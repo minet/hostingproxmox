@@ -9,13 +9,13 @@ import {Dns} from '../models/dns';
 import {timer, Subscription} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
 
-
 @Component({
   selector: 'app-dns',
   templateUrl: './dns.component.html',
   styleUrls: ['./dns.component.css']
 })
 export class DnsComponent implements OnInit, OnDestroy {
+
   loading = true;
   newDns = new Dns();
   ipList = Array<string>();
@@ -28,6 +28,7 @@ export class DnsComponent implements OnInit, OnDestroy {
   success = false;
   page = 1;
   pageSize = 10;
+
   constructor(private activatedRoute: ActivatedRoute,
               private http: HttpClient,
               private router: Router,

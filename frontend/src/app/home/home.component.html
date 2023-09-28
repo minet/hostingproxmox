@@ -43,11 +43,11 @@
             </p>
         </div>
 
-        <div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
+        <div class="alert alert-danger text-center" *ngIf="this.user.freezeState === 0">
             <b>{{'home.subscription.expired_1' | translate}}</b>
             <p>{{'home.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'home.subscription.expired_3' | translate}}</a> {{'home.subscription.expired_4' | translate}}</p>
         </div>
-        <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && this.user.cotisation < 3">
+        <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && this.user.freezeState < 3">
             <b>{{'home.charter.notsigned_1' | translate}}</b>
             <p>{{'home.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'home.charter.notsigned_3' | translate}}</a> {{'home.charter.notsigned_4' | translate}}</p>
         </div>
@@ -59,7 +59,7 @@
                     <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.user.usedCPU == -1 || nb_cpu_max == -1">
                       </div>
                     <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100"  *ngIf="this.user.usedCPU != -1 && nb_cpu_max != -1">
-                        <div class="progress-bar bg-success" style="width: {{(nb_cpu_max - (this.user.usedCPU +nb_cpu_selected))*100/nb_cpu_max}}%"></div>
+                        <div class="progress-bar bg-success" [style.width.%]="(nb_cpu_max - (this.user.usedCPU +nb_cpu_selected))*100/nb_cpu_max"></div>
                     </div>
                 </div>
                     <div>
@@ -68,7 +68,7 @@
                           </div>
                             <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100" *ngIf="this.user.usedRAM != -1 &&  nb_ram_max != -1">
                                 
-                                <div class="progress-bar bg-success" style="width: {{(nb_ram_max - (this.user.usedRAM +nb_ram_selected))*100/nb_ram_max}}%"></div>
+                                <div class="progress-bar bg-success" [style.width.%]="(nb_ram_max - (this.user.usedRAM +nb_ram_selected))*100/nb_ram_max"></div>
                             </div>
                     </div>
                     <div>
@@ -77,7 +77,7 @@
                           </div>
                         <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" *ngIf="this.user.usedStorage != -1 && nb_storage_max != -1">
                             
-                            <div class="progress-bar bg-success" style="width: {{(nb_storage_max - (this.user.usedStorage +nb_storage_selected))*100/nb_storage_max}}%" ></div>
+                            <div class="progress-bar bg-success" [style.width.%]="(nb_storage_max - (this.user.usedStorage +nb_storage_selected))*100/nb_storage_max"></div>
                         </div>
                     </div>
                 </div>
@@ -277,7 +277,7 @@
                     <div *ngIf="loading">
                         <div class="progress" >
                             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{progress}}%"><strong class="text-light" >{{progress | number:'1.0-0'}}%</strong></div>
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="progress"><strong class="text-light" >{{progress | number:'1.0-0'}}%</strong></div>
                         </div>
                         <p class="text-primary text-center font-weight-light font-italic">{{creation_state}}</p>
                         </div>

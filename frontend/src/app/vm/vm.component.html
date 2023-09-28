@@ -13,26 +13,25 @@ document.onload = loaded();
     <h4>{{'account.freeze.title' | translate }}</h4>
     <p></p>
     <p>{{'account.freeze.1.description' | translate }}<strong>{{'account.freeze.1.description.strong' | translate }} </strong></p>
-  </div>
-  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
+</div>
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
     <h1>❄️</h1>
     <h4>{{'account.freeze.title' | translate }}</h4>
     <p>{{'account.freeze.2.description.1' | translate }}<strong>{{'account.freeze.2.description.1.strong' | translate }}</strong> {{'account.freeze.2.description.2' | translate }}</p>
     <p><strong>{{'account.freeze.2.description.2.strong' | translate }}</strong></p>
-  </div>
-  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState >= 3 ">
+</div>
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState >= 3 ">
     <h1>❄️</h1>
     <h4>{{'account.freeze.title' | translate }}</h4>
     <p>{{'account.freeze.3.description' | translate }}<br><strong>{{'account.freeze.3.description.strong' | translate }}</strong></p>
-  </div>
-  <div class="alert alert-warning text-center" *ngIf="this.user.freezeState >= 3">
+</div>
+<div class="alert alert-warning text-center" *ngIf="this.user.freezeState >= 3">
     <h4>{{'account.expired.title' | translate }}</h4>
     <p>{{'account.expired.description' | translate }}</p>
-  </div>
+</div>
 
 
 <div *ngIf="(loading || deletionStatus != 'None') && (user.chartevalidated || user.admin) && (errorcode !== 500)">
-
     <div class="d-flex justify-content-center">
         <div class="spinner-border text-primary" role="status">
             <span class="sr-only">{{'vm.loading' | translate}}</span>
@@ -99,7 +98,7 @@ document.onload = loaded();
         <div class="alert alert-danger" *ngIf="popUpErrorCode != 0">
           <p [innerHtml] = "popUpErrorMessage"></p>
         </div>
-        <form (ngSubmit)="update_vm()">
+        <form (ngSubmit)="update_vm_credentials()">
           <div class="form-group">
             <label for="username" class="col-form-label">{{"vm.updateCreds.username" | translate}}</label>
             <input type="text" class="form-control" id="popUpUsername" [(ngModel)]="popUpUsername" name="popUpUsername">
@@ -152,16 +151,16 @@ document.onload = loaded();
                             <p *ngIf="user.vms[0].status == 'running'"><b>{{'vm.ipv4' | translate}} :</b>&nbsp; <span *ngIf="renew_vm_status != 'reboot'">{{ user.vms[0].ip }}</span> <button *ngIf="user.vms[0].ip == '' && (renew_vm_status == '' || renew_vm_status == 'loading')" class="btn btn-primary" (click)="renew_vm()"><span *ngIf="renew_vm_status == ''">{{'vm.ipv4.renew' | translate}}</span><span class="spinner-border spinner-border-sm" *ngIf="renew_vm_status == 'loading'"></span> </button>  <button  class="btn btn-danger" (click)="commit_edit('reboot')" *ngIf="renew_vm_status == 'reboot'">{{ 'vm.reboot.apply' | translate}}</button></p>
                             <p><b>{{'vm.startOnBoot' | translate}} :</b></p>
                             <div class="custom-control custom-switch">
-                                <input type="checkbox" (change)="commit_edit('switch_autoreboot')" [checked]="user.vms[0].autoreboot === 1" class="custom-control-input" id="customSwitches">
+                                <input type="checkbox" (change)="commit_edit('switch_autoreboot')" [checked]="+user.vms[0].autoreboot === 1" class="custom-control-input" id="customSwitches">
                                 <label class="custom-control-label" for="customSwitches">{{'vm.startOnBootDescription' | translate}}</label>
                             </div>
                             
                         </div>
                         <div class="col-6 text-left">
                             <p *ngIf="user.admin"><b>{{'vm.owner' | translate}} :</b> {{ user.vms[0].user }}</p>
-
+                            
                             <p><b>{{'vm.createdOn' | translate}} :</b> {{user.vms[0].createdOn}}</p>
-
+                            <p><b>{{'vm.lastBackup' | translate}} :</b> {{formatTimestamp(user.vms[0].lastBackup)}}</p>
                             <p *ngIf="user.vms[0].status == 'running'"><b>{{'vm.upTime' | translate}} :</b> {{secondsToDhms( user.vms[0].uptime )}}</p>
                         </div>
                         <p><br><br><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{'vm.updateCreds.button' | translate}}</button></p>
@@ -178,19 +177,19 @@ document.onload = loaded();
                     <div class="text-left">
                         <p *ngIf="!editing"><b>{{'vm.cpu' | translate}} :</b>&nbsp; {{ user.vms[0].cpu }}</p>
                         <div class="progress flex-fill">
-                            <div *ngIf="user.vms[0].cpuUsage <= 50" class="progress-bar progress-bar-animated"
+                            <div *ngIf="+user.vms[0].cpuUsage <= 50" class="progress-bar progress-bar-animated"
                                  role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].cpuUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].cpuUsage">
                             </div>
 
-                            <div *ngIf=" 50 < user.vms[0].cpuUsage && user.vms[0].cpuUsage <= 75"
+                            <div *ngIf=" 50 < +user.vms[0].cpuUsage && +user.vms[0].cpuUsage <= 75"
                                  class="progress-bar progress-bar-animated bg-warning" role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].cpuUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].cpuUsage">
                             </div>
 
-                            <div *ngIf=" 75 < user.vms[0].cpuUsage" class="progress-bar progress-bar-animated bg-danger"
+                            <div *ngIf=" 75 < +user.vms[0].cpuUsage" class="progress-bar progress-bar-animated bg-danger"
                                  role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].cpuUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].cpuUsage">
                             </div>
 
                         </div>
@@ -198,23 +197,23 @@ document.onload = loaded();
                               class="text-info"> {{user.vms[0].cpuUsage}}%</span>
                         <p style="padding-top: 5%" *ngIf="!editing"><b>{{'vm.ram' | translate}} :</b>&nbsp; {{ user.vms[0].ram }}</p>
                         <div class="progress flex-fill">
-                            <div *ngIf="user.vms[0].ramUsage <= 50" class="progress-bar progress-bar-animated"
+                            <div *ngIf="+user.vms[0].ramUsage <= 50" class="progress-bar progress-bar-animated"
                                  role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].ramUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].ramUsage">
                             </div>
 
-                            <div *ngIf=" 50 < user.vms[0].ramUsage && user.vms[0].ramUsage <= 75"
+                            <div *ngIf=" 50 < +user.vms[0].ramUsage && +user.vms[0].ramUsage <= 75"
                                  class="progress-bar progress-bar-animated bg-warning" role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].ramUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].ramUsage">
                             </div>
 
-                            <div *ngIf=" 75 < user.vms[0].ramUsage" class="progress-bar progress-bar-animated bg-danger"
+                            <div *ngIf=" 75 < +user.vms[0].ramUsage" class="progress-bar progress-bar-animated bg-danger"
                                  role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].ramUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].ramUsage">
                             </div>
                         </div>
                         <span *ngIf="user.vms[0].ramUsage" style="float: right"
-                              class="text-info">{{user.vms[0].ram * (user.vms[0].ramUsage / 100) | number:'1.1-2'}}
+                              class="text-info">{{+user.vms[0].ram * (+user.vms[0].ramUsage / 100) | number:'1.1-2'}}
                             /{{user.vms[0].ram}} GB</span>
                         <!-- <p *ngIf="editing">{{newVm.disk}}<button (click)="add('disk')" class="btn btn-primary btn-sm">+</button></p> -->
                         <p *ngIf="!editing" style="padding-top: 5%"><b>{{'vm.diskSpace' | translate}} :</b>&nbsp; {{ user.vms[0].disk }}
@@ -307,7 +306,7 @@ document.onload = loaded();
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary btn-danger" [disabled]="this.input_vm_id != this.vmid" (click)="delete_vm()" data-bs-dismiss="modal" >{{"vm.delete" | translate}} </button>
+              <button type="button" class="btn btn-primary btn-danger" [disabled]="+this.input_vm_id != this.vmid" (click)="delete_vm()" data-bs-dismiss="modal" >{{"vm.delete" | translate}} </button>
             </div>
           </div>
         </div>

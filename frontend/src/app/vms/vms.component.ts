@@ -145,6 +145,9 @@ export class VmsComponent implements OnInit, OnDestroy {
                     vm.status = rep.body['status'].trim();
                     vm.user = rep.body['user'];
                     vm.ip = rep.body['ip'][0];
+                    vm.lastBackup = rep.body['last_backup_date']
+                    console.log("test")
+                    console.log(vm.lastBackup)
                     vm.uptime = rep.body['uptime'];
                     vm.createdOn = rep.body['created_on'];
                     if (rep.body['type'] === 'nginx_vm') {

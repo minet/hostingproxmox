@@ -45,6 +45,7 @@ export class HistoryComponent implements OnInit {
     const newTimer = timer(0, 3000).pipe(
       mergeMap(() => this.http.get(this.authService.SERVER_URL + '/historyall', {observe: 'response'})))
         .subscribe(rep => {
+              console.log(rep.body)
               this.history = rep.body;
             },
             error => {

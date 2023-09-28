@@ -110,7 +110,6 @@ def get_vm_status(vmid): # Return the status of the VM and if there is an error 
         except:
             return "Unknown error", True
     else :
-        print('status', status)
         return status, False
 
 def set_vm_status(vmid, status, isAnError=False):
