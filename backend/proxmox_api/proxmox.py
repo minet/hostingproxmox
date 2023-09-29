@@ -499,7 +499,6 @@ def get_vm(user_id = 0, search=None):
             return database.get_vm_list(), 200
         else: # We get all user/name and filter them
             user_filtered = database.get_user_list(searchItem=search) # get all user filtered
-            print("user_filtered = " , user_filtered)
             vm_filtered_list = []
             for user in user_filtered:
                 vm_filtered_list += database.get_vm_list(user_id = user.id)
