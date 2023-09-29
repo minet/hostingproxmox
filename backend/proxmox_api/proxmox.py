@@ -743,23 +743,23 @@ def set_new_vm_ip(vmid, node):
 
 
 
-#def switch_autoreboot(vmid,node):
-#    (config, status) = get_vm_autoreboot(vmid, node)
-#    if status != 201 :
-#         return {"error" : "Impossible to retrieve onboot status"}, 500
-#    try:
-#        if config["autoreboot"] == 1:
-#            request = proxmox.nodes(node).qemu(vmid).config.post(onboot=0)
-#            status = get_vm_autoreboot(vmid, node)
-#            return {"status": "changed to 0"}, 201
-#        else:
-#            request = proxmox.nodes(node).qemu(vmid).config.post(onboot=1)
-#            status = get_vm_autoreboot(vmid, node)
-#            return {"status": "changed to 1"}, 201
-#    except Exception as e:
-#        logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
-#        print("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
-#        return {"error": "Impossible to update the uptime"}, 500
+def switch_autoreboot(vmid,node):
+    (config, status) = get_vm_autoreboot(vmid, node)
+    if status != 201 :
+         return {"error" : "Impossible to retrieve onboot status"}, 500
+    try:
+        if config["autoreboot"] == 1:
+            request = proxmox.nodes(node).qemu(vmid).config.post(onboot=0)
+            status = get_vm_autoreboot(vmid, node)
+            return {"status": "changed to 0"}, 201
+        else:
+            request = proxmox.nodes(node).qemu(vmid).config.post(onboot=1)
+            status = get_vm_autoreboot(vmid, node)
+            return {"status": "changed to 1"}, 201
+    except Exception as e:
+        logging.error("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
+        print("Problem in get_vm_uptime(" + str(vmid) + ") when getting VM uptime: " + str(e))
+        return {"error": "Impossible to update the uptime"}, 500
 
 
 
