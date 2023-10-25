@@ -778,8 +778,8 @@ def patch_vm(vmid, body=None):  # noqa: E501
             return proxmox.reboot_vm(vmid, node)
         elif requetsBody.status == "stop":
             return proxmox.stop_vm(vmid, node)
-        #elif requetsBody.status == "switch_autoreboot":
-        #    return proxmox.switch_autoreboot(vmid, node)
+        elif requetsBody.status == "switch_autoreboot":
+            return proxmox.switch_autoreboot(vmid, node)
         elif requetsBody.status == "transfering_ownership":
             if admin : 
                 new_owner = requetsBody.user
