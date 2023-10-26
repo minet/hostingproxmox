@@ -1,5 +1,5 @@
 import pytest
-import proxmox_api.proxmox  as proxmox
+import proxmox_api.proxmox as proxmox
 import time
 import proxmox_api.util as util
 from flask_sqlalchemy import SQLAlchemy

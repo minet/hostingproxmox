@@ -1,5 +1,6 @@
+import logging
 import pytest
-import proxmox_api.proxmox  as proxmox
+import proxmox_api.proxmox as proxmox
 import time
 import proxmox_api.util as util
 from flask_sqlalchemy import SQLAlchemy
@@ -18,6 +19,7 @@ def test_old_vm_deletion(init_vm_database):
     """
     node,status = proxmox.get_node_from_vm(VMID)
     print(node)
+    print(status)
     app = util.create_app()
     db = SQLAlchemy()
     db.init_app(app.app)
@@ -25,6 +27,7 @@ def test_old_vm_deletion(init_vm_database):
     with app.app.app_context():
         if status == 200:
             doesVMexist = True
+        print(doesVMexist)
         if doesVMexist:
             assert node == "kars" or node == "wammu"
             r = proxmox.delete_from_proxmox(VMID, node)

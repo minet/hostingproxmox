@@ -228,7 +228,7 @@ def delete_vm_id(vmid):  # noqa: E501
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):
-                admin = True;
+                admin = True
 
     user_id = cas['sub']
     if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
@@ -334,7 +334,7 @@ def get_dns():  # noqa: E501
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):
-                admin = True;
+                admin = True
     user_id = cas['sub']
     if admin: 
         freezeAccountState = 0
