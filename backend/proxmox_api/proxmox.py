@@ -69,7 +69,7 @@ def load_balance_server():
     server = ""
     perram_min = 100
     for i in nodes_info:
-        if i['node'] != "aomine": # on veut rien sur aomine
+        if i['node'] != "sam": # on veut rien sur sam
             perram = round(i["mem"] * 100 / i["maxmem"], 2)
             percpu = round(i["cpu"] * 100, 2)
             if i["status"] == "online" and perram < 90 and percpu < 70:
