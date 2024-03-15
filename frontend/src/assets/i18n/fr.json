@@ -207,7 +207,7 @@
   "manual.p6.title": "Après la création, que faire ?",
   "manual.p6_1_1": "Vous pouvez dans un premier temps vous connecter sur votre VM. Il existe deux manières :",
   "manual.p6_1_2": "via votre terminal en exécutant la commande",
-  "manual.p6_1_3": "ssh &lt;nomd'utilisateur&gt;@&lt;ipdevotrevm&gt;",
+  "manual.p6_1_3": "ssh nom_utilisateur@ip_de_votre_vm",
   "manual.p6_1_4": "Puis en entrant votre mot de passe.",
   "manual.p6_1_5": "via l'utilitaire webssh intégré sur notre site qui vous permet de vous connecter directement sur votre navigateur. Il vous faudra aussi entrer l'IP de votre machine et les identifiants que vous avez entré lors de la création.",
   "manual.p7.title": "Une entrée DNS, pour quoi faire ?",

@@ -197,7 +197,7 @@
   "manual.p6.title": "What should I do after my VM is up ?",
   "manual.p6_1_1": "You can firstly connect to your VM. There are two ways :",
   "manual.p6_1_2": "via your shell, by executing the command",
-  "manual.p6_1_3": "ssh &lt;user&gt;@&lt;ipofyourvm&gt;",
+  "manual.p6_1_3": "ssh username@your_vm_ip_address",
   "manual.p6_1_4": "and entering your password.",
   "manual.p6_1_5": "via the openssh tool, that is directly incorporated on our website, that allows you to connect to the VM through your browser. You'll then have to enter the IP address of your VM and its credentials.",
   "manual.p7.title": "Why would I use a DNS entry ?",
