@@ -20,7 +20,7 @@ PROXMOX_API_KEY = os.environ.get('PROXMOX_API_KEY')
 
 # VM number limit by user and total
 LIMIT_BY_USER = 3
-TOTAL_VM_LIMIT = 120
+TOTAL_VM_LIMIT = 150
 
 # Proxmox host
 
