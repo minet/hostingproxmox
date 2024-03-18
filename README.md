@@ -13,7 +13,7 @@ Ce code open source reprend la totalité du code de l'application web [hosting.m
 - Avoir installé `mysql`, `angular` et `flask`
 ### Backend
 Se placer dans `backend/`
-- Créer un environment virtuel `python3 venv venv` et l'activer `source venv/bin/activate`
+- Créer un environment virtuel `python3 -m venv venv` et l'activer `source venv/bin/activate`
 - Lancer la commande `pip3 install -r requirements.txt` dans le dépot pour installer les packages requis.
 
 ### Définir les différents secrets 

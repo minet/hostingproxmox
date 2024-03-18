@@ -31,7 +31,6 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(nam
 
 
 
-
 def add_user_dns(user_id, entry, ip):
     
     
@@ -70,13 +69,12 @@ def load_balance_server():
     server = ""
     perram_min = 100
     for i in nodes_info:
-        if i['node'] != "aomine": # on veut rien sur aomine
-            perram = round(i["mem"] * 100 / i["maxmem"], 2)
-            percpu = round(i["cpu"] * 100, 2)
-            if i["status"] == "online" and perram < 90 and percpu < 70:
-                if perram < perram_min:
-                    perram_min = perram
-                    server = i["node"]
+        perram = round(i["mem"] * 100 / i["maxmem"], 2)
+        percpu = round(i["cpu"] * 100, 2)
+        if i["status"] == "online" and perram < 90 and percpu < 70:
+            if perram < perram_min:
+                perram_min = perram
+                server = i["node"]
     if server == "":
         return {"server": "no server available"}, 500
 
@@ -934,5 +932,3 @@ def transfer_ownership(vmid, newowner):
     database.add_ip_to_history(ip, vmid, userid)
     database.update_all_ip_dns_record(ip, userid)
     return {"status": "ok"}, 201
-
-    
