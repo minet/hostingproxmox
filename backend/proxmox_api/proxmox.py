@@ -712,7 +712,7 @@ def get_vm_last_backup_date(vmid, node):
                 return None
 
     if len(backup_dates) == 0:
-        print("Error : no backup for VM "+ vmid)
+        print("Error : no backup for VM "+ str(vmid))
         return None
 
     return max(backup_dates)
