@@ -34,7 +34,8 @@ def test_old_vm_deletion(init_vm_database):
             assert r == True
         else :
             assert True
- # If previous test fail, we do not try to create a new one
+
+# If previous test fail, we do not try to create a new one
 
 @pytest.mark.dependency(name="creation", depends=["clean"])
 def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
