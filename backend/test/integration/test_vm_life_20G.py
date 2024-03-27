@@ -23,7 +23,7 @@ def test_old_vm_deletion(init_vm_database):
         if status == 200:
             doesVMexist = True
         if doesVMexist:
-            assert node == "kars" or node == "wammu"
+            assert node == "kars" or node == "wammu" or node == "sam"
             r = proxmox.delete_from_proxmox(VMID, node)
             assert r == True
         else :

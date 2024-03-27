@@ -149,9 +149,9 @@ paths:
                     description: tell if the VM if flagged as unsecure
                     example: true
                   last_backup_date:
-                    type: string
+                    type: number
                     description: last backup date from this VM
-                    example: 15-05-2021
+                    example: 87563
         "400":
           description: "invalid input, missing parameters"
         "403":

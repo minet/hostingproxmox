@@ -18,7 +18,7 @@ def test_old_vm_deletion(init_vm_database):
     """Test in charge of destroying all vm test created in the past.
     """
     node,status = proxmox.get_node_from_vm(VMID)
-    print(node)
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA :" + str(node))
     print(status)
     app = util.create_app()
     db = SQLAlchemy()
@@ -29,7 +29,7 @@ def test_old_vm_deletion(init_vm_database):
             doesVMexist = True
         print(doesVMexist)
         if doesVMexist:
-            assert node == "kars" or node == "wammu"
+            assert node == "kars" or node == "wammu" or node == "sam"
             r = proxmox.delete_from_proxmox(VMID, node)
             assert r == True
         else :

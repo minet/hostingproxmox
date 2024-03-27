@@ -142,7 +142,7 @@ def create_vm(body=None):  # noqa: E501
         alreadyUsedCPU += int(vm["cpu"])
         alreadyUsedRAM += int(vm["ram"])/1024
         alreadyUsedDisk += int(vm["disk"])
-    account_ressources = dbfct.get_vm_max_ressources();
+    account_ressources = dbfct.get_vm_max_ressources()
 
     if account_ressources is None:
         return {"error": "Error while getting ressources default"}, 500
@@ -178,7 +178,7 @@ def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error oc
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):
-                admin = True;
+                admin = True
 
     user_id = cas['sub']
     if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm

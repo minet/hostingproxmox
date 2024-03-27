@@ -79,7 +79,7 @@ def is_ip_available(ip): #permet de définir si l'ip est disponible... ou non
     if Vm.query.filter_by(ip=ip).first():
         return False
     else:
-        return True;
+        return True
 
 def getNextVmID(min = 110): # get the next vmid available. The minimum whould not be less than 110
     if min <110 : 
