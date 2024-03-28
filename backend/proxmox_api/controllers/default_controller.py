@@ -484,6 +484,7 @@ def get_vm_id(vmid):  # noqa: E501
     status = proxmox.get_proxmox_vm_status(vmid, node)
     type = dbfct.get_vm_type(vmid)
     created_on = get_vm_created_on(vmid)
+    last_backup_date = proxmox.get_vm_last_backup_date(vmid, node)
    
     (vmConfig, response) = proxmox.get_vm_config(vmid, node)
     #print("get_vm_config for " , vmid , " took ")
@@ -492,13 +493,12 @@ def get_vm_id(vmid):  # noqa: E501
     if response == 500:
         print("500 error, vmConfig = ", vmConfig)
         return vmConfig, 500
-        print("500 ended")
     elif response == 404:
         return {"error": "VM not found"},404
     elif response == 200 or( response == 201 and 'status' in vmConfig.keys()): # If the returned code is 201 and the vm is just created
         return vmConfig, response
     elif response != 201 :
-        return {"error": "API unkonwn response"},500
+        return {"error": "API unknown response"},500
     try:
         name = vmConfig["name"]
         ram = vmConfig["ram"]
@@ -522,7 +522,7 @@ def get_vm_id(vmid):  # noqa: E501
     if status[0]["status"] != 'running':
         return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": "", "status": status[0]["status"],
                 "ram": ram, "cpu": cpu, "disk": disk, "type": type[0]["type"],
-                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"], "unsecure" : isUnsecure}, 201
+                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"], "unsecure" : isUnsecure, "last_backup_date" : last_backup_date}, 201
     else:
         ip = proxmox.get_vm_ip(vmid, node)
         current_status,response = proxmox.get_vm_current_status(vmid, node)
@@ -552,7 +552,7 @@ def get_vm_id(vmid):  # noqa: E501
                    , "status": status[0]["status"], "ram": ram
                    , "cpu": cpu, "disk": disk, "type": type[0]["type"]
                    , "ram_usage": ram_usage, "cpu_usage": cpu_usage
-                   , "uptime": uptime, "created_on": created_on[0]["created_on"], "unsecure":isUnsecure}, 201
+                   , "uptime": uptime, "created_on": created_on[0]["created_on"], "unsecure":isUnsecure, "last_backup_date" : last_backup_date}, 201
 
     elif   status[1] == 404 or type[1] == 404  :
         return {"error": "vm not found"}, 404

@@ -225,6 +225,7 @@
   "vm.owner": "Owner",
   "vm.createdOn": "Created on",
   "vm.uptime": "Uptime",
+  "vm.lastBackup": "Last backup",
   "vm.systemInformation": "System Information",
   "vm.cpu": "CPU",
   "vm.ram": "RAM (GB)",
