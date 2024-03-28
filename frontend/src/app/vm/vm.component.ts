@@ -1,15 +1,13 @@
 import {Component, OnDestroy, OnInit, ViewChild, ElementRef} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Vm} from '../models/vm';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {User} from '../models/user';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Subscription, timer} from 'rxjs';
-import {delay, mergeMap} from 'rxjs/operators';
-import {TranslateService} from "@ngx-translate/core";
-import {CookieService} from "ngx-cookie-service";
+import {mergeMap} from 'rxjs/operators';
 import {Utils} from "../common/utils";
 
 
