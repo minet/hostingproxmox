@@ -484,7 +484,7 @@ def get_vm_id(vmid):  # noqa: E501
     status = proxmox.get_proxmox_vm_status(vmid, node)
     type = dbfct.get_vm_type(vmid)
     created_on = get_vm_created_on(vmid)
-    last_backup_date = proxmox.get_vm_last_backup_date(vmid)
+    last_backup_date = proxmox.get_vm_last_backup_date(vmid, node)
    
     (vmConfig, response) = proxmox.get_vm_config(vmid, node)
     #print("get_vm_config for " , vmid , " took ")
