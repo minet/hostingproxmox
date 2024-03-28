@@ -696,6 +696,28 @@ def get_proxmox_vm_status(vmid, node):
         return {"status": "error"}, 500
 
 
+def get_vm_last_backup_date(vmid, node):
+    try:
+        backups = proxmox.nodes(node).storage("hosting_backup").content.get()
+    except Exception as e:
+        logging.error("Problem in accessing backups : " + str(e))
+        return None
+    
+    backup_dates = []
+    for r in backups:
+        if vmid == r["vmid"]:
+            try:
+                backup_dates += [r["ctime"]]
+            except Exception as e:
+                logging.error("Problem in get_backup_vm_ctime("+str(vmid)+") when getting VM backups: " + str(e))
+                return None
+
+    if len(backup_dates) == 0:
+        print("Error : no backup for VM "+ vmid)
+        return None
+
+    return max(backup_dates)
+
 
 # Select the next available ip address and set up in the proxmox firewall
 def set_new_vm_ip(vmid, node):
