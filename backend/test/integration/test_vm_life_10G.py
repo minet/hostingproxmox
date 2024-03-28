@@ -18,7 +18,7 @@ def test_old_vm_deletion(init_vm_database):
     """Test in charge of destroying all vm test created in the past.
     """
     node,status = proxmox.get_node_from_vm(VMID)
-    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA :" + str(node))
+    print(node)
     print(status)
     app = util.create_app()
     db = SQLAlchemy()
