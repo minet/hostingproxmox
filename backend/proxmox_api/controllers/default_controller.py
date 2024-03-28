@@ -481,7 +481,7 @@ def get_vm_id(vmid):  # noqa: E501
     status = proxmox.get_proxmox_vm_status(vmid, node)
     type = dbfct.get_vm_type(vmid)
     created_on = get_vm_created_on(vmid)
-    last_backup_date = proxmox.get_vm_last_backup_date(vmid, node)
+    # last_backup_date = proxmox.get_vm_last_backup_date(vmid, node)
     (vmConfig, response) = proxmox.get_vm_config(vmid, node)
 
     if response == 500:
@@ -517,7 +517,8 @@ def get_vm_id(vmid):  # noqa: E501
         return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": "", "status": status[0]["status"],
                 "ram": ram, "cpu": cpu, "disk": disk, "type": type[0]["type"],
                 "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"], 
-                "unsecure" : isUnsecure, "last_backup_date" : last_backup_date}, 201
+                "unsecure" : isUnsecure}, 201
+        # , "last_backup_date" : last_backup_date
     else:
         ip = proxmox.get_vm_ip(vmid, node)
         current_status,response = proxmox.get_vm_current_status(vmid, node)
@@ -547,7 +548,8 @@ def get_vm_id(vmid):  # noqa: E501
                    , "status": status[0]["status"], "ram": ram
                    , "cpu": cpu, "disk": disk, "type": type[0]["type"]
                    , "ram_usage": ram_usage, "cpu_usage": cpu_usage
-                   , "uptime": uptime, "created_on": created_on[0]["created_on"], "unsecure":isUnsecure, "last_backup_date" : last_backup_date}, 201
+                   , "uptime": uptime, "created_on": created_on[0]["created_on"], "unsecure":isUnsecure}, 201
+        # , "last_backup_date" : last_backup_date
 
     elif   status[1] == 404 or type[1] == 404  :
         return {"error": "vm not found"}, 404
