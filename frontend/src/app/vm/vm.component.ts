@@ -107,7 +107,7 @@ export class VmComponent implements OnInit, OnDestroy {
         return dDisplay + hDisplay + mDisplay + sDisplay;
     }
 
-    formatTimestamp(timestamp): string {
+    formatTimestamp(timestamp: number): string {
         const date = new Date(timestamp*1000);
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -223,7 +223,7 @@ export class VmComponent implements OnInit, OnDestroy {
                     vm.ramUsage = rep.body['ram_usage'];
                     vm.cpuUsage = rep.body['cpu_usage'];
                     vm.uptime = rep.body['uptime'];
-                    vm.lastBackup = rep.body['last_backup_date'];
+                    // vm.lastBackup = rep.body['last_backup_date'];
                     vm.isUnsecure = Boolean(rep.body["unsecure"]);
                     if (rep.body['ip'] == ""){
                         vm.ip = ""

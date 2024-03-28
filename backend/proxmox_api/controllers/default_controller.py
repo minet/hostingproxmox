@@ -5,7 +5,7 @@ import requests
 import json
 from threading import Thread
 from requests.api import head
-#from slugify import slugify
+from slugify import slugify
 from proxmox_api.models.dns_entry_item import DnsEntryItem  # noqa: E501
 from proxmox_api.models.dns_item import DnsItem  # noqa: E501
 from proxmox_api.models.vm_id_item import VmIdItem  # noqa: E501
@@ -516,8 +516,7 @@ def get_vm_id(vmid):  # noqa: E501
     if status[0]["status"] != 'running':
         return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": "", "status": status[0]["status"],
                 "ram": ram, "cpu": cpu, "disk": disk, "type": type[0]["type"],
-                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"], 
-                "unsecure" : isUnsecure}, 201
+                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "created_on": created_on[0]["created_on"], "unsecure" : isUnsecure}, 201
         # , "last_backup_date" : last_backup_date
     else:
         ip = proxmox.get_vm_ip(vmid, node)
