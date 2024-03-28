@@ -1,4 +1,4 @@
-import {Component, OnInit, Input, SimpleChange, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {UserService} from '../common/services/user.service';
 import {Utils} from '../common/utils';
@@ -7,9 +7,6 @@ import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Vm} from '../models/vm';
 import {ActivatedRoute, Router} from '@angular/router';
-import {timer} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
-import {Dns} from "../models/dns";
 import {TranslateService} from "@ngx-translate/core";
 import {CookieService} from "ngx-cookie-service";
 

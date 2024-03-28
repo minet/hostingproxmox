@@ -93,7 +93,7 @@ export class VmComponent implements OnInit, OnDestroy {
         this.editing = true;
     }
 
-    secondsToDhms(seconds): string {
+    secondsToDhms(seconds: number): string {
         seconds = Number(seconds);
         const d = Math.floor(seconds / (3600 * 24));
         const h = Math.floor(seconds % (3600 * 24) / 3600);
@@ -107,7 +107,7 @@ export class VmComponent implements OnInit, OnDestroy {
         return dDisplay + hDisplay + mDisplay + sDisplay;
     }
 
-    formatTimestamp(timestamp): string {
+    formatTimestamp(timestamp: number): string {
         const date = new Date(timestamp*1000);
         const year = date.getFullYear();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
