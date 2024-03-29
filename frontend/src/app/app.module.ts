@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import {OAuthModule, OAuthStorage} from 'angular-oauth2-oidc';
+import { OAuthModule, OAuthStorage } from 'angular-oauth2-oidc';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -19,13 +19,13 @@ import { LegalComponent } from './legal/legal.component';
 import { ManualComponent } from './manual/manual.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HistoryComponent } from './history/history.component';
-import {Ng2SearchPipeModule} from "ng2-search-filter";
 import { environment } from './../environments/environment';
-import {HttpClient, HttpClientModule} from '@angular/common/http';
-import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
-import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { Ng2SearchPipeModule } from 'ng2-search-filter';
 
-export function storageFactory() : OAuthStorage {
+export function storageFactory(): OAuthStorage {
   return localStorage;
 }
 

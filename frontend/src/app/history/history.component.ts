@@ -16,7 +16,7 @@ import {CookieService} from "ngx-cookie-service";
   styleUrls: ['./history.component.css']
 })
 export class HistoryComponent implements OnInit {
-  history: any;
+  history: unknown;
   page = 1;
   errorcode = 201;
   pageSize = 200;

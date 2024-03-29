@@ -6,8 +6,7 @@ import {authCodeFlowConfig} from '../../sso.config';
 import {merge, Observable} from 'rxjs';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {HttpClient} from '@angular/common/http';
-import {CookieService} from "ngx-cookie-service";
-import {ActivatedRoute, Router} from '@angular/router';
+
 @Injectable({
     providedIn: 'root'
 })
@@ -80,14 +79,14 @@ export class UserService {
                 this.user.sn = user.sn;
                 this.user.name = user.given_name;
                 this.user.admin = false;
-                this.oauthService.loadUserProfile().then(r => {
-                    if (r.attributes['memberOf']) {
+                this.oauthService.loadUserProfile().then((r: any) => { // Specify the type of 'r' as 'any'
+                    if (r.attributes && r.attributes['memberOf']) { // Check if 'attributes' property exists
                         if (r.attributes['memberOf'].indexOf(this.authService.adminDn) > -1) {
                             this.user.admin = true;
                         }
                     }
                     this.check_freezeState();
-                    if(r.attributes['signedhosting'] === "false")
+                    if(r.attributes && r.attributes['signedhosting'] === "false") // Check if 'attributes' property exists
                         this.user.chartevalidated = false;
                     else
                         this.user.chartevalidated = true;

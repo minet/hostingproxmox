@@ -176,7 +176,7 @@ export class DnsComponent implements OnInit, OnDestroy {
         if(this.user.chartevalidated || this.user.admin) {
             this.http.delete(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})
                 .subscribe(
-                    rep => {
+                    () => {
                         window.location.reload();
                     },
                     error => {

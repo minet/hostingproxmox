@@ -124,7 +124,7 @@ export class VmComponent implements OnInit, OnDestroy {
             status,
         };
 
-        this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(rep => {
+        this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(() => {
             this.loading = true;
         }, error => {
             this.loading = false;
@@ -141,7 +141,7 @@ export class VmComponent implements OnInit, OnDestroy {
         }
         console.log(this.errorDescription)
         console.log(url)
-         this.http.delete(url).subscribe(rep => {
+         this.http.delete(url).subscribe(() => {
 
             const deletionTimer = timer(0, 3000).pipe(
             mergeMap(() =>  this.http.get(this.authService.SERVER_URL + '/vm/' +this.vmid, {observe: 'response'}))).subscribe(rep => {
@@ -186,7 +186,7 @@ export class VmComponent implements OnInit, OnDestroy {
             "user": this.new_user_to_transfer
         };
         this.transfering_ownership = true;
-        this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(rep => {
+        this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(() => {
             this.transfering_request_message = "success";
             setTimeout(() => {this.transfering_ownership = false;
             this.transfering_request_message = ""}, 1000);
@@ -309,7 +309,7 @@ export class VmComponent implements OnInit, OnDestroy {
         };
         this.popUpLoading = true;
         
-      this.http.post(this.authService.SERVER_URL + '/updateCredentials', data, {observe: 'response'}).subscribe(rep => {
+      this.http.post(this.authService.SERVER_URL + '/updateCredentials', data, {observe: 'response'}).subscribe(() => {
         console.log("success")
         this.popUpLoading = false;
         if(this.need_to_be_restored){

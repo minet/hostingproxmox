@@ -1,4 +1,4 @@
-import { Component, OnInit,  Inject, Injectable} from '@angular/core';
+import { Component, OnInit,  Inject} from '@angular/core';
 import { UserService } from '../common/services/user.service';
 import { User } from '../models/user';
 import {CookieService} from 'ngx-cookie-service';
@@ -77,7 +77,7 @@ export class NavbarComponent implements OnInit {
         this.notificationMessage = null;
       }
     },
-    error => {
+    () => {
       this.notificationTitle = null;
       this.notificationMessage = null;
     });

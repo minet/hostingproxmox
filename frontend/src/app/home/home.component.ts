@@ -228,7 +228,7 @@ export class HomeComponent implements OnInit {
 
 
   //configuration form 
-  configurationForm(vm:Vm):void{
+  configurationForm():void{
     this.errorMessage = ""
     this.errorcode = -1
     this.progress = 0
@@ -315,7 +315,6 @@ export class HomeComponent implements OnInit {
     this.http.get(this.authService.SERVER_URL + '/dns', {observe: 'response'}).subscribe(rep => {
           dns = rep.body as Array<string>;
           for (let i = 0; i < dns.length; i++) {
-            const dnsid = dns[i];
             this.countdns++;
           }
         },

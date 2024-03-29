@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import {TranslateService} from "@ngx-translate/core";
-import {CookieService} from "ngx-cookie-service";
 
 
 @Component({
@@ -10,8 +8,10 @@ import {CookieService} from "ngx-cookie-service";
 })
 export class ManualComponent implements OnInit {
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() { }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   ngOnInit(): void {
   }
 
