@@ -42,6 +42,7 @@ class VmItem(object):
         'cpu_usage': 'float',
         'ram_usage': 'float',
         'uptime': 'float',
+        'last_backup_date': 'float',
         'created_on': 'str'
     }
 
@@ -60,10 +61,11 @@ class VmItem(object):
         'cpu_usage': 'cpu_usage',
         'ram_usage': 'ram_usage',
         'uptime': 'uptime',
+        'last_backup_date': 'last_backup_date',
         'created_on': 'created_on'
     }
 
-    def __init__(self, name=None, type=None, user=None, password=None, ssh_key=None, ip=None, cpu=None, ram=None, disk=None, autoreboot=None, status=None, cpu_usage=None, ram_usage=None, uptime=None, created_on=None):  # noqa: E501
+    def __init__(self, name=None, type=None, user=None, password=None, ssh_key=None, ip=None, cpu=None, ram=None, disk=None, autoreboot=None, status=None, cpu_usage=None, ram_usage=None, uptime=None, last_backup_date=None, created_on=None):  # noqa: E501
         """VmItem - a model defined in Swagger"""  # noqa: E501
         self._name = None
         self._type = None
@@ -79,6 +81,7 @@ class VmItem(object):
         self._cpu_usage = None
         self._ram_usage = None
         self._uptime = None
+        self._last_backup_date = None
         self._created_on = None
         self.discriminator = None
         if name is not None:
@@ -109,6 +112,8 @@ class VmItem(object):
             self.ram_usage = ram_usage
         if uptime is not None:
             self.uptime = uptime
+        if last_backup_date is not None:
+            self.last_backup_date = last_backup_date
         if created_on is not None:
             self.created_on = created_on
 
@@ -433,6 +438,29 @@ class VmItem(object):
         """
 
         self._uptime = uptime
+        
+    @property
+    def last_backup_date(self):
+        """Gets the date of the last backup of this VmItem.  # noqa: E501
+
+        VM's time in sec  # noqa: E501
+
+        :return: The time of this VmItem.  # noqa: E501
+        :rtype: float
+        """
+        return self._uptime
+
+    @last_backup_date.setter
+    def last_backup_date(self, last_backup_date):
+        """Sets the last_backup_date of this VmItem.
+
+        VM's last_backup_date in sec  # noqa: E501
+
+        :param last_backup_date: The last_backup_date of this VmItem.  # noqa: E501
+        :type: float
+        """
+
+        self._last_backup_date = last_backup_date
 
     @property
     def created_on(self):

@@ -277,7 +277,7 @@
                     <div *ngIf="loading">
                         <div class="progress" >
                             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{progress}}%"><strong class="text-light" >{{progress | number:'1.0-0'}}%</strong></div>
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="progress"><strong class="text-light" >{{progress | number:'1.0-0'}}%</strong></div>
                         </div>
                         <p class="text-primary text-center font-weight-light font-italic">{{creation_state}}</p>
                         </div>
@@ -288,7 +288,7 @@
     
     <div *ngIf="user.admin" class="adminmenu">
         <p>{{'home.admin.description_1' | translate}}<br>
-            {{'home.admin.description_2' | translate}}</p>bg 
+            {{'home.admin.description_2' | translate}}</p>
         <h2>{{'home.admin.stats.title' | translate}}</h2>
         <br>
         <div class="card-deck mb-3">
