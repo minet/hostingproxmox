@@ -108,6 +108,10 @@ paths:
                     type: number
                     description: VM's uptime in sec
                     example: 87545
+                  last_backup_date:
+                    type: number
+                    description: VM's last_backup_date in sec
+                    example: 7754545
                   created_on:
                     type: string
                     description: creation date of the VM
