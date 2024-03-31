@@ -15,7 +15,7 @@ export class Vm {
     public ramUsage?: string,
     public cpuUsage?: string,
     public uptime?: string,
-    public lastBackupDate?: string,
+    // public lastBackupDate?: string,
     public createdOn?: string,
     public isUnsecure?: boolean,
 
