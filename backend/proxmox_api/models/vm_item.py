@@ -46,7 +46,7 @@ class VmItem(Model):
         :param uptime: The uptime of this VmItem.  # noqa: E501
         :type uptime: float
         :param last_backup_date: The last backup date of this VmItem.  # noqa: E501
-        :type uptime: float
+        :type last_backup_date: float
         :param created_on: The created_on of this VmItem.  # noqa: E501
         :type created_on: str
         """
