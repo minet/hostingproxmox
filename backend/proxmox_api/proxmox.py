@@ -694,7 +694,7 @@ def get_proxmox_vm_status(vmid, node):
         return {"status": "error"}, 500
 
 
-def get_vm_last_backup_date(vmid, node):
+def get_vm_last_backup_date(vmid: int, node):
     try:
         backups = proxmox.nodes(node).storage("hosting_backup").content.get()
     except Exception as e:

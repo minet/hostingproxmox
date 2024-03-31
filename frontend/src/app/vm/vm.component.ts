@@ -208,7 +208,7 @@ export class VmComponent implements OnInit, OnDestroy {
 
 
     get_vm(vmid, vm): void {
-       this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})
+        this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})
             .subscribe(rep => {
 
                 console.log(rep)
@@ -224,7 +224,10 @@ export class VmComponent implements OnInit, OnDestroy {
                     vm.ramUsage = rep.body['ram_usage'];
                     vm.cpuUsage = rep.body['cpu_usage'];
                     vm.uptime = rep.body['uptime'];
+                    console.log("vm.uptime", vm.uptime)
+                    console.log("lastBackupDate :", rep.body['last_backup_date'])
                     vm.lastBackupDate = rep.body['last_backup_date'];
+                    
                     vm.isUnsecure = Boolean(rep.body["unsecure"]);
                     if (rep.body['ip'] == ""){
                         vm.ip = ""

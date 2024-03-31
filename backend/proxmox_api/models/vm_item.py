@@ -14,7 +14,7 @@ class VmItem(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, name: str=None, type: str=None, user: str=None, password: str=None, ssh: bool=None, ssh_key: str=None, ip: str=None, cpu: float=None, ram: float=None, disk: float=None, status: str=None, cpu_usage: float=None, ram_usage: float=None, uptime: float=None, created_on: str=None):  # noqa: E501
+    def __init__(self, name: str=None, type: str=None, user: str=None, password: str=None, ssh: bool=None, ssh_key: str=None, ip: str=None, cpu: float=None, ram: float=None, disk: float=None, status: str=None, cpu_usage: float=None, ram_usage: float=None, uptime: float=None, last_backup_date: float=None, created_on: str=None):  # noqa: E501
         """VmItem - a model defined in Swagger
 
         :param name: The name of this VmItem.  # noqa: E501
@@ -45,6 +45,8 @@ class VmItem(Model):
         :type ram_usage: float
         :param uptime: The uptime of this VmItem.  # noqa: E501
         :type uptime: float
+        :param last_backup_date: The last backup date of this VmItem.  # noqa: E501
+        :type last_backup_date: float
         :param created_on: The created_on of this VmItem.  # noqa: E501
         :type created_on: str
         """
@@ -63,6 +65,7 @@ class VmItem(Model):
             'cpu_usage': float,
             'ram_usage': float,
             'uptime': float,
+            'last_backup_date': float,
             'created_on': str
         }
 
@@ -81,6 +84,7 @@ class VmItem(Model):
             'cpu_usage': 'cpu_usage',
             'ram_usage': 'ram_usage',
             'uptime': 'uptime',
+            'last_backup_date': 'last_backup_date',
             'created_on': 'created_on'
         }
         self._name = name
@@ -97,6 +101,7 @@ class VmItem(Model):
         self._cpu_usage = cpu_usage
         self._ram_usage = ram_usage
         self._uptime = uptime
+        self._last_backup_date = last_backup_date
         self._created_on = created_on
 
     @classmethod
@@ -431,6 +436,29 @@ class VmItem(Model):
         """
 
         self._uptime = uptime
+
+    @property
+    def last_backup_date(self) -> float:
+        """Gets the uptime of this VmItem.
+
+        VM's uptime in sec  # noqa: E501
+
+        :return: The uptime of this VmItem.
+        :rtype: float
+        """
+        return self._last_backup_date
+
+    @last_backup_date.setter
+    def last_backup_date(self, last_backup_date: float):
+        """Sets the uptime of this VmItem.
+
+        VM's uptime in sec  # noqa: E501
+
+        :param uptime: The uptime of this VmItem.
+        :type uptime: float
+        """
+
+        self._last_backup_date = last_backup_date
 
     @property
     def created_on(self) -> str:
