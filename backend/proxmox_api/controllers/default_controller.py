@@ -522,7 +522,7 @@ def get_vm_id(vmid):  # noqa: E501
     if status[0]["status"] != 'running':
         return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": "", "status": status[0]["status"],
                 "ram": ram, "cpu": cpu, "disk": disk, "type": type[0]["type"],
-                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "last_backup_date" : 0, "created_on": created_on[0]["created_on"], "unsecure" : isUnsecure}, 201
+                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "last_backup_date" : last_backup_date, "created_on": created_on[0]["created_on"], "unsecure" : isUnsecure}, 201
         # 
     else:
         ip = proxmox.get_vm_ip(vmid, node)

@@ -505,8 +505,6 @@ def get_vm(user_id = 0, search=None):
             start = time.time()
             vm_list = database.get_vm_list() # get all vm but only id
             for vmid in vm_list:
-                print("vmid = ", vmid)
-                print("search = ", search)
                 if search in str(vmid):
                     if vmid not in vm_filtered_list:
                         vm_filtered_list.append(vmid)
@@ -517,7 +515,6 @@ def get_vm(user_id = 0, search=None):
                 if vmid not in vm_filtered_list :
                     infos,_ = get_vm_name(vmid, node)
                     name = infos["name"]
-                    print("name = ", name)
                     if search in name :
                         if vmid not in vm_filtered_list:
                             vm_filtered_list.append(vmid)
@@ -712,7 +709,7 @@ def get_vm_last_backup_date(vmid: int, node):
 
     if len(backup_dates) == 0:
         print("Error : no backup for VM "+ str(vmid))
-        return None
+        return 0
 
     return max(backup_dates)
 

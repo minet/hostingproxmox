@@ -160,8 +160,8 @@ document.onload = loaded();
                         <div class="col-6 text-left">
                             <p *ngIf="user.admin"><b>{{'vm.owner' | translate}} :</b> {{ user.vms[0].user }}</p>
 
-                            <p><b>{{'vm.createdOn' | translate}} :</b> {{user.vms[0].createdOn}}</p>
-                            <p><b>{{'vm.lastBackupDate' | translate}} :</b> {{formatTimestamp(user.vms[0].lastBackupDate)}}</p>
+                            <p><b>{{'vm.createdOn' | translate}} :</b> {{user.vms[0].createdOn}}</p>                            
+                            <p><b>{{'vm.lastBackupDate' | translate}} :</b> {{user.vms[0].lastBackupDate !== 0 ? formatTimestamp(user.vms[0].lastBackupDate) : 'vm.noBackup' | translate}}</p>
                             <p *ngIf="user.vms[0].status == 'running'"><b>{{'vm.upTime' | translate}} :</b> {{secondsToDhms( user.vms[0].uptime )}}</p>
                         </div>
                         <p><br><br><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{'vm.updateCreds.button' | translate}}</button></p>

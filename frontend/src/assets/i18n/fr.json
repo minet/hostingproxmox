@@ -236,6 +236,7 @@
   "vm.createdOn": "Créée le",
   "vm.uptime": "Uptime",
   "vm.lastBackupDate": "Dernière backup",
+  "vm.noBackup": "Aucune backup",
   "vm.systemInformation": "Informations sur le Système",
   "vm.cpu": "CPU",
   "vm.ram": "RAM (GB)",
