@@ -1,15 +1,13 @@
 import {Component, OnDestroy, OnInit, ViewChild, ElementRef} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Vm} from '../models/vm';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {User} from '../models/user';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Subscription, timer} from 'rxjs';
-import {delay, mergeMap} from 'rxjs/operators';
-import {TranslateService} from "@ngx-translate/core";
-import {CookieService} from "ngx-cookie-service";
+import {mergeMap} from 'rxjs/operators';
 import {Utils} from "../common/utils";
 
 
@@ -27,7 +25,7 @@ export class VmComponent implements OnInit, OnDestroy {
     deletionStatus = "None";
     intervals = new Set<Subscription>();
     newVm = new Vm();
-    history: any;
+    history: unknown;
     input_vm_id = ""; // for the deletion pop up
     vm_has_error = false;
     vm_has_proxmox_error = false;
@@ -95,7 +93,7 @@ export class VmComponent implements OnInit, OnDestroy {
         this.editing = true;
     }
 
-    secondsToDhms(seconds): string {
+    secondsToDhms(seconds: number): string {
         seconds = Number(seconds);
         const d = Math.floor(seconds / (3600 * 24));
         const h = Math.floor(seconds % (3600 * 24) / 3600);
@@ -109,13 +107,24 @@ export class VmComponent implements OnInit, OnDestroy {
         return dDisplay + hDisplay + mDisplay + sDisplay;
     }
 
+    formatTimestamp(timestamp: number): string {
+        const date = new Date(timestamp*1000);
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+      }
+
 
     commit_edit(status: string): void {
         const data = {
             status,
         };
 
-        this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(rep => {
+        this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(() => {
             this.loading = true;
         }, error => {
             this.loading = false;
@@ -132,7 +141,7 @@ export class VmComponent implements OnInit, OnDestroy {
         }
         console.log(this.errorDescription)
         console.log(url)
-         this.http.delete(url).subscribe(rep => {
+         this.http.delete(url).subscribe(() => {
 
             const deletionTimer = timer(0, 3000).pipe(
             mergeMap(() =>  this.http.get(this.authService.SERVER_URL + '/vm/' +this.vmid, {observe: 'response'}))).subscribe(rep => {
@@ -177,7 +186,7 @@ export class VmComponent implements OnInit, OnDestroy {
             "user": this.new_user_to_transfer
         };
         this.transfering_ownership = true;
-        this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(rep => {
+        this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(() => {
             this.transfering_request_message = "success";
             setTimeout(() => {this.transfering_ownership = false;
             this.transfering_request_message = ""}, 1000);
@@ -199,7 +208,7 @@ export class VmComponent implements OnInit, OnDestroy {
 
 
     get_vm(vmid, vm): void {
-       this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})
+        this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})
             .subscribe(rep => {
 
                 console.log(rep)
@@ -215,6 +224,8 @@ export class VmComponent implements OnInit, OnDestroy {
                     vm.ramUsage = rep.body['ram_usage'];
                     vm.cpuUsage = rep.body['cpu_usage'];
                     vm.uptime = rep.body['uptime'];
+                    vm.lastBackupDate = rep.body['last_backup_date'];
+                    
                     vm.isUnsecure = Boolean(rep.body["unsecure"]);
                     if (rep.body['ip'] == ""){
                         vm.ip = ""
@@ -299,7 +310,7 @@ export class VmComponent implements OnInit, OnDestroy {
         };
         this.popUpLoading = true;
         
-      this.http.post(this.authService.SERVER_URL + '/updateCredentials', data, {observe: 'response'}).subscribe(rep => {
+      this.http.post(this.authService.SERVER_URL + '/updateCredentials', data, {observe: 'response'}).subscribe(() => {
         console.log("success")
         this.popUpLoading = false;
         if(this.need_to_be_restored){

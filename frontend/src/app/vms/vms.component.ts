@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Vm} from '../models/vm';
-import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {User} from '../models/user';
@@ -146,6 +146,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                     vm.user = rep.body['user'];
                     vm.ip = rep.body['ip'][0];
                     vm.uptime = rep.body['uptime'];
+
                     vm.createdOn = rep.body['created_on'];
                     if (rep.body['type'] === 'nginx_vm') {
                         vm.type = "web_server";

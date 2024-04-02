@@ -1,4 +1,4 @@
-import {Component, OnInit, Input, SimpleChange, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {UserService} from '../common/services/user.service';
 import {Utils} from '../common/utils';
@@ -7,9 +7,6 @@ import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Vm} from '../models/vm';
 import {ActivatedRoute, Router} from '@angular/router';
-import {timer} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
-import {Dns} from "../models/dns";
 import {TranslateService} from "@ngx-translate/core";
 import {CookieService} from "ngx-cookie-service";
 
@@ -231,7 +228,7 @@ export class HomeComponent implements OnInit {
 
 
   //configuration form 
-  configurationForm(vm:Vm):void{
+  configurationForm():void{
     this.errorMessage = ""
     this.errorcode = -1
     this.progress = 0
@@ -318,7 +315,6 @@ export class HomeComponent implements OnInit {
     this.http.get(this.authService.SERVER_URL + '/dns', {observe: 'response'}).subscribe(rep => {
           dns = rep.body as Array<string>;
           for (let i = 0; i < dns.length; i++) {
-            const dnsid = dns[i];
             this.countdns++;
           }
         },

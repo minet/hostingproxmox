@@ -12,7 +12,8 @@ function getBackendURL(){
       }
       case "hosting-local.minet.net" :{
         backendURL = "http://localhost:8080";
-         break;
+        // backendURL = "https://api-hosting-dev.minet.net";
+        break;
       }
       default: {
         backendURL = "https://api-hosting.minet.net";

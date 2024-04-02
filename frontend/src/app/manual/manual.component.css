@@ -61,6 +61,7 @@
         -moz-osx-font-smoothing: grayscale;
         word-break: normal;
         -moz-tab-size: 4;
+        tab-size: 4;
     }
 
     h2 {

@@ -6,8 +6,6 @@ import {authCodeFlowConfig} from '../../sso.config';
 import {merge, Observable} from 'rxjs';
 import {fromPromise} from 'rxjs/internal-compatibility';
 import {HttpClient} from '@angular/common/http';
-import {CookieService} from "ngx-cookie-service";
-import {ActivatedRoute, Router} from '@angular/router';
 @Injectable({
     providedIn: 'root'
 })
@@ -44,7 +42,7 @@ export class UserService {
             }
         });
         return merge(
-            this.discoveryDocument$.then((result) => this.oauthService.hasValidAccessToken()),
+            this.discoveryDocument$.then(() => this.oauthService.hasValidAccessToken()),
             tokenObservable$
         );
     }
@@ -73,8 +71,8 @@ export class UserService {
     
 
     getUser(): Observable<User> {
-        return fromPromise(this.discoveryDocument$.then((result) => {
-            const user: any = this.oauthService.getIdentityClaims();
+        return fromPromise(this.discoveryDocument$.then(() => {
+            const user : any = this.oauthService.getIdentityClaims();
             if (user != null) {
                 this.user.username = user.sub;
                 this.user.sn = user.sn;

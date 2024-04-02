@@ -16,11 +16,11 @@ import {CookieService} from "ngx-cookie-service";
   styleUrls: ['./history.component.css']
 })
 export class HistoryComponent implements OnInit {
-  history: any;
+  history: unknown;
   page = 1;
   errorcode = 201;
   pageSize = 200;
-  searchText;
+  searchText: unknown;
   constructor(
       private activatedRoute: ActivatedRoute,
       private router: Router,
@@ -42,7 +42,7 @@ export class HistoryComponent implements OnInit {
 
 
   get_ip_history(): void {
-    const newTimer = timer(0, 3000).pipe(
+    timer(0, 3000).pipe(
       mergeMap(() => this.http.get(this.authService.SERVER_URL + '/historyall', {observe: 'response'})))
         .subscribe(rep => {
               this.history = rep.body;

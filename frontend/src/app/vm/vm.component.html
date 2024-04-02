@@ -160,8 +160,8 @@ document.onload = loaded();
                         <div class="col-6 text-left">
                             <p *ngIf="user.admin"><b>{{'vm.owner' | translate}} :</b> {{ user.vms[0].user }}</p>
 
-                            <p><b>{{'vm.createdOn' | translate}} :</b> {{user.vms[0].createdOn}}</p>
-
+                            <p><b>{{'vm.createdOn' | translate}} :</b> {{user.vms[0].createdOn}}</p>                            
+                            <p><b>{{'vm.lastBackupDate' | translate}} :</b> {{user.vms[0].lastBackupDate !== 0 ? formatTimestamp(user.vms[0].lastBackupDate) : 'vm.noBackup' | translate}}</p>
                             <p *ngIf="user.vms[0].status == 'running'"><b>{{'vm.upTime' | translate}} :</b> {{secondsToDhms( user.vms[0].uptime )}}</p>
                         </div>
                         <p><br><br><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{'vm.updateCreds.button' | translate}}</button></p>
@@ -180,17 +180,17 @@ document.onload = loaded();
                         <div class="progress flex-fill">
                             <div *ngIf="user.vms[0].cpuUsage <= 50" class="progress-bar progress-bar-animated"
                                  role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].cpuUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].cpuUsage">
                             </div>
 
                             <div *ngIf=" 50 < user.vms[0].cpuUsage && user.vms[0].cpuUsage <= 75"
                                  class="progress-bar progress-bar-animated bg-warning" role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].cpuUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].cpuUsage">
                             </div>
 
                             <div *ngIf=" 75 < user.vms[0].cpuUsage" class="progress-bar progress-bar-animated bg-danger"
                                  role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].cpuUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].cpuUsage">
                             </div>
 
                         </div>
@@ -200,17 +200,17 @@ document.onload = loaded();
                         <div class="progress flex-fill">
                             <div *ngIf="user.vms[0].ramUsage <= 50" class="progress-bar progress-bar-animated"
                                  role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].ramUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].ramUsage">
                             </div>
 
                             <div *ngIf=" 50 < user.vms[0].ramUsage && user.vms[0].ramUsage <= 75"
                                  class="progress-bar progress-bar-animated bg-warning" role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].ramUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].ramUsage">
                             </div>
 
                             <div *ngIf=" 75 < user.vms[0].ramUsage" class="progress-bar progress-bar-animated bg-danger"
                                  role="progressbar"
-                                 aria-valuemin="0" aria-valuemax="100" style="width: {{user.vms[0].ramUsage}}%">
+                                 aria-valuemin="0" aria-valuemax="100" [style.width.%]="user.vms[0].ramUsage">
                             </div>
                         </div>
                         <span *ngIf="user.vms[0].ramUsage" style="float: right"
