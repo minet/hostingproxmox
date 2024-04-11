@@ -1,0 +1,35 @@
+<div class="vms container flex-fill">
+    <h1 class="text-center mb-5" *ngIf="user.admin">{{ "deletevm.listTitle" | translate}}</h1>
+    <div class="row" *ngIf="user.vms">
+        <div class="card flex-fill mb-3" *ngFor="let vm of user.vms">
+            <div *ngIf="vm.name">
+                <h5 class="card-header">Name: {{ vm.name }}</h5>
+            </div>
+            <div *ngIf="!vm.name">
+                <i class="fa fa-spinner fa-spin"></i> Loading...
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-row">
+                    <div>
+                        <h5 class="card-title">Owner: {{ vm.user }}</h5>
+                        <p class="card-text">Created: {{ vm.createdOn }}</p>
+                    </div>
+                    <div class="ml-auto" *ngIf="vm.status !== 'deleting'">
+                        <button class="btn btn-primary btn-danger" [disabled]="!vm.name" (click)="delete_vm(vm)" data-bs-dismiss="modal">{{ "deletevm.delete" | translate }}</button>
+                    </div>
+                    <div class="ml-auto" *ngIf="vm.status === 'deleting'">
+                        <i class="fa fa-spinner fa-spin text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center" *ngIf="!user.vms || user.vms.length === 0">
+        <div *ngIf="isLoaded">
+            <h4 class="text-danger">{{ "deletevm.noVms" | translate}}</h4>
+        </div>
+        <div *ngIf="!isLoaded">
+            <i class="fa fa-spinner fa-spin"></i>  {{ "deletevm.loading" | translate }}
+        </div>
+    </div>
+</div>

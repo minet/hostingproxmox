@@ -24,6 +24,7 @@ import { environment } from './../environments/environment';
 import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import { DeletevmComponent } from './deletevm/deletevm.component';
 
 export function storageFactory() : OAuthStorage {
   return localStorage;
@@ -47,6 +48,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     LegalComponent,
     ManualComponent,
     HistoryComponent,
+    DeletevmComponent,
   ],
   imports: [
     BrowserModule,

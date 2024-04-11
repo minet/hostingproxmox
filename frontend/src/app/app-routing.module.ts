@@ -7,6 +7,7 @@ import {DnsComponent} from './dns/dns.component';
 import {LegalComponent} from './legal/legal.component';
 import {ManualComponent} from './manual/manual.component';
 import {HistoryComponent} from './history/history.component';
+import {DeletevmComponent} from './deletevm/deletevm.component';
 
 
 const routes: Routes = [
@@ -17,6 +18,7 @@ const routes: Routes = [
   {path: 'legal', component: LegalComponent},
   {path: 'manual', component: ManualComponent},
   {path: 'history', component: HistoryComponent},
+  {path: 'deletevm', component: DeletevmComponent},
   {path: '**', redirectTo: ''},
 ];
 

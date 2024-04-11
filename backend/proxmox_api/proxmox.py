@@ -80,6 +80,7 @@ def load_balance_server():
 
     return {"server": server}, 201
 
+
 def is_admin(memberOf):
     return configuration.ADMIN_DN in memberOf
 
@@ -815,7 +816,7 @@ def get_freeze_state(username):
         freezeState = database.getFreezeState(username)
     except Exception as e :
         print(e)
-        return {"freeztatus" : "unknown"}, 404 # User doesn't exist, we fake the freeze state to 0.0
+        return {"freezeState" : "unknown"}, 404 # User doesn't exist, we fake the freeze state to 0.0
     if freezeState is None: # We have to create the freeze state
         return check_update_cotisation(username)
     elif freezeState == "0.0":
@@ -826,6 +827,35 @@ def get_freeze_state(username):
         freezeState = database.getFreezeState(username) # if expired with update in case of re-cotisation
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
+
+""" API endpoint to return every user with a freeze state superior to a given value
+
+    :param entry: targetFreezeState : int
+
+    :return: list of user_id with freeze state superior to targetFreezeState : int[]
+"""
+def get_users_with_freeze_state(targetFreezeState: int):
+    
+    if targetFreezeState < 0:
+        return {"error": "Invalid input"}, 400
+    
+    users = database.get_user_list()
+    freezed_users = []
+    
+    for user in users:
+        
+        freezeState = database.getFreezeState(user.id)
+        
+        if(freezeState is not None and int(freezeState.split(".")[0]) >= targetFreezeState):
+            check_update_cotisation(user.id) # Update the freeze state in case of re-cotisation
+            freezeState = database.getFreezeState(user.id)
+
+            if(freezeState is not None and int(freezeState.split(".")[0]) >= targetFreezeState):
+                freezed_users.append(user.id)
+    if len(freezed_users) == 0:
+        return {"error": "No users with freeze state of 3"}, 404
+    return freezed_users, 200
+
 
 """func called by jobs. For all user, it calls a function to check if the user has a cotisation. 
 

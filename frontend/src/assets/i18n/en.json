@@ -318,5 +318,11 @@
   "app.component.boxfeature1" : "Create a Virtual Machine or a Web Server ready to use.",
   "app.component.boxfeature2" : "Register a DNS record pointing to your Virtual Machine.",
   "app.component.boxfeature3-1" : "uptime in 2023",
-  "app.component.getstarted" : "Get started"
+  "app.component.getstarted" : "Get started",
+  "deletevm.listTitle": "VMs to delete",
+  "deletevm.noVms": "no VMs",
+  "deletevm.delete": "Delete",
+  "deletevm.loading": "Loading..."
+
+
 }
