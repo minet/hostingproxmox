@@ -325,5 +325,10 @@
   "app.component.boxfeature1" : "Créez une machine virtuelle ou un serveur Web prêt à l'emploi.",
   "app.component.boxfeature2" : "Créer un enregistrement DNS pointant vers votre machine virtuelle.",
   "app.component.boxfeature3-1" : "d'uptime en 2023",
-  "app.component.getstarted" : "Démarrer"
+  "app.component.getstarted" : "Démarrer",
+  "deletevm.listTitle": "VMs à supprimer",
+  "deletevm.noVms": "Aucune VM",
+  "deletevm.delete": "Supprimer",
+  "deletevm.loading": "Chargement..."
+
 }

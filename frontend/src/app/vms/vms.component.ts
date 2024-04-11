@@ -7,7 +7,6 @@ import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
 import {Observable, Subscription, timer} from 'rxjs';
 import {mergeMap} from 'rxjs/operators';
-import {ActivatedRoute, Router} from "@angular/router";
 import {Utils} from "../common/utils";
 
 @Component({
@@ -30,8 +29,6 @@ export class VmsComponent implements OnInit, OnDestroy {
     vmToRestoreCounter = 0; // Number VMs that need to be restored
 
     constructor(private http: HttpClient,
-                private activatedRoute: ActivatedRoute,
-                private router: Router,
                 public user: User,
                 private userService: UserService,
                 private utils: Utils,
@@ -63,7 +60,7 @@ export class VmsComponent implements OnInit, OnDestroy {
         }
     }
 
-    secondsToDhms(seconds): string {
+    secondsToDhms(seconds: number): string {
         seconds = Number(seconds);
         const d = Math.floor(seconds / (3600 * 24));
         const h = Math.floor(seconds % (3600 * 24) / 3600);
@@ -132,7 +129,6 @@ export class VmsComponent implements OnInit, OnDestroy {
      * 
      * Every 30s, a new call is made to update vm info
      */
-
 
 
     async get_vm(id: number, last: boolean) {
@@ -204,7 +200,7 @@ export class VmsComponent implements OnInit, OnDestroy {
     }
 
     // Check if a VM need to be restored
-    get_need_to_be_restored(vm, didAnErrorOccur):void{
+    get_need_to_be_restored(vm: Vm, didAnErrorOccur: boolean):void{
         this.http.get(this.authService.SERVER_URL + '/needToBeRestored/' + vm.id, {observe: 'response'})
         .subscribe(rep => {
             console.log(rep)
@@ -216,7 +212,7 @@ export class VmsComponent implements OnInit, OnDestroy {
                         vm.status = "Error: Your VM data is lost. Click to see more details."
                         vm.createdOn = ""
                         vm.type = "unknow";
-                    } else if (needToBeRestored && !didAnErrorOccur){ // juste incremente the number of vù to be restored
+                    } else if (needToBeRestored && !didAnErrorOccur){ // juste incremente the number of vm to be restored
                         this.vmToRestoreCounter += 1
                     }
                 }

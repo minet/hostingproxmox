@@ -8,7 +8,7 @@ export class User {
     public lastname: string;
     public name: string;
     public admin = false;
-    public chartevalidated;
+    public chartevalidated: boolean;
     public freezeState: number;
     public vms?: Array<Vm>;
     public dns?: Array<Dns>;

@@ -207,7 +207,7 @@ export class VmComponent implements OnInit, OnDestroy {
     }
 
 
-    get_vm(vmid, vm): void {
+    get_vm(vmid:number, vm: Vm): void {
         this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})
             .subscribe(rep => {
 

@@ -142,7 +142,7 @@ def create_vm(body=None):  # noqa: E501
         alreadyUsedCPU += int(vm["cpu"])
         alreadyUsedRAM += int(vm["ram"])/1024
         alreadyUsedDisk += int(vm["disk"])
-    account_ressources = dbfct.get_vm_max_ressources();
+    account_ressources = dbfct.get_vm_max_ressources()
 
     if account_ressources is None:
         return {"error": "Error while getting ressources default"}, 500
@@ -443,13 +443,10 @@ def get_vm_id(vmid):  # noqa: E501
         except Exception as e:
             return {"error": "error while getting freeze state"}, 500
    
-   
     if freezeAccountState >= 3: # For freeze state 1 or 2, the user can access to hosting
         return {"error": "cotisation expired"}, 403
 
-    
 
-    
     vm_status, isAnError = get_vm_status(vmid)
     if vm_status != None and vm_status != "created" : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
         if isAnError:
@@ -471,14 +468,13 @@ def get_vm_id(vmid):  # noqa: E501
     
     node,status = proxmox.get_node_from_vm(vmid)
     
-
+    
     if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
         return {'error' : "Forbidden"} , 403
     elif status != 200 and not admin: # exist in the db but not in proxmox. It's a error
         return {"error": "VM not found in proxmox"}, 500
     elif status != 200 and  admin:
         return {'error' : "VM no found"} , 404
-
 
 
     status = proxmox.get_proxmox_vm_status(vmid, node)
@@ -561,7 +557,6 @@ def get_vm_id(vmid):  # noqa: E501
     else :
         print("datal error for vm ", vmid, "Unknown error one of the status, type or ip doesn't exists : ", status, type, ip)
         return {"error": "Unknown error one of the status, type or ip doesn't exists."}, 500
-
 
 def renew_ip():
     if connexion.request.is_json:
@@ -971,6 +966,27 @@ def get_need_to_be_restored(vmid):
     except :
         return {"error": "Impossible to check the restore status of the vm"}, 500
     
+
+
+
+def get_expired_cotisation_users():
+    headers = connexion.request.headers
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
+        return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
+
+    admin = False
+
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+                
+    
+    if admin:
+        return proxmox.get_users_with_freeze_state(3) # 3 is the freeze state for expired cotisation after 2 months
+    else :
+        return {"error": "You are not allowed to check this account"}, 403
 
 
 
