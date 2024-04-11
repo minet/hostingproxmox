@@ -38,7 +38,7 @@ def test_valid_account_state(monkeypatch, init_user_database, client):
         assert dict['freezeState'] == '0'
 
 
-def test_unknown_account_state(mocker, init_user_database, client):
+def test_unknown_account_state(monkeypatch, init_user_database, client):
     """Test case for account_state
 
     Even if the user is not known, the result must be 200 and 0 because its a new member, wihtout vm.

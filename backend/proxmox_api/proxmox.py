@@ -715,6 +715,7 @@ def get_vm_last_backup_date(vmid: int, node):
     return max(backup_dates)
 
 
+
 # Select the next available ip address and set up in the proxmox firewall
 def set_new_vm_ip(vmid, node):
     if configuration.ENVIRONMENT == "DEV":
