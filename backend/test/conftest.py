@@ -82,7 +82,7 @@ def init_vm_database():
             {"id" : 3, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
             {"id" : 4, "userId" : "user-2", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
             {"id" : 5, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":False, "status":"created"},
-            {"id" : 6, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":True, "status":"created"}
+            {"id" : 6, "userId" : "user-1", "type":"bare", "ip" : None, "mac" : None,"needToBeRestored" : False, "unsecure":True, "status":"created"},
         ]
 
 
