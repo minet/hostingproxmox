@@ -38,6 +38,7 @@ def test_valid_account_state(monkeypatch, init_user_database, client):
         assert dict['freezeState'] == '0'
 
 
+
 def test_unknown_account_state(monkeypatch, init_user_database, client):
     """Test case for account_state
 
