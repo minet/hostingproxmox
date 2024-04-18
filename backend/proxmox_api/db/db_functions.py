@@ -262,21 +262,20 @@ def get_entry_ip(id):
     #   return {"ip": ip}, 201
 
 
-def get_entry_host(id):
-    host = DomainName.query.filter_by(id=id).first().entry
-    if host is None:
+def get_entry_host_and_validation(id):
+    domainName = DomainName.query.filter_by(id=id).first()
+
+    if domainName is None:
         return {"dns": "not found"}, 404
     else:
-        return {"host": host}, 201
+        return {"host": domainName.entry, "validated" : domainName.validated}, 201
 
 
 def get_entry_userid(dnsid):
     userid = DomainName.query.filter_by(id=dnsid).first().userId
     return userid
 
-def get_entry_validated(dnsid):
-    validated = DomainName.query.filter_by(id=dnsid).first().validated
-    return validated
+
 
 
 # Update all the dns records owner for an ip

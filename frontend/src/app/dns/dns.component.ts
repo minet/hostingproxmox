@@ -230,22 +230,28 @@ export class DnsComponent implements OnInit, OnDestroy {
 
 
     accept_entry(userid, dnsentry, dnsip): void {
-
-        if(this.user.admin) {
-            this.http.post(this.authService.SERVER_URL + '/dns/' + userid + "/" + dnsentry + "/" + dnsip, {observe: 'response'})
-                .subscribe(
-                    () => {
-                        window.location.reload();
-                        console.log("ok");
-                    },
-                    error => {
-                        console.log("error");
-                        this.errorcode = error.status;
-                        this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
-                    });
-
-        }
+    if(this.user.admin) {
+        this.http.post(this.authService.SERVER_URL + '/dns/validation', 
+            {
+                userid: userid,
+                dnsentry: dnsentry,
+                dnsip: dnsip
+            }, 
+            {observe: 'response'}
+        )
+        .subscribe(
+            () => {
+                window.location.reload();
+                console.log("ok");
+            },
+            error => {
+                console.log("error");
+                this.errorcode = error.status;
+                this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+            }
+        );
     }
+}
 
 
     delete_entry(id): void {

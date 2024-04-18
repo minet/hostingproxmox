@@ -143,8 +143,8 @@
         <td *ngIf="user.admin">{{dns.user}}</td>
         <td><a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a></td>
         <td>{{dns.ip}}</td>
-        <td><button class="btn-sm btn-success" (click)="accept_entry(dns.user, dns.entry, dns.ip)">{{'dns.item.accept' | translate}}</button></td>
-        <td><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.refuse' | translate}}</button></td>
+        <td *ngIf="user.admin"><button class="btn-sm btn-success" (click)="accept_entry(dns.user, dns.entry, dns.ip)">{{'dns.item.accept' | translate}}</button></td>
+        <td *ngIf="user.admin"><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.refuse' | translate}}</button></td>
         <td *ngIf="!user.admin">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td *ngIf="!user.admin"><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button></td>
       </tr>

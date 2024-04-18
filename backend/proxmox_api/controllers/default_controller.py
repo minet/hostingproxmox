@@ -18,6 +18,50 @@ from proxmox_api.proxmox import is_admin
 from proxmox_api.db import db_models
 
 
+def validate_dns():  # noqa: E501
+    """validate dns entry
+
+    # noqa: E501
+
+    :rtype: None
+    """
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    status_code, cas = util.check_cas_token(headers)
+
+    if status_code != 200:
+        return {"error": "You seem to be not connected."}, 403
+    user_id = cas['sub']
+    admin = False
+
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+
+    if admin :
+        freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
+    else :
+        body,statusCode = proxmox.get_freeze_state(user_id)
+        if statusCode != 200:
+            return body, statusCode
+        try:
+            freezeAccountState = int(body["freezeState"])
+        except Exception as e:
+            return {"error": "error while getting freeze state"}, 500
+    
+    if freezeAccountState != 0 and not admin:
+        return {"error": "Your cotisation has expired"}, 403
+
+    if connexion.request.is_json:
+        update_body = connexion.request.get_json()  # noqa: E50
+
+    try:
+        userid = update_body['userid']
+    except:
+        return {"error": "Bad userid"}, 400
+    
+
+    return proxmox.accept_user_dns(update_body['userid'], update_body['dnsentry'], update_body['dnsip']) 
 
 def create_dns(body=None):  # noqa: E501
     """create dns entry
@@ -69,7 +113,6 @@ def create_dns(body=None):  # noqa: E501
     
     isOk = proxmox.check_dns_ip_entry(user_id, body.ip)
     existingEntry = proxmox.isDnsEntryExistingInDatabase(body.entry)
-    print("existingEntry : " , existingEntry)
     if isOk is None :
         return {"error": "An error occured while checking your ip addresses. Please try again."}, 500
     elif not isOk and not admin:
@@ -606,11 +649,7 @@ def renew_ip():
 
     return proxmox.renew_ip(vmid)
 
-def validate_dns(userid, dnsentry, dnsip):  # noqa: E501
-    """validate dns entry
 
-            """
-    return proxmox.accept_user_dns(userid, dnsentry, dnsip)
 
 def delete_dns_id(dnsid):  # noqa: E501
     print("delete dns entry")
@@ -720,13 +759,14 @@ def get_dns_id(dnsid):  # noqa: E501
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
+    db_result = dbfct.get_entry_host_and_validation(dnsid)
+    entry = db_result[0]['host']
+    validated = db_result[0]['validated']
 
-    entry = dbfct.get_entry_host(dnsid)
     ip = dbfct.get_entry_ip(dnsid)
     owner = dbfct.get_entry_userid(dnsid)
-    validated = dbfct.get_entry_validated(dnsid)
-    if entry[1] == 201 and ip[1] == 201:
-        return {"ip": ip[0]['ip'], "entry": entry[0]['host'], "user": owner if admin else "", "validated": validated}, 201
+    if db_result[1] == 201 and ip[1] == 201:
+        return {"ip": ip[0]['ip'], "entry": entry, "user": owner if admin else "", "validated": validated}, 201
     elif entry[1] == 404 or ip[1] == 404:
         return {"status": "dns entry not found"}, 404
     else:

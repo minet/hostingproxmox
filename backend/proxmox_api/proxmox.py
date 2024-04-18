@@ -61,18 +61,29 @@ def get_user_dns(user_id = ""):
         return {"dns": "error occured"}, 500
 
 
+
+
 def del_user_dns(dnsid):
     print("proxmox")
-    entry = database.get_entry_host(dnsid)[0]['host']
-    if entry is None:
+    db_result = database.get_entry_host_and_validation(dnsid)
+    if db_result is None:
         return {"dns": "not found"}, 404
-    ddns_rep = ddns.delete_dns_record(entry)
-    print("ddns_rep = ", ddns_rep)
-    if ddns_rep[1] == 201:
-        print("here")
+    entry = db_result[0]['host']
+    if entry is None:
+        return {"dns.entry": "not found"}, 404
+    validated = db_result[0]['validated']
+    if validated is None:
+        return {"dns.validated": "not found"}, 404
+    if validated:
+        ddns_rep = ddns.delete_dns_record(entry)
+        if ddns_rep[1] == 201:
+            database.del_dns_entry(dnsid)
+            logging.info("DNS entry deleted: " + str(dnsid))
+        return ddns_rep
+    else:
         database.del_dns_entry(dnsid)
         logging.info("DNS entry deleted: " + str(dnsid))
-    return ddns_rep
+        return {"dns": "entry deleted"}, 201
 
 
 def load_balance_server():
