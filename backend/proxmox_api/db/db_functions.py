@@ -213,6 +213,12 @@ def get_dns_entry_from_ip(ip):
             list.append(dn.id)
     return list
 
+def isDnsEntryExisting(entry):
+    if DomainName.query.filter_by(entry=entry).first() is None:
+        return False
+    else:
+        return True
+
 
 def add_dns_entry(user, entry, ip, validated):
     new_entry = DomainName(userId=user, entry=entry, ip=ip, validated=validated)

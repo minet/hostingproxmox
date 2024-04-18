@@ -68,6 +68,8 @@ def create_dns(body=None):  # noqa: E501
         return {"error" : "This DNS entry is forbidden. This incident will be reported."}, 403
     
     isOk = proxmox.check_dns_ip_entry(user_id, body.ip)
+    existingEntry = proxmox.isDnsEntryExistingInDatabase(body.entry)
+    print("existingEntry : " , existingEntry)
     if isOk is None :
         return {"error": "An error occured while checking your ip addresses. Please try again."}, 500
     elif not isOk and not admin:
@@ -78,6 +80,8 @@ def create_dns(body=None):  # noqa: E501
             return {"error": "This ip address isn't associated to one vms."}, 400
         print(vmWithIp)
         user_id = vmWithIp.userId
+    if existingEntry:
+        return {"error": "This entry already exists in database"}, 400
     return proxmox.add_user_dns(user_id, body.entry, body.ip)
 
 

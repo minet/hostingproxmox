@@ -46,6 +46,8 @@ def accept_user_dns(user_id, entry, ip):
         logging.info("DNS entry validated: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
     return rep_msg, rep_code
 
+def isDnsEntryExistingInDatabase(entry):
+    return database.isDnsEntryExisting(entry)
 
 
 def get_user_dns(user_id = ""):
