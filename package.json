@@ -1,5 +1,8 @@
 {
   "devDependencies": {
-    "@angular/cli": "^17.3.5"
+    "@angular/cli": "^14.2.13"
+  },
+  "dependencies": {
+    "@angular-eslint/schematics": "^14.4.0"
   }
 }
