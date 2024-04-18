@@ -81,6 +81,8 @@ def create_dns(body=None):  # noqa: E501
     return proxmox.add_user_dns(user_id, body.entry, body.ip)
 
 
+    
+
 def create_vm(body=None):  # noqa: E501
     """create vm
 
@@ -359,6 +361,7 @@ def get_dns():  # noqa: E501
 
     return proxmox.get_user_dns(user_id)
 
+
 # /vms
 def get_vm(search= ""):  # noqa: E501
     """get all user vms
@@ -599,9 +602,14 @@ def renew_ip():
 
     return proxmox.renew_ip(vmid)
 
+def validate_dns(userid, dnsentry, dnsip):  # noqa: E501
+    """validate dns entry
 
+            """
+    return proxmox.accept_user_dns(userid, dnsentry, dnsip)
 
 def delete_dns_id(dnsid):  # noqa: E501
+    print("delete dns entry")
     """delete dns entry by id
 
      # noqa: E501
@@ -712,8 +720,9 @@ def get_dns_id(dnsid):  # noqa: E501
     entry = dbfct.get_entry_host(dnsid)
     ip = dbfct.get_entry_ip(dnsid)
     owner = dbfct.get_entry_userid(dnsid)
+    validated = dbfct.get_entry_validated(dnsid)
     if entry[1] == 201 and ip[1] == 201:
-        return {"ip": ip[0]['ip'], "entry": entry[0]['host'], "user": owner if admin else ""}, 201
+        return {"ip": ip[0]['ip'], "entry": entry[0]['host'], "user": owner if admin else "", "validated": validated}, 201
     elif entry[1] == 404 or ip[1] == 404:
         return {"status": "dns entry not found"}, 404
     else:

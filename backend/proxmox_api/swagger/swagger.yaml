@@ -660,6 +660,48 @@ paths:
         "404":
           description: dns entry not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /dns/{userid}/{dnsentry}/{dnsip}:
+    post:
+        summary: validate a dns entry by id
+        operationId: validate_dns
+        tags:
+            - DNS
+        parameters:
+        - name: userid
+          in: path
+          description: id of the dns entry to validate
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "lmartin"
+        - name: dnsentry
+          in: path
+          description: dns entry to validate
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "host"
+        - name: dnsip
+          in: path
+          description: ip to validate
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            example: "157.159.195.X"
+        responses:
+          "201":
+            description: validated dns entry by id
+          "400":
+            description: "invalid input, object invalid"
+          "404":
+            description: dns entry not found
+        x-openapi-router-controller: proxmox_api.controllers.default_controller 
 components:
   schemas:
     VmIdItem:
@@ -676,14 +718,20 @@ components:
     DnsEntryItem:
       required:
       - entry
+      - validated
       type: object
       properties:
         entry:
           type: string
           description: dns entry
           example: host
+        validated:
+          type: boolean
+          description: if the dns entry is validated
+          example: true
       example:
         entry: host
+        validated: true
     DnsItem:
       required:
       - entry
@@ -698,6 +746,10 @@ components:
           type: string
           description: entry to this ip
           example: 192.0.0.1
+        validated:
+          type: boolean
+          description: if the dns entry is validated
+          example: false
       example:
         entry: host
         ip: 192.0.0.1

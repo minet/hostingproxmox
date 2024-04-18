@@ -210,6 +210,107 @@ class DefaultApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
+    def validate_dns(self, userid, dnsentry, dnsip, **kwargs):  # noqa: E501
+        """validate a dns entry  # noqa: E501
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.validate_dns(userid, dnsentry, dnsip, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool
+        :param str userid: user id (required)
+        :param str dnsentry: dns entry (required)
+        :param str dnsip: ip address (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        kwargs['_return_http_data_only'] = True
+        if kwargs.get('async_req'):
+            return self.validate_dns_with_http_info(userid, dnsentry, dnsip, **kwargs)
+        else:
+            (data) = self.validate_dns_with_http_info(userid, dnsentry, dnsip, **kwargs)
+            return data
+    
+    def validate_dns_with_http_info(self, userid, dnsentry, dnsip, **kwargs):  # noqa: E501
+        """validate a dns entry  # noqa: E501
+
+        :param async_req bool
+        :param str userid: user id (required)
+        :param str dnsentry: dns entry (required)
+        :param str dnsip: ip address (required)
+        :return: None
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+            
+        all_params = ['userid', 'dnsentry', 'dnsip']
+        all_params.append('async_req')
+        all_params.append('_return_http_data_only')
+        all_params.append('_preload_content')
+        all_params.append('_request_timeout')
+
+        params = locals()
+        for key, val in six.iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method validate_dns" % key
+                )
+            params[key] = val
+        del params['kwargs']
+        # verify the required parameter 'userid' is set
+        if ('userid' not in params or
+                params['userid'] is None):
+            raise ValueError("Missing the required parameter `userid` when calling `validate_dns`")
+        # verify the required parameter 'dnsentry' is set
+        if ('dnsentry' not in params or
+                params['dnsentry'] is None):
+            raise ValueError("Missing the required parameter `dnsentry` when calling `validate_dns`")
+        # verify the required parameter 'dnsip' is set
+        if ('dnsip' not in params or
+                params['dnsip'] is None):
+            raise ValueError("Missing the required parameter `dnsip` when calling `validate_dns`")
+        
+        collection_formats = {}
+
+        path_params = {}
+        if 'userid' in params:
+            path_params['userid'] = params['userid']
+        if 'dnsentry' in params:
+            path_params['dnsentry'] = params['dnsentry']
+        if 'dnsip' in params:
+            path_params['dnsip'] = params['dnsip']
+        
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # Authentication setting
+        auth_settings = ['OAuth2']
+
+        return self.api_client.call_api(
+            '/dns/validate/{userid}/{dnsentry}/{dnsip}', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type=None,
+            auth_settings=auth_settings,
+            async_req=params.get('async_req'),
+            _return_http_data_only=params.get('_return_http_data_only'),
+            _preload_content=params.get('_preload_content', True),
+            _request_timeout=params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def delete_dns_id(self, dnsid, **kwargs):  # noqa: E501
         """delete dns entry by id  # noqa: E501
 
@@ -561,6 +662,8 @@ class DefaultApi(object):
             _preload_content=params.get('_preload_content', True),
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
+
+    
 
     def get_dns_id(self, dnsid, **kwargs):  # noqa: E501
         """get a dns entry by id  # noqa: E501

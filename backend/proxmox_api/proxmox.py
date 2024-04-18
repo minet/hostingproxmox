@@ -32,14 +32,20 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(nam
 
 
 def add_user_dns(user_id, entry, ip):
-    
-    
+    database.add_dns_entry(user_id, entry, ip, validated=False)
+    logging.info("DNS entry added: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
+    return {"dns": "added"}, 201
+
+
+
+def accept_user_dns(user_id, entry, ip):
 
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
-        database.add_dns_entry(user_id, entry, ip)
-        logging.info("DNS entry added: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
+        database.validate_dns_entry(user_id, entry, ip)
+        logging.info("DNS entry validated: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
     return rep_msg, rep_code
+
 
 
 def get_user_dns(user_id = ""):
@@ -54,11 +60,14 @@ def get_user_dns(user_id = ""):
 
 
 def del_user_dns(dnsid):
+    print("proxmox")
     entry = database.get_entry_host(dnsid)[0]['host']
     if entry is None:
         return {"dns": "not found"}, 404
     ddns_rep = ddns.delete_dns_record(entry)
+    print("ddns_rep = ", ddns_rep)
     if ddns_rep[1] == 201:
+        print("here")
         database.del_dns_entry(dnsid)
         logging.info("DNS entry deleted: " + str(dnsid))
     return ddns_rep
