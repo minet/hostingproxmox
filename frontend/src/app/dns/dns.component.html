@@ -104,29 +104,91 @@
   </div>
 </div>
 
-  <ng-container *ngIf="user.dns.length == 0; else dnsEntries">
+<div class="mt-5"></div>
+
+  <ng-container *ngIf="getPendingDnsCount() == 0 && getValidatedDnsCount() == 0; else (noPendingEntriesText)">
   <hr>
-  <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noEntries.user' | translate}}</h4>
   <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noEntries.admin' | translate}}</h4>
+  <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noEntries.user' | translate}}</h4>
   <hr>
   </ng-container>
-  <ng-template #dnsEntries>
-    <table class="table mt-5">
+
+
+  <ng-template #noPendingEntriesText>
+  <ng-container *ngIf="getPendingDnsCount() == 0; else (dnsPending)">
+  <hr>
+  <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noPendingEntries.admin' | translate}}</h4>
+  <hr>
+  </ng-container>
+  </ng-template>
+
+  <ng-template #dnsPending>
+    <h2 class="mt-5" *ngIf="!user.admin">{{'dns.pendingEntries.user' | translate}}</h2>
+    <h2 class="mt-5" *ngIf="user.admin">{{'dns.pendingEntries.admin' | translate}}</h2>
+    <table class="table mt-3">
+      <thead>
+      <tr>  
+        <th scope="col" *ngIf="user.admin">{{'dns.item.user' | translate}}</th>
+        <th scope="col">{{'dns.item.host' | translate}}</th>
+        <th scope="col">{{'dns.item.destination' | translate}}</th>
+        <th scope="col" *ngIf="user.admin">{{'dns.item.accept' | translate}}</th>
+        <th scope="col" *ngIf="user.admin">{{'dns.item.refuse' | translate}}</th>
+        <th scope="col" *ngIf="!user.admin"></th> 
+        <th scope="col" *ngIf="!user.admin">{{'dns.item.manage' | translate}}</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let dns of user.dns">
+      <tr *ngIf="!dns.validated">
+        <td *ngIf="user.admin">{{dns.user}}</td>
+        <td><a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a></td>
+        <td>{{dns.ip}}</td>
+        <td *ngIf="user.admin"><button class="btn-sm btn-success" (click)="accept_entry(dns.user, dns.entry, dns.ip)">{{'dns.item.accept' | translate}}</button></td>
+        <td *ngIf="user.admin"><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.refuse' | translate}}</button></td>
+        <td *ngIf="!user.admin">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        <td *ngIf="!user.admin"><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button></td>
+      </tr>
+      </ng-container>
+      </tbody>
+    </table>
+  </ng-template>
+
+
+  <ng-container *ngIf="getValidatedDnsCount() == 0 && getPendingDnsCount() == 0; else noValidatedEntriesText">
+  </ng-container>
+
+  <ng-template #noValidatedEntriesText>
+  <ng-container *ngIf="getValidatedDnsCount() == 0; else (dnsValidated)"> 
+  <hr>
+  <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noValidatedEntries.user' | translate}}</h4>
+  <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noValidatedEntries.admin' | translate}}</h4>
+  <hr>
+  </ng-container>
+  </ng-template>
+
+  <ng-template #dnsValidated>
+    <h2 class="mt-5" *ngIf="!user.admin">{{'dns.validatedEntries.user' | translate}}</h2>
+    <h2 class="mt-5" *ngIf="user.admin">{{'dns.validatedEntries.admin' | translate}}</h2>
+    <table class="table mt-3">
       <thead>
       <tr>
         <th scope="col" *ngIf="user.admin">{{'dns.item.user' | translate}}</th>
         <th scope="col">{{'dns.item.host' | translate}}</th>
         <th scope="col">{{'dns.item.destination' | translate}}</th>
+        <th scope="col"></th> 
         <th scope="col">{{'dns.item.manage' | translate}}</th>
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let dns of user.dns">
+      <ng-container *ngFor="let dns of user.dns">
+      <tr *ngIf="dns.validated">
         <td *ngIf="user.admin">{{dns.user}}</td>
         <td><a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a></td>
         <td>{{dns.ip}}</td>
+        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button></td>
       </tr>
+      </ng-container>
       </tbody>
     </table>
   </ng-template>

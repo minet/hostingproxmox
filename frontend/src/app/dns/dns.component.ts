@@ -83,6 +83,52 @@ export class DnsComponent implements OnInit, OnDestroy {
 
     }
 
+    get_pending_dns_list(): void {
+        let dnsList: Array<string>;
+
+        this.http.get(this.authService.SERVER_URL + '/dns/pending', {observe: 'response'})
+            .subscribe(rep => {
+                    dnsList = rep.body as Array<string>;
+                    console.log(dnsList.length);
+                    if (dnsList.length === 0) {
+                        this.loading = false;
+                    }
+                    for (let i = 0; i < dnsList.length; i++) {
+                        const id = dnsList[i];
+                        const last = (i === dnsList.length - 1);
+                        this.get_dns(id, last);
+                    }
+                },
+                error => {
+                    this.errorcode = error.status;
+                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+                });
+
+    }
+
+    get_validated_dns_list(): void {
+        let dnsList: Array<string>;
+
+        this.http.get(this.authService.SERVER_URL + '/dns/validated', {observe: 'response'})
+            .subscribe(rep => {
+                    dnsList = rep.body as Array<string>;
+                    console.log(dnsList.length);
+                    if (dnsList.length === 0) {
+                        this.loading = false;
+                    }
+                    for (let i = 0; i < dnsList.length; i++) {
+                        const id = dnsList[i];
+                        const last = (i === dnsList.length - 1);
+                        this.get_dns(id, last);
+                    }
+                },
+                error => {
+                    this.errorcode = error.status;
+                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+                });
+
+    }
+
     get_ips_list(): void {
         this.http.get(this.authService.SERVER_URL + '/ips', {observe: 'response'})
             .subscribe(rep => {
@@ -106,6 +152,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                     dns.entry = rep.body['entry'];
                     dns.ip = rep.body['ip'];
                     dns.user = rep.body['user'];
+                    dns.validated = rep.body['validated'];
                     if (last) {
                         this.loading = false;
                     }
@@ -117,6 +164,15 @@ export class DnsComponent implements OnInit, OnDestroy {
 
         this.intervals.add(newTimer);
     }
+
+    getPendingDnsCount(): number {
+        return this.user.dns.filter(dns => !dns.validated).length;
+      }
+
+
+    getValidatedDnsCount(): number {
+        return this.user.dns.filter(dns => dns.validated).length;
+      }
 
 
     create_dns(dns: Dns): void {
@@ -171,6 +227,32 @@ export class DnsComponent implements OnInit, OnDestroy {
         const authorized_ip = /^157\.159\.195\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-5][0-5])$/; // At least 157.159.40.xxx > 10 < 255. The backend then checks if the user own the ip
         return authorized_ip.test(ip.trim())
     }
+
+
+    accept_entry(userid, dnsentry, dnsip): void {
+    if(this.user.admin) {
+        this.http.post(this.authService.SERVER_URL + '/dns/validation', 
+            {
+                userid: userid,
+                dnsentry: dnsentry,
+                dnsip: dnsip
+            }, 
+            {observe: 'response'}
+        )
+        .subscribe(
+            () => {
+                window.location.reload();
+                console.log("ok");
+            },
+            error => {
+                console.log("error");
+                this.errorcode = error.status;
+                this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+            }
+        );
+    }
+}
+
 
     delete_entry(id): void {
         if(this.user.chartevalidated || this.user.admin) {

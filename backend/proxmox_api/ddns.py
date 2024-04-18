@@ -42,6 +42,6 @@ def delete_dns_record(entry):
     if response.rcode() == 0:
         return {"dns": "entry deleted"}, 201
     if response.rcode() == 3:
-        return {"dns": "entry does not exist"}, 405
+        return {"dns": "entry does not exist"}, 201 #C'est très crade, mais c'est dans le cas ou l'entrée n'a pas été validée, mais l'appel à ddns se fais quand même.
     logging.error("Problem in get_vm_status(" + str(vmid) + ") when getting VM status: " + str(e))
     return {"dns": "error occured"}, 500

@@ -213,10 +213,21 @@ def get_dns_entry_from_ip(ip):
             list.append(dn.id)
     return list
 
+def isDnsEntryExisting(entry):
+    if DomainName.query.filter_by(entry=entry).first() is None:
+        return False
+    else:
+        return True
 
-def add_dns_entry(user, entry, ip):
-    new_entry = DomainName(userId=user, entry=entry, ip=ip)
+
+def add_dns_entry(user, entry, ip, validated):
+    new_entry = DomainName(userId=user, entry=entry, ip=ip, validated=validated)
     db.session.add(new_entry)
+    db.session.commit()
+
+def validate_dns_entry(user, entry, ip):
+    dns = DomainName.query.filter_by(userId=user, entry=entry, ip=ip).first()
+    dns.validated = True
     db.session.commit()
 
 def del_dns_entry(dnsid):
@@ -241,7 +252,6 @@ def get_dns_entries(user_id=""):  # user_id vide quand un admin se connecte
                 list.append(j.id)
         return list
 
-
 def get_entry_ip(id):
     ip = DomainName.query.filter_by(id=id).first().ip
     return {"ip": ip}, 201
@@ -252,17 +262,20 @@ def get_entry_ip(id):
     #   return {"ip": ip}, 201
 
 
-def get_entry_host(id):
-    host = DomainName.query.filter_by(id=id).first().entry
-    if host is None:
+def get_entry_host_and_validation(id):
+    domainName = DomainName.query.filter_by(id=id).first()
+
+    if domainName is None:
         return {"dns": "not found"}, 404
     else:
-        return {"host": host}, 201
+        return {"host": domainName.entry, "validated" : domainName.validated}, 201
 
 
 def get_entry_userid(dnsid):
     userid = DomainName.query.filter_by(id=dnsid).first().userId
     return userid
+
+
 
 
 # Update all the dns records owner for an ip
