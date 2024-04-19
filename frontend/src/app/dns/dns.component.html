@@ -34,7 +34,7 @@
     </div>
   </div>
   <ng-template #dnsPannel>
-    <div class="dns container">
+    <div *ngIf="!user.admin" class="dns container">
       <div class="text-center">
         <button class="btn btn-primary" (click)="showForm = !showForm">{{'dns.addEntry' | translate}}</button>
       </div>
@@ -107,9 +107,9 @@
         </div>
       </div>
     </div>
-
+    
     <div class="mt-5"></div>
-    <div *ngIf="dnsService.isUpdatingVms <= 0 && (dns$ | async).length == 0; else dnsEntries">
+    <div *ngIf="dnsService.isUpdatingDns <= 0 && (dns$ | async).length == 0; else dnsEntries">
       <hr>
         <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noEntries.user' | translate}}</h4>
         <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noEntries.admin' | translate}}</h4>
@@ -118,7 +118,7 @@
 
     <ng-template #dnsEntries>
 
-      <div *ngIf="dnsService.isUpdatingVms <= 0 && dnsService.PendingDNSCount == 0; else dnsPending">
+      <div *ngIf="dnsService.isUpdatingDns <= 0 && dnsService.PendingDNSCount == 0; else dnsPending">
         <hr>
           <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noPendingEntries.admin' | translate}}</h4>
         <hr>
@@ -173,7 +173,7 @@
         </table>
       </ng-template>
       
-      <div *ngIf="dnsService.isUpdatingVms <= 0 && dnsService.ActiveDNSCount == 0; else dnsValidated">
+      <div *ngIf="dnsService.isUpdatingDns <= 0 && dnsService.ActiveDNSCount == 0; else dnsValidated">
         <hr>
         <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noValidatedEntries.user' | translate}}</h4>
         <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noValidatedEntries.admin' | translate}}</h4>

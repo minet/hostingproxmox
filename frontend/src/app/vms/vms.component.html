@@ -85,7 +85,6 @@
     <hr>
     <div>
         <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf=" (vms$ | async).length !=0 "><span>{{ "vms.refresh" | translate}}</span></div>
-        
         <app-vm-box class="row" *ngFor="let vm of vms$ | async" [vm]="vm" [user]="user"></app-vm-box>
         <div #ssh>
             <hr *ngIf="showSsh">
