@@ -8,6 +8,7 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { FooterComponent } from './footer/footer.component';
 import { AuthService } from './common/services/auth.service';
 import { UserService } from './common/services/user.service';
+import { VmsService } from './common/services/vms.service';
 import { FormsModule } from '@angular/forms';
 import { User } from './models/user';
 import { SlugifyPipe } from './pipes/slugify.pipe';
@@ -25,6 +26,8 @@ import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import { DeletevmComponent } from './deletevm/deletevm.component';
+import { VmBoxComponent } from './vm-box/vm-box.component';
+import { DnsService } from './common/services/dns.service';
 
 export function storageFactory() : OAuthStorage {
   return localStorage;
@@ -49,6 +52,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     ManualComponent,
     HistoryComponent,
     DeletevmComponent,
+    VmBoxComponent,
   ],
   imports: [
     BrowserModule,
@@ -73,7 +77,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
       }
     }),
   ],
-  providers: [AuthService, UserService, User, SlugifyPipe, { provide: OAuthStorage, useFactory: storageFactory }],
+  providers: [AuthService, UserService, VmsService, DnsService, User, SlugifyPipe, { provide: OAuthStorage, useFactory: storageFactory }],
   bootstrap: [AppComponent]
 })
 export class AppModule {

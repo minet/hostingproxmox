@@ -1,13 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
 import {User} from '../models/user';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {Utils} from '../common/utils';
 import {Dns} from '../models/dns';
-import {timer, Subscription} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
+import {Subscription, Observable, interval, Subject} from 'rxjs';
+import { DnsService } from '../common/services/dns.service';
+import { switchMap, takeUntil } from 'rxjs/operators';
 
 
 @Component({
@@ -16,9 +16,11 @@ import {mergeMap} from 'rxjs/operators';
   styleUrls: ['./dns.component.css']
 })
 export class DnsComponent implements OnInit, OnDestroy {
+    dns$!: Observable<Dns[]>; // Observable to get the list of DNS
+    updateDnsSubscription: Subscription;
   loading = true;
   newDns = new Dns();
-  ipList = Array<string>();
+  ipList : string[]; // Observable to get the list of IPs
   intervals = new Set<Subscription>();
   showForm = false;
   errorcode = 201;
@@ -28,154 +30,76 @@ export class DnsComponent implements OnInit, OnDestroy {
   success = false;
   page = 1;
   pageSize = 10;
-  constructor(private activatedRoute: ActivatedRoute,
-              private http: HttpClient,
-              private router: Router,
+  private destroy$ = new Subject<void>();
+
+  constructor(private http: HttpClient,
               public user: User,
               private userService: UserService,
               private authService: AuthService,
+                public dnsService: DnsService,
               private utils: Utils) {
   }
 
 
     ngOnInit(): void {
-        setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
-            if(this.user.admin || (this.user.chartevalidated && this.user.freezeState < 3)) {
-                this.get_dns_list();
-                this.user.dns = Array<Dns>();
-                this.get_ips_list();
-                console.log("ips :", this.user.ips);
+        //on souscrit aux valeurs de l'utilisateur au cours du temps
+        this.userService.getUserObservable().subscribe((user) => {
+            //On attend d'avoir un utilisateur valide, en particulier le freezeState qui prend du temps à être récupéré
+            if(user && user.freezeState>=0) {
+                this.user = user;
+                if (this.user.admin || (this.user.chartevalidated && this.user.freezeState < 3)) {
+
+                    //On souscrit à la liste des DNS chargée au cours du temps
+                    this.dns$ = this.dnsService.getDnsList();
+
+                    //On update la liste des ids entrées DNS dans la base de données
+                    this.dnsService.updateDnsIds();
+
+                    //On souscrit aux infos des entrées DNS
+                    this.updateDnsSubscription = interval(10000).pipe(
+                            switchMap(() => this.dnsService.updateAllDns())
+                        ).subscribe((response) => {
+                            this.errorcode = response;
+                        });
+                    this.getIpsList();
+                    
+                }
             }
-        }, 1000);
+        });
         this.newDns.entry =  "";
 
     }
 
     ngOnDestroy(): void {
-        for (const id of this.intervals) {
-            id.unsubscribe();
-
-
+        //On se désabonne pour éviter les fuites de mémoire
+        if(this.updateDnsSubscription){
+            this.updateDnsSubscription.unsubscribe();
         }
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
 
-    get_dns_list(): void {
-        let dnsList: Array<string>;
+    
 
-        this.http.get(this.authService.SERVER_URL + '/dns', {observe: 'response'})
-            .subscribe(rep => {
-                    dnsList = rep.body as Array<string>;
-                    console.log(dnsList.length);
-                    if (dnsList.length === 0) {
-                        this.loading = false;
-                    }
-                    for (let i = 0; i < dnsList.length; i++) {
-                        const id = dnsList[i];
-                        const last = (i === dnsList.length - 1);
-                        this.get_dns(id, last);
-                    }
-                },
-                error => {
-                    this.errorcode = error.status;
-                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
-                });
-
-    }
-
-    get_pending_dns_list(): void {
-        let dnsList: Array<string>;
-
-        this.http.get(this.authService.SERVER_URL + '/dns/pending', {observe: 'response'})
-            .subscribe(rep => {
-                    dnsList = rep.body as Array<string>;
-                    console.log(dnsList.length);
-                    if (dnsList.length === 0) {
-                        this.loading = false;
-                    }
-                    for (let i = 0; i < dnsList.length; i++) {
-                        const id = dnsList[i];
-                        const last = (i === dnsList.length - 1);
-                        this.get_dns(id, last);
-                    }
-                },
-                error => {
-                    this.errorcode = error.status;
-                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
-                });
-
-    }
-
-    get_validated_dns_list(): void {
-        let dnsList: Array<string>;
-
-        this.http.get(this.authService.SERVER_URL + '/dns/validated', {observe: 'response'})
-            .subscribe(rep => {
-                    dnsList = rep.body as Array<string>;
-                    console.log(dnsList.length);
-                    if (dnsList.length === 0) {
-                        this.loading = false;
-                    }
-                    for (let i = 0; i < dnsList.length; i++) {
-                        const id = dnsList[i];
-                        const last = (i === dnsList.length - 1);
-                        this.get_dns(id, last);
-                    }
-                },
-                error => {
-                    this.errorcode = error.status;
-                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
-                });
-
-    }
-
-    get_ips_list(): void {
-        this.http.get(this.authService.SERVER_URL + '/ips', {observe: 'response'})
-            .subscribe(rep => {
-                    this.ipList =rep.body["ip_list"];
-                    console.log(this.ipList)
-                },
-                error => {
-                    this.errorcode = error.status;
-                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
-                });
-
-    }
-
-    get_dns(id: string, last: boolean): void {
-        const dns = new Dns();
-        dns.id = id;
-        this.user.dns.push(dns);
-        const newTimer = timer(0, 5000).pipe(
-            mergeMap(() => this.http.get(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})))
-            .subscribe(rep => {
-                    dns.entry = rep.body['entry'];
-                    dns.ip = rep.body['ip'];
-                    dns.user = rep.body['user'];
-                    dns.validated = rep.body['validated'];
-                    if (last) {
-                        this.loading = false;
-                    }
-                },
-                error => {
-                    this.errorcode = error.status;
-                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
-                });
-
-        this.intervals.add(newTimer);
-    }
-
-    getPendingDnsCount(): number {
-        return this.user.dns.filter(dns => !dns.validated).length;
+    getIpsList(): void {
+        this.http.get(this.authService.SERVER_URL + '/ips', {observe: 'response'}).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe(rep => {
+            this.ipList = rep.body["ip_list"];
+            console.log(this.ipList)
+          },
+          error => {
+            this.errorcode = error.status;
+            this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+          });
       }
 
+    
 
-    getValidatedDnsCount(): number {
-        return this.user.dns.filter(dns => dns.validated).length;
-      }
-
-
+    
     create_dns(dns: Dns): void {
+        console.log(dns)
         this.errorMessage = ""
         if (dns.ip == null){
             this.errorcode = 400
@@ -193,6 +117,7 @@ export class DnsComponent implements OnInit, OnDestroy {
             } else {
                 let data = {};
                 data = {entry: dns.entry, ip: dns.ip};
+                console.log(data)
                 this.http.post(this.authService.SERVER_URL + '/dns', data, {observe: 'response'}).subscribe(
                     (rep) => {
                         if (rep.status === 201) {
@@ -215,7 +140,7 @@ export class DnsComponent implements OnInit, OnDestroy {
 
     // Check if the DNS entry is correct and respect minet rules
     // TO DO : make a manual validation
-    check_dns_entry(entry):boolean{
+    check_dns_entry(entry: string):boolean{
         const forbidden_entries = ["armes", "arme", "fuck", "porn", "porno", "weapon", "weapons", "pornographie", "amazon", "sex", "sexe", "attack", "hack", "attaque", "hacker", "hacking", "pornhub", "xxx", "store", "hosting", "adh6"];
         const authorized_entry = /^[a-zA-Z0-9-._]*$/;
         return authorized_entry.test(entry) && !(entry in forbidden_entries);
@@ -223,38 +148,37 @@ export class DnsComponent implements OnInit, OnDestroy {
 
     // Check if the ip is for hosting
     // TO DO : make a local check if the user owns the ip
-    check_dns_ip(ip):boolean{
+    check_dns_ip(ip: string):boolean{
         const authorized_ip = /^157\.159\.195\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-5][0-5])$/; // At least 157.159.40.xxx > 10 < 255. The backend then checks if the user own the ip
         return authorized_ip.test(ip.trim())
     }
 
-
-    accept_entry(userid, dnsentry, dnsip): void {
-    if(this.user.admin) {
-        this.http.post(this.authService.SERVER_URL + '/dns/validation', 
-            {
-                userid: userid,
-                dnsentry: dnsentry,
-                dnsip: dnsip
-            }, 
-            {observe: 'response'}
-        )
-        .subscribe(
-            () => {
-                window.location.reload();
-                console.log("ok");
-            },
-            error => {
-                console.log("error");
-                this.errorcode = error.status;
-                this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
-            }
-        );
+    accept_entry(userid: string, dnsentry: string, dnsip: string): void {
+        if(this.user.admin) {
+            this.http.post(this.authService.SERVER_URL + '/dns/validation', 
+                {
+                    userid: userid,
+                    dnsentry: dnsentry,
+                    dnsip: dnsip
+                }, 
+                {observe: 'response'}
+            )
+            .subscribe(
+                () => {
+                    window.location.reload();
+                    console.log("ok");
+                },
+                error => {
+                    console.log("error");
+                    this.errorcode = error.status;
+                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+                }
+            );
+        }
     }
-}
+    
 
-
-    delete_entry(id): void {
+    delete_entry(id: string): void {
         if(this.user.chartevalidated || this.user.admin) {
             this.http.delete(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})
                 .subscribe(

@@ -8,7 +8,7 @@ export class Vm {
     public type?: string,
     public status?: string,
     public autoreboot?: string,
-    public id?: string,
+    public id?: number,
     public password?: string,
     public sshKey?: string,
     public ip?: string,
@@ -18,6 +18,7 @@ export class Vm {
     public lastBackupDate?: string,
     public createdOn?: string,
     public isUnsecure?: boolean,
+    public hasError?: boolean,
 
   ) { }
 

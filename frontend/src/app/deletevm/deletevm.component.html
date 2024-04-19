@@ -1,7 +1,7 @@
-<div class="vms container flex-fill">
-    <h1 class="text-center mb-5" *ngIf="user.admin">{{ "deletevm.listTitle" | translate}}</h1>
-    <div class="row" *ngIf="user.vms">
-        <div class="card flex-fill mb-3" *ngFor="let vm of user.vms">
+<div class="vms container flex-fill" *ngIf="user.admin">
+    <h1 class="text-center mb-5" >{{ "deletevm.listTitle" | translate}}</h1>
+    <div class="row">
+        <div class="card flex-fill mb-3" *ngFor="let vm of vmsToDelete$ | async">
             <div *ngIf="vm.name">
                 <h5 class="card-header">Name: {{ vm.name }}</h5>
             </div>
@@ -24,12 +24,14 @@
             </div>
         </div>
     </div>
-    <div class="text-center" *ngIf="!user.vms || user.vms.length === 0">
-        <div *ngIf="isLoaded">
-            <h4 class="text-danger">{{ "deletevm.noVms" | translate}}</h4>
-        </div>
-        <div *ngIf="!isLoaded">
+    
+    <div class="text-center">
+        <div *ngIf="vmsService.isUpdatingExpiredUsers || vmsService.isUpdatingVms > 0 || vmsService.isUpdatingVmIds; else loading">
             <i class="fa fa-spinner fa-spin"></i>  {{ "deletevm.loading" | translate }}
         </div>
+        <ng-template #loading>
+            <h4 *ngIf="(vmsToDelete$ | async).length === 0" class="text-danger">{{ "deletevm.noVms" | translate}}</h4>
+        </ng-template>
     </div>
+
 </div>

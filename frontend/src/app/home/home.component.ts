@@ -9,6 +9,8 @@ import {Vm} from '../models/vm';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
 import {CookieService} from "ngx-cookie-service";
+import { VmsService } from '../common/services/vms.service';
+import { DnsService } from '../common/services/dns.service';
 
 @Component({
   selector: 'app-home',
@@ -23,7 +25,7 @@ export class HomeComponent implements OnInit {
 
   
 
-  vm = new Vm('', '', '1', '10', 'stopped', 'No', '', '', '', '');
+  vm = new Vm('', '', '1', '10', 'stopped', 'No', '', '', null, '');
   maxVmPerUser = 3;
   rulesCheck = false;
   passwordErrorMessage = "";
@@ -34,9 +36,6 @@ export class HomeComponent implements OnInit {
   errorMessage = ""
   url: string;
   sshAddress: string;
-  countvm: number;
-  countactivevm: number;
-  countdns: number;
   vmstate: string;
   interval;
   progress = 0;
@@ -55,10 +54,6 @@ export class HomeComponent implements OnInit {
   display_ressource_configuration = false; 
   
 
-
- 
-
-
   constructor(private http: HttpClient,
               private router: Router,
               public user: User,
@@ -69,34 +64,37 @@ export class HomeComponent implements OnInit {
               private route: ActivatedRoute,
               public translate: TranslateService,
               private cookie: CookieService, 
-              ) {
+              public vmsService: VmsService,
+              public dnsService: DnsService
+              )
+              {
     this.cookie.get('lang') == 'en' ? this.translate.use('en') && this.cookie.set('lang','en') : this.translate.use('fr') && this.cookie.set('lang','fr');
     console.log("cookie =" + this.route.snapshot.paramMap.get('lang'))
   }
 
-  
-
 
   ngOnInit(): void {
-    setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user);
-      if ((this.user.chartevalidated) || this.user.admin) {
-        if (this.userService.errorcode != null) {
-          this.loading = false;
-          this.errorcode = this.userService.errorcode;
-          this.errorMessage = this.userService.errorMessage;
-          console.log(this.user.freezeState)
-        console.log("error code =" , this.userService.errorMessage)
-        }
-        this.get_account_maximal_ressources();
-        this.user.usedCPU = -1;
-        this.user.usedRAM = -1;
-        this.user.usedStorage =-1;
-        this.count_ressources();
-      }
-      if(this.user.admin) {
-        this.count_dns();
-      }}, 1000);
-      console.log((this.nb_cpu_max - this.user.usedCPU)*100/this.nb_cpu_max)
+      //on souscrit aux valeurs de l'utilisateur au cours du temps
+      this.userService.getUserObservable().subscribe((user) => {
+          //On attend d'avoir un utilisateur valide, en particulier le freezeState qui prend du temps à être récupéré
+          if (user && user.freezeState >= 0) {
+              this.user = user;
+        
+              if ((this.user.chartevalidated) || this.user.admin) {
+                  this.get_account_maximal_ressources();
+
+                  if (this.userService.errorcode != null) {
+                    this.loading = false;
+                    this.errorcode = this.userService.errorcode;
+                    this.errorMessage = this.userService.errorMessage;
+                    console.log(this.user.freezeState)
+                    console.log("error code =", this.userService.errorMessage)
+                  }
+              }
+        
+          }
+      });
+      console.log((this.nb_cpu_max - this.vmsService.CPUCount)*100/this.nb_cpu_max)
   }
 
   images = [
@@ -169,7 +167,7 @@ export class HomeComponent implements OnInit {
 
   
   // check if the password respect the CNIL specs It is check after the box check and after that, after each new char modification
-  check_password(vm):boolean{
+  check_password(vm: Vm):boolean{
     const special = /[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~]/;
     const upper = /[A-Z]/;
     const number = /[0-9]/;
@@ -275,6 +273,8 @@ export class HomeComponent implements OnInit {
               this.http.get(this.authService.SERVER_URL + '/vm/' + id, {observe: 'response'}).subscribe(rep => {
                   this.vmstate = rep.body['status'];
                   isStarted = this.vmstate == "created" || this.vmstate == "booting" || this.vmstate == "running" || this.vmstate == "stoped";
+                  this.vmsService.updateVmIds();
+                  this.vmsService.updateVms();
                 },
                   error => {
                           this.loading = false;
@@ -307,47 +307,29 @@ export class HomeComponent implements OnInit {
   }
 
 
-
-
-  count_dns(): void {
-    let dns: Array<string>;
-    this.countdns = 0;
-    this.http.get(this.authService.SERVER_URL + '/dns', {observe: 'response'}).subscribe(rep => {
-          dns = rep.body as Array<string>;
-          for (let i = 0; i < dns.length; i++) {
-            this.countdns++;
-          }
-        },
-        error => {
-          this.loading = false
-          this.errorcode = error.status;
-          this.errorMessage = error.error["error"];
-        });
-  }
-
   slider_change():void{
     const cpu_selected  = +((<HTMLInputElement>document.getElementById("cpu_slider")).value)
     this.nb_cpu_selected = cpu_selected
-    if (this.nb_cpu_max - this.user.usedCPU < this.nb_cpu_selected ){
+    if (this.nb_cpu_max - this.vmsService.CPUCount < this.nb_cpu_selected ){
       
-      (<HTMLInputElement>document.getElementById("cpu_slider")).value = String(this.nb_cpu_max - this.user.usedCPU)
+      (<HTMLInputElement>document.getElementById("cpu_slider")).value = String(this.nb_cpu_max - this.vmsService.CPUCount)
         
-      this.nb_cpu_selected = this.nb_cpu_max - this.user.usedCPU
+      this.nb_cpu_selected = this.nb_cpu_max - this.vmsService.CPUCount
     } 
     
 
     const ram_selected  = +((<HTMLInputElement>document.getElementById("ram_slider")).value)
     this.nb_ram_selected = ram_selected
-    if (this.nb_ram_max - this.user.usedRAM < ram_selected){
-        (<HTMLInputElement>document.getElementById("ram_slider")).value = String(this.nb_ram_max - this.user.usedRAM)
-        this.nb_ram_selected = this.nb_ram_max - this.user.usedRAM
+    if (this.nb_ram_max - this.vmsService.RAMCount < ram_selected){
+        (<HTMLInputElement>document.getElementById("ram_slider")).value = String(this.nb_ram_max - this.vmsService.RAMCount)
+        this.nb_ram_selected = this.nb_ram_max - this.vmsService.RAMCount
     } 
 
     const storage_selected  = +((<HTMLInputElement>document.getElementById("storage_slider")).value)
     this.nb_storage_selected = storage_selected
-    if (this.nb_storage_max - this.user.usedStorage < storage_selected){
-          (<HTMLInputElement>document.getElementById("storage_slider")).value = String(this.nb_storage_max - this.user.usedStorage)
-          this.nb_storage_selected = this.nb_storage_max - this.user.usedStorage
+    if (this.nb_storage_max - this.vmsService.DISKCount < storage_selected){
+          (<HTMLInputElement>document.getElementById("storage_slider")).value = String(this.nb_storage_max - this.vmsService.DISKCount)
+          this.nb_storage_selected = this.nb_storage_max - this.vmsService.DISKCount
     }
   }
 
@@ -358,67 +340,17 @@ export class HomeComponent implements OnInit {
   //  console.log("ram",this.nb_ram_selected)
   //}
   //ram_slider_change():void{
-  //  console.log("ram", this.nb_ram_max - this.user.usedRAM)
-  //  if (this.nb_ram_max - this.user.usedRAM < this.nb_ram_selected){
-  //        this.nb_ram_selected = this.nb_ram_max - this.user.usedRAM
+  //  console.log("ram", this.nb_ram_max - this.vmsService.RAMcount)
+  //  if (this.nb_ram_max - this.vmsService.RAMcount < this.nb_ram_selected){
+  //        this.nb_ram_selected = this.nb_ram_max - this.vmsService.RAMcount
   //      }
   //}
   //storage_slider_change():void{
-  //  if (this.nb_storage_max - this.user.usedStorage < this.nb_storage_selected){
-  //      this.nb_storage_selected = this.nb_storage_max - this.user.usedStorage
+  //  if (this.nb_storage_max - this.vmsService.DISKcount < this.nb_storage_selected){
+  //      this.nb_storage_selected = this.nb_storage_max - this.vmsService.DISKcount
   //    }
   //}
 
-
-
-
-  count_ressources(): void {
-    console.log("cpu", this.nb_cpu_max -  this.user.usedCPU)
-      let vmList: Array<string>;
-
-       this.countactivevm = 0;
-      this.http.get(this.authService.SERVER_URL + '/vm', {observe: 'response'}).subscribe(rep => {
-        console.log(rep)
-        vmList = rep.body as Array<string>;
-        this.countvm = vmList.length;
-        for (let i = 0; i < vmList.length; i++) {
-          const vmid = vmList[i];
-          this.new_vmconfig(vmid);
-        }
-        this.user.usedCPU = 0;
-        this.user.usedRAM = 0;
-        this.user.usedStorage =0;
-      },
-
-      error => {
-        this.loading = false
-        this.errorcode = error.status;
-        this.errorMessage = error.error["error"];
-      });
-  }
-
-  /*
-    Check the vm status (vmid). If it's started, the number of active vm is added to 1 and the ressource is added
-  */
-    new_vmconfig(vmid: string): void {
-    const vm = new Vm();
-    vm.id = vmid;
-    this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'}).subscribe(rep => {
-        this.vmstate = rep.body['status'];
-        this.user.usedCPU += rep.body['cpu'];
-        this.user.usedRAM += Math.floor(rep.body['ram']/1000);
-        this.user.usedStorage += rep.body['disk'];
-
-       
-        if(rep.body['status'] === "running")
-          this.countactivevm++;
-        },
-        error => {
-          this.loading = false
-          this.errorcode = error.status;
-          this.errorMessage = error.error["error"];
-    });
-  }
 
 /*Return true if the vm is booting and false if not
 vmid is the id of the vm researched 

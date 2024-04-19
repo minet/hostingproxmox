@@ -1,5 +1,5 @@
 
-<div *ngIf="loading && (user.chartevalidated || user.admin)">
+<div *ngIf="this.vmsService.isUpdatingVmIds && (user.chartevalidated || user.admin)">
     <div class="d-flex justify-content-center">
         <div class="spinner-border text-primary" role="status">
             <span class="sr-only">{{ "vms.loading" | translate}}</span>
@@ -7,36 +7,43 @@
         
     </div>
 </div>
-<div class="alert alert-warning text-center" *ngIf="vmToRestoreCounter >= 1">
+
+<div class="alert alert-warning text-center" *ngIf="vmsService.vmToRestoreCounter >= 1">
     <h5>{{"vm.alert.title" | translate}}</h5>
     <p>{{"vm.alert.descr.1" | translate}}</p><br>
     <p>{{"vm.alert.descr.2" | translate}}</p>
     <p>{{"vm.alert.descr.3" | translate}}</p>
     <p><a href='https://www.minet.net/fr/2022/10/29/incident.html'>{{"vm.alert.repair" | translate}}</a></p>
-  </div>
+</div>
 
 <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 1">
     <h1>❄️</h1>
     <h4>{{'account.freeze.title' | translate }}</h4>
     <p></p>
     <p>{{'account.freeze.1.description' | translate }}<strong>{{'account.freeze.1.description.strong' | translate }} </strong></p>
-  </div>
-  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
+</div>
+
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState == 2">
     <h1>❄️</h1>
     <h4>{{'account.freeze.title' | translate }}</h4>
     <p>{{'account.freeze.2.description.1' | translate }}<strong>{{'account.freeze.2.description.1.strong' | translate }}</strong> {{'account.freeze.2.description.2' | translate }}</p>
     <p><strong>{{'account.freeze.2.description.2.strong' | translate }}</strong></p>
-  </div>
-  <div class="alert alert-primary text-center" *ngIf="this.user.freezeState >= 3 ">
+</div>
+
+<div class="alert alert-primary text-center" *ngIf="this.user.freezeState >= 3 ">
     <h1>❄️</h1>
     <h4>{{'account.freeze.title' | translate }}</h4>
     <p>{{'account.freeze.3.description' | translate }}<br><strong>{{'account.freeze.3.description.strong' | translate }}</strong></p>
-  </div>
-  <div class="alert alert-warning text-center" *ngIf="this.user.freezeState >= 3">
+</div>
+
+<div class="alert alert-warning text-center" *ngIf="this.user.freezeState >= 3">
     <h4>{{'account.expired.title' | translate }}</h4>
     <p>{{'account.expired.description' | translate }}</p>
-  </div>
-<div class="vms container flex-fill" *ngIf=" ((this.user.chartevalidated && this.user.freezeState < 3) || this.user.admin)" >
+</div>
+
+
+
+<div class="vms container flex-fill" *ngIf="(user.chartevalidated && user.freezeState < 3) || this.user.admin" >
 
 
 
@@ -49,87 +56,43 @@
     </div>
     <div class="d-flex justify-content-around">
         <div *ngIf="user.admin">
-        <div class="input-group">
-            <br><br>
-            <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" [(ngModel)]="this.searchFilter"  />
-            <button type="button" class="btn btn-outline-primary" (click)="get_vms()" [disabled]="loading" >Search <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" *ngIf="loading"></span></button>
-            <br>
-        </div>
-          </div>
-          <div>
-    <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
-                    aria-label="Default pagination" (pageChange)="loadPage()">
-                </ngb-pagination>
+            <div class="input-group">
+                <br><br>
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" [(ngModel)]="this.searchFilter"  />
+                <button type="button" class="btn btn-outline-primary" (click)="search()" [disabled]="loading" >Search</button>
+                <br>
             </div>
+        </div>
+        <div>
+            <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
+                aria-label="Default pagination" (pageChange)="loadPage()">
+            </ngb-pagination>
+        </div>
     </div>
+
     <div class="text-center">
-        
-        <ng-container *ngIf="user.vms.length == 0 && !user.admin && !loading">
+        <ng-container *ngIf="this.vmsService.isUpdatingVms == 0 && !this.vmsService.isUpdatingVmIds && (vms$ | async).length ==0 && !user.admin">
             <h4 class="text-danger">{{ "vms.noVms" | translate}}</h4>
         </ng-container>
-        <ng-container *ngIf="user.vms.length == 0 && user.admin && !loading">
+        <ng-container *ngIf="this.vmsService.isUpdatingVms == 0 && !this.vmsService.isUpdatingVmIds && (vms$ | async).length ==0 && user.admin">
             <h4 class="text-danger">{{ "vms.noVmsAdmin" | translate}}</h4>
         </ng-container>
-        <ng-container *ngIf="user.vms.length != 0 && !user.admin">
+        <ng-container *ngIf="(vms$ | async).length != 0 && !user.admin">
             <button *ngIf="!loading" class="btn btn-primary" (click)="scrollSsh(ssh)">{{ "vms.showSsh" | translate}}</button>
         </ng-container>
     </div>
+
     <hr>
     <div>
-        <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf=" user.vms.length !=0 "><span>{{ "vms.refresh" | translate}}</span></div>
-        <div class="row" *ngFor="let vm of user.vms | slice: (page-1) * pageSize : (page-1) * pageSize + pageSize">
-            
-            <div class="col-12" >
-                <div class="card border-success border-1" style="margin-bottom: 2%" >
-                    <div class="card-img-top" *ngIf="!user.admin"
-                         style='background-image: url("assets/images/vms/{{ vm.type }}.png"); height: 100px;
-background-position: 50% 50%; background-size: 100%; position: relative'>
-                        <small class="text-white m-2"
-                               style="position: absolute; right: 0; bottom: 0">{{ vm.type | translate}}</small>
-                    </div>
-                    <div class="card-body">
-                        <h4 class="card-title">
-                            <div class="row">
-                                <div class="col-6">
-                                  <span class="badge badge-pill"
-                                        [ngClass]="{
-                                        'badge-secondary': vm.status === 'stopped',
-                                        'badge-danger': vm.status === 'deleting',
-                                        'badge-info': vm.status === 'creating',
-                                        'badge-warning': vm.status === 'booting',
-                                        'badge-success': vm.status === 'running'
-                                                }"
-                                  >
-                                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
-                                            *ngIf="vm.status === 'booting'  || vm.status === 'creating' || loading"></span>{{ vm.status }}</span>
-                                    &nbsp;{{ vm.name }}&nbsp;<small clallass="text-muted">(#{{ vm.id }})</small>&nbsp;<small *ngIf="user.admin" class="text-muted">- {{ vm.user }}</small>
-                                    <br/>
-                                    <br/>
-                                    <p>{{ "vms.createdOn" | translate}} : {{vm.createdOn}}</p>
-
-                                </div>
-                                <div class="col-6">
-                                    <div class="spinner-border text-primary" role="status" *ngIf="vm.createdOn == null">
-                                        <span class="sr-only">{{ "vms.createdOn" | translate}}</span>
-                                    </div>
-                                    <p class="text-right">{{ vm.ip }}</p>
-                                    <p class="text-right" *ngIf="vm.status == 'running'">{{ "vms.uptime" | translate}} : {{secondsToDhms(vm.uptime)}} </p>
-                                </div>
-
-                            </div>
-                        </h4>
-                        <a href="#" [routerLink]="[vm.id]" class="stretched-link"></a>
-
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf=" (vms$ | async).length !=0 "><span>{{ "vms.refresh" | translate}}</span></div>
+        <app-vm-box class="row" *ngFor="let vm of vms$ | async" [vm]="vm" [user]="user"></app-vm-box>
         <div #ssh>
             <hr *ngIf="showSsh">
             <app-ssh *ngIf="showSsh"></app-ssh>
         </div>
     </div>
-</div><br/>
+</div>
+<br/>
 
 
 <div class="alert alert-danger text-center" *ngIf="this.user.freezeState >= 3">
@@ -141,3 +104,13 @@ background-position: 50% 50%; background-size: 100%; position: relative'>
     <p>{{'vms.charter.notsigned_2' | translate}} <a href="https://chartes.minet.net/">{{'vms.charter.notsigned_3' | translate}}</a> {{'vms.charter.notsigned_4' | translate}}</p>
 
 </div>
+
+<div *ngIf="this.vmsService.isUpdatingVms > 0 && (user.chartevalidated || user.admin)">
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">{{ "vms.loading" | translate}}</span>
+        </div><br><br>
+        
+    </div>
+</div>
+

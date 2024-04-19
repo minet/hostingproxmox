@@ -6,9 +6,10 @@ import {User} from '../models/user';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
-import {Subscription, timer} from 'rxjs';
-import {mergeMap} from 'rxjs/operators';
+import {Observable, Subscription, interval, of} from 'rxjs';
+import {switchMap} from 'rxjs/operators';
 import {Utils} from "../common/utils";
+import { VmsService } from '../common/services/vms.service';
 
 
 @Component({
@@ -18,14 +19,13 @@ import {Utils} from "../common/utils";
 })
 export class VmComponent implements OnInit, OnDestroy {
     vmid: number;
-    loading = true;
-    editing = false;
-    errorcode = 201;
+    vm$!: Observable<Vm>;
+    updateVmSubscription: Subscription;
+    
+    errorcode = 0;
     errorDescription = "";
     deletionStatus = "None";
-    intervals = new Set<Subscription>();
-    newVm = new Vm();
-    history: unknown;
+    history: [string, string, string, string];
     input_vm_id = ""; // for the deletion pop up
     vm_has_error = false;
     vm_has_proxmox_error = false;
@@ -41,7 +41,7 @@ export class VmComponent implements OnInit, OnDestroy {
     new_user_to_transfer="";
     transfering_ownership=false;
     transfering_request_message="";
-
+    editing = false;
 
     constructor(
         private activatedRoute: ActivatedRoute,
@@ -50,6 +50,7 @@ export class VmComponent implements OnInit, OnDestroy {
         public user: User,
         private userService: UserService,
         public authService: AuthService,
+        private vmsService: VmsService,
         public slugifyPipe: SlugifyPipe,
         private utils : Utils,
         
@@ -61,10 +62,38 @@ export class VmComponent implements OnInit, OnDestroy {
     @ViewChild('openUpdateButton') openUpdateButton: ElementRef;
 
     ngOnInit(): void {
-        setTimeout(() => {  this.userService.getUser().subscribe((user) => this.user = user); }, 1000);
-        this.user.vms = Array<Vm>();
-        this.vmid = this.activatedRoute.snapshot.params.vmid;
-        this.start_get_vm(this.vmid);
+        //on souscrit aux valeurs de l'utilisateur au cours du temps
+        this.userService.getUserObservable().subscribe((user) => {
+            //On attend d'avoir un utilisateur valide, en particulier le freezeState qui prend du temps à être récupéré
+            if(user && user.freezeState >= 0) {
+                this.user = user;
+                this.vmid = +this.activatedRoute.snapshot.params.vmid; //On récupère l'id de la vm dans l'url
+                this.vm$ = this.vmsService.getVm(this.vmid); //On souscrit aux infos de la vm
+                if (this.user.admin) {
+                    this.getIpHistory(this.vmid);
+                }
+                //On update les infos sur la vm toutes les 3s
+                this.updateVmSubscription = interval(3000).pipe(
+                    switchMap(() => {
+                        if (this.deletionStatus !== "deleting" && this.errorcode !== 500 && this.errorcode !== 403) {
+                            return this.vmsService.updateVm(this.vmid);
+                        } else {
+                            return of(null); // Return an empty observable if deletionStatus is 'deleting'
+                        }
+                    })
+                ).subscribe((response) => {
+                    if (this.deletionStatus !== "deleting") {
+                        this.errorcode = response.errorcode;
+                        this.errorDescription = response.errorDescription;
+                        this.vm_has_error = response.vm_has_error;
+                        this.vm_has_proxmox_error = response.vm_has_proxmox_error;
+                    }
+                });
+
+        
+            }
+        });
+        
     }
 
 
@@ -79,34 +108,23 @@ export class VmComponent implements OnInit, OnDestroy {
     }
     
 
-    ngOnDestroy(): void {
-        for (const id of this.intervals) {
-            id.unsubscribe();
+    ngOnDestroy() {
+        // Important de se désabonner pour éviter les fuites de mémoire
+        if (this.updateVmSubscription) {
+          this.updateVmSubscription.unsubscribe();
         }
-    }
+      }
 
 
-    edit(): void {
-        this.newVm.ram = this.user.vms[0].ram;
-        this.newVm.cpu = this.user.vms[0].cpu;
-        this.newVm.disk = this.user.vms[0].disk;
-        this.editing = true;
-    }
+    // edit(): void {
+    //     this.newVm.ram = this.user.vms[0].ram;
+    //     this.newVm.cpu = this.user.vms[0].cpu;
+    //     this.newVm.disk = this.user.vms[0].disk;
+    //     this.editing = true;
+    // }
 
-    secondsToDhms(seconds: number): string {
-        seconds = Number(seconds);
-        const d = Math.floor(seconds / (3600 * 24));
-        const h = Math.floor(seconds % (3600 * 24) / 3600);
-        const m = Math.floor(seconds % 3600 / 60);
-        const s = Math.floor(seconds % 60);
 
-        const dDisplay = d > 0 ? d + 'd ' : '';
-        const hDisplay = h > 0 ? h + 'h ' : '';
-        const mDisplay = m > 0 ? m + 'min ' : '';
-        const sDisplay = s > 0 ? s + 's ' : '';
-        return dDisplay + hDisplay + mDisplay + sDisplay;
-    }
-
+    
     formatTimestamp(timestamp: number): string {
         const date = new Date(timestamp*1000);
         const year = date.getFullYear();
@@ -116,8 +134,27 @@ export class VmComponent implements OnInit, OnDestroy {
         const minutes = date.getMinutes().toString().padStart(2, '0');
         
         return `${year}-${month}-${day} ${hours}:${minutes}`;
-      }
+    }
 
+    /**
+       * Convert seconds to days, hours, minutes and seconds
+       * @param seconds
+       * @returns string
+       * @example 90061 => 1d 1h 1min 1s
+      */
+      secondsToDhms(seconds: number): string {
+        seconds = Number(seconds);
+        const d = Math.floor(seconds / (3600 * 24));
+        const h = Math.floor(seconds % (3600 * 24) / 3600);
+        const m = Math.floor(seconds % 3600 / 60);
+        const s = Math.floor(seconds % 60);
+    
+        const dDisplay = d > 0 ? d + 'd ' : '';
+        const hDisplay = h > 0 ? h + 'h ' : '';
+        const mDisplay = m > 0 ? m + 'min ' : '';
+        const sDisplay = s > 0 ? s + 's ' : '';
+        return dDisplay + hDisplay + mDisplay + sDisplay;
+    }
 
     commit_edit(status: string): void {
         const data = {
@@ -125,60 +162,13 @@ export class VmComponent implements OnInit, OnDestroy {
         };
 
         this.http.patch(this.authService.SERVER_URL + '/vm/' + this.vmid, data).subscribe(() => {
-            this.loading = true;
+            return;
         }, error => {
-            this.loading = false;
             this.errorcode = error.status;
         });
     }
 
-    delete_vm(): void {
-        this.deletionStatus = "deleting";
-        this.errorDescription = "";
-        let url = this.authService.SERVER_URL + '/vm/' + this.vmid;
-        if(this.vm_has_error ){
-            url = this.authService.SERVER_URL + '/vmWithError/' + this.vmid;
-        }
-        console.log(this.errorDescription)
-        console.log(url)
-         this.http.delete(url).subscribe(() => {
-
-            const deletionTimer = timer(0, 3000).pipe(
-            mergeMap(() =>  this.http.get(this.authService.SERVER_URL + '/vm/' +this.vmid, {observe: 'response'}))).subscribe(rep => {
-                        const vmstate = rep.body['status'];
-                        if(vmstate == "deleted"){
-                            deletionTimer.unsubscribe();
-                            if(this.need_to_be_restored){
-                                this.openModalButton.nativeElement.click();
-                            }
-                            this.deletionStatus = "deleted";
-                            setTimeout(() =>this.router.navigate(['vms']), 2000);
-                        }
-                      },
-                    error => {
-                        if (error.status == 403 || error.status == 404){ // the vm is deleted 
-                            deletionTimer.unsubscribe();
-                            this.deletionStatus = "deleted";
-                            setTimeout(() =>this.router.navigate(['vms']), 2000);
-                        } else {
-                            deletionTimer.unsubscribe();
-                            this.loading = false;
-                              this.errorcode = error.status;
-                              this.errorDescription = error.error["error"];
-                        }
-                       
-                          
-                    });
-                this.intervals.add(deletionTimer);
-            },
-
-            error => {
-                this.loading = false;
-                this.deletionStatus  = "None";
-                this.errorcode = error.status;
-                this.errorDescription = error.statusText;
-            });
-    }
+    
 
     transfer_vm_ownership():void{
         const data = {
@@ -196,106 +186,60 @@ export class VmComponent implements OnInit, OnDestroy {
         });
     }
 
-    start_get_vm(vmid){
-        const vm = new Vm();
-        vm.id = vmid;
-        this.user.vms.push(vm);
-        setInterval(()=> { this.get_vm(vmid, vm) }, 3000); // each 3 s
-        if (this.need_to_be_restored == null || !this.popUpShowed){
-            this.get_need_to_be_restored(vmid);
-        }
+    deleteVm(): void {
+        this.deletionStatus = "deleting";
+        this.errorDescription = "";
+        this.vmsService.deleteVm(this.vmid, this.vm_has_error).subscribe((response) => {
+            this.deletionStatus = response.deletionStatus;
+            this.errorcode = response.errorcode;
+            this.errorDescription = response.errorDescription;
+            if (response.deletionStatus == "deleted") {
+                if (this.need_to_be_restored) {
+                    this.openModalButton.nativeElement.click();
+                }
+                //On attend 2s avant de rediriger vers la page des VMs
+                //On en profite pour mettre à jour les VMs
+                this.vmsService.updateVmIds();
+                this.vmsService.updateVms();
+                setTimeout(() => this.router.navigate(['vms']), 2000);
+            }
+        });
     }
 
+    // start_get_vm(vmid){
+    //     const vm = new Vm();
+    //     vm.id = vmid;
+    //     this.user.vms.push(vm);
+    //     setInterval(()=> { this.get_vm(vmid, vm) }, 3000); // each 3 s
+    //     if (this.need_to_be_restored == null || !this.popUpShowed){
+    //         this.get_need_to_be_restored(vmid);
+    //     }
+    // }
 
-    get_vm(vmid:number, vm: Vm): void {
-        this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, {observe: 'response'})
-            .subscribe(rep => {
+    renewVm():void{
+        this.renew_vm_status = "loading";
+        this.vmsService.renewVm(this.vmid).subscribe((response) => {
+            this.renew_vm_status = response.renew_vm_status;
+            this.errorcode = response.errorcode;
+            this.errorDescription = response.errorDescription;
+        });
+    }
 
-                console.log(rep)
-                    if(this.user.admin)
-                        this.get_ip_history(vmid);
-                    vm.name = rep.body['name'];
-                    vm.status = rep.body['status'];
-                    vm.ram = String(Math.floor(rep.body['ram']/1000));
-                    vm.disk = rep.body['disk'];
-                    vm.cpu = rep.body['cpu'];
-                    vm.user = rep.body['user'];
-                    vm.autoreboot = rep.body['autoreboot'];
-                    vm.ramUsage = rep.body['ram_usage'];
-                    vm.cpuUsage = rep.body['cpu_usage'];
-                    vm.uptime = rep.body['uptime'];
-                    vm.lastBackupDate = rep.body['last_backup_date'];
+    
+    public getIpHistory(vmid: number): void {
+        this.http.get(this.authService.SERVER_URL + '/history/' + vmid, { observe: 'response' })
+            .subscribe(
+                rep => {
                     
-                    vm.isUnsecure = Boolean(rep.body["unsecure"]);
-                    if (rep.body['ip'] == ""){
-                        vm.ip = ""
-                    } else {
-                        vm.ip = rep.body['ip'][0];
-                    }
-                    //console.log("rep = ", rep.body['ip']);
-                    vm.createdOn = rep.body['created_on'];
-                    if (rep.body['type'] === 'nginx_vm') {
-                        vm.type = 'web server';
-                    } else if (rep.body['type'] === 'bare_vm') {
-                        vm.type = 'bare vm';
-                    } else {
-                        vm.type = 'not defined';
-                    }
-                    this.loading = false;
-                    console.log("vm.status", vm.status)
+                    this.history = rep.body as [string, string, string, string];
                 },
                 error => {
-                    if(error.status == 500 && error.error["error"] == "VM not found in proxmox"){
-                       this.vm_has_proxmox_error = true;
-                    }
+                    console.error(`Erreur lors de la récupération de l'historique des IPs de la VM avec l'ID ${vmid}: `, error);
                     this.errorcode = error.status;
-                    this.errorDescription = error.error["error"];
-                    this.vm_has_error = true;
-                    console.log(this.vm_has_error)
-                    this.loading = false;
-                });
-    }
-
-    get_ip_history(vmid): void {
-        this.http.get(this.authService.SERVER_URL + '/history/' + vmid, {observe: 'response'})
-        .subscribe(rep => {
-                this.history = rep.body;
-            },
-            error => {
-                this.errorcode = error.status;
-            });
-    }
-
-    get_need_to_be_restored(vmid):void{
-        this.http.get(this.authService.SERVER_URL + '/needToBeRestored/' + vmid, {observe: 'response'})
-        .subscribe(rep => {
-            console.log(rep)
-
-                this.need_to_be_restored = rep.body['need_to_be_restored'];
-                if(this.need_to_be_restored){
-                    this.startPopUp();
+                    this.history = ["", "", "", ""];
                 }
-            },
-            error => {
-                this.errorcode = error.status;
-                this.errorDescription = error.error["error"];
-            });
-    }
-
-    renew_vm():void{
-        this.renew_vm_status = "loading";
-        let data = {};
-        data = {
-            vmid: this.vmid,
-        };
-        this.http.post(this.authService.SERVER_URL + '/renew-ip', data, {observe: 'response'}).subscribe(rep => {
-            this.renew_vm_status = "reboot" // need reboot to apply
-            this.user.vms[0].ip = rep.body['ip'];
-        }, 
-        error => {
-            this.errorcode = error.status;
-            this.errorDescription = error.error["error"];
-        })
+            );
+        this.history = ["", "", "", ""];
     }
 
 
@@ -333,8 +277,7 @@ export class VmComponent implements OnInit, OnDestroy {
         });
     }
 
-    displayError(errorcode): string {
-        this.loading = false; // de toute manière on va pas charger pendant 106 ans
+    displayError(errorcode: number): string {
         switch(errorcode) {
             case 500:
                 return this.utils.getTranslation('vm.error.500');
