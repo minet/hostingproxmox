@@ -14,8 +14,11 @@ export class DnsService {
     private dnsIds$: Observable<string[]> = new Observable<string[]>(); // Observable to get the list of DNS IDs
     private dnsSubject: BehaviorSubject<Map<string,Dns>> = new BehaviorSubject<Map<string,Dns>>(new Map()); // Observable to get the list of DNS
     public isUpdatingDnsIds = false; // Boolean to know if the DNS IDs are being updated
+    public isUpdatingDns = 0; // Integer to know how many DNS are being updated
 
     public DNSCount = 0; // Number of DNSs
+    public PendingDNSCount = 0; // Number of DNSs in pending state
+    public ActiveDNSCount = 0; // Number of DNSs in active state
 
     constructor(private authService: AuthService,
                 private http: HttpClient,
@@ -83,15 +86,18 @@ export class DnsService {
         return this.dnsIds$.pipe(
             switchMap((dnsIds: string[]) => {
                 const httpRequests = dnsIds.map((id: string) => {
+                    this.isUpdatingDns++;
                     return this.http.get(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'}).pipe(
                         tap(response => {
                             const dns = this.dnsSubject.getValue().get(id); 
                             this.updateDns(response, dns); 
+                            this.isUpdatingDns--;
                         }),
                         catchError(error => {
                             console.error(`Erreur lors de la récupération de la VM avec l'ID ${id}: `, error);
                             const dns = this.dnsSubject.getValue().get(id); 
                             this.createErrorDns(dns, error); // Créez un DNS erreur
+                            this.isUpdatingDns--;
                             return of(error.code); // Retourne un Observable qui émet l'error code en cas d'erreur
                         })
                     )
@@ -112,6 +118,15 @@ export class DnsService {
         dns.entry = response.body['entry'];
         dns.ip = response.body['ip'];
         dns.user = response.body['user'];
+        dns.validated = response.body['validated'];
+
+        if (dns.validated) {
+            this.ActiveDNSCount++;
+        }
+        else {
+            this.PendingDNSCount++;
+        }
+
         this.dnsSubject.next(this.dnsSubject.getValue());
     }
 

@@ -210,6 +210,7 @@ class DefaultApi(object):
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
 
+
     def delete_dns_id(self, dnsid, **kwargs):  # noqa: E501
         """delete dns entry by id  # noqa: E501
 
@@ -561,6 +562,8 @@ class DefaultApi(object):
             _preload_content=params.get('_preload_content', True),
             _request_timeout=params.get('_request_timeout'),
             collection_formats=collection_formats)
+
+    
 
     def get_dns_id(self, dnsid, **kwargs):  # noqa: E501
         """get a dns entry by id  # noqa: E501

@@ -97,7 +97,7 @@ export class DnsComponent implements OnInit, OnDestroy {
 
     
 
-
+    
     create_dns(dns: Dns): void {
         console.log(dns)
         this.errorMessage = ""
@@ -152,6 +152,31 @@ export class DnsComponent implements OnInit, OnDestroy {
         const authorized_ip = /^157\.159\.195\.([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-5][0-5])$/; // At least 157.159.40.xxx > 10 < 255. The backend then checks if the user own the ip
         return authorized_ip.test(ip.trim())
     }
+
+    accept_entry(userid: string, dnsentry: string, dnsip: string): void {
+        if(this.user.admin) {
+            this.http.post(this.authService.SERVER_URL + '/dns/validation', 
+                {
+                    userid: userid,
+                    dnsentry: dnsentry,
+                    dnsip: dnsip
+                }, 
+                {observe: 'response'}
+            )
+            .subscribe(
+                () => {
+                    window.location.reload();
+                    console.log("ok");
+                },
+                error => {
+                    console.log("error");
+                    this.errorcode = error.status;
+                    this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+                }
+            );
+        }
+    }
+    
 
     delete_entry(id: string): void {
         if(this.user.chartevalidated || this.user.admin) {
