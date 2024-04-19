@@ -41,7 +41,11 @@ export class NavbarComponent implements OnInit {
   ngOnInit(): void {
     this.validToken$ = this.userService.validToken();
     this.validToken$.subscribe();
-    this.userService.getUser().subscribe((user) => this.user = user);
+    this.userService.getUserObservable().subscribe((user) => {
+        if (user) {
+            this.user = user;
+        }
+    });
     this.cookie.get('lang') == 'en' ? this.translate.use('en') : this.translate.use('fr');
     this.fetchNotification();
   }

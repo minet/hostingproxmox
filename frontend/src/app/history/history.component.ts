@@ -34,8 +34,10 @@ export class HistoryComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.userService.getUser().subscribe((user) => {
-      this.user = user;
+    this.userService.getUserObservable().subscribe((user) => {
+      if(user) {
+        this.user = user;
+      }
     });
       this.get_ip_history();
   }

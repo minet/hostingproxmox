@@ -19,7 +19,12 @@
   <h4>{{'account.expired.title' | translate }}</h4>
   <p>{{'account.expired.description' | translate }}</p>
 </div>
-<div *ngIf="loading && ((user.chartevalidated && user.freezeState < 3) || user.admin)">
+
+
+<h1 class="text-center mb-2" *ngIf="!user.admin">{{'dns.title.user' | translate}}</h1>
+<h1 class="text-center mb-2" *ngIf="user.admin">{{'dns.title.admin' | translate}}</h1>
+
+<div *ngIf="dnsService.isUpdatingDnsIds && (dns$ | async).length == 0 && ((user.chartevalidated && user.freezeState < 3) || user.admin)">
   <div class="d-flex justify-content-center">
     <div class="spinner-border text-primary" role="status">
       <span class="sr-only">{{'dns.loading' | translate}}</span>
@@ -27,10 +32,7 @@
   </div>
 </div>
 
-<h1 class="text-center mb-2" *ngIf="!user.admin">{{'dns.title.user' | translate}}</h1>
-<h1 class="text-center mb-2" *ngIf="user.admin">{{'dns.title.admin' | translate}}</h1>
-
-<div class="dns container" *ngIf="!loading && ((user.chartevalidated && user.freezeState < 3) || user.admin)">
+<div class="dns container" *ngIf="(!dnsService.isUpdatingDnsIds || (dns$ | async).length != 0) && ((user.chartevalidated && user.freezeState < 3) || user.admin)">
   <div class="text-center">
     <button class="btn btn-primary" (click)="showForm = !showForm">{{'dns.addEntry' | translate}}</button>
   </div>
@@ -104,11 +106,11 @@
   </div>
 </div>
 
-  <ng-container *ngIf="user.dns.length == 0; else dnsEntries">
-  <hr>
-  <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noEntries.user' | translate}}</h4>
-  <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noEntries.admin' | translate}}</h4>
-  <hr>
+  <ng-container *ngIf="!dnsService.isUpdatingDnsIds && (dns$ | async).length == 0; else dnsEntries">
+    <hr>
+    <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noEntries.user' | translate}}</h4>
+    <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noEntries.admin' | translate}}</h4>
+    <hr>
   </ng-container>
   <ng-template #dnsEntries>
     <table class="table mt-5">
@@ -117,16 +119,40 @@
         <th scope="col" *ngIf="user.admin">{{'dns.item.user' | translate}}</th>
         <th scope="col">{{'dns.item.host' | translate}}</th>
         <th scope="col">{{'dns.item.destination' | translate}}</th>
+        <th scope="col" *ngIf="user.admin">id</th>
         <th scope="col">{{'dns.item.manage' | translate}}</th>
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let dns of user.dns">
-        <td *ngIf="user.admin">{{dns.user}}</td>
-        <td><a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a></td>
-        <td>{{dns.ip}}</td>
-        <td><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button></td>
-      </tr>
+        <tr *ngFor="let dns of dns$ | async">
+          <td *ngIf="user.admin">{{dns.user}}</td>
+          <td>
+            <ng-container *ngIf="dns.entry; else spinner">
+              <a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a>
+            </ng-container>
+            <ng-template #spinner>
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </ng-template>
+          </td>
+          <td>
+            <ng-container *ngIf="dns.entry; else spinner">
+              {{dns.ip}}
+            </ng-container>
+            <ng-template #spinner>
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </ng-template>
+          </td>
+          <td *ngIf="user.admin">{{dns.id}}</td>
+          <td>
+            <ng-container>
+              <button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button>
+            </ng-container>
+          </td>
+        </tr>
       </tbody>
     </table>
   </ng-template>

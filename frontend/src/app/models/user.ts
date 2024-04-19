@@ -1,5 +1,3 @@
-import {Vm} from './vm';
-import {Dns} from './dns';
 
 export class User {
     public sn: string;
@@ -10,13 +8,4 @@ export class User {
     public admin = false;
     public chartevalidated: boolean;
     public freezeState: number;
-    public vms?: Array<Vm>;
-    public dns?: Array<Dns>;
-    public ips?: Array<string>;
-    public usedCPU?: number;
-    public usedRAM?: number;
-    public usedStorage?: number;
-    public availableCPU?: number;
-    public availableRAM?: number;
-    public availableStorage?: number;
 }

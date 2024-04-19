@@ -491,11 +491,11 @@ def get_vm_name(vmid, node):
         return {"name": "error"}, 500
 
 
-def get_vm(user_id = 0, search=None):
+def get_vm(user_id = 0, search=""):
     if user_id != 0: # No filter for non admin
         return database.get_vm_list(user_id), 200
     else:
-        if search is None : 
+        if search == "" : 
             return database.get_vm_list(), 200
         else: # We get all user/name and filter them
             user_filtered = database.get_user_list(searchItem=search) # get all user filtered
@@ -854,7 +854,7 @@ def get_users_with_freeze_state(targetFreezeState: int):
             if(freezeState is not None and int(freezeState.split(".")[0]) >= targetFreezeState):
                 freezed_users.append(user.id)
     if len(freezed_users) == 0:
-        return {"error": "No users with freeze state of 3"}, 404
+        return {"error": "No users with targetted freeze state"}, 404
     return freezed_users, 200
 
 

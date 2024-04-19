@@ -11,6 +11,4 @@ export class AuthService {
    public adminDn = 'cn=cluster-hosting,ou=groups,dc=minet,dc=net';
    //public SERVER_URL = 'https://api-hosting.minet.net/2.0';
 
-
-
 }
