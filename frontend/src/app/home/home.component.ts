@@ -274,7 +274,7 @@ export class HomeComponent implements OnInit {
                   this.vmstate = rep.body['status'];
                   isStarted = this.vmstate == "created" || this.vmstate == "booting" || this.vmstate == "running" || this.vmstate == "stoped";
                   this.vmsService.updateVmIds();
-                  this.vmsService.updateVms();
+                  this.vmsService.updateVms(0);
                 },
                   error => {
                           this.loading = false;

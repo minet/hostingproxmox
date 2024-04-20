@@ -56,7 +56,7 @@ export class DnsService {
 
         this.isUpdatingDnsIds = true;
 
-        this.http.get<string[]>(this.authService.SERVER_URL + '/dns').pipe(
+        this.dnsIds$ = this.http.get<string[]>(this.authService.SERVER_URL + '/dns').pipe(
             tap((dnsIds: string[]) => {
                 dnsIds.forEach((id: string) => {
                     this.addDns(id);
@@ -70,9 +70,7 @@ export class DnsService {
             finalize(() => {
                 this.isUpdatingDnsIds = false;
             })
-        ).subscribe(dnsIds => {
-            this.dnsIds$ = of(dnsIds);
-        });
+        )
     }
 
     /**
@@ -82,8 +80,12 @@ export class DnsService {
      * We use merge to execute all the requests in parallel and process the responses as soon as they arrive
      * @returns Observable<number | null> : Observable that emits the error code in case of error
      */
-    public updateAllDns(): Observable<number | null> {
-        return this.dnsIds$.pipe(
+    public updateAllDns(): void {
+        if(this.isUpdatingDns > 0) {
+            return; // Si une mise à jour est déjà en cours, on ne fait rien
+        }
+
+        this.dnsIds$.pipe(
             switchMap((dnsIds: string[]) => {
                 const httpRequests = dnsIds.map((id: string) => {
                     this.isUpdatingDns++;
@@ -105,7 +107,7 @@ export class DnsService {
                 // Exécuter toutes les requêtes en parallèle et traiter les réponses dès qu'elles arrivent
                 return merge(...httpRequests);
             })
-        );
+        ).subscribe();
     }
 
 

@@ -64,7 +64,6 @@ def get_user_dns(user_id = ""):
 
 
 def del_user_dns(dnsid):
-    print("proxmox")
     db_result = database.get_entry_host_and_validation(dnsid)
     if db_result is None:
         return {"dns": "not found"}, 404
@@ -75,6 +74,7 @@ def del_user_dns(dnsid):
     if validated is None:
         return {"dns.validated": "not found"}, 404
     if validated:
+        print("Deleting entry: " + str(entry))
         ddns_rep = ddns.delete_dns_record(entry)
         if ddns_rep[1] == 201:
             database.del_dns_entry(dnsid)
@@ -911,12 +911,10 @@ def check_cotisation_job(app):
 """
 def check_update_cotisation(username, createEntry=False):
         
-    print("check cotisation of", username)
     #headers = {"Authorization": req_headers}
     account, status = util.get_adh6_account(username)
     if (account is None):
         return {"error": "Impossible to retrieve the user info"}, 404
-    print("Adh6 account", account)
     today =  date.today()
     if "ip" not in account: # Cotisation expired
         #print(username , "cotisation expired", membership.json())
@@ -935,7 +933,6 @@ def check_update_cotisation(username, createEntry=False):
         #print(membership.json()["departureDate"], end='\n\n')
         departureDate = datetime.strptime(account["departureDate"], "%Y-%m-%d").date()
         if departureDate < today: # Cotisation expired:
-            print(username , "cotisation expired (departure date)")
             status = database.getFreezeState(username)
             if status is None:
                 status = '1'

@@ -34,7 +34,7 @@
     </div>
   </div>
   <ng-template #dnsPannel>
-    <div *ngIf="!user.admin" class="dns container">
+    <div class="dns container">
       <div class="text-center">
         <button class="btn btn-primary" (click)="showForm = !showForm">{{'dns.addEntry' | translate}}</button>
       </div>
@@ -118,7 +118,7 @@
 
     <ng-template #dnsEntries>
 
-      <div *ngIf="dnsService.isUpdatingDns <= 0 && dnsService.PendingDNSCount == 0; else dnsPending">
+      <div *ngIf="!dnsService.isUpdatingDnsIds && dnsService.isUpdatingDns <= 0 && dnsService.PendingDNSCount == 0; else dnsPending">
         <hr>
           <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noPendingEntries.admin' | translate}}</h4>
         <hr>
@@ -172,8 +172,8 @@
           </tbody>
         </table>
       </ng-template>
-      
-      <div *ngIf="dnsService.isUpdatingDns <= 0 && dnsService.ActiveDNSCount == 0; else dnsValidated">
+
+      <div *ngIf="!dnsService.isUpdatingDnsIds && dnsService.isUpdatingDns <= 0 && dnsService.ActiveDNSCount == 0; else dnsValidated">
         <hr>
         <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noValidatedEntries.user' | translate}}</h4>
         <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noValidatedEntries.admin' | translate}}</h4>

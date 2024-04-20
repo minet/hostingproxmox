@@ -110,7 +110,6 @@ def get_vm_status(vmid): # Return the status of the VM and if there is an error 
         except:
             return "Unknown error", True
     else :
-        print('status', status)
         return status, False
 
 def set_vm_status(vmid, status, isAnError=False):
@@ -263,7 +262,10 @@ def get_entry_ip(id):
 
 
 def get_entry_host_and_validation(id):
-    domainName = DomainName.query.filter_by(id=id).first()
+    try:
+        domainName = DomainName.query.filter_by(id=id).first()
+    except Exception as e:
+        print(f"Error occurred while executing query: {e}")
 
     if domainName is None:
         return {"dns": "not found"}, 404
