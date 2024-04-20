@@ -378,7 +378,7 @@ export class VmsService {
     
     // Check if a VM need to be restored
     get_need_to_be_restored(vm: Vm, didAnErrorOccur: boolean):void{
-        this.http.get(this.authService.SERVER_URL + '/needToBeRestored/' + vm.id, {observe: 'response'})
+        this.http.get(this.authService.SERVER_URL + '/needToBeRestored/' + vm.id, {observe: 'response'}).pipe(takeUntil(this.cancelRequests))
         .subscribe(rep => {
             const needToBeRestored = Boolean(rep.body['need_to_be_restored']);
                 if(needToBeRestored){
@@ -405,8 +405,6 @@ export class VmsService {
         this.vmIds$.subscribe((vms: number[]) => {
             length = vms.length;
             this.isUpdatingVms = 0; // Réinitialise le compteur
-            console.log("temp", temp)
-            console.log("length", length)
             this.updateVms(Math.max(length-temp-3, 0)); // Relance la mise à jour des VMs
           });
         
