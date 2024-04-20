@@ -44,10 +44,6 @@
 
 
 <div class="vms container flex-fill" *ngIf="(user.chartevalidated && user.freezeState < 3) || this.user.admin" >
-
-
-
-    
     <h1 class="text-center mb-2" *ngIf="!user.admin">{{ "vms.listTitle" | translate}}</h1>
     <h1 class="text-center mb-2" *ngIf="user.admin">{{ "vms.listTitleAdmin" | translate}}</h1>
     <div class="text-center">
@@ -56,35 +52,34 @@
     </div>
     <div class="d-flex justify-content-around">
         <div *ngIf="user.admin">
-            <div class="input-group">
                 <br><br>
-                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" [(ngModel)]="this.searchFilter"  />
-                <button type="button" class="btn btn-outline-primary" (click)="search()" [disabled]="loading" >Search</button>
+                    <div class="input-group">
+                        <input class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" [ngModel]="searchFilter" (ngModelChange)="searchTextChanged.next($event)"/>
+                        <button type="submit" class="btn btn-outline-primary">Search</button>
+                    </div>
                 <br>
-            </div>
         </div>
-        <div>
+        <!-- <div>
             <ngb-pagination *ngIf="user.admin" [collectionSize]="totalVm" [pageSize]="pageSize" [(page)]="page"
                 aria-label="Default pagination" (pageChange)="loadPage()">
             </ngb-pagination>
-        </div>
+        </div> -->
     </div>
 
     <div class="text-center">
-        <ng-container *ngIf="this.vmsService.isUpdatingVms == 0 && !this.vmsService.isUpdatingVmIds && (vms$ | async).length ==0 && !user.admin">
+        <ng-container *ngIf="this.vmsService.isUpdatingVms == 0 && !this.vmsService.isUpdatingVmIds && (vms$ | async)?.length ==0 && !user.admin">
             <h4 class="text-danger">{{ "vms.noVms" | translate}}</h4>
         </ng-container>
-        <ng-container *ngIf="this.vmsService.isUpdatingVms == 0 && !this.vmsService.isUpdatingVmIds && (vms$ | async).length ==0 && user.admin">
+        <ng-container *ngIf="this.vmsService.isUpdatingVms == 0 && !this.vmsService.isUpdatingVmIds && (vms$ | async)?.length ==0 && user.admin">
             <h4 class="text-danger">{{ "vms.noVmsAdmin" | translate}}</h4>
         </ng-container>
-        <ng-container *ngIf="(vms$ | async).length != 0 && !user.admin">
+        <ng-container *ngIf="(vms$ | async)?.length != 0 && !user.admin">
             <button *ngIf="!loading" class="btn btn-primary" (click)="scrollSsh(ssh)">{{ "vms.showSsh" | translate}}</button>
         </ng-container>
     </div>
-
     <hr>
     <div>
-        <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf=" (vms$ | async).length !=0 "><span>{{ "vms.refresh" | translate}}</span></div>
+        <div class="comment" style="color:gray; font-style: italic;margin-bottom:10px;" *ngIf=" (vms$ | async)?.length !=0 "><span>{{ "vms.refresh" | translate}}</span></div>
         <app-vm-box class="row" *ngFor="let vm of vms$ | async" [vm]="vm" [user]="user"></app-vm-box>
         <div #ssh>
             <hr *ngIf="showSsh">

@@ -20,6 +20,9 @@ export class VmsService {
     public isUpdatingExpiredUsers = false; // Boolean to know if the expired users are being updated
     public isUpdatingVmIds = false; // Boolean to know if the VM IDs are being updated
 
+    private cancelRequests = new Subject<void>();
+
+
     public CPUCount = 0; // Number of CPUs
     public RAMCount = 0; // Amount of RAM
     public DISKCount = 0; // Amount of disk space
@@ -121,7 +124,7 @@ export class VmsService {
             finalize(() => {
                 this.isUpdatingVmIds = false;
             })
-        );
+        )
     }
 
     /**
@@ -130,7 +133,7 @@ export class VmsService {
      * For each VM, update the information in the list
      * We use merge to execute all the requests in parallel and process the responses as soon as they arrive
      */
-    public updateVms(): void {
+    public updateVms(startIndex: number): void {
         
         //Si une requête est déjà en cours, ne pas en lancer une autre
         if (this.isUpdatingVms > 0) {
@@ -139,11 +142,16 @@ export class VmsService {
         
         this.vmIds$.pipe(
             switchMap((vmIds: number[]) => {
+
+                const slicedVmIds = vmIds.slice(startIndex);
+
                 // Créer un tableau d'Observables pour chaque requête HTTP
-                const httpRequests = vmIds.map((vmid: number) => {
+                const httpRequests = slicedVmIds.map((vmid: number) => {
+
                     this.isUpdatingVms++; // Incrémenter le compteur de requêtes en cours
 
                     return this.http.get(this.authService.SERVER_URL + '/vm/' + vmid, { observe: 'response' }).pipe(
+                        takeUntil(this.cancelRequests),
                         tap(response => {
                             this.addVm(vmid); // Ajouter la VM au Subject
                             const vm = this.vmsSubject.getValue().get(vmid); 
@@ -165,7 +173,6 @@ export class VmsService {
                 return merge(...httpRequests);
             })
         ).subscribe();
-        
     }
 
     /**
@@ -225,7 +232,7 @@ export class VmsService {
                             map(vmIds => vmIds.filter(id => id !== vmid))
                         )
                         this.updateVmIds();
-                        this.updateVms();
+                        this.updateVms(0);
                         unsubscribeTimer.next();
                         observer.next({ deletionStatus: "deleted", errorcode: null, errorDescription: null });
                         observer.complete();
@@ -234,7 +241,7 @@ export class VmsService {
                     error => {
                         if (error.status == 403 || error.status == 404) { // the vm is deleted 
                             this.updateVmIds();
-                            this.updateVms();
+                            this.updateVms(0);
                             unsubscribeTimer.next();
                             observer.next({ deletionStatus: "deleted", errorcode: null, errorDescription: null });
                             observer.complete();
@@ -371,7 +378,7 @@ export class VmsService {
     
     // Check if a VM need to be restored
     get_need_to_be_restored(vm: Vm, didAnErrorOccur: boolean):void{
-        this.http.get(this.authService.SERVER_URL + '/needToBeRestored/' + vm.id, {observe: 'response'})
+        this.http.get(this.authService.SERVER_URL + '/needToBeRestored/' + vm.id, {observe: 'response'}).pipe(takeUntil(this.cancelRequests))
         .subscribe(rep => {
             const needToBeRestored = Boolean(rep.body['need_to_be_restored']);
                 if(needToBeRestored){
@@ -388,6 +395,19 @@ export class VmsService {
                  
             });
             return null;
+    }
+
+    public cancelUpdateVms(): void {
+        this.cancelRequests.next(); // Annule les requêtes en cours
+
+        let length:number
+        const temp = this.isUpdatingVms;
+        this.vmIds$.subscribe((vms: number[]) => {
+            length = vms.length;
+            this.isUpdatingVms = 0; // Réinitialise le compteur
+            this.updateVms(Math.max(length-temp-3, 0)); // Relance la mise à jour des VMs
+          });
+        
     }
 
 }

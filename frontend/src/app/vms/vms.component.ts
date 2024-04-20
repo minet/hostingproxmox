@@ -4,9 +4,9 @@ import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {User} from '../models/user';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
-import {BehaviorSubject, Observable, Subscription, combineLatest, interval} from 'rxjs';
+import {BehaviorSubject, Observable, Subscription, combineLatest, timer} from 'rxjs';
 import { VmsService } from '../common/services/vms.service';
-import { map, tap } from 'rxjs/operators';
+import { debounceTime, map, tap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-vms',
@@ -18,10 +18,10 @@ export class VmsComponent implements OnInit, OnDestroy {
     showSsh = false;
     errorcode = 201;
     searchFilter = "";
-    searchFilter$ = new BehaviorSubject(this.searchFilter);
+    searchTextChanged = new BehaviorSubject<string>('');
     vmToRestoreCounter = 0; // Number VMs that need to be restored
     
-    vms$!: Observable<Vm[]>;
+    vms$: Observable<Vm[]> = new Observable<Vm[]>(); // Observable to get the list of VMs
     updateVmSubscription: Subscription;
 
 
@@ -33,6 +33,7 @@ export class VmsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+
         //on souscrit aux valeurs de l'utilisateur au cours du temps
         this.userService.getUserObservable().subscribe((user) => {
             //On attend d'avoir un utilisateur valide, en particulier le freezeState qui prend du temps à être récupéré
@@ -41,26 +42,30 @@ export class VmsComponent implements OnInit, OnDestroy {
                 if(this.user.chartevalidated || this.user.admin) {
 
                     //On update les infos sur les vms toutes les 40s
-                    this.updateVmSubscription = interval(40000).pipe(
+                    this.updateVmSubscription = timer(0,60000).pipe(
                         tap(() => {
                             this.vmsService.updateVmIds();
-                            this.vmsService.updateVms();
+                            this.vmsService.updateVms(0);
                         })
                     ).subscribe();
+                        
+                    
 
                     //Cette observable est actualisé à chaque vm chargée ou à chaque recherche
                     //Elle permet de filtrer les vms en fonction de la recherche
                     this.vms$ = combineLatest([
                         this.vmsService.getVms(),
-                        this.searchFilter$
+                        this.searchTextChanged.pipe(debounceTime(200))  // attendre 200ms après chaque changement de valeur
                       ]).pipe(
-                        map(([vms]) => 
-                          vms.filter(vm => 
-                          this.searchFilter == "" || 
-                          (vm.name && vm.name.includes(this.searchFilter)) || 
-                          (vm.id && String(vm.id).includes(this.searchFilter)) || 
-                          (vm.user && vm.user.includes(this.searchFilter))
-                        ))
+                        map(([vms, searchFilter]) => {
+                          console.log(searchFilter); // Display the searchFilter in the console
+                          return vms.filter(vm => 
+                            searchFilter == "" || 
+                            (vm.name && vm.name.includes(searchFilter)) || 
+                            (vm.id && String(vm.id).includes(searchFilter)) || 
+                            (vm.user && vm.user.includes(searchFilter))
+                          );
+                        })
                       );
                     console.log(this.user)
                 }
@@ -81,12 +86,8 @@ export class VmsComponent implements OnInit, OnDestroy {
         }
     }
 
-    /**
-     * Lorsqu'on clique sur le bouton de recherche
-     */
-    search(): void {
-        this.searchFilter$.next(this.searchFilter);
-    }
+    
+
 
     /**
     * 

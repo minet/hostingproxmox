@@ -34,6 +34,7 @@ def create_entry(entry, ip_add):
 
 def delete_dns_record(entry):
     """ Delete a record with ddns protocole in configuration.MAIN_DNS_SERVER_IP DNS server """
+    print("Deleting entry: " + str(entry))
     dns_domain = "%s." % configuration.HOSTING_DOMAIN
     update = dns.update.Update(dns_domain, keyring=keyring)
     update.present(entry)

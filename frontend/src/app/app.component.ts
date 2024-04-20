@@ -74,9 +74,10 @@ export class AppComponent implements OnInit{
         if ((this.user.chartevalidated && this.user.freezeState < 3) || this.user.admin) {
 
           //On précharge les VMs et DNS pour plus de rapidité
-          this.vmsService.updateVmIds();
-          this.vmsService.updateVms();
           this.dnsService.updateDnsIds();
+          this.dnsService.updateAllDns();
+          this.vmsService.updateVmIds();
+          this.vmsService.updateVms(0);
 
         }
       }

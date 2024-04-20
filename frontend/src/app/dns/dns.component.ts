@@ -5,9 +5,9 @@ import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {Utils} from '../common/utils';
 import {Dns} from '../models/dns';
-import {Subscription, Observable, interval, Subject} from 'rxjs';
+import {Subscription, Observable, Subject, timer} from 'rxjs';
 import { DnsService } from '../common/services/dns.service';
-import { switchMap, takeUntil } from 'rxjs/operators';
+import { takeUntil, tap } from 'rxjs/operators';
 
 
 @Component({
@@ -18,27 +18,27 @@ import { switchMap, takeUntil } from 'rxjs/operators';
 export class DnsComponent implements OnInit, OnDestroy {
     dns$!: Observable<Dns[]>; // Observable to get the list of DNS
     updateDnsSubscription: Subscription;
-  loading = true;
-  newDns = new Dns();
-  ipList : string[]; // Observable to get the list of IPs
-  intervals = new Set<Subscription>();
-  showForm = false;
-  errorcode = 201;
-  httpErrorMessage = "";
-  errorMessage = ""
-  timer: Subscription;
-  success = false;
-  page = 1;
-  pageSize = 10;
-  private destroy$ = new Subject<void>();
+    loading = true;
+    newDns = new Dns();
+    ipList : string[]; // Observable to get the list of IPs
+    intervals = new Set<Subscription>();
+    showForm = false;
+    errorcode = 201;
+    httpErrorMessage = "";
+    errorMessage = ""
+    timer: Subscription;
+    success = false;
+    page = 1;
+    pageSize = 10;
+    private destroy$ = new Subject<void>();
 
-  constructor(private http: HttpClient,
-              public user: User,
-              private userService: UserService,
-              private authService: AuthService,
-                public dnsService: DnsService,
-              private utils: Utils) {
-  }
+    constructor(private http: HttpClient,
+                public user: User,
+                private userService: UserService,
+                private authService: AuthService,
+                  public dnsService: DnsService,
+                private utils: Utils) {
+    }
 
 
     ngOnInit(): void {
@@ -56,11 +56,9 @@ export class DnsComponent implements OnInit, OnDestroy {
                     this.dnsService.updateDnsIds();
 
                     //On souscrit aux infos des entrées DNS
-                    this.updateDnsSubscription = interval(10000).pipe(
-                            switchMap(() => this.dnsService.updateAllDns())
-                        ).subscribe((response) => {
-                            this.errorcode = response;
-                        });
+                    this.updateDnsSubscription = timer(0,30000).pipe(
+                            tap(() => this.dnsService.updateAllDns())
+                        ).subscribe();
                     this.getIpsList();
                     
                 }

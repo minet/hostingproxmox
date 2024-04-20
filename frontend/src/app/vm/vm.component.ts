@@ -6,7 +6,7 @@ import {User} from '../models/user';
 import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {SlugifyPipe} from '../pipes/slugify.pipe';
-import {Observable, Subscription, interval, of} from 'rxjs';
+import {Observable, Subscription, of, timer} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 import {Utils} from "../common/utils";
 import { VmsService } from '../common/services/vms.service';
@@ -73,7 +73,7 @@ export class VmComponent implements OnInit, OnDestroy {
                     this.getIpHistory(this.vmid);
                 }
                 //On update les infos sur la vm toutes les 3s
-                this.updateVmSubscription = interval(3000).pipe(
+                this.updateVmSubscription = timer(0,3000).pipe(
                     switchMap(() => {
                         if (this.deletionStatus !== "deleting" && this.errorcode !== 500 && this.errorcode !== 403) {
                             return this.vmsService.updateVm(this.vmid);
@@ -200,7 +200,7 @@ export class VmComponent implements OnInit, OnDestroy {
                 //On attend 2s avant de rediriger vers la page des VMs
                 //On en profite pour mettre à jour les VMs
                 this.vmsService.updateVmIds();
-                this.vmsService.updateVms();
+                this.vmsService.updateVms(0);
                 setTimeout(() => this.router.navigate(['vms']), 2000);
             }
         });

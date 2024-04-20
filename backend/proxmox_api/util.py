@@ -292,7 +292,6 @@ def get_adh6_account(username):
     headers = {"X-API-KEY": config.ADH6_API_KEY}
     #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
     userInfoJson = adh6_search_user(username, headers)
-    print(userInfoJson)
     if userInfoJson is None or userInfoJson  == []: # not found
             print("ERROR : the user " , username , " failed to be retrieved :" , userInfoJson)
             return {"error" : "the user " + username + " failed to be retrieved"}, 404
@@ -303,7 +302,6 @@ def get_adh6_account(username):
             tmp_account = accountJson.json()
             if tmp_account["username"].lower() == username.lower():
                 account = tmp_account
-        print("account : ", account)
         return account, 200
 
 def adh6_search_user(username, headers):
