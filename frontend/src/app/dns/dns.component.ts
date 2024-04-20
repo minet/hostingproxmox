@@ -5,7 +5,7 @@ import {UserService} from '../common/services/user.service';
 import {AuthService} from '../common/services/auth.service';
 import {Utils} from '../common/utils';
 import {Dns} from '../models/dns';
-import {Subscription, Observable, interval, Subject} from 'rxjs';
+import {Subscription, Observable, Subject, timer} from 'rxjs';
 import { DnsService } from '../common/services/dns.service';
 import { takeUntil, tap } from 'rxjs/operators';
 
@@ -56,7 +56,7 @@ export class DnsComponent implements OnInit, OnDestroy {
                     this.dnsService.updateDnsIds();
 
                     //On souscrit aux infos des entrées DNS
-                    this.updateDnsSubscription = interval(30000).pipe(
+                    this.updateDnsSubscription = timer(0,30000).pipe(
                             tap(() => this.dnsService.updateAllDns())
                         ).subscribe();
                     this.getIpsList();

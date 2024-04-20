@@ -145,7 +145,7 @@
                 <td *ngIf="user.admin">{{dns.user}}</td>
                 <td>
                   <ng-container *ngIf="dns.entry; else spinner">
-                    <a *ngIf="dns.validated" href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a>
+                    <a href="http://{{dns.entry}}.h.minet.net">{{dns.entry}}</a>
                   </ng-container>
                   <ng-template #spinner>
                     <div class="spinner-border text-primary" role="status">
@@ -155,7 +155,7 @@
                 </td>
                 <td>
                   <ng-container *ngIf="dns.entry; else spinner">
-                    <p *ngIf="dns.validated"></p>{{dns.ip}}
+                    <p></p>{{dns.ip}}
                   </ng-container>
                   <ng-template #spinner>
                     <div class="spinner-border text-primary" role="status">
