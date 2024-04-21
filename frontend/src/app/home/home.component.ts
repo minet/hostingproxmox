@@ -286,6 +286,11 @@ export class HomeComponent implements OnInit {
               await delay(2000);
           }
           if (isStarted){ // There were no errors, we show the vm
+            
+            this.vmsService.CPUCount += this.nb_cpu_selected;
+            this.vmsService.RAMCount += this.nb_ram_selected;
+            this.vmsService.DISKCount += this.nb_storage_selected;
+            this.loading = false;
             this.progress = 100;
             this.router.navigate(['/vms/' + id]);
           } else { // There was an error, we show the form for a new submit

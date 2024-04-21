@@ -228,11 +228,20 @@ export class VmsService {
                 ).subscribe(rep => {
                     const vmstate = rep.body['status'];
                     if (vmstate == "deleted") {
-                        this.vmIds$.pipe(
-                            map(vmIds => vmIds.filter(id => id !== vmid))
-                        )
+                        //wipe out les vms pour recalculer les ressources
+                        this.vmIds$ = new Observable<number[]>();
+                        this.vmsSubject = new BehaviorSubject<Map<number, Vm>>(new Map());
+                        this.VMCount = 0;
+                        this.CPUCount = 0;
+                        this.RAMCount = 0;
+                        this.DISKCount = 0;
+                        this.ActiveVMCount = 0;
+                        this.vmToRestoreCounter = 0;
+
                         this.updateVmIds();
                         this.updateVms(0);
+
+                        
                         unsubscribeTimer.next();
                         observer.next({ deletionStatus: "deleted", errorcode: null, errorDescription: null });
                         observer.complete();
@@ -240,8 +249,20 @@ export class VmsService {
                 },
                     error => {
                         if (error.status == 403 || error.status == 404) { // the vm is deleted 
+                            //wipe out les vms pour recalculer les ressources
+                            this.vmIds$ = new Observable<number[]>();
+                            this.vmsSubject = new BehaviorSubject<Map<number, Vm>>(new Map());
+                            this.VMCount = 0;
+                            this.CPUCount = 0;
+                            this.RAMCount = 0;
+                            this.DISKCount = 0;
+                            this.ActiveVMCount = 0;
+                            this.vmToRestoreCounter = 0;
+                            
                             this.updateVmIds();
                             this.updateVms(0);
+                            
+                            
                             unsubscribeTimer.next();
                             observer.next({ deletionStatus: "deleted", errorcode: null, errorDescription: null });
                             observer.complete();
