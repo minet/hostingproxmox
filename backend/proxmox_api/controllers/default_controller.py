@@ -1,18 +1,11 @@
-from logging import error
 from proxmox_api import proxmox
+
 import connexion
-import requests
-import json
 from threading import Thread
-from requests.api import head
-from slugify import slugify
-from proxmox_api.models.dns_entry_item import DnsEntryItem  # noqa: E501
 from proxmox_api.models.dns_item import DnsItem  # noqa: E501
-from proxmox_api.models.vm_id_item import VmIdItem  # noqa: E501
 from proxmox_api.models.vm_item import VmItem  # noqa: E501
 from proxmox_api import util
 from proxmox_api.db.db_functions import *
-from datetime import datetime
 import proxmox_api.db.db_functions as dbfct
 from proxmox_api.proxmox import is_admin
 from proxmox_api.db import db_models
@@ -57,11 +50,10 @@ def validate_dns():  # noqa: E501
 
     try:
         userid = update_body['userid']
-    except:
+    except KeyError:
         return {"error": "Bad userid"}, 400
     
-
-    return proxmox.accept_user_dns(update_body['userid'], update_body['dnsentry'], update_body['dnsip']) 
+    return proxmox.accept_user_dns(userid, update_body['dnsentry'], update_body['dnsip']) 
 
 def create_dns(body=None):  # noqa: E501
     """create dns entry
@@ -652,7 +644,6 @@ def renew_ip():
 
 
 def delete_dns_id(dnsid):  # noqa: E501
-    print("delete dns entry")
     """delete dns entry by id
 
      # noqa: E501
@@ -666,6 +657,9 @@ def delete_dns_id(dnsid):  # noqa: E501
         dnsid = int(dnsid)
     except:
         return {"status": "error not an integer"}, 500
+    
+    # Get the sendMail parameter from the request
+    sendMail = connexion.request.args.get('sendMail', default=False, type=bool)
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
@@ -697,14 +691,20 @@ def delete_dns_id(dnsid):  # noqa: E501
         return {"status": "cotisation expired"}, 403
 
     user_id = cas['sub']
+    
+    # print(update_body)
+    # try:
+    #     sendMail = bool(update_body['sendMail'])
+    # except KeyError:
+    #     return {"error": "Not a boolean"}, 400
 
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):
-                return proxmox.del_user_dns(dnsid)
+                return proxmox.del_user_dns(dnsid, sendMail)
 
     if dnsid in map(int, proxmox.get_user_dns(user_id)[0]):
-        return proxmox.del_user_dns(dnsid)
+        return proxmox.del_user_dns(dnsid, sendMail)
     else:
         return {"status": "error"}, 500
 

@@ -15,7 +15,7 @@
                         <p class="card-text">Created: {{ vm.createdOn }}</p>
                     </div>
                     <div class="ml-auto" *ngIf="vm.status !== 'deleting'">
-                        <button class="btn btn-primary btn-danger" [disabled]="!vm.name" (click)="delete_vm(vm)" data-bs-dismiss="modal">{{ "deletevm.delete" | translate }}</button>
+                        <button class="btn btn-primary btn-danger" [disabled]="!vm.name" (click)="deleteVm(vm)" data-bs-dismiss="modal">{{ "deletevm.delete" | translate }}</button>
                     </div>
                     <div class="ml-auto" *ngIf="vm.status === 'deleting'">
                         <i class="fa fa-spinner fa-spin text-danger"></i>
@@ -30,7 +30,7 @@
             <i class="fa fa-spinner fa-spin"></i>  {{ "deletevm.loading" | translate }}
         </div>
         <ng-template #loading>
-            <h4 *ngIf="(vmsToDelete$ | async).length === 0" class="text-danger">{{ "deletevm.noVms" | translate}}</h4>
+            <h4 *ngIf="(vmsToDelete$ | async)?.length === 0" class="text-danger">{{ "deletevm.noVms" | translate}}</h4>
         </ng-template>
     </div>
 

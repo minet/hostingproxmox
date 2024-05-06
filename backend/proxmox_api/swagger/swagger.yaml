@@ -652,6 +652,13 @@ paths:
         schema:
           type: string
           example: "3"
+      - name: sendMail
+        in: query
+        description: do we send an email to the user
+        required: false
+        schema:
+          type: string
+          example: "sendMail: true"
       responses:
         "201":
           description: deleted dns entry by id

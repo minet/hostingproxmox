@@ -17,7 +17,7 @@ import { debounceTime, map, tap } from 'rxjs/operators';
 export class VmsComponent implements OnInit, OnDestroy {
     showSsh = false;
     errorcode = 201;
-    searchFilter = "";
+    searchFilter = '';
     searchTextChanged = new BehaviorSubject<string>('');
     vmToRestoreCounter = 0; // Number VMs that need to be restored
     
@@ -58,7 +58,6 @@ export class VmsComponent implements OnInit, OnDestroy {
                         this.searchTextChanged.pipe(debounceTime(200))  // attendre 200ms après chaque changement de valeur
                       ]).pipe(
                         map(([vms, searchFilter]) => {
-                          console.log(searchFilter); // Display the searchFilter in the console
                           return vms.filter(vm => 
                             searchFilter == "" || 
                             (vm.name && vm.name.includes(searchFilter)) || 

@@ -4,7 +4,7 @@ export class Dns {
     public entry?: string,
     public ip?: string,
     public user?: string,
-    public validated?: boolean
-
+    public validated?: boolean,
+    public status?: string
   ) { }
 }

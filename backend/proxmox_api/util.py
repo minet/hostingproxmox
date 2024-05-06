@@ -7,12 +7,13 @@ import requests
 import connexion
 import tempfile
 import subprocess
-from flask_apscheduler import APScheduler
-from flask_cors import CORS
 import proxmox_api.config.configuration as  config 
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
 from proxmox_api.db.db_models import db
+from email.message import EmailMessage
+import smtplib
+
 
 if not bool(config.ADH6_API_KEY):
     raise Exception("NO ADH6 API KEY GIVEN")
@@ -344,3 +345,88 @@ def subscribe_to_hosting_ML(username):
                 return status, response.status_code
     
     return {"error" : "the user " + username + " failed to be retrieved"}, 404
+
+def sendMailBureau(htmlbody, username):
+    msg = EmailMessage()
+    msg['From'] = "hosting-noreply@minet.net"
+    msg['To'] = "bureau@listes.minet.net"
+    # msg['Bcc'] = "archive_expired_cotisation_hosting@listes.minet.net"
+    msg['subject'] = f"[Hosting]" + {username} + " veut créer un nom de domaine !"
+    msg.add_header('Content-Type','text/html')
+    msg.set_payload(htmlbody.encode('utf-8'))
+    server = smtplib.SMTP("192.168.102.18:25")
+    server.send_message(msg)
+    server.set_debuglevel(1)
+    server.quit()
+    print("OK email")
+    return 0
+
+def sendMailAdherent(usermail: str, htmlbody: str, entry: str, accepted: bool):
+    msg = EmailMessage()
+    msg['From'] = "hosting-noreply@minet.net"
+    print(usermail)
+    msg['To'] = usermail
+    # msg['Bcc'] = "archive_expired_cotisation_hosting@listes.minet.net"
+    if accepted:
+        msg['subject'] = f"[Hosting] : {entry} a été accepté comme nom de domaine!"
+    else:
+        msg['subject'] = f"[Hosting] : {entry} a été refusé comme nom de domaine!"
+        
+    msg.add_header('Content-Type','text/html')
+    msg.set_payload(htmlbody.encode('utf-8'))
+    server = smtplib.SMTP("192.168.102.18:25")
+    server.send_message(msg)
+    server.set_debuglevel(1)
+    server.quit()
+    print("OK email")
+    return 0
+
+def mailHTMLBureau(username, entry, ip):
+    
+    header="""
+    <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<style>
+body{
+    font-family: Helvetica, sans-serif;
+    font-size: 14px;
+    font-color:black;
+}
+</style>"""
+    msg = f"""
+<body>
+    &#128680; Une personne souhaite ajouter une nouvelle entrée DNS sur hosting : {username} qui veut mettre en ligne {entry} pour l'IP {ip}.<br>
+    Un admin Hosting doit la valider sur <a href="https://hosting.minet.net">hosting.minet.net</a>
+</body></html>
+        """
+    return header+msg
+
+def mailHTMLAdherent(username: str, entry: str, ip: str, accepted:str):
+    
+    header="""
+    <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<style>
+body{
+    font-family: Helvetica, sans-serif;
+    font-size: 14px;
+    font-color:black;
+}
+</style>""".replace('\n', ' ').replace('\r', ' ')
+    msg = f"""
+<body>
+
+    Bonjour {username}, <br> 
+    Ton entrée DNS <strong>{entry}</strong> pour ta machine d'IP <strong>{ip}</strong> a été {accepted} par un admin sur <a href="https://hosting.minet.net">hosting</a>.<br>
+    Cordialement,<br>
+    <table style="font-size: medium; font-family: Arial; background:white; width:vw;" class="sc-gPEVay eQYmiW" cellspacing="0" cellpadding="0"><tbody><tr><td><table style="font-size: medium; font-family: Arial;" class="sc-gPEVay eQYmiW" cellspacing="0" cellpadding="0"><tbody><tr><td style="vertical-align: middle;" width="150"><span style="margin-right: 20px; display: block;" class="sc-kgAjT cuzzPp"><img src="https://www.minet.net/res/img/minet.png" role="presentation" style="max-width: 130px;" class="sc-cHGsZl bHiaRe" width="130"></span></td><td style="vertical-align: middle;"><font color="#000000" size="4"><span style="caret-color: rgb(0, 0, 0);"><b>L'équipe MINET</b></span></font><p color="#000000" font-size="medium" style="margin: 0px; color: rgb(0, 0, 0); font-size: 14px; line-height: 22px;" class="sc-fMiknA bxZCMx"><span></span></p><p color="#000000" font-size="medium" style="margin: 0px; font-weight: 500; color: rgb(0, 0, 0); font-size: 14px; line-height: 22px;" class="sc-dVhcbM fghLuF"><span></span></p></td><td width="30"><div style="width: 30px;"></div></td><td color="#6fa3e8" direction="vertical" style="width: 1px; border-bottom: medium none; border-left: 1px solid rgb(111, 163, 232);" class="sc-jhAzac hmXDXQ" width="1"></td><td width="30"><div style="width: 30px;"></div></td><td style="vertical-align: middle;"><table style="font-size: medium; font-family: Arial;" class="sc-gPEVay eQYmiW" cellspacing="0" cellpadding="0"><tbody><tr><td style="padding: 0px;"><a href="https://tickets.minet.net" color="#000000" style="text-decoration: none; color: rgb(0, 0, 0); font-size: 12px;" class="sc-gipzik iyhjGb"><span style="margin-left:1px; font-family: Arial;">&#128735; tickets.minet.net</span></a></td></tr><tr><td style="padding: 0px;"><a href="//www.minet.net" color="#000000" style="text-decoration: none; color: rgb(0, 0, 0); font-size: 12px;" class="sc-gipzik iyhjGb"><span style="margin-left:1px; font-family: Arial;">&#127760;  www.minet.net</span></a></td></tr><tr style="vertical-align: middle;" height="25"><td style="padding: 0px;"><span color="#000000" style="font-size: 12px; color: rgb(0, 0, 0);" class="sc-csuQGl CQhxV"><span style="margin-left:1px; font-family: Arial;"> &#128235;  9 rue Charles Fourier, 91000, Evry</span></span></td></tr></tbody></table></td></tr></tbody></table></td></tr><tr><td></td></tr><tr><td></td></tr></tbody></table>
+    </body></html>
+        """.replace('\n', ' ').replace('\r', ' ')
+    return header+msg
+    

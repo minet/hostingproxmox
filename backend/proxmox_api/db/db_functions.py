@@ -270,7 +270,7 @@ def get_entry_host_and_validation(id):
     if domainName is None:
         return {"dns": "not found"}, 404
     else:
-        return {"host": domainName.entry, "validated" : domainName.validated}, 201
+        return {"host": domainName.entry, "validated" : domainName.validated, "ip" : domainName.ip, "userId" : domainName.userId}, 201
 
 
 def get_entry_userid(dnsid):

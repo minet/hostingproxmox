@@ -13,7 +13,6 @@ export class CancelUpdateGuard implements CanActivate {
     const url = route.url.join('/');
     if (url === 'dns' || url.startsWith('vms/') || url === 'history') {
       this.vmsService.cancelUpdateVms();
-      console.log(route.url);
     }
     return true;
   }

@@ -165,6 +165,7 @@ export class VmComponent implements OnInit, OnDestroy {
             return;
         }, error => {
             this.errorcode = error.status;
+            console.error(`Erreur lors de la mise à jour de la VM avec l'ID ${this.vmid}: `, error);
         });
     }
 

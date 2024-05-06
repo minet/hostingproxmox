@@ -36,13 +36,17 @@ def delete_dns_record(entry):
     """ Delete a record with ddns protocole in configuration.MAIN_DNS_SERVER_IP DNS server """
     print("Deleting entry: " + str(entry))
     dns_domain = "%s." % configuration.HOSTING_DOMAIN
+    print(keyring)
+    
     update = dns.update.Update(dns_domain, keyring=keyring)
+    print(update)
     update.present(entry)
     update.delete(entry)
     response = dns.query.tcp(update, configuration.MAIN_DNS_SERVER_IP, timeout=5)
+    print(response)
     if response.rcode() == 0:
         return {"dns": "entry deleted"}, 201
     if response.rcode() == 3:
         return {"dns": "entry does not exist"}, 201 #C'est très crade, mais c'est dans le cas ou l'entrée n'a pas été validée, mais l'appel à ddns se fais quand même.
-    logging.error("Problem in get_vm_status(" + str(vmid) + ") when getting VM status: " + str(e))
+    logging.error("Problem in delete_dns_id(" + entry + ")")
     return {"dns": "error occured"}, 500

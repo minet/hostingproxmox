@@ -121,7 +121,7 @@ export class DnsService {
         dns.ip = response.body['ip'];
         dns.user = response.body['user'];
         dns.validated = response.body['validated'];
-
+        dns.status = 'created';
         if (dns.validated) {
             this.ActiveDNSCount++;
         }

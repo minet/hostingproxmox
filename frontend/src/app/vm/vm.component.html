@@ -37,304 +37,306 @@ document.onload = loaded();
           </div>
       </div>
   </div>
-  <div class="container text-center" *ngIf="(errorcode != 0 || (vm$ | async)?.name) && (user.chartevalidated || user.admin); else loading">
-      <h1 class="text-center mb-2">VM: {{ (vm$ | async).name }}</h1>
-      <hr>
-      <div class="alert"
-           [ngClass]="{
-                      'alert-danger': deletionStatus == 'deleting' || vm_has_error,
-                      'alert-secondary' : (vm$ | async).status === 'stopped',
-                      'alert-info': (vm$ | async).status === 'creating',
-                      'alert-warning': (vm$ | async).status === 'booting',
-                      'alert-success': (vm$ | async).status === 'running' || deletionStatus == 'deleted'
-                      }"
-      >
-      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
-             *ngIf="(vm$ | async).status === 'booting'  || (vm$ | async).status === 'creating' || deletionStatus == 'deleting' || deletionStatus == 'deleted' "></span> 
-             <div *ngIf="(vm$ | async).status === 'booting'  || (vm$ | async).status === 'creating' || (vm$ | async).status === 'running' || deletionStatus == 'deleting' || deletionStatus == 'deleted' || (vm$ | async).status == 'stopped'" >{{'vm.status' | translate}} :&nbsp;{{ deletionStatus != 'None' ? deletionStatus  : (vm$ | async).status | translate }}</div>
-                    
-             <div *ngIf="vm_has_error"><strong>{{"vm.error" | translate}} {{errorcode}} : {{utils.getHttpErrorMessage(errorcode)}}</strong><br> 
-              <p  *ngIf="vm_has_proxmox_error" [innerHtml]="'vm.error.404.description' | translate"></p>
-            
-          </div>
-        
-      </div>
-    
-      <button id="openModalButton" data-bs-toggle="modal" data-bs-target="#restoreLabel" [hidden]="true">Open popup</button>
-      <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="restoreLabel" aria-hidden="true" id = "restoreLabel" data-show="true" data-backdrop="static" data-keyboard="false" *ngIf="need_to_be_restored">
-          <div class="modal-dialog modal-lg modal-dialog-centered">
-              <div class="modal-content">
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="container text-center" *ngIf="(errorcode != 0 || vm?.name) && (user.chartevalidated || user.admin); else loading">
+        <h1 class="text-center mb-2">VM: {{ vm.name }}</h1>
+        <hr>
+        <div class="alert"
+             [ngClass]="{
+                        'alert-danger': deletionStatus == 'deleting' || vm_has_error,
+                        'alert-secondary' : vm.status === 'stopped',
+                        'alert-info': vm.status === 'creating',
+                        'alert-warning': vm.status === 'booting',
+                        'alert-success': vm.status === 'running' || deletionStatus == 'deleted'
+                        }"
+        >
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+               *ngIf="vm.status === 'booting'  || vm.status === 'creating' || deletionStatus == 'deleting' || deletionStatus == 'deleted' "></span> 
+               <div *ngIf="vm.status === 'booting'  || vm.status === 'creating' || vm.status === 'running' || deletionStatus == 'deleting' || deletionStatus == 'deleted' || vm.status == 'stopped'" >{{'vm.status' | translate}} :&nbsp;{{ deletionStatus != 'None' ? deletionStatus  : vm.status | translate }}</div>
+                      
+               <div *ngIf="vm_has_error"><strong>{{"vm.error" | translate}} {{errorcode}} : {{utils.getHttpErrorMessage(errorcode)}}</strong><br> 
+                <p  *ngIf="vm_has_proxmox_error" [innerHtml]="'vm.error.404.description' | translate"></p>
               
-                  <div class="modal-header ">
-                      <h3 class="modal-title text-danger" id="title">{{ 'vm.backup.popup.title' | translate }}</h3>
-                  </div>
-                  <div class="modal-body">
-                      <p [innerHtml]="'vm.backup.popup.description.1' | translate"></p>
-                      <p [innerHtml]="'vm.backup.popup.description.2' | translate" *ngIf="!this.vm_has_proxmox_error && errorcode != 404"></p>
-                      <p [innerHtml]="'vm.backup.popup.description.3' | translate" *ngIf="this.vm_has_proxmox_error || errorcode == 404"></p>
-                  </div>
-                  <div class="modal-footer .center">
-                      <p><button type="button" class="btn btn-primary btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteVMModal">{{ 'vm.backup.popup.button.delete' | translate }}</button></p>
-                      <p><button type="button" class="btn btn-primary btn btn-success" data-bs-toggle="modal" data-bs-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{ 'vm.backup.popup.button.restore' | translate }}</button></p>
-                      <p><a href="/vms"><button type="button" class="btn btn-secondary" >{{ 'vm.backup.popup.button.cancel' | translate }}</button></a></p>
-                  </div>
-              </div>
-          </div>
-      </div>
-    
-    
-  <div class="modal fade bd-example-modal-lg" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="restoreModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 class="modal-title" id="restoreModalLabel">{{ "vm.updateCreds.title" | translate }} </h3>
-          <button type="button" class="close" id="updateCloseButton" #updateCloseButton data-bs-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p><strong class="text-alert" *ngIf="need_to_be_restored">{{ "vm.backup.popup.button.explanation" | translate }}</strong> </p>
-          <div class="alert alert-danger" *ngIf="popUpErrorCode != 0">
-            <p [innerHtml] = "popUpErrorMessage"></p>
-          </div>
-          <form (ngSubmit)="update_vm()">
-            <div class="form-group">
-              <label for="username" class="col-form-label">{{"vm.updateCreds.username" | translate}}</label>
-              <input type="text" class="form-control" id="popUpUsername" [(ngModel)]="popUpUsername" name="popUpUsername">
             </div>
-            <div class="form-group">
-              <label for="password" class="col-form-label">{{"vm.updateCreds.password" | translate}}</label>
-              <input type="password" class="form-control" id="popUpPassword" [(ngModel)]="popUpPassword" name="popUpPassword">
-            </div>
-            <div class="form-group">
-              <label for="sshKey" class="col-form-label">{{"vm.updateCreds.ssh" | translate}}</label>
-              <textarea class="form-control" id="popUpSSHkey" [(ngModel)]="popUpSSHkey" name="popUpSSHkey"></textarea>
-            </div>
-          </form>
-        
-          <div class="alert alert-primary" *ngIf="need_to_be_restored">
-            <p [innerHtml]="'vm.updateCreds.charte' | translate"></p>
-          </div>
-          <div class="alert alert-primary" *ngIf="!need_to_be_restored">
-            <p>{{ 'vm.updateCreds.info' | translate }}</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="backButton" [disabled]="popUpLoading">{{ "vm.backup.popup.button.cancel" |translate }}</button>
           
-            <button  class="btn btn-success w-50" [disabled]="popUpLoading" (click)="update_vm_credentials()">
-              <span [hidden]="popUpLoading" *ngIf="need_to_be_restored">{{ "vm.backup.popup.button.restore" | translate }}</span>
-              <span *ngIf="!need_to_be_restored">{{ "vm.backup.popup.button.update" | translate }}</span> <div class="spinner-border spinner-border-sm text-light" role="status" *ngIf="popUpLoading">
-              <span class="sr-only">Loading...</span>
-            </div></button>
-          </div>
         </div>
-        
+      
+        <button id="openModalButton" data-bs-toggle="modal" data-bs-target="#restoreLabel" [hidden]="true">Open popup</button>
+        <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="restoreLabel" aria-hidden="true" id = "restoreLabel" data-show="true" data-backdrop="static" data-keyboard="false" *ngIf="need_to_be_restored">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                
+                    <div class="modal-header ">
+                        <h3 class="modal-title text-danger" id="title">{{ 'vm.backup.popup.title' | translate }}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p [innerHtml]="'vm.backup.popup.description.1' | translate"></p>
+                        <p [innerHtml]="'vm.backup.popup.description.2' | translate" *ngIf="!this.vm_has_proxmox_error && errorcode != 404"></p>
+                        <p [innerHtml]="'vm.backup.popup.description.3' | translate" *ngIf="this.vm_has_proxmox_error || errorcode == 404"></p>
+                    </div>
+                    <div class="modal-footer .center">
+                        <p><button type="button" class="btn btn-primary btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteVMModal">{{ 'vm.backup.popup.button.delete' | translate }}</button></p>
+                        <p><button type="button" class="btn btn-primary btn btn-success" data-bs-toggle="modal" data-bs-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{ 'vm.backup.popup.button.restore' | translate }}</button></p>
+                        <p><a href="/vms"><button type="button" class="btn btn-secondary" >{{ 'vm.backup.popup.button.cancel' | translate }}</button></a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+      
+      
+    <div class="modal fade bd-example-modal-lg" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="restoreModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title" id="restoreModalLabel">{{ "vm.updateCreds.title" | translate }} </h3>
+            <button type="button" class="close" id="updateCloseButton" #updateCloseButton data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p><strong class="text-alert" *ngIf="need_to_be_restored">{{ "vm.backup.popup.button.explanation" | translate }}</strong> </p>
+            <div class="alert alert-danger" *ngIf="popUpErrorCode != 0">
+              <p [innerHtml] = "popUpErrorMessage"></p>
+            </div>
+            <form (ngSubmit)="update_vm()">
+              <div class="form-group">
+                <label for="username" class="col-form-label">{{"vm.updateCreds.username" | translate}}</label>
+                <input type="text" class="form-control" id="popUpUsername" [(ngModel)]="popUpUsername" name="popUpUsername">
+              </div>
+              <div class="form-group">
+                <label for="password" class="col-form-label">{{"vm.updateCreds.password" | translate}}</label>
+                <input type="password" class="form-control" id="popUpPassword" [(ngModel)]="popUpPassword" name="popUpPassword">
+              </div>
+              <div class="form-group">
+                <label for="sshKey" class="col-form-label">{{"vm.updateCreds.ssh" | translate}}</label>
+                <textarea class="form-control" id="popUpSSHkey" [(ngModel)]="popUpSSHkey" name="popUpSSHkey"></textarea>
+              </div>
+            </form>
+          
+            <div class="alert alert-primary" *ngIf="need_to_be_restored">
+              <p [innerHtml]="'vm.updateCreds.charte' | translate"></p>
+            </div>
+            <div class="alert alert-primary" *ngIf="!need_to_be_restored">
+              <p>{{ 'vm.updateCreds.info' | translate }}</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="backButton" [disabled]="popUpLoading">{{ "vm.backup.popup.button.cancel" |translate }}</button>
+            
+              <button  class="btn btn-success w-50" [disabled]="popUpLoading" (click)="update_vm_credentials()">
+                <span [hidden]="popUpLoading" *ngIf="need_to_be_restored">{{ "vm.backup.popup.button.restore" | translate }}</span>
+                <span *ngIf="!need_to_be_restored">{{ "vm.backup.popup.button.update" | translate }}</span> <div class="spinner-border spinner-border-sm text-light" role="status" *ngIf="popUpLoading">
+                <span class="sr-only">Loading...</span>
+              </div></button>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
-  </div>
-  
-      <div *ngIf="deletionStatus != 'deleting' && deletionStatus != 'deleted' && !vm_has_error">
-      <hr>
-      <div class="row" >
-          <div class="col-md-6">
-              <div class="card">
-                  <div class="card-body" >
-                      <h4>{{'vm.information' | translate}}</h4>
-                      <hr>
-                      <div class="row">
-                          <div class="col-6 text-left">
-                              <p><b>{{'vm.id' | translate}} :</b>&nbsp; {{ (vm$ | async).id }}</p>
-                              <p><b>{{'vm.type' | translate}} :</b>&nbsp; {{ (vm$ | async).type }}</p>
-                              <p><b>{{'vm.status' | translate}} :</b>&nbsp; {{ (vm$ | async).status }}</p>
-                              <p><b>{{'vm.name' | translate}} :</b>&nbsp; {{ (vm$ | async).name }}</p>
-                              <p *ngIf="(vm$ | async).status == 'running'"><b>{{'vm.ipv4' | translate}} :</b>&nbsp; <span *ngIf="renew_vm_status != 'reboot'">{{ (vm$ | async).ip }}</span> <button *ngIf="(vm$ | async).ip == '' && (renew_vm_status == '' || renew_vm_status == 'loading')" class="btn btn-primary" (click)="renew_vm()"><span *ngIf="renew_vm_status == ''">{{'vm.ipv4.renew' | translate}}</span><span class="spinner-border spinner-border-sm" *ngIf="renew_vm_status == 'loading'"></span> </button>  <button  class="btn btn-danger" (click)="commit_edit('reboot')" *ngIf="renew_vm_status == 'reboot'">{{ 'vm.reboot.apply' | translate}}</button></p>
-                              <p><b>{{'vm.startOnBoot' | translate}} :</b></p>
-                              <div class="custom-control custom-switch">
-                                  <input type="checkbox" (change)="commit_edit('switch_autoreboot')" [checked]="(vm$ | async).autoreboot === 1" class="custom-control-input" id="customSwitches">
-                                  <label class="custom-control-label" for="customSwitches">{{'vm.startOnBootDescription' | translate}}</label>
-                              </div>
+
+        <div *ngIf="deletionStatus != 'deleting' && deletionStatus != 'deleted' && !vm_has_error">
+        <hr>
+        <div class="row" >
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body" >
+                        <h4>{{'vm.information' | translate}}</h4>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6 text-left">
+                                <p><b>{{'vm.id' | translate}} :</b>&nbsp; {{ vm.id }}</p>
+                                <p><b>{{'vm.type' | translate}} :</b>&nbsp; {{ vm.type }}</p>
+                                <p><b>{{'vm.status' | translate}} :</b>&nbsp; {{ vm.status }}</p>
+                                <p><b>{{'vm.name' | translate}} :</b>&nbsp; {{ vm.name }}</p>
+                                <p *ngIf="vm.status == 'running'"><b>{{'vm.ipv4' | translate}} :</b>&nbsp; <span *ngIf="renew_vm_status != 'reboot'">{{ vm.ip }}</span> <button *ngIf="vm.ip == '' && (renew_vm_status == '' || renew_vm_status == 'loading')" class="btn btn-primary" (click)="renew_vm()"><span *ngIf="renew_vm_status == ''">{{'vm.ipv4.renew' | translate}}</span><span class="spinner-border spinner-border-sm" *ngIf="renew_vm_status == 'loading'"></span> </button>  <button  class="btn btn-danger" (click)="commit_edit('reboot')" *ngIf="renew_vm_status == 'reboot'">{{ 'vm.reboot.apply' | translate}}</button></p>
+                                <p><b>{{'vm.startOnBoot' | translate}} :</b></p>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" (change)="commit_edit('switch_autoreboot')" [checked]="vm.autoreboot === 1" class="custom-control-input" id="customSwitches">
+                                    <label class="custom-control-label" for="customSwitches">{{'vm.startOnBootDescription' | translate}}</label>
+                                </div>
+
+                            </div>
+                            <div class="col-6 text-left">
+                                <p *ngIf="user.admin"><b>{{'vm.owner' | translate}} :</b> {{ vm.user }}</p>
+                            
+                                <p><b>{{'vm.createdOn' | translate}} :</b> {{vm.createdOn}}</p>                            
+                                <p><b>{{'vm.lastBackupDate' | translate}} :</b> {{vm.lastBackupDate !== 0 ? formatTimestamp(vm.lastBackupDate) : 'vm.noBackup' | translate}}</p>
+                                <p *ngIf="vm.status == 'running'"><b>{{'vm.upTime' | translate}} :</b> {{secondsToDhms( vm.uptime )}}</p>
+                            </div>
+                            <p><br><br><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{'vm.updateCreds.button' | translate}}</button></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>{{'vm.systemInformation' | translate}}</h4>
+                        <hr>
+                        <div class="text-left">
+                            <p *ngIf="!editing"><b>{{'vm.cpu' | translate}} :</b>&nbsp; {{ vm.cpu }}</p>
+                            <div class="progress flex-fill">
+                                <div *ngIf="vm.cpuUsage <= 50" class="progress-bar progress-bar-animated"
+                                     role="progressbar"
+                                     aria-valuemin="0" aria-valuemax="100" [style.width.%]="vm.cpuUsage">
+                                </div>
                               
-                          </div>
-                          <div class="col-6 text-left">
-                              <p *ngIf="user.admin"><b>{{'vm.owner' | translate}} :</b> {{ (vm$ | async).user }}</p>
-                          
-                              <p><b>{{'vm.createdOn' | translate}} :</b> {{(vm$ | async).createdOn}}</p>                            
-                              <p><b>{{'vm.lastBackupDate' | translate}} :</b> {{(vm$ | async).lastBackupDate !== 0 ? formatTimestamp((vm$ | async).lastBackupDate) : 'vm.noBackup' | translate}}</p>
-                              <p *ngIf="(vm$ | async).status == 'running'"><b>{{'vm.upTime' | translate}} :</b> {{secondsToDhms( (vm$ | async).uptime )}}</p>
-                          </div>
-                          <p><br><br><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateModal" id="openUpdateButton" data-whatever="@getbootstrap" *ngIf="!this.vm_has_proxmox_error && errorcode != 404" >{{'vm.updateCreds.button' | translate}}</button></p>
-                      </div>
-                  </div>
-              </div>
-          </div>
-        
-          <div class="col-md-6">
-              <div class="card">
-                  <div class="card-body">
-                      <h4>{{'vm.systemInformation' | translate}}</h4>
-                      <hr>
-                      <div class="text-left">
-                          <p *ngIf="!editing"><b>{{'vm.cpu' | translate}} :</b>&nbsp; {{ (vm$ | async).cpu }}</p>
-                          <div class="progress flex-fill">
-                              <div *ngIf="(vm$ | async).cpuUsage <= 50" class="progress-bar progress-bar-animated"
-                                   role="progressbar"
-                                   aria-valuemin="0" aria-valuemax="100" [style.width.%]="(vm$ | async).cpuUsage">
-                              </div>
-                            
-                              <div *ngIf=" 50 < (vm$ | async).cpuUsage && (vm$ | async).cpuUsage <= 75"
-                                   class="progress-bar progress-bar-animated bg-warning" role="progressbar"
-                                   aria-valuemin="0" aria-valuemax="100" [style.width.%]="(vm$ | async).cpuUsage">
-                              </div>
-                            
-                              <div *ngIf=" 75 < (vm$ | async).cpuUsage" class="progress-bar progress-bar-animated bg-danger"
-                                   role="progressbar"
-                                   aria-valuemin="0" aria-valuemax="100" [style.width.%]="(vm$ | async).cpuUsage">
-                              </div>
-                            
-                          </div>
-                          <span *ngIf="(vm$ | async).cpuUsage" style="float: right"
-                                class="text-info"> {{(vm$ | async).cpuUsage}}%</span>
-                          <p style="padding-top: 5%" *ngIf="!editing"><b>{{'vm.ram' | translate}} :</b>&nbsp; {{ (vm$ | async).ram }}</p>
-                          <div class="progress flex-fill">
-                              <div *ngIf="(vm$ | async).ramUsage <= 50" class="progress-bar progress-bar-animated"
-                                   role="progressbar"
-                                   aria-valuemin="0" aria-valuemax="100" [style.width.%]="(vm$ | async).ramUsage">
-                              </div>
-                            
-                              <div *ngIf=" 50 < (vm$ | async).ramUsage && (vm$ | async).ramUsage <= 75"
-                                   class="progress-bar progress-bar-animated bg-warning" role="progressbar"
-                                   aria-valuemin="0" aria-valuemax="100" [style.width.%]="(vm$ | async).ramUsage">
-                              </div>
-                            
-                              <div *ngIf=" 75 < (vm$ | async).ramUsage" class="progress-bar progress-bar-animated bg-danger"
-                                   role="progressbar"
-                                   aria-valuemin="0" aria-valuemax="100" [style.width.%]="(vm$ | async).ramUsage">
-                              </div>
-                          </div>
-                          <span *ngIf="(vm$ | async).ramUsage" style="float: right"
-                                class="text-info">{{(vm$ | async).ram * ((vm$ | async).ramUsage / 100) | number:'1.1-2'}}
-                              /{{(vm$ | async).ram}} GB</span>
-                          <!-- <p *ngIf="editing">{{newVm.disk}}<button (click)="add('disk')" class="btn btn-primary btn-sm">+</button></p> -->
-                          <p *ngIf="!editing" style="padding-top: 5%"><b>{{'vm.diskSpace' | translate}} :</b>&nbsp; {{ (vm$ | async).disk }}
-                          </p>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
-    
-      <hr>
-      </div>
-    
-      <div class="row">
-        <div class="alert alert-warning text-center" *ngIf="(vm$ | async).isUnsecure">
-          <b>Ta VM a été eteinte car elle n'est pas sécurisée !</b><br><br>
-          Pour des raisons de sécurité, la connexion SSH par mot de passe aux VMs est interdite. Seule l'authentification par clé doit être autorisée. Afin de prévenir tout risque de sécurité, votre VM a été automatiquement éteinte.<br><br>
-        
-          Pour re-sécuriser la connexion SSH de ta VM, vous pouvez suivre <a href="https://hosting.minet.net/manual#securiser-connexion-SSH">ce tutoriel</a>.
+                                <div *ngIf=" 50 < vm.cpuUsage && vm.cpuUsage <= 75"
+                                     class="progress-bar progress-bar-animated bg-warning" role="progressbar"
+                                     aria-valuemin="0" aria-valuemax="100" [style.width.%]="vm.cpuUsage">
+                                </div>
+                              
+                                <div *ngIf=" 75 < vm.cpuUsage" class="progress-bar progress-bar-animated bg-danger"
+                                     role="progressbar"
+                                     aria-valuemin="0" aria-valuemax="100" [style.width.%]="vm.cpuUsage">
+                                </div>
+                              
+                            </div>
+                            <span *ngIf="vm.cpuUsage" style="float: right"
+                                  class="text-info"> {{vm.cpuUsage}}%</span>
+                            <p style="padding-top: 5%" *ngIf="!editing"><b>{{'vm.ram' | translate}} :</b>&nbsp; {{ vm.ram }}</p>
+                            <div class="progress flex-fill">
+                                <div *ngIf="vm.ramUsage <= 50" class="progress-bar progress-bar-animated"
+                                     role="progressbar"
+                                     aria-valuemin="0" aria-valuemax="100" [style.width.%]="vm.ramUsage">
+                                </div>
+                              
+                                <div *ngIf=" 50 < vm.ramUsage && vm.ramUsage <= 75"
+                                     class="progress-bar progress-bar-animated bg-warning" role="progressbar"
+                                     aria-valuemin="0" aria-valuemax="100" [style.width.%]="vm.ramUsage">
+                                </div>
+                              
+                                <div *ngIf=" 75 < vm.ramUsage" class="progress-bar progress-bar-animated bg-danger"
+                                     role="progressbar"
+                                     aria-valuemin="0" aria-valuemax="100" [style.width.%]="vm.ramUsage">
+                                </div>
+                            </div>
+                            <span *ngIf="vm.ramUsage" style="float: right"
+                                  class="text-info">{{vm.ram * (vm.ramUsage / 100) | number:'1.1-2'}}
+                                /{{vm.ram}} GB</span>
+                            <!-- <p *ngIf="editing">{{newVm.disk}}<button (click)="add('disk')" class="btn btn-primary btn-sm">+</button></p> -->
+                            <p *ngIf="!editing" style="padding-top: 5%"><b>{{'vm.diskSpace' | translate}} :</b>&nbsp; {{ vm.disk }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+      
+        <hr>
+        </div>
+      
+        <div class="row">
+          <div class="alert alert-warning text-center" *ngIf="vm.isUnsecure">
+            <b>Ta VM a été eteinte car elle n'est pas sécurisée !</b><br><br>
+            Pour des raisons de sécurité, la connexion SSH par mot de passe aux VMs est interdite. Seule l'authentification par clé doit être autorisée. Afin de prévenir tout risque de sécurité, votre VM a été automatiquement éteinte.<br><br>
+          
+            Pour re-sécuriser la connexion SSH de ta VM, vous pouvez suivre <a href="https://hosting.minet.net/manual#securiser-connexion-SSH">ce tutoriel</a>.
+          </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="btn-group">
+                            <button type="button" *ngIf="(!vm_has_error && vm.status != 'creating') || vm_has_proxmox_error" class="btn btn-danger" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
+                            data-bs-toggle="modal" data-bs-target="#deleteVMModal">{{'vm.delete' | translate}}
+                            </button>
+                            <!-- <button type="button" class="btn btn-primary" *ngIf="!editing" (click)="edit()">Edit</button> -->
+                            <!--<button type="button" class="btn btn-primary" *ngIf="editing" (click)="editing = false;">Confirm</button>-->
+                            <button type="button" class="btn btn-info" *ngIf="vm.status == 'stopped'"  [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
+                                    (click)="commit_edit('start')">{{'vm.start' | translate}}
+                            </button>
+                            <button type="button" class="btn btn-info" *ngIf="vm.status == 'running'" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
+                                    (click)="commit_edit('stop')">{{'vm.stop' | translate}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 20px;" *ngIf="this.user.admin">
           <div class="col-12">
               <div class="card">
                   <div class="card-body">
-                      <div class="btn-group">
-                          <button type="button" *ngIf="(!vm_has_error && (vm$ | async).status != 'creating') || vm_has_proxmox_error" class="btn btn-danger" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
-                          data-bs-toggle="modal" data-bs-target="#deleteVMModal">{{'vm.delete' | translate}}
-                          </button>
-                          <!-- <button type="button" class="btn btn-primary" *ngIf="!editing" (click)="edit()">Edit</button> -->
-                          <!--<button type="button" class="btn btn-primary" *ngIf="editing" (click)="editing = false;">Confirm</button>-->
-                          <button type="button" class="btn btn-info" *ngIf="(vm$ | async).status == 'stopped'"  [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
-                                  (click)="commit_edit('start')">{{'vm.start' | translate}}
-                          </button>
-                          <button type="button" class="btn btn-info" *ngIf="(vm$ | async).status == 'running'" [disabled]="deletionStatus == 'deleting' || deletionStatus == 'deleted'"
-                                  (click)="commit_edit('stop')">{{'vm.stop' | translate}}
-                          </button>
+                    <form (ngSubmit)="transfer_vm_ownership()">
+                      <div>
+                        <div class="d-flex justify-content-center">
+                          <span><strong>Compte actuel :</strong> {{vm.user}}</span><br>
+                        </div>     
+                        <div class="d-flex justify-content-center" style="margin-top:20px">
+                            <div style="width:25%">
+                              <input type="text" class="form-control" id="username" placeholder="Login adhérent" [(ngModel)]="this.new_user_to_transfer">
+                            </div>
+                            <div style="width:25%">
+                                <button type="submit" class="btn mb-3" [disabled]="transfering_ownership" [ngClass]="{
+                                  'btn-success': transfering_request_message == 'success',
+                                  'btn-primary': transfering_request_message != 'success'
+                                    }">  
+                                  <span [hidden]="!transfering_ownership"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading ...</span>
+                                  <span [hidden]="transfering_ownership">Transférer la propriété</span></button>
+                            </div>
+                        </div>     
                       </div>
+                    </form>
+                    <div class="alert alert-danger" role="alert" *ngIf="!transfering_ownership && transfering_request_message != '' && transfering_request_message != 'success'">
+                      <div>
+                        {{transfering_request_message}}
+                      </div>
+                    </div>        
                   </div>
               </div>
           </div>
       </div>
-      <div class="row" style="margin-top: 20px;" *ngIf="this.user.admin">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                  <form (ngSubmit)="transfer_vm_ownership()">
-                    <div>
-                      <div class="d-flex justify-content-center">
-                        <span><strong>Compte actuel :</strong> {{(vm$ | async).user}}</span><br>
-                      </div>     
-                      <div class="d-flex justify-content-center" style="margin-top:20px">
-                          <div style="width:25%">
-                            <input type="text" class="form-control" id="username" placeholder="Login adhérent" [(ngModel)]="this.new_user_to_transfer">
-                          </div>
-                          <div style="width:25%">
-                              <button type="submit" class="btn mb-3" [disabled]="transfering_ownership" [ngClass]="{
-                                'btn-success': transfering_request_message == 'success',
-                                'btn-primary': transfering_request_message != 'success'
-                                  }">  
-                                <span [hidden]="!transfering_ownership"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading ...</span>
-                                <span [hidden]="transfering_ownership">Transférer la propriété</span></button>
-                          </div>
-                      </div>     
+        <div class="modal fade" id="deleteVMModal" tabindex="-1" role="dialog" aria-labelledby="deleteVMModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="popUpAlertTitle"> {{ 'vm.delete.popup.title' | translate }} {{ this.vmid }}</h5>
+                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                          <label for="input_vm_id" class="col-form-label">{{ "vm.delete.popup.desc" | translate }}<br><br>{{ "vm.delete.popup.prompt.label" | translate }}:</label>
+                          <input type="text" class="form-control" id="input_vm_id" [(ngModel)]="this.input_vm_id" name="input_vm_id" [placeholder]="this.vmid" value=""/>
+                        </div>
+                      </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary btn-danger" [disabled]="this.input_vm_id != this.vmid" (click)="deleteVm()" data-bs-dismiss="modal" >{{"vm.delete" | translate}} </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        <div class="row" style="margin-top: 20px;" *ngIf="this.user.admin">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                            <h4>{{'vm.ipHistory' | translate}}</h4>
+                            <hr>
+                            <div class="text-center">{{'vm.ipHistoryDescription' | translate}}</div>
+                            <table style="margin-top: px" class="table table-striped">
+                                <thead>
+                                    <th scope="col">IP</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Vm ID</th>
+                                    <th scope="col">User ID</th>
+                                </thead>
+                                <tbody>
+                                    <tr scope="row" *ngFor="let lign of this.history; let i = index">
+                                        <td *ngFor="let column of history[i]"> {{ column }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                     </div>
-                  </form>
-                  <div class="alert alert-danger" role="alert" *ngIf="!transfering_ownership && transfering_request_message != '' && transfering_request_message != 'success'">
-                    <div>
-                      {{transfering_request_message}}
-                    </div>
-                  </div>        
                 </div>
             </div>
         </div>
     </div>
-      <div class="modal fade" id="deleteVMModal" tabindex="-1" role="dialog" aria-labelledby="deleteVMModalTitle" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="popUpAlertTitle"> {{ 'vm.delete.popup.title' | translate }} {{ this.vmid }}</h5>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                  <form>
-                      <div class="form-group">
-                        <label for="input_vm_id" class="col-form-label">{{ "vm.delete.popup.desc" | translate }}<br><br>{{ "vm.delete.popup.prompt.label" | translate }}:</label>
-                        <input type="text" class="form-control" id="input_vm_id" [(ngModel)]="this.input_vm_id" name="input_vm_id" [placeholder]="this.vmid" value=""/>
-                      </div>
-                    </form>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary btn-danger" [disabled]="this.input_vm_id != this.vmid" (click)="deleteVm()" data-bs-dismiss="modal" >{{"vm.delete" | translate}} </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      <div class="row" style="margin-top: 20px;" *ngIf="this.user.admin">
-          <div class="col-12">
-              <div class="card">
-                  <div class="card-body">
-                          <h4>{{'vm.ipHistory' | translate}}</h4>
-                          <hr>
-                          <div class="text-center">{{'vm.ipHistoryDescription' | translate}}</div>
-                          <table style="margin-top: px" class="table table-striped">
-                              <thead>
-                                  <th scope="col">IP</th>
-                                  <th scope="col">Date</th>
-                                  <th scope="col">Vm ID</th>
-                                  <th scope="col">User ID</th>
-                              </thead>
-                              <tbody>
-                                  <tr scope="row" *ngFor="let lign of this.history; let i = index">
-                                      <td *ngFor="let column of history[i]"> {{ column }}</td>
-                                  </tr>
-                              </tbody>
-                          </table>
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
+  </ng-container>
   
   
   <div class="alert alert-danger text-center" *ngIf="!this.user.chartevalidated && !user.admin && this.user.freezeState == 0">

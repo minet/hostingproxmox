@@ -24,9 +24,9 @@ def create_app():
     app = connexion.App(__name__, specification_dir='./swagger/')
     app.app.json_encoder = encoder.JSONEncoder
     app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
-    CORS(app.app)
     scheduler = APScheduler()
     app.add_api('swagger.yaml', arguments={'title': 'Proxmox'}, pythonic_params=True)
+    CORS(app.app)
     return app, scheduler
 
 

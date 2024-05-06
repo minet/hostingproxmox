@@ -34,6 +34,12 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(nam
 def add_user_dns(user_id, entry, ip):
     database.add_dns_entry(user_id, entry, ip, validated=False)
     logging.info("DNS entry added: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
+    logging.info("send a notification to bureau@listes.minet.net")
+    mailBody = util.mailHTMLBureau(user_id, entry, ip)
+    try : 
+        util.sendMailBureau(mailBody, user_id)
+    except Exception as e:
+        print("ERROR : the mail to " + str(user_id) + " failed to be sent : " + str(e))
     return {"dns": "added"}, 201
 
 
@@ -42,8 +48,21 @@ def accept_user_dns(user_id, entry, ip):
 
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
+        
         database.validate_dns_entry(user_id, entry, ip)
         logging.info("DNS entry validated: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
+        logging.info("send a notification to " + str(user_id))
+        print("send a notification to " + str(user_id))
+        mailBody = util.mailHTMLAdherent(user_id, entry, ip, "acceptée")
+        account, status = util.get_adh6_account(user_id)
+        if (account is None):
+            return {"error": "Impossible to retrieve the user info"}, 404
+        try : 
+            util.sendMailAdherent(account["email"], mailBody, entry, True)
+        except Exception as e:
+            print("ERROR : the mail to " + str(user_id) + " failed to be sent : " + str(e))
+            return rep_msg, rep_code
+        
     return rep_msg, rep_code
 
 def isDnsEntryExistingInDatabase(entry):
@@ -63,7 +82,7 @@ def get_user_dns(user_id = ""):
 
 
 
-def del_user_dns(dnsid):
+def del_user_dns(dnsid, sendMail:bool = False):
     db_result = database.get_entry_host_and_validation(dnsid)
     if db_result is None:
         return {"dns": "not found"}, 404
@@ -83,6 +102,14 @@ def del_user_dns(dnsid):
     else:
         database.del_dns_entry(dnsid)
         logging.info("DNS entry deleted: " + str(dnsid))
+        if sendMail:
+            user_id = db_result[0]['userId']
+            ip = db_result[0]['ip']
+            mailBody = util.mailHTMLAdherent(user_id, entry, ip, "refusée")
+            try : 
+                util.sendMailAdherent(mailBody, user_id, entry, False)
+            except Exception as e:
+                print("ERROR : the mail to " + str(user_id) + " failed to be sent : " + str(e))
         return {"dns": "entry deleted"}, 201
 
 
