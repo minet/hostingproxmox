@@ -211,7 +211,7 @@ class DefaultApi(object):
             collection_formats=collection_formats)
 
 
-    def delete_dns_id(self, dnsid, **kwargs):  # noqa: E501
+    def delete_dns_id(self, dnsid, sendMail, **kwargs):  # noqa: E501
         """delete dns entry by id  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
@@ -227,12 +227,12 @@ class DefaultApi(object):
         """
         kwargs['_return_http_data_only'] = True
         if kwargs.get('async_req'):
-            return self.delete_dns_id_with_http_info(dnsid, **kwargs)  # noqa: E501
+            return self.delete_dns_id_with_http_info(dnsid, sendMail, **kwargs)  # noqa: E501
         else:
-            (data) = self.delete_dns_id_with_http_info(dnsid, **kwargs)  # noqa: E501
+            (data) = self.delete_dns_id_with_http_info(dnsid, sendMail, **kwargs)  # noqa: E501
             return data
 
-    def delete_dns_id_with_http_info(self, dnsid, **kwargs):  # noqa: E501
+    def delete_dns_id_with_http_info(self, dnsid, sendMail, **kwargs):  # noqa: E501
         """delete dns entry by id  # noqa: E501
 
         This method makes a synchronous HTTP request by default. To make an
@@ -247,7 +247,7 @@ class DefaultApi(object):
                  returns the request thread.
         """
 
-        all_params = ['dnsid']  # noqa: E501
+        all_params = ['dnsid', 'sendMail']  # noqa: E501
         all_params.append('async_req')
         all_params.append('_return_http_data_only')
         all_params.append('_preload_content')
@@ -266,12 +266,19 @@ class DefaultApi(object):
         if ('dnsid' not in params or
                 params['dnsid'] is None):
             raise ValueError("Missing the required parameter `dnsid` when calling `delete_dns_id`")  # noqa: E501
+        
+        if ('sendMail' not in params or
+                params['sendMail'] is None):
+            raise ValueError("Missing the required parameter `sendMail` when calling `delete_dns_id`")  # noqa: E501
 
         collection_formats = {}
 
         path_params = {}
         if 'dnsid' in params:
             path_params['dnsid'] = params['dnsid']  # noqa: E501
+            
+        if 'sendMail' in params:
+            path_params['sendMail'] = params['sendMail']  # noqa: E501
 
         query_params = []
 

@@ -151,13 +151,14 @@ export class DnsComponent implements OnInit, OnDestroy {
         return authorized_ip.test(ip.trim())
     }
 
-    accept_entry(userid: string, dnsentry: string, dnsip: string): void {
+    accept_entry(dns: Dns): void {
         if(this.user.admin) {
+            dns.status = "accepting"
             this.http.post(this.authService.SERVER_URL + '/dns/validation', 
                 {
-                    userid: userid,
-                    dnsentry: dnsentry,
-                    dnsip: dnsip
+                    userid: dns.user,
+                    dnsentry: dns.entry,
+                    dnsip: dns.ip
                 }, 
                 {observe: 'response'}
             )
@@ -167,26 +168,31 @@ export class DnsComponent implements OnInit, OnDestroy {
                     console.log("ok");
                 },
                 error => {
-                    console.log("error");
+                    console.log(error);
                     this.errorcode = error.status;
                     this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+                    dns.status = "created"
                 }
             );
         }
     }
     
 
-    delete_entry(id: string): void {
+    delete_entry(dns: Dns, sendMail: boolean): void {
         if(this.user.chartevalidated || this.user.admin) {
-            this.http.delete(this.authService.SERVER_URL + '/dns/' + id, {observe: 'response'})
-                .subscribe(
-                    () => {
-                        window.location.reload();
-                    },
-                    error => {
-                        this.errorcode = error.status;
-                        this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
-                    });
+            dns.status = "deleting";
+            this.http.delete(`${this.authService.SERVER_URL}/dns/${dns.id}`
+            , { params: { sendMail: sendMail.toString() } }
+        ).subscribe(
+            () => {
+                window.location.reload();
+            },
+            error => {
+                this.errorcode = error.status;
+                this.httpErrorMessage = this.utils.getHttpErrorMessage(this.errorcode)
+                console.log(error);
+                dns.status = "created"
+            });
         }
     }
 }

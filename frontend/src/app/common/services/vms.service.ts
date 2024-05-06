@@ -229,8 +229,8 @@ export class VmsService {
                     const vmstate = rep.body['status'];
                     if (vmstate == "deleted") {
                         //wipe out les vms pour recalculer les ressources
-                        this.vmIds$ = new Observable<number[]>();
-                        this.vmsSubject = new BehaviorSubject<Map<number, Vm>>(new Map());
+                        this.vmIds$ = of([]);
+                        this.vmsSubject.next(new Map());
                         this.VMCount = 0;
                         this.CPUCount = 0;
                         this.RAMCount = 0;
@@ -250,8 +250,8 @@ export class VmsService {
                     error => {
                         if (error.status == 403 || error.status == 404) { // the vm is deleted 
                             //wipe out les vms pour recalculer les ressources
-                            this.vmIds$ = new Observable<number[]>();
-                            this.vmsSubject = new BehaviorSubject<Map<number, Vm>>(new Map());
+                            this.vmIds$ = of([]);
+                            this.vmsSubject.next(new Map());
                             this.VMCount = 0;
                             this.CPUCount = 0;
                             this.RAMCount = 0;

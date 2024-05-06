@@ -26,7 +26,7 @@
 
 <div *ngIf="(user.chartevalidated && user.freezeState < 3) || user.admin">
 
-  <div *ngIf="(dnsService.isUpdatingDnsIds || dnsService.isUpdatingDns > 0) && (dns$ | async).length == 0; else dnsPannel">
+  <div *ngIf="(dnsService.isUpdatingDnsIds || dnsService.isUpdatingDns > 0) && (dns$ | async)?.length == 0; else dnsPannel">
     <div class="d-flex justify-content-center">
       <div class="spinner-border text-primary" role="status">
         <span class="sr-only">{{'dns.loading' | translate}}</span>
@@ -109,7 +109,7 @@
     </div>
     
     <div class="mt-5"></div>
-    <div *ngIf="dnsService.isUpdatingDns <= 0 && (dns$ | async).length == 0; else dnsEntries">
+    <div *ngIf="dnsService.isUpdatingDns <= 0 && (dns$ | async)?.length == 0; else dnsEntries">
       <hr>
         <h4 class="text-danger text-center" *ngIf="!user.admin">{{'dns.noEntries.user' | translate}}</h4>
         <h4 class="text-danger text-center" *ngIf="user.admin">{{'dns.noEntries.admin' | translate}}</h4>
@@ -163,10 +163,31 @@
                     </div>
                   </ng-template>
                 </td>
-                <td *ngIf="user.admin && dns.entry"><button class="btn-sm btn-success" (click)="accept_entry(dns.user, dns.entry, dns.ip)">{{'dns.item.accept' | translate}}</button></td>
-                <td *ngIf="user.admin && dns.entry"><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.refuse' | translate}}</button></td>
+                <td *ngIf="user.admin && dns.entry">
+                  <div *ngIf="dns.status === 'created'">
+                    <button class="btn-sm btn-success" (click)="accept_entry(dns)">{{'dns.item.accept' | translate}}</button>
+                  </div>
+                  <div class="ml-auto text-center" *ngIf="dns.status === 'accepting'">
+                    <i class="fa fa-spinner fa-spin text-success"></i>
+                  </div>
+                </td>
+                <td *ngIf="user.admin && dns.entry">
+                  <div *ngIf="dns.status === 'created'">
+                    <button class="btn-sm btn-danger" (click)="delete_entry(dns, true)">{{'dns.item.refuse' | translate}}</button>
+                  </div>
+                  <div class="ml-auto text-center" *ngIf="dns.status === 'deleting'">
+                    <i class="fa fa-spinner fa-spin text-danger"></i>
+                  </div>
+                </td>
                 <td *ngIf="!user.admin && dns.entry">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                <td *ngIf="!user.admin && dns.entry"><button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button></td>
+                <td *ngIf="!user.admin && dns.entry">
+                  <div *ngIf="dns.status === 'created'">
+                    <button class="btn-sm btn-danger" (click)="delete_entry(dns, false)">{{'dns.item.delete' | translate}}</button>
+                  </div>
+                  <div class="ml-auto text-center" *ngIf="dns.status === 'deleting'">
+                    <i class="fa fa-spinner fa-spin text-danger"></i>
+                  </div>
+                </td>
               </tr>
             </ng-container>
           </tbody>
@@ -220,9 +241,12 @@
                 </td>
                 <td *ngIf="user.admin">{{dns.id}}</td>
                 <td>
-                  <ng-container>
-                    <button class="btn-sm btn-danger" (click)="delete_entry(dns.id)">{{'dns.item.delete' | translate}}</button>
+                  <ng-container *ngIf="dns.status === 'created'">
+                  <button class="btn-sm btn-danger" (click)="delete_entry(dns, false)">{{'dns.item.delete' | translate}}</button>
                   </ng-container>
+                  <div class="ml-auto text-center" *ngIf="dns.status === 'deleting'">
+                    <i class="fa fa-spinner fa-spin text-danger"></i>
+                  </div>
                 </td>
               </tr>
             </ng-container>
