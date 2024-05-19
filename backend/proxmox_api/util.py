@@ -361,6 +361,8 @@ def sendMailBureau(htmlbody, username):
     print("OK email")
     return 0
 
+
+
 def sendMailAdherent(usermail: str, htmlbody: str, entry: str, accepted: bool):
     msg = EmailMessage()
     msg['From'] = "hosting-noreply@minet.net"
