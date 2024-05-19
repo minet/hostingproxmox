@@ -32,6 +32,7 @@ angular_code_quality:
   before_script:
     - cd frontend
     - NG_CLI_ANALYTICS=ci
+    - npm config set registry http://registry.npmjs.org/
     - npm install -g @angular/cli
   script:
     - ng add @angular-eslint/schematics --skip-confirmation
@@ -88,6 +89,7 @@ angular_build:
     - npm config rm https-proxy
     - npm config set proxy "$HTTP_PROXY"
     - npm config set https-proxy "$HTTP_PROXY"
+    - npm config set registry http://registry.npmjs.org/
     - npm cache clear --force
     - cd frontend
     - NG_CLI_ANALYTICS=ci
