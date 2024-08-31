@@ -601,6 +601,7 @@ def get_vm_id(vmid):  # noqa: E501
         return {"error": "Unknown error one of the status, type or ip doesn't exists."}, 500
 
 
+
 def renew_ip():
     if connexion.request.is_json:
         body = connexion.request.get_json()  # noqa: E50
