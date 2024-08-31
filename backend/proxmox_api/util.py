@@ -351,7 +351,7 @@ def sendMailBureau(htmlbody, username):
     msg['From'] = "hosting-noreply@minet.net"
     msg['To'] = "bureau@listes.minet.net"
     # msg['Bcc'] = "archive_expired_cotisation_hosting@listes.minet.net"
-    msg['subject'] = f"[Hosting]" + {username} + " veut créer un nom de domaine !"
+    msg['subject'] = f"[Hosting] : {username} veut créer un nom de domaine !"
     msg.add_header('Content-Type','text/html')
     msg.set_payload(htmlbody.encode('utf-8'))
     server = smtplib.SMTP("192.168.102.18:25")
@@ -360,6 +360,8 @@ def sendMailBureau(htmlbody, username):
     server.quit()
     print("OK email")
     return 0
+
+
 
 def sendMailAdherent(usermail: str, htmlbody: str, entry: str, accepted: bool):
     msg = EmailMessage()
@@ -395,13 +397,13 @@ body{
     font-size: 14px;
     font-color:black;
 }
-</style>"""
+</style>""".replace('\n', ' ').replace('\r', ' ')
     msg = f"""
 <body>
     &#128680; Une personne souhaite ajouter une nouvelle entrée DNS sur hosting : {username} qui veut mettre en ligne {entry} pour l'IP {ip}.<br>
     Un admin Hosting doit la valider sur <a href="https://hosting.minet.net">hosting.minet.net</a>
 </body></html>
-        """
+        """.replace('\n', ' ').replace('\r', ' ')
     return header+msg
 
 def mailHTMLAdherent(username: str, entry: str, ip: str, accepted:str):

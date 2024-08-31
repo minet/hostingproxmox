@@ -497,7 +497,7 @@ def get_vm_id(vmid):  # noqa: E501
                 return {"error": errorMessage}, 400
             except: 
                 return {"error":  "An unknown error occured"}, 500
-        elif not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin: # we authorize to consult error message
+        elif not vmid in map(int, proxmox.get_mvm(user_id)[0]) and not admin: # we authorize to consult error message
             return {"error": "You don't have the right permissions"}, 403
         elif vm_status == "creating" : 
             return {"status" : "creating"}, 200
@@ -599,6 +599,8 @@ def get_vm_id(vmid):  # noqa: E501
     else :
         print("datal error for vm ", vmid, "Unknown error one of the status, type or ip doesn't exists : ", status, type, ip)
         return {"error": "Unknown error one of the status, type or ip doesn't exists."}, 500
+
+
 
 def renew_ip():
     if connexion.request.is_json:
