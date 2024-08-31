@@ -9,6 +9,7 @@ import {ManualComponent} from './manual/manual.component';
 import {HistoryComponent} from './history/history.component';
 import {DeletevmComponent} from './deletevm/deletevm.component';
 import { CancelUpdateGuard } from './cancel-update.guard';
+import { TestComponent } from './test/test.component';
 
 
 const routes: Routes = [
@@ -20,6 +21,7 @@ const routes: Routes = [
   {path: 'manual', component: ManualComponent},
   {path: 'history', component: HistoryComponent, canActivate: [CancelUpdateGuard]},
   {path: 'deletevm', component: DeletevmComponent},
+  {path: 'test', component: TestComponent},
   {path: '**', redirectTo: ''},
 ];
 

@@ -75,7 +75,11 @@ export class VmsService {
         // Update the list of expired users each time one theses two observables changes
         return combineLatest([this.vmsSubject, this.expiredUsersSubject]).pipe(
             map(([vms, expiredUsers]) => {
+
+
                 const expiredVms: Vm[] = [];
+
+
                 if (expiredUsers.length > 0) {
                     vms.forEach((vm) => {
                         if (expiredUsers.includes(vm.user)) {
@@ -351,6 +355,7 @@ export class VmsService {
             }
         }
         
+        
         vm.name = response.body['name'].trim();
         vm.status = response.body['status'];
         vm.ram = String(Math.floor(response.body['ram']/1000));
@@ -362,6 +367,8 @@ export class VmsService {
         vm.cpuUsage = response.body['cpu_usage'];
         vm.uptime = response.body['uptime'];
         vm.lastBackupDate = response.body['last_backup_date'];
+
+
         if (response.body['ip'] == ""){
             vm.ip = ""
         } else {

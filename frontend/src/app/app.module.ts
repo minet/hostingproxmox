@@ -28,6 +28,7 @@ import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import { DeletevmComponent } from './deletevm/deletevm.component';
 import { VmBoxComponent } from './vm-box/vm-box.component';
 import { DnsService } from './common/services/dns.service';
+import { TestComponent } from './test/test.component';
 
 export function storageFactory() : OAuthStorage {
   return localStorage;
@@ -53,6 +54,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     HistoryComponent,
     DeletevmComponent,
     VmBoxComponent,
+    TestComponent,
   ],
   imports: [
     BrowserModule,
