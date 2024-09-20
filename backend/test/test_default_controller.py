@@ -541,6 +541,18 @@ def test_admin_get_other_account_state(client, init_user_database, monkeypatch):
     assert user2.json == {"freezeState": "0"}
 
 
+def test_list_freezed_account(monkeypatch,init_user_database, client):
+    """Test if every freezed account is listed
+
+    """
+    monkeypatch.setattr(util, "check_cas_token", fake_check_cas_admin)
+
+    response = client.get('/2.0/expired', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
+    print(response.json)
+    assert response.status_code == 200
+    assert response.json == ["expired-user-3", "expired-user-4"]    
+
+
 
 #####
 ## get_account_max_ressources

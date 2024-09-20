@@ -1,4 +1,4 @@
-import { Component, OnInit,  Inject, Injectable} from '@angular/core';
+import { Component, OnInit,  Inject} from '@angular/core';
 import { UserService } from '../common/services/user.service';
 import { User } from '../models/user';
 import {CookieService} from 'ngx-cookie-service';
@@ -41,7 +41,11 @@ export class NavbarComponent implements OnInit {
   ngOnInit(): void {
     this.validToken$ = this.userService.validToken();
     this.validToken$.subscribe();
-    this.userService.getUser().subscribe((user) => this.user = user);
+    this.userService.getUserObservable().subscribe((user) => {
+        if (user) {
+            this.user = user;
+        }
+    });
     this.cookie.get('lang') == 'en' ? this.translate.use('en') : this.translate.use('fr');
     this.fetchNotification();
   }
@@ -77,7 +81,8 @@ export class NavbarComponent implements OnInit {
         this.notificationMessage = null;
       }
     },
-    error => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _error => {
       this.notificationTitle = null;
       this.notificationMessage = null;
     });

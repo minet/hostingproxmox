@@ -1,20 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DnsComponent } from './dns.component';
+import { VmBoxComponent } from './vm-box.component';
 
-describe('DnsComponent', () => {
-  let component: DnsComponent;
-  let fixture: ComponentFixture<DnsComponent>;
+describe('VmBoxComponent', () => {
+  let component: VmBoxComponent;
+  let fixture: ComponentFixture<VmBoxComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DnsComponent ]
+      declarations: [ VmBoxComponent ]
     })
     .compileComponents();
-  });
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(DnsComponent);
+    fixture = TestBed.createComponent(VmBoxComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -23,4 +21,3 @@ describe('DnsComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-

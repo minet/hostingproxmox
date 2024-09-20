@@ -15,7 +15,6 @@ export class Utils{
                 ) {
         this.cookie.get('lang') == 'en' ? this.translate.use('en') && this.cookie.set('lang','en') : this.translate.use('fr') && this.cookie.set('lang','fr');
     }
-    private errorcode;
 
 
     // A function which return the http error message for a given http error code
@@ -24,7 +23,7 @@ export class Utils{
         return errorMessages[httpErroCode];
     }
 
-    getTranslation(str) {
+    getTranslation(str: string) {
         let translation = str;
         this.translate.get(str).subscribe (x=> 
              translation =x);

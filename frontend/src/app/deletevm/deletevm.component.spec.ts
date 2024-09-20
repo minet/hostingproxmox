@@ -1,20 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DnsComponent } from './dns.component';
+import { DeletevmComponent } from './deletevm.component';
 
-describe('DnsComponent', () => {
-  let component: DnsComponent;
-  let fixture: ComponentFixture<DnsComponent>;
+describe('DeletevmComponent', () => {
+  let component: DeletevmComponent;
+  let fixture: ComponentFixture<DeletevmComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DnsComponent ]
+      declarations: [ DeletevmComponent ]
     })
     .compileComponents();
-  });
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(DnsComponent);
+    fixture = TestBed.createComponent(DeletevmComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -23,4 +21,3 @@ describe('DnsComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-

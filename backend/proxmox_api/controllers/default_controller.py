@@ -1,23 +1,59 @@
-from logging import error
 from proxmox_api import proxmox
+
 import connexion
-import requests
-import json
 from threading import Thread
-from requests.api import head
-from slugify import slugify
-from proxmox_api.models.dns_entry_item import DnsEntryItem  # noqa: E501
 from proxmox_api.models.dns_item import DnsItem  # noqa: E501
-from proxmox_api.models.vm_id_item import VmIdItem  # noqa: E501
 from proxmox_api.models.vm_item import VmItem  # noqa: E501
 from proxmox_api import util
 from proxmox_api.db.db_functions import *
-from datetime import datetime
 import proxmox_api.db.db_functions as dbfct
 from proxmox_api.proxmox import is_admin
 from proxmox_api.db import db_models
 
 
+def validate_dns():  # noqa: E501
+    """validate dns entry
+
+    # noqa: E501
+
+    :rtype: None
+    """
+    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    status_code, cas = util.check_cas_token(headers)
+
+    if status_code != 200:
+        return {"error": "You seem to be not connected."}, 403
+    user_id = cas['sub']
+    admin = False
+
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+
+    if admin :
+        freezeAccountState = 0 # Un admin n'a pas d'expiration de compte
+    else :
+        body,statusCode = proxmox.get_freeze_state(user_id)
+        if statusCode != 200:
+            return body, statusCode
+        try:
+            freezeAccountState = int(body["freezeState"])
+        except Exception as e:
+            return {"error": "error while getting freeze state"}, 500
+    
+    if freezeAccountState != 0 and not admin:
+        return {"error": "Your cotisation has expired"}, 403
+
+    if connexion.request.is_json:
+        update_body = connexion.request.get_json()  # noqa: E50
+
+    try:
+        userid = update_body['userid']
+    except KeyError:
+        return {"error": "Bad userid"}, 400
+    
+    return proxmox.accept_user_dns(userid, update_body['dnsentry'], update_body['dnsip']) 
 
 def create_dns(body=None):  # noqa: E501
     """create dns entry
@@ -68,6 +104,7 @@ def create_dns(body=None):  # noqa: E501
         return {"error" : "This DNS entry is forbidden. This incident will be reported."}, 403
     
     isOk = proxmox.check_dns_ip_entry(user_id, body.ip)
+    existingEntry = proxmox.isDnsEntryExistingInDatabase(body.entry)
     if isOk is None :
         return {"error": "An error occured while checking your ip addresses. Please try again."}, 500
     elif not isOk and not admin:
@@ -78,8 +115,12 @@ def create_dns(body=None):  # noqa: E501
             return {"error": "This ip address isn't associated to one vms."}, 400
         print(vmWithIp)
         user_id = vmWithIp.userId
+    if existingEntry:
+        return {"error": "This entry already exists in database"}, 400
     return proxmox.add_user_dns(user_id, body.entry, body.ip)
 
+
+    
 
 def create_vm(body=None):  # noqa: E501
     """create vm
@@ -142,7 +183,7 @@ def create_vm(body=None):  # noqa: E501
         alreadyUsedCPU += int(vm["cpu"])
         alreadyUsedRAM += int(vm["ram"])/1024
         alreadyUsedDisk += int(vm["disk"])
-    account_ressources = dbfct.get_vm_max_ressources();
+    account_ressources = dbfct.get_vm_max_ressources()
 
     if account_ressources is None:
         return {"error": "Error while getting ressources default"}, 500
@@ -359,6 +400,7 @@ def get_dns():  # noqa: E501
 
     return proxmox.get_user_dns(user_id)
 
+
 # /vms
 def get_vm(search= ""):  # noqa: E501
     """get all user vms
@@ -443,13 +485,10 @@ def get_vm_id(vmid):  # noqa: E501
         except Exception as e:
             return {"error": "error while getting freeze state"}, 500
    
-   
     if freezeAccountState >= 3: # For freeze state 1 or 2, the user can access to hosting
         return {"error": "cotisation expired"}, 403
 
-    
 
-    
     vm_status, isAnError = get_vm_status(vmid)
     if vm_status != None and vm_status != "created" : # if not then the vm is created of not found. Before get the proxmox config, we must be sure the vm is not creating or deleting
         if isAnError:
@@ -458,7 +497,7 @@ def get_vm_id(vmid):  # noqa: E501
                 return {"error": errorMessage}, 400
             except: 
                 return {"error":  "An unknown error occured"}, 500
-        elif not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin: # we authorize to consult error message
+        elif not vmid in map(int, proxmox.get_mvm(user_id)[0]) and not admin: # we authorize to consult error message
             return {"error": "You don't have the right permissions"}, 403
         elif vm_status == "creating" : 
             return {"status" : "creating"}, 200
@@ -471,14 +510,13 @@ def get_vm_id(vmid):  # noqa: E501
     
     node,status = proxmox.get_node_from_vm(vmid)
     
-
+    
     if not admin and dbfct.get_vm_userid(vmid) != user_id : # if not admin, we check if the user is the owner of the vm
         return {'error' : "Forbidden"} , 403
     elif status != 200 and not admin: # exist in the db but not in proxmox. It's a error
         return {"error": "VM not found in proxmox"}, 500
     elif status != 200 and  admin:
         return {'error' : "VM no found"} , 404
-
 
 
     status = proxmox.get_proxmox_vm_status(vmid, node)
@@ -522,7 +560,7 @@ def get_vm_id(vmid):  # noqa: E501
     if status[0]["status"] != 'running':
         return {"name": name, "autoreboot": autoreboot, "user": owner if admin else "", "ip": "", "status": status[0]["status"],
                 "ram": ram, "cpu": cpu, "disk": disk, "type": type[0]["type"],
-                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "last_backup_date" : 0, "created_on": created_on[0]["created_on"], "unsecure" : isUnsecure}, 201
+                "ram_usage": 0, "cpu_usage": 0, "uptime": 0, "last_backup_date" : last_backup_date, "created_on": created_on[0]["created_on"], "unsecure" : isUnsecure}, 201
         # 
     else:
         ip = proxmox.get_vm_ip(vmid, node)
@@ -561,6 +599,7 @@ def get_vm_id(vmid):  # noqa: E501
     else :
         print("datal error for vm ", vmid, "Unknown error one of the status, type or ip doesn't exists : ", status, type, ip)
         return {"error": "Unknown error one of the status, type or ip doesn't exists."}, 500
+
 
 
 def renew_ip():
@@ -620,6 +659,9 @@ def delete_dns_id(dnsid):  # noqa: E501
         dnsid = int(dnsid)
     except:
         return {"status": "error not an integer"}, 500
+    
+    # Get the sendMail parameter from the request
+    sendMail = connexion.request.args.get('sendMail', default=False, type=bool)
 
     headers = {"Authorization": connexion.request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
@@ -651,14 +693,20 @@ def delete_dns_id(dnsid):  # noqa: E501
         return {"status": "cotisation expired"}, 403
 
     user_id = cas['sub']
+    
+    # print(update_body)
+    # try:
+    #     sendMail = bool(update_body['sendMail'])
+    # except KeyError:
+    #     return {"error": "Not a boolean"}, 400
 
     if "attributes" in cas:
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):
-                return proxmox.del_user_dns(dnsid)
+                return proxmox.del_user_dns(dnsid, sendMail)
 
     if dnsid in map(int, proxmox.get_user_dns(user_id)[0]):
-        return proxmox.del_user_dns(dnsid)
+        return proxmox.del_user_dns(dnsid, sendMail)
     else:
         return {"status": "error"}, 500
 
@@ -713,12 +761,14 @@ def get_dns_id(dnsid):  # noqa: E501
         if "memberOf" in cas["attributes"]:
             if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
                 admin = True
+    db_result = dbfct.get_entry_host_and_validation(dnsid)
+    entry = db_result[0]['host']
+    validated = db_result[0]['validated']
 
-    entry = dbfct.get_entry_host(dnsid)
     ip = dbfct.get_entry_ip(dnsid)
     owner = dbfct.get_entry_userid(dnsid)
-    if entry[1] == 201 and ip[1] == 201:
-        return {"ip": ip[0]['ip'], "entry": entry[0]['host'], "user": owner if admin else ""}, 201
+    if db_result[1] == 201 and ip[1] == 201:
+        return {"ip": ip[0]['ip'], "entry": entry, "user": owner if admin else "", "validated": validated}, 201
     elif entry[1] == 404 or ip[1] == 404:
         return {"status": "dns entry not found"}, 404
     else:
@@ -971,6 +1021,27 @@ def get_need_to_be_restored(vmid):
     except :
         return {"error": "Impossible to check the restore status of the vm"}, 500
     
+
+
+
+def get_expired_cotisation_users():
+    headers = connexion.request.headers
+    status_code, cas = util.check_cas_token(headers)
+    if status_code != 200:
+        return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
+
+    admin = False
+
+    if "attributes" in cas:
+        if "memberOf" in cas["attributes"]:
+            if is_admin(cas["attributes"]["memberOf"]):  # partie admin pour renvoyer l'owner en plus
+                admin = True
+                
+    
+    if admin:
+        return proxmox.get_users_with_freeze_state(3) # 3 is the freeze state for expired cotisation after 2 months
+    else :
+        return {"error": "You are not allowed to check this account"}, 403
 
 
 
