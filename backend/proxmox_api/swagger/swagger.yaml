@@ -260,6 +260,31 @@ paths:
         "404":
           description: vm not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /expired:
+    get:
+      summary : get the list of users with expired cotisation
+      operationId: get_expired_cotisation_users
+      tags:
+          - User
+      responses : 
+        "200" :
+          description : "The list of users with expired cotisation"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["seaweedbrain", "seberus", "nishogi", "valt"]
+
+                x-content-type: application/json
+        "400":
+          description: "invalid input, object invalid"
+        "403":
+          description: "not enough permissions"
+        "404":
+          description: "no user found"
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
   /max_account_ressources:
     get:
       summary : max ressources a single account can have
@@ -613,7 +638,7 @@ paths:
           description: dns entry not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
     delete:
-      summary: delete dns entry by id
+      summary: delete dns entry by id in database, also delete the dns entry in the proxmox server if it exists (validated)
       operationId: delete_dns_id
       tags:
           - DNS
@@ -627,6 +652,13 @@ paths:
         schema:
           type: string
           example: "3"
+      - name: sendMail
+        in: query
+        description: do we send an email to the user
+        required: false
+        schema:
+          type: string
+          example: "sendMail: true"
       responses:
         "201":
           description: deleted dns entry by id
@@ -635,6 +667,36 @@ paths:
         "404":
           description: dns entry not found
       x-openapi-router-controller: proxmox_api.controllers.default_controller
+  /dns/validation:
+    post:
+      summary: validate a dns entry by id
+      operationId: validate_dns
+      tags:
+         - DNS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userid:
+                  type: string
+                dnsentry:
+                 type: string
+                dnsip:
+                  type: string
+              required:
+                - userid
+                - dnsentry
+                - dnsip
+      responses:
+        '200':
+          description: DNS validated successfully
+        '400':
+          description: Invalid input
+      x-openapi-router-controller: proxmox_api.controllers.default_controller
+
 components:
   schemas:
     VmIdItem:
@@ -651,14 +713,20 @@ components:
     DnsEntryItem:
       required:
       - entry
+      - validated
       type: object
       properties:
         entry:
           type: string
           description: dns entry
           example: host
+        validated:
+          type: boolean
+          description: if the dns entry is validated
+          example: true
       example:
         entry: host
+        validated: true
     DnsItem:
       required:
       - entry
@@ -673,6 +741,10 @@ components:
           type: string
           description: entry to this ip
           example: 192.0.0.1
+        validated:
+          type: boolean
+          description: if the dns entry is validated
+          example: false
       example:
         entry: host
         ip: 192.0.0.1

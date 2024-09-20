@@ -22,6 +22,9 @@
         <a href="#" class="nav-link" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['dns']" [routerLinkActiveOptions]="{exact: true}" [routerLinkActive]="['active', 'text-primary']" >{{'navbar.dns.admin' | translate}}</a>
       </li>
       <li class="nav-item">
+        <a href="#" class="nav-link" *ngIf="(validToken$ | async) && user.admin" [routerLink]="['deletevm']" data-bs-toggle="modal" >Delete VM</a>
+      </li>
+      <li class="nav-item">
         <a href="#" class="nav-link" *ngIf="(validToken$ | async) && user.admin" data-bs-toggle="modal" data-bs-target="#addNotificationModal" >Notification</a>
       </li>
     </ul>

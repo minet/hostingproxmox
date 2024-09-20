@@ -1,7 +1,15 @@
 <app-navbar></app-navbar>
+
+
 <div id="content" style="min-height: 100%" class="container mt-5">
-    <router-outlet *ngIf="(validToken$ | async)  || router.url === this.cookie.get('lang')+'/manual' || router.url === '/legal'; else landing"></router-outlet>
+    
+    
+    <router-outlet *ngIf="(validToken$ | async)  || router.url === this.cookie.get('lang')+'/manual' || router.url === '/legal' || router.url === '/test'; else landing"></router-outlet>
+    
+    
     <ng-template #landing>
+
+
         <div class="text-center">
             <img id="logo" class="mb-3" style="height: 150px" src="assets/images/minet.png">
             <div class="alert alert-success" role="alert">
@@ -41,4 +49,6 @@
         </div>
     </ng-template>
 </div>
+
+
 <app-footer></app-footer>

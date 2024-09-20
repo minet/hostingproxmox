@@ -43,7 +43,7 @@
             </p>
         </div>
 
-        <div class="alert alert-danger text-center" *ngIf="this.user.cotisation === 0">
+        <div class="alert alert-danger text-center" *ngIf="this.user.freezeState >= 1">
             <b>{{'home.subscription.expired_1' | translate}}</b>
             <p>{{'home.subscription.expired_2' | translate}} <a href="https://payment.minet.net/">{{'home.subscription.expired_3' | translate}}</a> {{'home.subscription.expired_4' | translate}}</p>
         </div>
@@ -55,40 +55,40 @@
         <div class="userok" *ngIf='this.user.freezeState == 0 && this.user.chartevalidated'>
             <div class="d-flex justify-content-evenly flex-wrap">
                 <div>
-                    <strong class="text-center" >{{nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) > 0 ? nb_cpu_max - (this.user.usedCPU +nb_cpu_selected) : 0 }} CPUs restant</strong>
-                    <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.user.usedCPU == -1 || nb_cpu_max == -1">
+                    <strong class="text-center" >{{nb_cpu_max - (this.vmsService.CPUCount +nb_cpu_selected) > 0 ? nb_cpu_max - (this.vmsService.CPUCount +nb_cpu_selected) : 0 }} CPUs restant</strong>
+                    <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.vmsService.isUpdatingVms || nb_cpu_max == -1">
                       </div>
-                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100"  *ngIf="this.user.usedCPU != -1 && nb_cpu_max != -1">
-                        <div class="progress-bar bg-success" [style.width.%]="(nb_cpu_max - (this.user.usedCPU +nb_cpu_selected))*100/nb_cpu_max"></div>
+                    <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100"  *ngIf="this.vmsService.CPUCount != 0 && nb_cpu_max != -1">
+                        <div class="progress-bar bg-success" [style.width.%]="(nb_cpu_max - (this.vmsService.CPUCount +nb_cpu_selected))*100/nb_cpu_max"></div>
                     </div>
                 </div>
                     <div>
-                        <strong class="text-center">{{nb_ram_max - (this.user.usedRAM +nb_ram_selected) > 0 ? nb_ram_max - (this.user.usedRAM +nb_ram_selected) : 0}} GO de RAM restant</strong>
-                        <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.user.usedRAM == -1 || nb_ram_max == -1">
+                        <strong class="text-center">{{nb_ram_max - (this.vmsService.RAMCount +nb_ram_selected) > 0 ? nb_ram_max - (this.vmsService.RAMCount +nb_ram_selected) : 0}} GO de RAM restant</strong>
+                        <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.vmsService.isUpdatingVms || nb_ram_max == -1">
                           </div>
-                            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100" *ngIf="this.user.usedRAM != -1 &&  nb_ram_max != -1">
+                            <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="1000" aria-valuemin="0" aria-valuemax="100" *ngIf="this.vmsService.RAMCount != -1 &&  nb_ram_max != -1">
                                 
-                                <div class="progress-bar bg-success" [style.width.%]="(nb_ram_max - (this.user.usedRAM +nb_ram_selected))*100/nb_ram_max"></div>
+                                <div class="progress-bar bg-success" [style.width.%]="(nb_ram_max - (this.vmsService.RAMCount +nb_ram_selected))*100/nb_ram_max"></div>
                             </div>
                     </div>
                     <div>
-                        <strong class="text-center">{{nb_storage_max - (this.user.usedStorage +nb_storage_selected) > 0 ? nb_storage_max - (this.user.usedStorage +nb_storage_selected) : 0}} GO de stockage restant</strong>
-                        <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.user.usedStorage == -1 || nb_storage_max == -1">
+                        <strong class="text-center">{{nb_storage_max - (this.vmsService.DISKCount +nb_storage_selected) > 0 ? nb_storage_max - (this.vmsService.DISKCount +nb_storage_selected) : 0}} GO de stockage restant</strong>
+                        <div class="spinner-border spinner-border-sm text-secondary" role="status" *ngIf="this.vmsService.isUpdatingVms || nb_storage_max == -1">
                           </div>
-                        <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" *ngIf="this.user.usedStorage != -1 && nb_storage_max != -1">
+                        <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" *ngIf="this.vmsService.DISKCount != 0 && nb_storage_max != -1">
                             
-                            <div class="progress-bar bg-success" [style.width.%]="(nb_storage_max - (this.user.usedStorage +nb_storage_selected))*100/nb_storage_max" ></div>
+                            <div class="progress-bar bg-success" [style.width.%]="(nb_storage_max - (this.vmsService.DISKCount +nb_storage_selected))*100/nb_storage_max" ></div>
                         </div>
                     </div>
                 </div>
             <br>
             <hr>
-            <div class="alert alert-warning text-center" *ngIf="this.user.usedCPU == nb_cpu_max or this.user.usedRAM == nb_ram_max or  this.user.usedStorage == nb_storage_max">
+            <div class="alert alert-warning text-center" *ngIf="this.vmsService.CPUCount == nb_cpu_max or this.vmsService.RAMCount == nb_ram_max or  this.vmsService.DISKCount == nb_storage_max">
                 <b>{{'home.createVm.error.maxVmAlready_1' | translate}} </b>
                 <p>{{'home.createVm.error.maxVmAlready_2' | translate}}
             </div>
 
-            <div class="card mb-3" *ngIf="this.user.usedCPU != nb_cpu_max && this.user.usedRAM != nb_ram_max &&  this.user.usedStorage != nb_storage_max">
+            <div class="card mb-3" *ngIf="this.vmsService.CPUCount != nb_cpu_max && this.vmsService.RAMCount != nb_ram_max &&  this.vmsService.DISKCount != nb_storage_max">
                 <h4 class="card-header">
                     {{'home.createVm.form.title' | translate}}
                 </h4>
@@ -295,19 +295,19 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{'home.admin.stats.createdVm' | translate}}</h5>
-                    <a [routerLink]="['vms']" class="btn btn-primary">{{ countvm }}</a>
+                    <a [routerLink]="['vms']" class="btn btn-primary">{{ this.vmsService.VMCount }}</a>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{'home.admin.stats.activeVm' | translate}}</h5>
-                    <a [routerLink]="['vms']" class="btn btn-primary">{{ countactivevm }}</a>
+                    <a [routerLink]="['vms']" class="btn btn-primary">{{ this.vmsService.ActiveVMCount }}</a>
                 </div>
             </div>
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{'home.admin.stats.dns' | translate}}</h5>
-                    <a [routerLink]="['dns']" class="btn btn-primary">{{ countdns }}</a>
+                    <a [routerLink]="['dns']" class="btn btn-primary">{{ this.dnsService.DNSCount }}</a>
                 </div>
             </div>
         </div>

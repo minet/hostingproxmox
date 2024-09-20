@@ -29,21 +29,25 @@ class DnsItem(object):
     """
     swagger_types = {
         'entry': 'str',
-        'ip': 'str'
+        'ip': 'str',
+        'validated': 'bool'
+        
     }
 
     attribute_map = {
         'entry': 'entry',
-        'ip': 'ip'
+        'ip': 'ip',
+        'validated': 'validated'
     }
 
-    def __init__(self, entry=None, ip=None):  # noqa: E501
+    def __init__(self, entry=None, ip=None, validated=False):  # noqa: E501
         """DnsItem - a model defined in Swagger"""  # noqa: E501
         self._entry = None
         self._ip = None
         self.discriminator = None
         self.entry = entry
         self.ip = ip
+        self.validated = validated
 
     @property
     def entry(self):
@@ -94,6 +98,22 @@ class DnsItem(object):
             raise ValueError("Invalid value for `ip`, must not be `None`")  # noqa: E501
 
         self._ip = ip
+
+    @property
+    def validated(self):  # Add a getter for 'validated'
+        """Gets the validated of this DnsItem.
+        :return: The validated of this DnsItem.
+        :rtype: bool
+        """
+        return self._validated
+
+    @validated.setter
+    def validated(self, validated):  # Add a setter for 'validated'
+        """Sets the validated of this DnsItem.
+        :param validated: The validated of this DnsItem.
+        :type: bool
+        """
+        self._validated = validated
 
     def to_dict(self):
         """Returns the model properties as a dict"""

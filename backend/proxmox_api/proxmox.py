@@ -32,14 +32,41 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(nam
 
 
 def add_user_dns(user_id, entry, ip):
-    
-    
+    database.add_dns_entry(user_id, entry, ip, validated=False)
+    logging.info("DNS entry added: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
+    logging.info("send a notification to bureau@listes.minet.net")
+    mailBody = util.mailHTMLBureau(user_id, entry, ip)
+    try : 
+        util.sendMailBureau(mailBody, user_id)
+    except Exception as e:
+        print("ERROR : the mail to " + str(user_id) + " failed to be sent : " + str(e))
+    return {"dns": "added"}, 201
+
+
+
+def accept_user_dns(user_id, entry, ip):
 
     rep_msg, rep_code = ddns.create_entry(entry, ip)
     if rep_code == 201:
-        database.add_dns_entry(user_id, entry, ip)
-        logging.info("DNS entry added: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
+        
+        database.validate_dns_entry(user_id, entry, ip)
+        logging.info("DNS entry validated: " + str(user_id) + " " + str(entry) + "=> " + str(ip))
+        logging.info("send a notification to " + str(user_id))
+        print("send a notification to " + str(user_id))
+        mailBody = util.mailHTMLAdherent(user_id, entry, ip, "acceptée")
+        account, status = util.get_adh6_account(user_id)
+        if (account is None):
+            return {"error": "Impossible to retrieve the user info"}, 404
+        try : 
+            util.sendMailAdherent(account["email"], mailBody, entry, True)
+        except Exception as e:
+            print("ERROR : the mail to " + str(user_id) + " failed to be sent : " + str(e))
+            return rep_msg, rep_code
+        
     return rep_msg, rep_code
+
+def isDnsEntryExistingInDatabase(entry):
+    return database.isDnsEntryExisting(entry)
 
 
 def get_user_dns(user_id = ""):
@@ -53,15 +80,37 @@ def get_user_dns(user_id = ""):
         return {"dns": "error occured"}, 500
 
 
-def del_user_dns(dnsid):
-    entry = database.get_entry_host(dnsid)[0]['host']
-    if entry is None:
+
+
+def del_user_dns(dnsid, sendMail:bool = False):
+    db_result = database.get_entry_host_and_validation(dnsid)
+    if db_result is None:
         return {"dns": "not found"}, 404
-    ddns_rep = ddns.delete_dns_record(entry)
-    if ddns_rep[1] == 201:
+    entry = db_result[0]['host']
+    if entry is None:
+        return {"dns.entry": "not found"}, 404
+    validated = db_result[0]['validated']
+    if validated is None:
+        return {"dns.validated": "not found"}, 404
+    if validated:
+        print("Deleting entry: " + str(entry))
+        ddns_rep = ddns.delete_dns_record(entry)
+        if ddns_rep[1] == 201:
+            database.del_dns_entry(dnsid)
+            logging.info("DNS entry deleted: " + str(dnsid))
+        return ddns_rep
+    else:
         database.del_dns_entry(dnsid)
         logging.info("DNS entry deleted: " + str(dnsid))
-    return ddns_rep
+        if sendMail:
+            user_id = db_result[0]['userId']
+            ip = db_result[0]['ip']
+            mailBody = util.mailHTMLAdherent(user_id, entry, ip, "refusée")
+            try : 
+                util.sendMailAdherent(mailBody, user_id, entry, False)
+            except Exception as e:
+                print("ERROR : the mail to " + str(user_id) + " failed to be sent : " + str(e))
+        return {"dns": "entry deleted"}, 201
 
 
 def load_balance_server():
@@ -79,6 +128,7 @@ def load_balance_server():
         return {"server": "no server available"}, 500
 
     return {"server": server}, 201
+
 
 def is_admin(memberOf):
     return configuration.ADMIN_DN in memberOf
@@ -490,11 +540,11 @@ def get_vm_name(vmid, node):
         return {"name": "error"}, 500
 
 
-def get_vm(user_id = 0, search=None):
+def get_vm(user_id = 0, search=""):
     if user_id != 0: # No filter for non admin
         return database.get_vm_list(user_id), 200
     else:
-        if search is None : 
+        if search == "" : 
             return database.get_vm_list(), 200
         else: # We get all user/name and filter them
             user_filtered = database.get_user_list(searchItem=search) # get all user filtered
@@ -505,8 +555,6 @@ def get_vm(user_id = 0, search=None):
             start = time.time()
             vm_list = database.get_vm_list() # get all vm but only id
             for vmid in vm_list:
-                print("vmid = ", vmid)
-                print("search = ", search)
                 if search in str(vmid):
                     if vmid not in vm_filtered_list:
                         vm_filtered_list.append(vmid)
@@ -517,7 +565,6 @@ def get_vm(user_id = 0, search=None):
                 if vmid not in vm_filtered_list :
                     infos,_ = get_vm_name(vmid, node)
                     name = infos["name"]
-                    print("name = ", name)
                     if search in name :
                         if vmid not in vm_filtered_list:
                             vm_filtered_list.append(vmid)
@@ -712,9 +759,10 @@ def get_vm_last_backup_date(vmid: int, node):
 
     if len(backup_dates) == 0:
         print("Error : no backup for VM "+ str(vmid))
-        return None
+        return 0
 
     return max(backup_dates)
+
 
 
 # Select the next available ip address and set up in the proxmox firewall
@@ -818,7 +866,7 @@ def get_freeze_state(username):
         freezeState = database.getFreezeState(username)
     except Exception as e :
         print(e)
-        return {"freeztatus" : "unknown"}, 404 # User doesn't exist, we fake the freeze state to 0.0
+        return {"freezeState" : "unknown"}, 404 # User doesn't exist, we fake the freeze state to 0.0
     if freezeState is None: # We have to create the freeze state
         return check_update_cotisation(username)
     elif freezeState == "0.0":
@@ -829,6 +877,35 @@ def get_freeze_state(username):
         freezeState = database.getFreezeState(username) # if expired with update in case of re-cotisation
         status = freezeState.split(".")[0]
         return {"freezeState" : status}, 200
+
+""" API endpoint to return every user with a freeze state superior to a given value
+
+    :param entry: targetFreezeState : int
+
+    :return: list of user_id with freeze state superior to targetFreezeState : int[]
+"""
+def get_users_with_freeze_state(targetFreezeState: int):
+    
+    if targetFreezeState < 0:
+        return {"error": "Invalid input"}, 400
+    
+    users = database.get_user_list()
+    freezed_users = []
+    
+    for user in users:
+        
+        freezeState = database.getFreezeState(user.id)
+        
+        if(freezeState is not None and int(freezeState.split(".")[0]) >= targetFreezeState):
+            check_update_cotisation(user.id) # Update the freeze state in case of re-cotisation
+            freezeState = database.getFreezeState(user.id)
+
+            if(freezeState is not None and int(freezeState.split(".")[0]) >= targetFreezeState):
+                freezed_users.append(user.id)
+    if len(freezed_users) == 0:
+        return {"error": "No users with targetted freeze state"}, 404
+    return freezed_users, 200
+
 
 """func called by jobs. For all user, it calls a function to check if the user has a cotisation. 
 
@@ -861,12 +938,10 @@ def check_cotisation_job(app):
 """
 def check_update_cotisation(username, createEntry=False):
         
-    print("check cotisation of", username)
     #headers = {"Authorization": req_headers}
     account, status = util.get_adh6_account(username)
     if (account is None):
         return {"error": "Impossible to retrieve the user info"}, 404
-    print("Adh6 account", account)
     today =  date.today()
     if "ip" not in account: # Cotisation expired
         #print(username , "cotisation expired", membership.json())
@@ -885,7 +960,6 @@ def check_update_cotisation(username, createEntry=False):
         #print(membership.json()["departureDate"], end='\n\n')
         departureDate = datetime.strptime(account["departureDate"], "%Y-%m-%d").date()
         if departureDate < today: # Cotisation expired:
-            print(username , "cotisation expired (departure date)")
             status = database.getFreezeState(username)
             if status is None:
                 status = '1'

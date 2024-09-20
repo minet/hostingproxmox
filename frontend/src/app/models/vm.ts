@@ -8,16 +8,17 @@ export class Vm {
     public type?: string,
     public status?: string,
     public autoreboot?: string,
-    public id?: string,
+    public id?: number,
     public password?: string,
     public sshKey?: string,
     public ip?: string,
     public ramUsage?: string,
     public cpuUsage?: string,
     public uptime?: string,
-    // public lastBackupDate?: string,
+    public lastBackupDate?: string,
     public createdOn?: string,
     public isUnsecure?: boolean,
+    public hasError?: boolean,
 
   ) { }
 
