@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
+import dotenv
+print("Dotenv")
+dotenv.load_dotenv()
+
 import connexion
 from flask_cors import CORS
 from flask_apscheduler import APScheduler
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
 from proxmox_api.db.db_models import db
+
 
 
 print("config = ",  config.ENV)
@@ -27,6 +32,15 @@ def create_app():
     scheduler = APScheduler()
     app.add_api('swagger.yaml', arguments={'title': 'Proxmox'}, pythonic_params=True)
     CORS(app.app)
+
+    # Log every request
+    from flask import request
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    @app.app.before_request
+    def log_request():
+        logging.info(f"Request: {request.method} {request.path} - Args: {request.args} - JSON: {request.get_json(silent=True)}")
+
     return app, scheduler
 
 
