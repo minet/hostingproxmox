@@ -10,7 +10,11 @@ LOG_LEVEL = logging.DEBUG
 ADMIN_DN = 'cn=cluster-hosting,ou=groups,dc=minet,dc=net'
 
 # Proxmox host
-PROXMOX_HOST = "192.168.104.7"
+PROXMOX_HOST = os.environ.get("PROXMOX_HOST")
+
+# Node names
+
+LIST_NAME_NODES = os.environ.get("LIST_NAME_NODES")
 
 # Proxmox host
 PROXMOX_USER = "root@pam"
@@ -65,7 +69,7 @@ HOSTING_DOMAIN = 'h.minet.net'
 DNS_ENTRY_TTL = 14400
 
 # Main DNS server ip
-MAIN_DNS_SERVER_IP = "192.168.104.28"
+MAIN_DNS_SERVER_IP = os.environ.get("MAIN_DNS_SERVER_IP")
 
 
 VM_CREATION_STATUS_JSON = "proxmox_api/config/vm_creation_status.json" # json file of all vm creating and there status. If an error occur during the creation, the vm is deleted and the error code is kepts until the user get it. This is a informationnal dictionnary and cannot be trust at 100%.

@@ -25,8 +25,15 @@ export PROXMOX_API_KEY=<PROXMOX_API_KEY>
 export PROXMOX_BACK_DB=<PROXMOX_BACK_DB>
 export ADH6_API_KEY=<ADH6_API_KEY>
 export PROXMOX_BACK_DB_DEV=<PROXMOX_BACK_DB_DEV>
+export PROXMOX_HOST=<IP_PROXMOX_HOST>
+export MAIN_DNS_SERVER_IP=<IP_DNS_HOSTING>
+export LIST_NAME_NODES=<LIST_NAME_NODES>
 export ENVIRONMENT="DEV"
 ```
+
+#### Où trouver ces valeurs ?
+
+
 
 Ces valeurs doivent vous êtes fournies par les maintainers actuels et dépendent de l'infrastructure.
 
