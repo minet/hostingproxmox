@@ -573,27 +573,18 @@ def get_vm(user_id = 0, search=""):
 
 
 # Checks if a vmid is available on the cluster for a new vm to be created
-def is_vmid_available_cluster(vmid): 
-    kars, wammu = False, False
-    try :
-        proxmox.nodes("kars").qemu(vmid).status.get()
-        kars = True 
-    except : 
-        try : 
-            proxmox.nodes("kars").lxc(vmid).status.get() # We have to check CT too
-            kars = True
+def is_vmid_available_cluster(vmid):
+    for node in configuration.LIST_NAME_NODES.split():
+        try:
+            proxmox.nodes(node).qemu(vmid).status.get()
+            return False  # VM found in QEMU
         except:
-            kars = False
-    try :
-        proxmox.nodes("wammu").qemu(vmid).config.get()['name']
-        wammu = True
-    except :
-        try :
-            proxmox.nodes("wammu").lxc(vmid).status.get() # We have to check CT too
-            wammu = True
-        except:
-            wammu = False
-    return not kars and not wammu 
+            try:
+                proxmox.nodes(node).lxc(vmid).status.get()
+                return False  # VM found in LXC
+            except:
+                continue
+    return True
 
 
 
