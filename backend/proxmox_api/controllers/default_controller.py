@@ -192,7 +192,7 @@ def create_vm(body=None):  # noqa: E501
         return {"error": "You have already used all your resources"}, 403
     if body.name is None or body.type is None or body.password is None or body.user is None or body.ssh_key is None:
         return {"error": "You have to fill all the fields"}, 400
-    return proxmox.create_vm(body.name, body.type, user_id, body.cpu, body.ram, body.disk, body.password, body.user, body.ssh_key, )
+    return proxmox.create_vm(body.name, body.type, user_id, body.cpu, body.ram, body.disk, body.password, body.user, body.ssh_key)
 
 def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error occured
     """delete vm by id where an error occured
@@ -497,7 +497,7 @@ def get_vm_id(vmid):  # noqa: E501
                 return {"error": errorMessage}, 400
             except: 
                 return {"error":  "An unknown error occured"}, 500
-        elif not vmid in map(int, proxmox.get_mvm(user_id)[0]) and not admin: # we authorize to consult error message
+        elif not vmid in map(int, proxmox.get_vm(user_id)[0]) and not admin: # we authorize to consult error message
             return {"error": "You don't have the right permissions"}, 403
         elif vm_status == "creating" : 
             return {"status" : "creating"}, 200

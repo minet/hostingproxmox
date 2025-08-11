@@ -62,7 +62,7 @@ requires-dist = [
     { name = "markupsafe", specifier = "==2.1.1" },
     { name = "mysqlclient", specifier = "==2.1.0" },
     { name = "openapi-spec-validator", specifier = "==0.4.0" },
-    { name = "proxmoxer", specifier = "==1.3.1" },
+    { name = "proxmoxer", specifier = "==2.2.0" },
     { name = "python-dateutil", specifier = "==2.8.2" },
     { name = "python-slugify", specifier = "==6.1.1" },
     { name = "setuptools", specifier = "==60.9.3" },
@@ -384,11 +384,11 @@ wheels = [
 
 [[package]]
 name = "proxmoxer"
-version = "1.3.1"
+version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/cc/bf/cc547d27185b98c82591924e6134decdb8583b1dc6884a54457dd63e589e/proxmoxer-1.3.1.tar.gz", hash = "sha256:ef32c549877bf4439da6df3dff08be10d9dfe3bfc8a25d676a786ffe861ee096", size = 15387, upload-time = "2022-05-14T15:46:10.597Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6a/54/dc2919eed681ca31220a9021e35935a3995335069b520279b4d55b9df822/proxmoxer-2.2.0.tar.gz", hash = "sha256:3ed63a58e5c0822841afdb3801f9d913a4996955c1c54f7319b5842ba2615006", size = 29666, upload-time = "2024-12-15T02:08:36.351Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c0/bf/1bf695e04cc609d8f925cf2cd9744f06f30aac963eca53b4aa32cd7f1678/proxmoxer-1.3.1-py3-none-any.whl", hash = "sha256:ac4449cb754a4d7a1a6f6a110de7d903c742ee023c127ee7de47fcea2a37b802", size = 14428, upload-time = "2022-05-14T15:46:09.131Z" },
+    { url = "https://files.pythonhosted.org/packages/2c/9a/0c3570e2ccce07d304c8a25f7238accc5174c234f5eddb3b666e20777898/proxmoxer-2.2.0-py3-none-any.whl", hash = "sha256:7e4431fd38e1a9321eedf6d860ddc373fc2b29ce1845fa8b072d7580d99f6b90", size = 19217, upload-time = "2024-12-15T02:08:34.047Z" },
 ]
 
 [[package]]

@@ -11,6 +11,7 @@ from proxmox_api import util
 from proxmox_api import config
 from proxmox_api import ddns
 from proxmox_api.config import configuration
+import os
 
 from proxmox_api.db import db_functions as database
 from  proxmox_api.db import db_models
@@ -112,12 +113,13 @@ def del_user_dns(dnsid, sendMail:bool = False):
                 print("ERROR : the mail to " + str(user_id) + " failed to be sent : " + str(e))
         return {"dns": "entry deleted"}, 201
 
-
 def load_balance_server():
     nodes_info = proxmox.nodes.get()
     server = ""
     perram_min = 100
     for i in nodes_info:
+        return {"server": i["node"]}, 201 #TODO : trouver le noeud optimal où créer la VM
+
         perram = round(i["mem"] * 100 / i["maxmem"], 2)
         percpu = round(i["cpu"] * 100, 2)
         if i["status"] == "online" and perram < 90 and percpu < 70:
@@ -295,7 +297,7 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
             newid=next_vmid,
             target=node,
             full=1,
-            storage="replicated_3_times_hosting"
+            storage=os.environ.get("PROXMOX_STORAGE"),
         )
 
 
@@ -964,14 +966,15 @@ def check_update_cotisation(username, createEntry=False):
 
 
 def next_available_vmid():# determine the next available vmid from both db and proxmox
-    next_vmid_db = 110
+    next_vmid_db = 1100
     is_vmid_available_prox = False 
-    while next_vmid_db != None and not is_vmid_available_prox : # if next_vmid_db is None then there is no next vmid available and if is_vmid_available_prox = True then the next vmid is available in proxmox and in db
+    while next_vmid_db != None and is_vmid_available_prox : # if next_vmid_db is None then there is no next vmid available and if is_vmid_available_prox = True then the next vmid is available in proxmox and in db
         next_vmid_db += 1
-        next_vmid_db = database.getNextVmID(next_vmid_db)
+        #next_vmid_db = database.getNextVmID(next_vmid_db)
        
         is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
-    return next_vmid_db
+    #return next_vmid_db
+    return 500 #TODO : réparer is_vmid_available_cluster pour trouver l'id suivant utilisable
 
 
 """_summary_ : This function is called by the job to stop expired vm when the account freeze state is 2.x or 3.1
