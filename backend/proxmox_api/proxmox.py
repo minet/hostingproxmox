@@ -1,4 +1,5 @@
 import urllib.parse
+import time
 from time import sleep
 import logging
 from ipaddress import IPv4Network
@@ -12,6 +13,7 @@ from proxmox_api import config
 from proxmox_api import ddns
 from proxmox_api.config import configuration
 import os
+import re
 
 from proxmox_api.db import db_functions as database
 from  proxmox_api.db import db_models
@@ -30,6 +32,7 @@ else:
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(name)s: %(message)s')
 
+MAC_RE = re.compile(r'([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}')  # Forme d'une adresse MAC
 
 
 def add_user_dns(user_id, entry, ip):
@@ -300,9 +303,6 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
             storage=os.environ.get("PROXMOX_STORAGE"),
         )
 
-
-
-
     except Exception as e:
         logging.error("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
         print("Problem in create_vm(" + str(next_vmid) + ") when cloning: " + str(e))
@@ -386,6 +386,15 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
         print("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
     print("vm started")
+
+    # Mise à jour de la MAC dans la db par celle assignée par proxmox à la création
+    mac = get_mac_from_config(vmid,node)
+    if mac:
+        app = util.create_app()  # créer ou récupérer ton app Flask
+
+        with app.app.app_context():
+            database.update_vm_mac(vmid,mac)
+
     try : 
 
         try:
@@ -520,6 +529,23 @@ def get_vm_ip(vmid, node):
     except Exception as e:
         logging.error("Problem in get_vm_ip(" + str(vmid) + ") when getting VM infos: " + str(e))
         return {"error ": "Impossible to get info about your vm"}, 500
+
+# Fonction pour obtenir la MAC de la machine
+def get_mac_from_config(vmid, node):
+    config = proxmox.nodes(node).qemu(vmid).config.get()
+    print(f"Config brute pour vmid {vmid} sur node {node}:")
+    print(config)
+    # Par défaut, chercher net0, net1, ... puis parser les valeurs
+    for key, val in config.items():
+        if key.startswith("net") and val:
+            # val attendu: "virtio=DE:AD:BE:EF:12:34,bridge=vmbr0" ou similaire
+            parts = val.split(",")
+            for p in parts:
+                if "=" in p:
+                    k, v = p.split("=", 1)
+                    if MAC_RE.match(v):
+                        return v.lower()
+    return None
 
 ######
 ## DEPRECATED
@@ -974,7 +1000,7 @@ def next_available_vmid():# determine the next available vmid from both db and p
        
         is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
     #return next_vmid_db
-    return 500 #TODO : réparer is_vmid_available_cluster pour trouver l'id suivant utilisable
+    return 601 #TODO : réparer is_vmid_available_cluster pour trouver l'id suivant utilisable
 
 
 """_summary_ : This function is called by the job to stop expired vm when the account freeze state is 2.x or 3.1
