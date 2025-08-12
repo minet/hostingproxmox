@@ -279,12 +279,12 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
         if user is None:
             database.add_user(user_id)
             check_update_cotisation(user_id)
-            database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
+            database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac=None, ip=ip)
             util.subscribe_to_hosting_ML(user_id)
         else:
             util.subscribe_to_hosting_ML(user_id)
             if len(database.get_vm_list(user_id)) < configuration.LIMIT_BY_USER and len(database.get_vm_list()) < configuration.TOTAL_VM_LIMIT:
-                database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac="En attente", ip=ip)
+                database.add_vm(id=next_vmid, user_id=user_id, type=vm_type, mac=None, ip=ip)
                 database.add_ip_to_history(ip, next_vmid, user_id)
             else:
                 return {"error": "error, can not create more VMs"}, 500
