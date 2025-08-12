@@ -533,8 +533,6 @@ def get_vm_ip(vmid, node):
 # Fonction pour obtenir la MAC de la machine
 def get_mac_from_config(vmid, node):
     config = proxmox.nodes(node).qemu(vmid).config.get()
-    print(f"Config brute pour vmid {vmid} sur node {node}:")
-    print(config)
     # Par défaut, chercher net0, net1, ... puis parser les valeurs
     for key, val in config.items():
         if key.startswith("net") and val:
