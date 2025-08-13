@@ -600,7 +600,9 @@ def get_vm(user_id = 0, search=""):
 
 # Checks if a vmid is available on the cluster for a new vm to be created
 def is_vmid_available_cluster(vmid):
-    for node in configuration.LIST_NAME_NODES.split():
+    nodes = proxmox.nodes.get()
+    node_names = [n['node'] for n in nodes]
+    for node in node_names:
         try:
             proxmox.nodes(node).qemu(vmid).status.get()
             return False  # VM found in QEMU

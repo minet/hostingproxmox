@@ -12,10 +12,6 @@ ADMIN_DN = 'cn=cluster-hosting,ou=groups,dc=minet,dc=net'
 # Proxmox host
 PROXMOX_HOST = os.environ.get("PROXMOX_HOST")
 
-# Node names
-
-LIST_NAME_NODES = os.environ.get("LIST_NAME_NODES")
-
 # Proxmox host
 PROXMOX_USER = "root@pam"
 
