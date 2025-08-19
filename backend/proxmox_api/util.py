@@ -163,7 +163,7 @@ def _deserialize_dict(data, boxed_type):
     :rtype: bool
 """
 def check_password_strength(password:str) -> bool:
-    special = "[`!@#$%^&*()_+-=[\]{};':\"\\|,.<>/?~]"
+    special = r"[`!@#$%^&*()_+-=[\]{};':\"\\|,.<>/?~]"
     upper = "[A-Z]"
     number = "[0-9]"
     # Return true if and only if there are at least 12 char, 1 spec char, 1 uppercase letter and 1 lowercase letter
@@ -179,7 +179,7 @@ sub validate_ssh_public_keys {
     my @lines = split(/\n/, $raw);
 
     foreach my $line (@lines) {
-	next if $line =~ m/^\s*$/;
+	next if $line =~ m/^\\s*$/;
 	eval {
 	    my ($filename, $handle) = tempfile_contents($line);
 	    run_command(["ssh-keygen", "-l", "-f", $filename],

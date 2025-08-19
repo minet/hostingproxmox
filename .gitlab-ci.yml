@@ -7,16 +7,15 @@ stages:
 
 python_code_quality:
   stage: lint
-  image: python:3.9
+  image: ghcr.io/astral-sh/uv:python3.13-alpine
   before_script:
     - cd backend
-    - export PYTHONPATH=$(pwd)
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
     - export no_proxy="$NO_PROXY"
-    - pip3 install pylint
+    - uv add --dev pylint
   script:
-    - pylint --fail-under=1 proxmox_api/*.py > code_quality.txt
+    - uv run pylint --fail-under=1 proxmox_api/*.py > code_quality.txt
     - cat code_quality.txt
   artifacts:
     paths:
@@ -48,15 +47,14 @@ angular_code_quality:
 
 test_backend:
   stage: test
-  image: python:3.9
+  image: ghcr.io/astral-sh/uv:python3.13-alpine
   needs : 
    - python_code_quality
   before_script:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
     - export no_proxy="$NO_PROXY"
-    - apt update 
-    - apt install sqlite3
+    - apk add --no-cache sqlite
     - export ENVIRONMENT='TEST'
     - export KEYRING_DNS_SECRET=$KEYRING_DNS_SECRET
     - export PROXMOX_API_KEY_NAME=$PROXMOX_API_KEY_NAME
@@ -64,11 +62,10 @@ test_backend:
     - export PROXMOX_BACK_DB_DEV=$PROXMOX_BACK_DB_DEV
     - export ADH6_API_KEY=$ADH6_API_KEY
     - cd backend/
-    - export PYTHONPATH=$(pwd)
-    - pip3 install -r requirements.txt
-    - pip3 install -r test-requirements.txt
+    # Install dependencies with uv
+    - uv sync --extra test
   script :
-    - pytest --cov=proxmox_api --cov-report term-missing --cov-report xml:./coverage_out_report.xml --junitxml=report.xml
+    - uv run pytest --cov=proxmox_api --cov-report term-missing --cov-report xml:./coverage_out_report.xml --junitxml=report.xml
   coverage: '/TOTAL.*\s+(\d+%)$/'
   artifacts:
     when: always
@@ -106,6 +103,7 @@ angular_build:
 
 deploy_backend:
   stage: deploy
+  image: python:3.13-slim
   needs :
     - angular_build
     - test_backend
@@ -114,7 +112,10 @@ deploy_backend:
     - export https_proxy="$HTTPS_PROXY"
     - export no_proxy="$NO_PROXY"
     - cd backend
-    - pip3 install -r requirements.txt
+    # Install uv
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="/root/.local/bin:$PATH"
+    - uv sync
     - sudo /bin/systemctl stop proxmox_api
     - rm -rf /var/www/proxmox_api
   script:
@@ -149,6 +150,7 @@ deploy_frontend:
 
 deploy_backend_dev:
   stage: deploy
+  image: python:3.13-slim
   needs:
     - angular_build
     - test_backend
@@ -157,7 +159,10 @@ deploy_backend_dev:
     - export https_proxy="$HTTPS_PROXY"
     - export no_proxy="$NO_PROXY"
     - cd backend
-    - pip3 install -r requirements.txt 
+    # Install uv
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="/root/.local/bin:$PATH"
+    - uv sync
     - sudo /bin/systemctl stop proxmox_api
     - rm -rf /var/www/proxmox_api
   script:

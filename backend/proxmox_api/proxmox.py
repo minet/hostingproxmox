@@ -311,8 +311,8 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
         delete_from_db(next_vmid)
         return {"error": "Impossible to create the VM (cloning)"}, 500
 
-    app = util.create_app() # we need the context to delete the vm if there is an error
-    db_models.db.init_app(app.app)
+    # Utiliser l'instance SQLAlchemy existante
+    from proxmox_api.__main__ import app
     with app.app.app_context():
         database.set_vm_status(next_vmid, "creating")
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key,ip,cpu, ram, )).start()
