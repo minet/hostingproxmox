@@ -7,7 +7,6 @@ import requests
 import connexion
 import tempfile
 import subprocess
-import proxmox_api.config.configuration as  config 
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
 from proxmox_api.db.db_models import db

@@ -1,5 +1,7 @@
 import pytest
 import proxmox_api.proxmox  as proxmox
+from proxmoxer import ProxmoxAPI
+from proxmox_api.config import configuration
 import time
 import proxmox_api.util as util
 from flask_sqlalchemy import SQLAlchemy
@@ -23,9 +25,22 @@ def test_old_vm_deletion(init_vm_database):
         if status == 200:
             doesVMexist = True
         if doesVMexist:
-            assert node == "kars" or node == "wammu" or node == "sam"
+            # Crée un client proxmoxer
+            client = ProxmoxAPI(
+                host=configuration.PROXMOX_HOST,
+                user=configuration.PROXMOX_USER,
+                token_name=configuration.PROXMOX_API_KEY_NAME,
+                token_value=configuration.PROXMOX_API_KEY,
+                verify_ssl=False
+            )
+            # Récupération des noms de nodes depuis proxmox
+            available_nodes = [n["node"] for n in client.nodes.get()]
+
+            # Vérifie que le node est bien valide
+            assert node in available_nodes, f"Node {node} not found in {available_nodes}"
+
             r = proxmox.delete_from_proxmox(VMID, node)
-            assert r == True
+            assert r is True
         else :
             assert True
  # If previous test fail, we do not try to create a new one
