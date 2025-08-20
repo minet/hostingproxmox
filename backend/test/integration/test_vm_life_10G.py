@@ -8,7 +8,7 @@ from time import sleep
 from proxmox_api.db import db_functions 
 
 
-VMID = 9998
+VMID = 9999
 def fake_subscribe_to_hosting_ML(username):
     return 200, {"status": "ok"}
 DISK_SIZE = 10
@@ -71,6 +71,7 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
         configuration_state = "creating"
         while time.time() - start_time <= 600 and configuration_state == "creating"  : # timeout after 10min
             configuration_state,_ = db_functions.get_vm_status(VMID)
+            print(configuration_state)
             sleep(1)
         assert configuration_state == "created"
         

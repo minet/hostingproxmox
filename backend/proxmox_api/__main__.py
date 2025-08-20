@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from dotenv import load_dotenv
-load_dotenv()
 import connexion
 from flask_cors import CORS
 from flask import request

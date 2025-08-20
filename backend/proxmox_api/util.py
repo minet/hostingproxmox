@@ -13,7 +13,6 @@ from proxmox_api.db.db_models import db
 from email.message import EmailMessage
 import smtplib
 
-
 if not bool(config.ADH6_API_KEY):
     raise Exception("NO ADH6 API KEY GIVEN")
 

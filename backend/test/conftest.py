@@ -1,8 +1,4 @@
 import pytest
-# Charger les variables d'environnement depuis le fichier .env
-from dotenv import load_dotenv
-load_dotenv()
-
 import proxmox_api.config.configuration as config
 import proxmox_api.db.db_functions as database
 import proxmox_api.db.db_models as model

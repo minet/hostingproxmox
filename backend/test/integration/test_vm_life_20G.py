@@ -7,7 +7,7 @@ import proxmox_api.util as util
 from time import sleep
 from proxmox_api.db import db_functions 
 
-VMID = 9998
+VMID = 9999
 def fake_subscribe_to_hosting_ML(username):
     return 200, {"status": "ok"}
 DISK_SIZE = 20
