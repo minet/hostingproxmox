@@ -4,6 +4,8 @@ Contributeurs :
 - [Dzenan Cindrak](https://github.com/DzeCin)
 - [Jules Gonzales](https://github.com/Seberus1)
 - [Nathan Stchepinsky](https://github.com/SeaweedbrainCY)
+- [Gustave Beauvallet](https://github.com/getorochied)
+- [Alexandre Naizondard](https://github.com/FirstThunderbolt)
 ## Présentation
 Hosting est la plateforme d'hébergement cloud proposée gratuitement par l'[Association MiNET](https://minet.net) à ses adhérents. 
 

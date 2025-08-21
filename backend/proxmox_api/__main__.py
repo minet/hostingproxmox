@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import connexion
-from flask_cors import CORS
+from starlette.middleware.cors import CORSMiddleware
 from flask import request
 from flask_apscheduler import APScheduler
 import proxmox_api.config.configuration as config
@@ -19,12 +19,22 @@ if config.ENV == "TEST":
     print("**************************************************\n\n")
 
 def create_app():
-    app = connexion.App(__name__, specification_dir='./swagger/')
+    # Use FlaskApp for connexion 3.x
+    app = connexion.FlaskApp(__name__, specification_dir='./swagger/')
     app.app.json_encoder = encoder.JSONEncoder
     app.app.config['SQLALCHEMY_DATABASE_URI'] = config.DATABASE_URI
     scheduler = APScheduler()
+    
+    # Add CORS middleware for connexion 3.x
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Configure this properly for production
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    
     app.add_api('swagger.yaml', arguments={'title': 'Proxmox'}, pythonic_params=True)
-    CORS(app.app)
 
     # Log every request
     import logging
@@ -68,4 +78,4 @@ scheduler.init_app(app.app)
 scheduler.start()
 
 if __name__ == '__main__':
-    app.app.run(port=8080)
+    app.run(port=8080)

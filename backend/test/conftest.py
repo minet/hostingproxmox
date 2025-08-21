@@ -213,6 +213,6 @@ def proxmoxAPI():
 def client():
     app, _ = main.create_app()
     db.init_app(app.app) 
-    #return flask_app.app.test_client()
-    with app.app.test_client() as client:
-        yield client
+    # Use connexion 3.x built-in test client
+    client = app.test_client()
+    yield client

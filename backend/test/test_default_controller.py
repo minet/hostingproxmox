@@ -59,9 +59,9 @@ def test_valid_valid_get_vm_id_with_unsecure(client, init_user_database, init_vm
     monkeypatch.setattr(proxmox, "get_vm_current_status", fake_get_vm_current_status)
     monkeypatch.setattr(proxmox, "get_vm_ip", fake_get_vm_ip)
     response = client.get('/vm/6', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
-    print("json=" ,response.json)
+    print("json=" ,response.json())
     assert response.status_code == 201
-    assert response.json['unsecure'] == True
+    assert response.json()['unsecure'] == True
 
 # Valid user with not valid token. Not admin.
 def test_false_token_get_vm_id(client, init_user_database, init_vm_database, monkeypatch):
@@ -387,7 +387,7 @@ def  test_valid_patch_vm_start(client, init_user_database, init_vm_database, mon
     # client patch request with a body
     response = client.patch('/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
     assert response.status_code == 200
-    assert response.json == {"status": "start OK"}
+    assert response.json() == {"status": "start OK"}
 
 def  test_valid_patch_vm_reboot(client, init_user_database, init_vm_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
@@ -397,7 +397,7 @@ def  test_valid_patch_vm_reboot(client, init_user_database, init_vm_database, mo
     # client patch request with a body
     response = client.patch('/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "reboot"})
     assert response.status_code == 200
-    assert response.json == {"status": "reboot OK"}
+    assert response.json() == {"status": "reboot OK"}
 
 def  test_valid_patch_vm_stop(client, init_user_database, init_vm_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
@@ -407,7 +407,7 @@ def  test_valid_patch_vm_stop(client, init_user_database, init_vm_database, monk
     # client patch request with a body
     response = client.patch('/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "stop"})
     assert response.status_code == 200
-    assert response.json == {"status": "stop OK"}
+    assert response.json() == {"status": "stop OK"}
 
 def  test_valid_patch_vm_switch_autoreboot(client, init_user_database, init_vm_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
@@ -417,7 +417,7 @@ def  test_valid_patch_vm_switch_autoreboot(client, init_user_database, init_vm_d
     # client patch request with a body
     response = client.patch('/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "switch_autoreboot"})
     assert response.status_code == 200
-    assert response.json == {"status": "switch autoreboot OK"}
+    assert response.json() == {"status": "switch autoreboot OK"}
 
 def  test_valid_patch_vm_unknown_status(client, init_user_database, init_vm_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_token)
@@ -427,7 +427,7 @@ def  test_valid_patch_vm_unknown_status(client, init_user_database, init_vm_data
     # client patch request with a body
     response = client.patch('/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "unknown"})
     assert response.status_code == 500
-    assert response.json == {"status": "uknown status"}
+    assert response.json() == {"status": "uknown status"}
 
 # Try to patch the VM of another user
 def test_foreign_patch_vm(client, init_user_database, init_vm_database, monkeypatch):
@@ -448,9 +448,9 @@ def test_admin_patch_vm(client, init_user_database, init_vm_database, monkeypatc
     vm1 = client.patch('/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
     vm2 = client.patch('/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "start"})
     assert vm1.status_code == 200
-    assert vm1.json == {"status": "start OK"}
+    assert vm1.json() == {"status": "start OK"}
     assert vm2.status_code == 200
-    assert vm2.json == {"status": "start OK"}
+    assert vm2.json() == {"status": "start OK"}
 
 # Try to transfert the VM as an admin
 def test_admin_transfer_ownership(client, init_user_database, init_vm_database, monkeypatch):
@@ -460,7 +460,7 @@ def test_admin_transfer_ownership(client, init_user_database, init_vm_database, 
     
     vm1 = client.patch('/vm/3', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "transfering_ownership", "user" : "user-1"})
     assert vm1.status_code == 200
-    assert vm1.json == {"status": "OK"}
+    assert vm1.json() == {"status": "OK"}
 
 # Try to transfert the VM as an a non admin
 def test_non_admin_transfer_ownership(client, init_user_database, init_vm_database, monkeypatch):
@@ -470,7 +470,7 @@ def test_non_admin_transfer_ownership(client, init_user_database, init_vm_databa
     
     vm1 = client.patch('/vm/1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"}, json={"status": "transfering_ownership", "user" : "user-1"})
     assert vm1.status_code == 403
-    assert vm1.json == {"status": "Permission denied"}
+    assert vm1.json() == {"status": "Permission denied"}
 
 # Try to patch with an invalid token
 def test_invalid_patch_vm(client, init_user_database, init_vm_database, monkeypatch):
@@ -497,7 +497,7 @@ def test_valid_get_account_state(client, init_user_database, monkeypatch):
     
     response = client.get('/account_state/user-1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 200
-    assert response.json == {"freezeState": "0"}
+    assert response.json() == {"freezeState": "0"}
 
 # invalid token
 def test_invalid_get_account_state(client, init_user_database, monkeypatch):
@@ -506,7 +506,7 @@ def test_invalid_get_account_state(client, init_user_database, monkeypatch):
     
     response = client.get('/account_state/user-1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 403
-    assert response.json == {"error": "Impossible to check your account. Please log into the MiNET cas"}
+    assert response.json() == {"error": "Impossible to check your account. Please log into the MiNET cas"}
 
 # get account state of another user
 def test_foreign_get_account_state(client, init_user_database, monkeypatch):
@@ -515,7 +515,7 @@ def test_foreign_get_account_state(client, init_user_database, monkeypatch):
     
     response = client.get('/account_state/user-2', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 403
-    assert response.json == {"error": "You are not allowed to check this account"}
+    assert response.json() == {"error": "You are not allowed to check this account"}
 
 # admin get its own account state
 def test_admin_get_own_account_state(client, init_user_database, monkeypatch):
@@ -524,7 +524,7 @@ def test_admin_get_own_account_state(client, init_user_database, monkeypatch):
     
     response = client.get('/account_state/admin', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
     assert response.status_code == 200
-    assert response.json == {"freezeState" : "0"}
+    assert response.json() == {"freezeState" : "0"}
 
 
 # admin get other account state
@@ -532,13 +532,13 @@ def test_admin_get_other_account_state(client, init_user_database, monkeypatch):
     monkeypatch.setattr(util, "check_cas_token", fake_check_cas_admin)
     monkeypatch.setattr(proxmox, "get_freeze_state", fake_get_freeze_state)
     
-    user1 = client.get('/account_state/user-1', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
-    user2 = client.get('/account_state/user-2', headers={'Content-Type': 'application json', "Authorization" : "Bearer AT-TEST"})
-    print("user1", user1.json)
+    user1 = client.get('/account_state/user-1', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    user2 = client.get('/account_state/user-2', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-TEST"})
+    print("user1", user1.json())
     assert user1.status_code == 200
-    assert user1.json == {"freezeState": "0"}
+    assert user1.json() == {"freezeState": "0"}
     assert user2.status_code == 200
-    assert user2.json == {"freezeState": "0"}
+    assert user2.json() == {"freezeState": "0"}
 
 
 def test_list_freezed_account(monkeypatch,init_user_database, client):
@@ -550,7 +550,7 @@ def test_list_freezed_account(monkeypatch,init_user_database, client):
     response = client.get('/expired', headers={'Content-Type': 'application/json', "Authorization" : "Bearer AT-232-ZAlr3TdJmZbGkL173Al8xm1VWSPnJTpy"})
     print(response.json)
     assert response.status_code == 200
-    assert response.json == ["expired-user-3", "expired-user-4"]    
+    assert response.json() == ["expired-user-3", "expired-user-4"]    
 
 
 

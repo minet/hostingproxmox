@@ -69,7 +69,7 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
         assert status == 201 
         start_time = time.time()
         configuration_state = "creating"
-        while time.time() - start_time <= 600 and configuration_state == "creating"  : # timeout after 10min
+        while time.time() - start_time <= 300 and configuration_state == "creating"  : # timeout after 5min
             configuration_state,_ = db_functions.get_vm_status(VMID)
             print(configuration_state)
             sleep(1)

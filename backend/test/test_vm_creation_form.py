@@ -30,7 +30,7 @@ def fake_get_node_from_vm(vmid):
 
 
 
-def fake_config_vm(next_vmid, node, password, vm_user, main_ssh_key,ip):
+def fake_config_vm(vmid, node, password, vm_user, main_ssh_key, ip, cpu, ram):
     return True
 
 class _ProxmoxAPIRessources:

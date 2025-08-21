@@ -146,8 +146,7 @@ def is_admin(memberOf):
 """
 def delete_from_db(vmid) -> bool:
     try :
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
+        from proxmox_api.__main__ import app
         with app.app.app_context():
             database.del_vm_list(vmid)
         return True
@@ -164,8 +163,7 @@ def delete_from_db(vmid) -> bool:
 """
 def delete_from_dns(vmid):
     try:
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
+        from proxmox_api.__main__ import app
         with app.app.app_context():
            
             ip = database.get_vm_ip(vmid)
@@ -325,6 +323,8 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
 When the VM is up, the password, vm user name and ssh key are set up
 """
 def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
+    # Import the existing app instance once at the top
+    from proxmox_api.__main__ import app
     
     success = True
     sync = False
@@ -350,7 +350,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
             cipassword=password,
             ciuser=vm_user,
             searchdomain="minet.net",
-            nameserver="157.159.195.51",
+            nameserver=configuration.MAIN_DNS_SERVER_IP,
             ipconfig0= "ip=" + str(ip)+"/24,gw=157.159.195.1",
             sshkeys=urllib.parse.quote(main_ssh_key, safe=''),
             sockets=vm_socket,
@@ -364,8 +364,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         delete_from_proxmox(vmid, node)
         delete_from_dns(vmid)
         delete_from_db(vmid)
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "error:An error occured while configuring vm (vmid ="+str(vmid) +")")
 
@@ -379,8 +377,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         delete_from_proxmox(vmid, node)
         delete_from_dns(vmid)
         delete_from_db(vmid)
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "error:An error occured while configuring vm (vmid ="+str(vmid) +")")
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
@@ -390,8 +386,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
     # Mise à jour de la MAC dans la db par celle assignée par proxmox à la création
     mac = get_mac_from_config(vmid,node)
     if mac:
-        app = util.create_app()  # créer ou récupérer ton app Flask
-
         with app.app.app_context():
             database.update_vm_mac(vmid,mac)
 
@@ -421,8 +415,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         delete_from_proxmox(vmid, node)
         delete_from_dns(vmid)
         delete_from_db(vmid)
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")")
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
@@ -430,13 +422,9 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
     print("firewall set")
 
     if success:
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "created")
     else : 
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "error:An error occured while creating your vm")
 
