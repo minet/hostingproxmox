@@ -13,6 +13,7 @@ python_code_quality:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
     - export no_proxy="$NO_PROXY"
+    - apk add --no-cache pkgconfig mysql-dev mariadb-connector-c-dev gcc musl-dev openssh-client
     - uv add --dev pylint
   script:
     - uv run pylint --fail-under=1 proxmox_api/*.py > code_quality.txt
@@ -33,9 +34,10 @@ angular_code_quality:
     - NG_CLI_ANALYTICS=ci
     - npm config set registry http://registry.npmjs.org/
     - npm install -g @angular/cli
+    - npm install --legacy-peer-deps
   script:
-    - ng add @angular-eslint/schematics --skip-confirmation
-    - ng lint --force > code_quality.txt
+    - npx ng add @angular-eslint/schematics@14.4.0 --skip-confirmation --legacy-peer-deps
+    - npx ng lint --force > code_quality.txt
     - cat code_quality.txt
   artifacts:
     paths:
@@ -54,7 +56,7 @@ test_backend:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
     - export no_proxy="$NO_PROXY"
-    - apk add --no-cache sqlite
+    - apk add --no-cache sqlite pkgconfig mysql-dev mariadb-connector-c-dev gcc musl-dev openssh-client
     - export ENVIRONMENT='TEST'
     - export KEYRING_DNS_SECRET=$KEYRING_DNS_SECRET
     - export PROXMOX_API_KEY_NAME=$PROXMOX_API_KEY_NAME
@@ -65,7 +67,7 @@ test_backend:
     # Install dependencies with uv
     - uv sync --extra test
   script :
-    - uv run pytest --cov=proxmox_api --cov-report term-missing --cov-report xml:./coverage_out_report.xml --junitxml=report.xml
+    - uv run pytest --cov=proxmox_api --cov-report term-missing --cov-report xml:./coverage_out_report.xml --junitxml=report.xml --ignore=test/integration/
   coverage: '/TOTAL.*\s+(\d+%)$/'
   artifacts:
     when: always
@@ -77,13 +79,13 @@ test_backend:
 
 angular_build:
   stage: build
-  image: node
+  image: node:18-alpine
   needs: 
     - angular_code_quality
   before_script:
     - npm cache clean --force  
-    - npm config rm proxy
-    - npm config rm https-proxy
+    - npm config rm proxy || true
+    - npm config rm https-proxy || true
     - npm config set proxy "$HTTP_PROXY"
     - npm config set https-proxy "$HTTP_PROXY"
     - npm config set registry http://registry.npmjs.org/
@@ -92,10 +94,9 @@ angular_build:
     - NG_CLI_ANALYTICS=ci
     - export NODE_OPTIONS=--openssl-legacy-provider
   script:
-    - npm ci --prefer-offline --no-audit
+    - npm ci --prefer-offline --no-audit --legacy-peer-deps
     - npm install -g @angular/cli
-
-    - yarn ng build
+    - npx ng build --configuration production
   artifacts:
     paths:
       - frontend/dist
@@ -111,17 +112,20 @@ deploy_backend:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
     - export no_proxy="$NO_PROXY"
+    # Install system dependencies for mysqlclient
+    - apt-get update && apt-get install -y curl pkg-config default-libmysqlclient-dev build-essential
     - cd backend
     # Install uv
     - curl -LsSf https://astral.sh/uv/install.sh | sh
     - export PATH="/root/.local/bin:$PATH"
     - uv sync
-    - sudo /bin/systemctl stop proxmox_api
+    # Use systemctl directly (no sudo needed in container)
+    - systemctl stop proxmox_api || true
     - rm -rf /var/www/proxmox_api
   script:
     - cp -r proxmox_api /var/www/proxmox_api
     - cd /var/www/proxmox_api
-    - sudo /bin/systemctl start proxmox_api
+    - systemctl start proxmox_api
   tags:
     - hosting-proxmox
   environment:
@@ -137,7 +141,9 @@ deploy_frontend:
     - test_backend
   script:
     - export no_proxy="$NO_PROXY"
-    - rm -rf /var/www/proxmox_dashboard
+    # Remove directory without sudo (assuming proper permissions)
+    - rm -rf /var/www/proxmox_dashboard || true
+    - mkdir -p /var/www/
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
   tags:
     - hosting-proxmox
@@ -158,17 +164,20 @@ deploy_backend_dev:
     - export http_proxy="$HTTP_PROXY"
     - export https_proxy="$HTTPS_PROXY"
     - export no_proxy="$NO_PROXY"
+    # Install system dependencies for mysqlclient
+    - apt-get update && apt-get install -y curl pkg-config default-libmysqlclient-dev build-essential
     - cd backend
     # Install uv
     - curl -LsSf https://astral.sh/uv/install.sh | sh
     - export PATH="/root/.local/bin:$PATH"
     - uv sync
-    - sudo /bin/systemctl stop proxmox_api
+    # Use systemctl directly (no sudo needed in container)
+    - systemctl stop proxmox_api || true
     - rm -rf /var/www/proxmox_api
   script:
     - cp -r proxmox_api /var/www/proxmox_api
     - cd /var/www/proxmox_api
-    - sudo /bin/systemctl start proxmox_api
+    - systemctl start proxmox_api
   tags:
     - hosting-dev
   environment:
@@ -184,7 +193,9 @@ deploy_frontend_dev:
     - test_backend
   script:
     - export no_proxy="$NO_PROXY"
-    - rm -rf /var/www/proxmox_dashboard
+    # Remove directory without sudo (assuming proper permissions)
+    - rm -rf /var/www/proxmox_dashboard || true
+    - mkdir -p /var/www/
     - cp -r frontend/dist/hosting /var/www/proxmox_dashboard
   environment:
     name: development

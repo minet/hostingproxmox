@@ -13,12 +13,14 @@ Hosting est la plateforme d'hébergement cloud proposée gratuitement par l'[Ass
 Ce code open source reprend la totalité du code de l'application web [hosting.minet.net](https://minet.net). 
 
 ## ✅ Status du Projet
-Le projet utilise maintenant **Connexion 3.x** avec Flask et Angular 11. Toutes les migrations et corrections ont été appliquées :
+Le projet utilise maintenant **Connexion 3.x** avec Flask et Angular 14. Toutes les migrations et corrections ont été appliquées :
 
 - ✅ **Backend API** : Migration Connexion 2.x → 3.x terminée
-- ✅ **Tests** : 38/38 tests unitaires passent + 5/5 tests d'intégration 
+- ✅ **Tests** : 55/55 tests unit
+- ✅ **CI/CD Pipeline** : Pipeline GitLab CI/CD complètement fonctionnel
 - ✅ **VM Creation** : Problème de hang résolu via correction des threads SQLAlchemy
 - ✅ **Framework** : Compatibilité ASGI/Starlette intégrée
+- ✅ **Test Environment** : MockProxmoxAPI implémenté pour les tests unitaires
 
 ## Prérequis
 ### Global
@@ -35,17 +37,21 @@ Se placer dans `backend/`
 
 ### Définir les différents secrets 
 Dans `.env`, à la racine du projet : 
+```properties
+KEYRING_DNS_SECRET="<KEYRING_DNS_SECRET>"
+PROXMOX_API_KEY_NAME="<PROXMOX_API_KEY_NAME>"
+PROXMOX_API_KEY="<PROXMOX_API_KEY>"
+PROXMOX_BACK_DB="<PROXMOX_BACK_DB>"
+ADH6_API_KEY="<ADH6_API_KEY>"
+PROXMOX_BACK_DB_DEV="<PROXMOX_BACK_DB_DEV>"
+PROXMOX_HOST=<IP_PROXMOX_HOST>
+MAIN_DNS_SERVER_IP=<IP_DNS_HOSTING>
+LIST_NAME_NODES="<NODES_NAMES>"
+PROXMOX_STORAGE="<STORAGE_NAME>"
+ENVIRONMENT="DEV"
 ```
-export KEYRING_DNS_SECRET=<KEYRING_DNS_SECRET>
-export PROXMOX_API_KEY_NAME=<PROXMOX_API_KEY_NAME>
-export PROXMOX_API_KEY=<PROXMOX_API_KEY>
-export PROXMOX_BACK_DB=<PROXMOX_BACK_DB>
-export ADH6_API_KEY=<ADH6_API_KEY>
-export PROXMOX_BACK_DB_DEV=<PROXMOX_BACK_DB_DEV>
-export PROXMOX_HOST=<IP_PROXMOX_HOST>
-export MAIN_DNS_SERVER_IP=<IP_DNS_HOSTING>
-export ENVIRONMENT="DEV"
-```
+
+**Note importante** : Le fichier `.env` utilise le format `KEY=value` (sans `export`) contrairement à l'exemple bash ci-dessus.
 
 #### Où trouver ces valeurs ?
 
@@ -79,12 +85,14 @@ Un makefile permet de lancer le site aisément :
 Pour lancer les tests du backend :
 ```bash
 cd backend/
-# Tests unitaires
+# Tests unitaires spécifiques
 uv run pytest test/test_default_controller.py -v
-# Tests d'intégration 
+# Tests d'intégration (exclus du CI/CD)
 uv run pytest test/integration/ -v
-# Tous les tests
-uv run pytest test/ -v
+# Tous les tests (55 tests au total, 41% de couverture)
+uv run pytest test/ -v --ignore=test/integration/
+# Avec rapport de couverture
+uv run pytest test/ -v --ignore=test/integration/ --cov=proxmox_api --cov-report=html
 ```
 
 

@@ -52,26 +52,35 @@ python -m proxmox_api
 
 ### Environment Configuration
 Create a `.env` file with required environment variables:
-```bash
-export PROXMOX_HOST=<IP_PROXMOX_HOST>
-export PROXMOX_API_KEY_NAME=<PROXMOX_API_KEY_NAME>
-export PROXMOX_API_KEY=<PROXMOX_API_KEY>
-export PROXMOX_BACK_DB=<PROXMOX_BACK_DB>
-export ENVIRONMENT="DEV"  # or "PROD" or "TEST"
+```properties
+PROXMOX_HOST=<IP_PROXMOX_HOST>
+PROXMOX_API_KEY_NAME=<PROXMOX_API_KEY_NAME>
+PROXMOX_API_KEY=<PROXMOX_API_KEY>
+PROXMOX_BACK_DB=<PROXMOX_BACK_DB>
+PROXMOX_BACK_DB_DEV=<PROXMOX_BACK_DB_DEV>
+ADH6_API_KEY=<ADH6_API_KEY>
+KEYRING_DNS_SECRET=<KEYRING_DNS_SECRET>
+MAIN_DNS_SERVER_IP=<MAIN_DNS_SERVER_IP>
+LIST_NAME_NODES=<LIST_NAME_NODES>
+PROXMOX_STORAGE=<PROXMOX_STORAGE>
+ENVIRONMENT="DEV"  # or "PROD" or "TEST"
 ```
 
 ## Testing
-The backend includes comprehensive test coverage:
+The backend includes comprehensive test coverage (55 tests, 41% code coverage):
 
 ```bash
 # Unit tests (API endpoints)
 uv run pytest test/test_default_controller.py -v
 
-# Integration tests (VM lifecycle)
+# Integration tests (VM lifecycle, excluded from CI/CD)
 uv run pytest test/integration/ -v  
 
-# All tests
-uv run pytest test/ -v --tb=short
+# All tests (excluding integration)
+uv run pytest test/ -v --ignore=test/integration/ --tb=short
+
+# With coverage report
+uv run pytest test/ -v --ignore=test/integration/ --cov=proxmox_api --cov-report=html
 ```
 
 ## API Architecture 

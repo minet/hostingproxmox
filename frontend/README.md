@@ -3,7 +3,7 @@
 Angular frontend for the MiNET Hosting Proxmox platform. This provides the web interface for managing VMs and DNS entries through the Proxmox API backend.
 
 ## Project Info
-- **Framework**: Angular CLI version 11.0.5
+- **Framework**: Angular 14 with Angular CLI
 - **Backend API**: Connects to Proxmox API backend on port 8080
 - **Authentication**: OAuth2 integration with MiNET CAS
 - **Status**: ✅ Compatible with updated Connexion 3.x backend

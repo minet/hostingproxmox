@@ -1,0 +1,53 @@
+
+Linting "hosting"...
+
+/builds/hosting/api/frontend/src/app/app.component.html
+  1:4  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/common/services/user.service.ts
+  82:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/builds/hosting/api/frontend/src/app/deletevm/deletevm.component.html
+  1:5  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/dns/dns.component.html
+  1:5  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/footer/footer.component.html
+  1:8  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/history/history.component.html
+  1:5  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/home/home.component.html
+  1:5  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/legal/legal.component.html
+  1:9  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/manual/manual.component.html
+  1:5  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/navbar/navbar.component.html
+  1:5  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/ssh/ssh.component.html
+  1:8  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/test/test.component.html
+  1:8  error  Parsing error: ';' expected
+
+/builds/hosting/api/frontend/src/app/vm-box/vm-box.component.html
+  1:5  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/app/vm/vm.component.html
+  8:1  error  Parsing error: Type expected
+
+/builds/hosting/api/frontend/src/app/vms/vms.component.html
+  2:5  error  Parsing error: '>' expected
+
+/builds/hosting/api/frontend/src/index.html
+  1:10  error  Parsing error: '>' expected
+
+✖ 16 problems (15 errors, 1 warning)
+
