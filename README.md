@@ -6,17 +6,32 @@ Contributeurs :
 - [Nathan Stchepinsky](https://github.com/SeaweedbrainCY)
 - [Gustave Beauvallet](https://github.com/getorochied)
 - [Alexandre Naizondard](https://github.com/FirstThunderbolt)
+
 ## Présentation
 Hosting est la plateforme d'hébergement cloud proposée gratuitement par l'[Association MiNET](https://minet.net) à ses adhérents. 
 
 Ce code open source reprend la totalité du code de l'application web [hosting.minet.net](https://minet.net). 
+
+## ✅ Status du Projet
+Le projet utilise maintenant **Connexion 3.x** avec Flask et Angular 11. Toutes les migrations et corrections ont été appliquées :
+
+- ✅ **Backend API** : Migration Connexion 2.x → 3.x terminée
+- ✅ **Tests** : 38/38 tests unitaires passent + 5/5 tests d'intégration 
+- ✅ **VM Creation** : Problème de hang résolu via correction des threads SQLAlchemy
+- ✅ **Framework** : Compatibilité ASGI/Starlette intégrée
+
 ## Prérequis
 ### Global
 - Avoir installé `mysql`, `angular` et `flask`
+- Python 3.8+ (testé avec Python 3.13)
+- Node.js et npm pour le frontend Angular
 ### Backend
 Se placer dans `backend/`
-- Créer un environment virtuel `python3 -m venv venv` et l'activer `source venv/bin/activate`
-- Lancer la commande `pip3 install -r requirements.txt` dans le dépot pour installer les packages requis.
+- Créer un environment virtuel `python3 -m venv .venv` et l'activer `source .venv/bin/activate`
+- **Recommandé** : Utiliser `uv` pour une gestion plus rapide des dépendances : `pip install uv`
+- Lancer la commande `uv sync` ou `pip3 install -r requirements.txt` dans le dépôt pour installer les packages requis.
+
+**Note** : Le backend utilise maintenant **Connexion 3.x** avec Flask et ASGI. Les tests ont été mis à jour pour utiliser l'interface Starlette.
 
 ### Définir les différents secrets 
 Dans `.env`, à la racine du projet : 
@@ -56,11 +71,21 @@ Un makefile permet de lancer le site aisément :
 
 ### Le `backend`/API à la main: 
 
-
 1. Charger les variables d'environnement `source .env`
-2. Rendez vous dans `backend/` et chargez l'environnement virtuel python : `source venv/bin/activate`
+2. Rendez vous dans `backend/` et chargez l'environnement virtuel python : `source .venv/bin/activate`
+3. Exécutez la commande `uv run python3 -m proxmox_api` (ou `python3 -m proxmox_api` si vous n'utilisez pas uv). Le serveur se lance alors. *Assurez vous qu'il est joignable via le port 8080 de votre machine pour qu'il puisse être joint par le `frontend`*
 
-3. Exécutez la commande `python3 -m proxmox_api`. Le serveur se lance alors. *Assurez vous qu'il est joignable via le port 8080 de votre machine pour qu'il puisse être joint par le `frontend`*
+### Tests
+Pour lancer les tests du backend :
+```bash
+cd backend/
+# Tests unitaires
+uv run pytest test/test_default_controller.py -v
+# Tests d'intégration 
+uv run pytest test/integration/ -v
+# Tous les tests
+uv run pytest test/ -v
+```
 
 
 ### Le `frontend`
