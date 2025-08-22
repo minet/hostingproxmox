@@ -70,7 +70,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "buildTarget": "hosting:build"
+            "buildTarget": "hosting:build",
+            "allowedHosts": ["hosting.minet.net", "hosting-dev.minet.net", "hosting-local.minet.net"]
           },
           "configurations": {
             "production": {

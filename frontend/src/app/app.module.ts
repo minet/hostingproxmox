@@ -12,6 +12,7 @@ import { VmsService } from './common/services/vms.service';
 import { FormsModule } from '@angular/forms';
 import { User } from './models/user';
 import { SlugifyPipe } from './pipes/slugify.pipe';
+import { SearchFilterPipe } from './pipes/search-filter.pipe';
 import { VmsComponent } from './vms/vms.component';
 import { VmComponent } from './vm/vm.component';
 import { DnsComponent } from './dns/dns.component';
@@ -20,7 +21,6 @@ import { LegalComponent } from './legal/legal.component';
 import { ManualComponent } from './manual/manual.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HistoryComponent } from './history/history.component';
-import {Ng2SearchPipeModule} from "ng2-search-filter";
 import { environment } from './../environments/environment';
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
@@ -44,6 +44,7 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
         NavbarComponent,
         FooterComponent,
         SlugifyPipe,
+        SearchFilterPipe,
         VmsComponent,
         VmComponent,
         DnsComponent,
@@ -58,7 +59,6 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
     bootstrap: [AppComponent], imports: [BrowserModule,
         NgbModule,
         AppRoutingModule,
-        Ng2SearchPipeModule,
         OAuthModule.forRoot({
             resourceServer: {
                 allowedUrls: [environment.backendURL],
