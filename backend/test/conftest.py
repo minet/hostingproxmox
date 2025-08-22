@@ -18,8 +18,8 @@ from proxmox_api.db.db_models import db
 def init_user_database():
     if configuration.ENV != "TEST":
         raise Exception("You must set the environnement to TEST to run tests")
-    db = SQLAlchemy()
-    db.init_app(flask_app.app)
+    # Utiliser l'instance SQLAlchemy existante au lieu d'en créer une nouvelle
+    from proxmox_api.db.db_models import db
     with flask_app.app.app_context():
         # Create the database and the database table
         #model.User.query.delete()
@@ -66,8 +66,8 @@ def init_user_database():
 def init_vm_database():
     if configuration.ENV != "TEST":
         raise Exception("You must set the environnement to TEST to run tests")
-    db = SQLAlchemy()
-    db.init_app(flask_app.app)
+    # Utiliser l'instance SQLAlchemy existante au lieu d'en créer une nouvelle
+    from proxmox_api.db.db_models import db
     with flask_app.app.app_context():
         try:
             db.session.query(model.Vm).delete()
@@ -114,8 +114,8 @@ def init_vm_database():
 def init_expired_vm_database():
     if configuration.ENV != "TEST":
         raise Exception("You must set the environnement to TEST to run tests")
-    db = SQLAlchemy()
-    db.init_app(flask_app.app)
+    # Utiliser l'instance SQLAlchemy existante au lieu d'en créer une nouvelle
+    from proxmox_api.db.db_models import db
     with flask_app.app.app_context():
         try:
             db.session.query(model.Vm).delete()
@@ -160,8 +160,8 @@ def init_expired_vm_database():
 def init_max_ressources_for_one_user():
     if configuration.ENV != "TEST":
         raise Exception("You must set the environnement to TEST to run tests")
-    db = SQLAlchemy()
-    db.init_app(flask_app.app)
+    # Utiliser l'instance SQLAlchemy existante au lieu d'en créer une nouvelle
+    from proxmox_api.db.db_models import db
     with flask_app.app.app_context():
         try:
             db.session.query(model.Account_Max_Ressources).delete()
@@ -211,8 +211,8 @@ def proxmoxAPI():
 
 @pytest.fixture(scope='module')
 def client():
-    app, scheduler = main.create_app()
+    app, _ = main.create_app()
     db.init_app(app.app) 
-    #return flask_app.app.test_client()
-    return app.app.test_client()
-         
+    # Use connexion 3.x built-in test client
+    client = app.test_client()
+    yield client

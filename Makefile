@@ -1,9 +1,7 @@
 .DEFAULT_GOAL := run
 
 install_server:
-	rm -rf backend/venv
-	python3 -m venv backend/venv
-	backend/venv/bin/pip install -r backend/requirements.txt
+	cd backend && uv sync
 
 install_frontend:
 	cd frontend && npm install
@@ -11,7 +9,7 @@ install_frontend:
 install_all: install_server install_frontend
 
 run_server:
-	. ./.env && . backend/venv/bin/activate && cd backend && python3 -m proxmox_api
+	cd backend && uv run python -m proxmox_api
 
 run_frontend:
 	cd frontend && ng serve --host=127.0.0.1 --disable-host-check

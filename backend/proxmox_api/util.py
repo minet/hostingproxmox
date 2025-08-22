@@ -7,7 +7,6 @@ import requests
 import connexion
 import tempfile
 import subprocess
-import proxmox_api.config.configuration as  config 
 import proxmox_api.config.configuration as config
 from proxmox_api import encoder
 from proxmox_api.db.db_models import db
@@ -15,8 +14,10 @@ from email.message import EmailMessage
 import smtplib
 
 
-if not bool(config.ADH6_API_KEY):
-    raise Exception("NO ADH6 API KEY GIVEN")
+def _check_adh6_api_key():
+    """Check if ADH6 API key is available, raise exception if not in production."""
+    if not bool(config.ADH6_API_KEY) and config.ENVIRONMENT != 'TEST':
+        raise Exception("NO ADH6 API KEY GIVEN")
 
 
 def _deserialize(data, klass):
@@ -164,7 +165,7 @@ def _deserialize_dict(data, boxed_type):
     :rtype: bool
 """
 def check_password_strength(password:str) -> bool:
-    special = "[`!@#$%^&*()_+-=[\]{};':\"\\|,.<>/?~]"
+    special = r"[`!@#$%^&*()_+-=[\]{};':\"\\|,.<>/?~]"
     upper = "[A-Z]"
     number = "[0-9]"
     # Return true if and only if there are at least 12 char, 1 spec char, 1 uppercase letter and 1 lowercase letter
@@ -180,7 +181,7 @@ sub validate_ssh_public_keys {
     my @lines = split(/\n/, $raw);
 
     foreach my $line (@lines) {
-	next if $line =~ m/^\s*$/;
+	next if $line =~ m/^\\s*$/;
 	eval {
 	    my ($filename, $handle) = tempfile_contents($line);
 	    run_command(["ssh-keygen", "-l", "-f", $filename],
@@ -290,6 +291,7 @@ def check_cas_token(headers):
 
 
 def get_adh6_account(username):
+    _check_adh6_api_key()
     headers = {"X-API-KEY": config.ADH6_API_KEY}
     #print("https://adh6.minet.net/api/member/?limit=25&filter%5Busername%5D="+str(username)+"&only=id,username")
     userInfoJson = adh6_search_user(username, headers)
@@ -301,7 +303,8 @@ def get_adh6_account(username):
         for id in userInfoJson:
             accountJson = requests.get("https://adh6.minet.net/api/member/"+str(id), headers=headers) # memership info
             tmp_account = accountJson.json()
-            if tmp_account["username"].lower() == username.lower():
+            # Handle test environment where username might not be present
+            if "username" in tmp_account and tmp_account["username"].lower() == username.lower():
                 account = tmp_account
         return account, 200
 
@@ -312,6 +315,7 @@ def adh6_search_user(username, headers):
 
 # Subscribe on adh6 a user to the hosting mailing list
 def subscribe_to_hosting_ML(username):
+    _check_adh6_api_key()
     print("Subscribe to hosting ML : " + username)
     headers = {"X-API-KEY": config.ADH6_API_KEY}
     userInfoJson = adh6_search_user(username, headers)
@@ -334,7 +338,8 @@ def subscribe_to_hosting_ML(username):
         for id in userInfoJson:
             accountJson = requests.get("https://adh6.minet.net/api/member/"+str(id), headers=headers) # memership info
             tmp_account = accountJson.json()
-            if tmp_account["username"].lower() == username.lower():
+            # Handle test environment where username might not be present
+            if "username" in tmp_account and tmp_account["username"].lower() == username.lower():
                 current_ML_status = tmp_account["mailinglist"]
                 new_ML_status = int(str(bin(current_ML_status))[:-2] + "1" + str(bin(current_ML_status))[-1], 2) # Add 1 to the bit before the last one, no matter the old value
                 headers["Content-Type"] = "application/json"

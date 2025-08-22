@@ -1,6 +1,7 @@
 from proxmox_api import proxmox
 
 import connexion
+from flask import request
 from threading import Thread
 from proxmox_api.models.dns_item import DnsItem  # noqa: E501
 from proxmox_api.models.vm_item import VmItem  # noqa: E501
@@ -18,7 +19,7 @@ def validate_dns():  # noqa: E501
 
     :rtype: None
     """
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -45,8 +46,8 @@ def validate_dns():  # noqa: E501
     if freezeAccountState != 0 and not admin:
         return {"error": "Your cotisation has expired"}, 403
 
-    if connexion.request.is_json:
-        update_body = connexion.request.get_json()  # noqa: E50
+    if request.is_json:
+        update_body = request.get_json()  # noqa: E50
 
     try:
         userid = update_body['userid']
@@ -66,7 +67,7 @@ def create_dns(body=None):  # noqa: E501
 
     :rtype: None
     """
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -95,8 +96,8 @@ def create_dns(body=None):  # noqa: E501
 
     user_id = cas['sub']
 
-    if connexion.request.is_json:
-        body = DnsItem.from_dict(connexion.request.get_json())  # noqa: E501
+    if request.is_json:
+        body = DnsItem.from_dict(request.get_json())  # noqa: E501
 
    # finally we have to check if the entry is correct : 
     if not util.check_dns_entry(body.entry):
@@ -132,7 +133,7 @@ def create_vm(body=None):  # noqa: E501
 
     :rtype: None
     """
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -159,8 +160,8 @@ def create_vm(body=None):  # noqa: E501
    
     if freezeAccountState != 0 and not admin: # for any other freestate user can't create vm
         return {"error": "Your cotisation has expired"}, 403
-    if connexion.request.is_json:
-        body = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
+    if request.is_json:
+        body = VmItem.from_dict(request.get_json())  # noqa: E501
     try :
         if body.cpu == 0 or body.ram == 0 or body.disk == 0 or body.cpu is None or body.ram is None or body.disk is None:
             return {"error": "Impossible to create a VM without CPU, RAM or disk"}, 400
@@ -209,7 +210,7 @@ def delete_vm_id_with_error(vmid): #API endpoint to delete a VM when an error oc
     except:
         return {"status": "error not an integer"}, 500
 
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -259,7 +260,7 @@ def delete_vm_id(vmid):  # noqa: E501
     except:
         return {"status": "error not an integer"}, 500
 
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -365,7 +366,7 @@ def get_dns():  # noqa: E501
 
     :rtype: List[DnsEntryItem]
     """
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -409,7 +410,7 @@ def get_vm(search= ""):  # noqa: E501
 
     :rtype: List[VmIdItem]
     """
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"status": "error"}, 403
@@ -456,7 +457,7 @@ def get_vm_id(vmid):  # noqa: E501
     """
 
 
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
@@ -603,14 +604,14 @@ def get_vm_id(vmid):  # noqa: E501
 
 
 def renew_ip():
-    if connexion.request.is_json:
-        body = connexion.request.get_json()  # noqa: E50
+    if request.is_json:
+        body = request.get_json()  # noqa: E50
 
     try:
         vmid = int(body['vmid'])
     except:
         return {"error": "Bad vmid"}, 400
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -661,9 +662,9 @@ def delete_dns_id(dnsid):  # noqa: E501
         return {"status": "error not an integer"}, 500
     
     # Get the sendMail parameter from the request
-    sendMail = connexion.request.args.get('sendMail', default=False, type=bool)
+    sendMail = request.args.get('sendMail', default=False, type=bool)
 
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -721,7 +722,7 @@ def get_dns_id(dnsid):  # noqa: E501
 
     :rtype: DnsItem
     """
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"status": "error"}, 403
@@ -787,14 +788,14 @@ def patch_vm(vmid, body=None):  # noqa: E501
 
     :rtype: None
     """
-    if connexion.request.is_json:
-        requetsBody = VmItem.from_dict(connexion.request.get_json())  # noqa: E501
+    if request.is_json:
+        requetsBody = VmItem.from_dict(request.get_json())  # noqa: E501
     try:
         vmid = int(vmid)
     except:
         return {"status": "error not an integer"}, 500
 
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"status": "error"}, 403
@@ -849,7 +850,7 @@ def patch_vm(vmid, body=None):  # noqa: E501
         return {"status": "Permission denied"}, 403
 
 def get_historyip(vmid):
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"status": "error"}, 403
@@ -867,7 +868,7 @@ def get_historyip(vmid):
         return {"status": "error"}, 403
 
 def get_historyipall():
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"status": "error"}, 403
@@ -888,7 +889,7 @@ def get_historyipall():
 # Return the list of all ips of a user
 
 def get_ip_list():
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"status": "This is forbidden"}, 403
@@ -921,14 +922,14 @@ def get_ip_list():
 
 def update_credentials():
 
-    if connexion.request.is_json:
-        update_body = connexion.request.get_json()  # noqa: E50
+    if request.is_json:
+        update_body = request.get_json()  # noqa: E50
 
     try:
         vmid = int(update_body['vmid'])
     except:
         return {"error": "Bad vmid"}, 400
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
 
     if status_code != 200:
@@ -976,7 +977,7 @@ def update_credentials():
     
 
 def get_need_to_be_restored(vmid):
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
     
     if status_code != 200:
@@ -1025,7 +1026,7 @@ def get_need_to_be_restored(vmid):
 
 
 def get_expired_cotisation_users():
-    headers = connexion.request.headers
+    headers = request.headers
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
@@ -1046,7 +1047,7 @@ def get_expired_cotisation_users():
 
 
 def get_account_state(username):
-    headers = connexion.request.headers
+    headers = request.headers
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"error": "Impossible to check your account. Please log into the MiNET cas"}, 403
@@ -1068,7 +1069,7 @@ def get_account_state(username):
 
 
 def get_notification():
-    headers = connexion.request.headers
+    headers = request.headers
     try:
         status_code, cas = util.check_cas_token(headers)
         if status_code != 200:
@@ -1092,7 +1093,7 @@ def get_notification():
 
 
 def put_notification():
-    headers = connexion.request.headers
+    headers = request.headers
     status_code, cas = util.check_cas_token(headers)
     print("cas", cas)
     if status_code != 200:
@@ -1108,10 +1109,10 @@ def put_notification():
     if not admin:
         return {"error": "You are not allowed to do this"}, 403
     try:
-        title = connexion.request.json.get("title")
-        message = connexion.request.json.get("message")
-        criticity = connexion.request.json.get("criticity")
-        active = connexion.request.json.get("active")
+        title = request.json.get("title")
+        message = request.json.get("message")
+        criticity = request.json.get("criticity")
+        active = request.json.get("active")
         if title == None or message == None or criticity == None or active == None:
             return {"error": "Missing parameters"}, 400
     except Exception as _:
@@ -1121,7 +1122,7 @@ def put_notification():
 
 
 def get_account_max_ressources():
-    headers = {"Authorization": connexion.request.headers["Authorization"]}
+    headers = {"Authorization": request.headers["Authorization"]}
     status_code, cas = util.check_cas_token(headers)
     if status_code != 200:
         return {"status": "error"}, 403

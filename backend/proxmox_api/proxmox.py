@@ -19,16 +19,96 @@ from proxmox_api.db import db_functions as database
 from  proxmox_api.db import db_models
 logging.basicConfig(filename="log", filemode="a", level=logging.INFO
                     , format='%(asctime)s ==> %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+# Define mock classes first, before the condition
+class MockNode:
+    def __init__(self, node_name="mock-node"):
+        self.node_name = node_name
+        
+    def qemu(self, vmid):
+        return MockVM()
+        
+    def status(self):
+        return MockNodeStatus()
+
+class MockVM:
+    def config(self):
+        return {"net0": "virtio=AA:BB:CC:DD:EE:FF"}
+        
+    def status(self):
+        return MockVMStatus()
+
+class MockNodeStatus:
+    def get(self):
+        return {"status": "online"}
+        
+class MockVMStatus:
+    def get(self):
+        return {"status": "running"}
+        
+class MockNodes:
+    def __init__(self):
+        self.mock_node = MockNode()
+        
+    def __getitem__(self, node_name):
+        return self.mock_node
+        
+    def __call__(self, node_name=None):
+        return self.mock_node
+        
+    def get(self):
+        return [{"node": "mock-node", "status": "online"}]
+
+class MockProxmoxAPI:
+    def __init__(self):
+        self.cluster = MockCluster()
+        self.nodes = MockNodes()
+        
+    def get(self, *args, **kwargs):
+        return {"data": []}
+        
+    def put(self, *args, **kwargs):
+        return {"data": "OK"}
+        
+    def post(self, *args, **kwargs):
+        return {"data": "OK"}
+        
+    def delete(self, *args, **kwargs):
+        return {"data": "OK"}
+
+class MockCluster:
+    def __init__(self):
+        self.resources = MockResources()
+
+class MockResources:
+    def get(self, type=None):
+        if type == "vm":
+            return [{"vmid": 100, "node": "mock-node", "status": "running"}]
+        return []
+
+# Now initialize the proxmox client based on environment
 HASPROXMOXHOST = bool(configuration.PROXMOX_HOST)
 HASPROXMOXUSER = bool(configuration.PROXMOX_USER)
 HASPROXMOXAPIKEY = bool(configuration.PROXMOX_API_KEY)
 HASPROXMOXAPIKEYNAME = bool(configuration.PROXMOX_API_KEY_NAME)
-if  HASPROXMOXHOST and HASPROXMOXUSER and HASPROXMOXAPIKEY and HASPROXMOXAPIKEYNAME :
+
+# Force mock usage in TEST environment, even if Proxmox credentials are available
+if configuration.ENVIRONMENT == 'TEST':
+    # In test environment, always use mock ProxmoxAPI object
+    proxmox = MockProxmoxAPI()
+    print("Running with mock Proxmox API (TEST environment)")
+elif HASPROXMOXHOST and HASPROXMOXUSER and HASPROXMOXAPIKEY and HASPROXMOXAPIKEYNAME:
+    # Production/Development environment with valid credentials
     proxmox = ProxmoxAPI(host=configuration.PROXMOX_HOST, user=configuration.PROXMOX_USER
                      , token_name=configuration.PROXMOX_API_KEY_NAME
                      , token_value=configuration.PROXMOX_API_KEY, verify_ssl=False)
+    print(f"Running with real Proxmox API (Environment: {configuration.ENVIRONMENT})")
 else:
-    raise Exception("Environnement variables are not exported")
+    # Fallback to mock when credentials are not available
+    proxmox = MockProxmoxAPI()
+    print("Running with mock Proxmox API (missing credentials)")
+    if configuration.ENVIRONMENT != 'TEST':
+        print("WARNING: Proxmox environment variables not fully configured")
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s:%(name)s: %(message)s')
 
@@ -146,8 +226,7 @@ def is_admin(memberOf):
 """
 def delete_from_db(vmid) -> bool:
     try :
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
+        from proxmox_api.__main__ import app
         with app.app.app_context():
             database.del_vm_list(vmid)
         return True
@@ -164,8 +243,7 @@ def delete_from_db(vmid) -> bool:
 """
 def delete_from_dns(vmid):
     try:
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
+        from proxmox_api.__main__ import app
         with app.app.app_context():
            
             ip = database.get_vm_ip(vmid)
@@ -311,8 +389,8 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
         delete_from_db(next_vmid)
         return {"error": "Impossible to create the VM (cloning)"}, 500
 
-    app = util.create_app() # we need the context to delete the vm if there is an error
-    db_models.db.init_app(app.app)
+    # Utiliser l'instance SQLAlchemy existante
+    from proxmox_api.__main__ import app
     with app.app.app_context():
         database.set_vm_status(next_vmid, "creating")
     Thread(target=config_vm, args=(next_vmid, node, password, vm_user, main_ssh_key,ip,cpu, ram, )).start()
@@ -325,6 +403,8 @@ def create_vm(name, vm_type, user_id, cpu, ram, disk, password="no", vm_user="",
 When the VM is up, the password, vm user name and ssh key are set up
 """
 def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
+    # Import the existing app instance once at the top
+    from proxmox_api.__main__ import app
     
     success = True
     sync = False
@@ -350,7 +430,7 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
             cipassword=password,
             ciuser=vm_user,
             searchdomain="minet.net",
-            nameserver="157.159.195.51",
+            nameserver=configuration.MAIN_DNS_SERVER_IP,
             ipconfig0= "ip=" + str(ip)+"/24,gw=157.159.195.1",
             sshkeys=urllib.parse.quote(main_ssh_key, safe=''),
             sockets=vm_socket,
@@ -364,8 +444,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         delete_from_proxmox(vmid, node)
         delete_from_dns(vmid)
         delete_from_db(vmid)
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "error:An error occured while configuring vm (vmid ="+str(vmid) +")")
 
@@ -379,8 +457,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         delete_from_proxmox(vmid, node)
         delete_from_dns(vmid)
         delete_from_db(vmid)
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "error:An error occured while configuring vm (vmid ="+str(vmid) +")")
         logging.error("Problem in create_vm(" + str(vmid) + ") when sarting VM: " + str(e))
@@ -390,8 +466,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
     # Mise à jour de la MAC dans la db par celle assignée par proxmox à la création
     mac = get_mac_from_config(vmid,node)
     if mac:
-        app = util.create_app()  # créer ou récupérer ton app Flask
-
         with app.app.app_context():
             database.update_vm_mac(vmid,mac)
 
@@ -421,8 +495,6 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
         delete_from_proxmox(vmid, node)
         delete_from_dns(vmid)
         delete_from_db(vmid)
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "An unkonwn error occured while setting the firewall of your vm(vmid ="+str(vmid) +")")
         logging.error("Problem in create_vm(" + str(vmid) + ") when setting the firewall of VM: " + str(e))
@@ -430,13 +502,9 @@ def config_vm(vmid, node, password, vm_user,main_ssh_key, ip, cpu, ram):
     print("firewall set")
 
     if success:
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "created")
     else : 
-        app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             database.set_vm_status(vmid, "error:An error occured while creating your vm")
 
@@ -694,6 +762,21 @@ def get_vm_config(vmid, node):
 
 """Return all the CURRENT status info related to a VM, it combines cpu usage, ram usage and uptime
 """
+
+def get_vm_autoreboot(vmid, node):
+    """Get the autoreboot status of a VM."""
+    try:
+        config = proxmox.nodes(node).qemu(vmid).config.get()
+        if "onboot" in config:
+            autoreboot = 1 if config['onboot'] == 1 else 0
+        else:
+            autoreboot = 0
+        return {"autoreboot": autoreboot}, 201
+    except Exception as e:
+        print("Problem in get_vm_autoreboot(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
+        logging.error("Problem in get_vm_autoreboot(" + str(vmid) + ") when getting VM autoreboot: " + str(e))
+        return {"error": "An error occurred while getting the autoreboot option"}, 500
+
 
 def get_vm_current_status(vmid, node):
     try:

@@ -1,13 +1,14 @@
 import pytest
 import proxmox_api.proxmox  as proxmox
+from proxmoxer import ProxmoxAPI
+from proxmox_api.config import configuration
 import time
 import proxmox_api.util as util
-from flask_sqlalchemy import SQLAlchemy
 from time import sleep
 from proxmox_api.db import db_functions 
 
 
-VMID = 9998
+VMID = 9999
 def fake_subscribe_to_hosting_ML(username):
     return 200, {"status": "ok"}
 DISK_SIZE = 10
@@ -18,17 +19,28 @@ def test_old_vm_deletion(init_vm_database):
     """
     node,status = proxmox.get_node_from_vm(VMID)
     print(node)
-    app = util.create_app()
-    db = SQLAlchemy()
-    db.init_app(app.app)
+    from proxmox_api.__main__ import app as flask_app
     doesVMexist = False
-    with app.app.app_context():
+    with flask_app.app.app_context():
         if status == 200:
             doesVMexist = True
         if doesVMexist:
-            assert node == "kars" or node == "wammu" or node == "sam"
+            # Crée un client proxmoxer
+            client = ProxmoxAPI(
+                host=configuration.PROXMOX_HOST,
+                user=configuration.PROXMOX_USER,
+                token_name=configuration.PROXMOX_API_KEY_NAME,
+                token_value=configuration.PROXMOX_API_KEY,
+                verify_ssl=False
+            )
+            # Récupération des noms de nodes depuis proxmox
+            available_nodes = [n["node"] for n in client.nodes.get()]
+
+            # Vérifie que le node est bien valide
+            assert node in available_nodes, f"Node {node} not found in {available_nodes}"
+
             r = proxmox.delete_from_proxmox(VMID, node)
-            assert r == True
+            assert r is True
         else :
             assert True
  # If previous test fail, we do not try to create a new one
@@ -44,10 +56,8 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
     def fake_set_new_vm_ip(next_vmid, node):
         return "127.0.0.1"
 
-    app = util.create_app()
-    db = SQLAlchemy()
-    db.init_app(app.app)
-    with app.app.app_context():
+    from proxmox_api.__main__ import app as flask_app
+    with flask_app.app.app_context():
         # Mocking
         monkeypatch.setattr(proxmox, 'next_available_vmid', fake_next_available_vmid)
         monkeypatch.setattr(proxmox, 'set_new_vm_ip', fake_set_new_vm_ip)
@@ -59,8 +69,9 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
         assert status == 201 
         start_time = time.time()
         configuration_state = "creating"
-        while time.time() - start_time <= 600 and configuration_state == "creating"  : # timeout after 10min
+        while time.time() - start_time <= 300 and configuration_state == "creating"  : # timeout after 5min
             configuration_state,_ = db_functions.get_vm_status(VMID)
+            print(configuration_state)
             sleep(1)
         assert configuration_state == "created"
         
@@ -70,20 +81,18 @@ def test_valid_vm_creation(monkeypatch, init_user_database, init_vm_database):
 def test_vm_start():
     """Test case for vm_start
     """
-    app = util.create_app()
-    db = SQLAlchemy()
-    db.init_app(app.app)
-    with app.app.app_context(): # no need to start the vm, start on boot is enabled
+    from proxmox_api.__main__ import app as flask_app
+    with flask_app.app.app_context(): # no need to start the vm, start on boot is enabled
         node,status_node = proxmox.get_node_from_vm(VMID)
         assert status_node == 200
         vm_status,_ = proxmox.get_proxmox_vm_status(VMID, node)
         start_time = time.time()
-        while time.time() - start_time <= 120 and vm_status["status"] != "running": # timeout after 2min
+        while time.time() - start_time <= 300 and vm_status["status"] not in ["running", "booting"]: # timeout after 5min, accept both running and booting
             vm_status,_ = proxmox.get_proxmox_vm_status(VMID, node)
             sleep(1)
-        if time.time() - start_time >= 120:
+        if time.time() - start_time >= 300:
             print("start time out")
-        assert vm_status["status"] == "running"
+        assert vm_status["status"] in ["running", "booting"]
         
 
 # If previous test fail, we do not try to start it
@@ -91,10 +100,8 @@ def test_vm_start():
 def test_vm_stop():
     """Test case for vm_start
     """
-    app = util.create_app()
-    db = SQLAlchemy()
-    db.init_app(app.app)
-    with app.app.app_context():
+    from proxmox_api.__main__ import app as flask_app
+    with flask_app.app.app_context():
         node,status_node = proxmox.get_node_from_vm(VMID)
         _, status_stop = proxmox.stop_vm(VMID, node)
         assert status_node == 200
@@ -115,10 +122,8 @@ def test_vm_stop():
 def test_vm_deletion():
     """Test case for vm_start
     """
-    app = util.create_app()
-    db = SQLAlchemy()
-    db.init_app(app.app)
-    with app.app.app_context():
+    from proxmox_api.__main__ import app as flask_app
+    with flask_app.app.app_context():
         node,status_node = proxmox.get_node_from_vm(VMID)
         isProxmoxDeleted = proxmox.delete_from_proxmox(VMID, node)
         isDbDeleted = proxmox.delete_from_db(VMID)

@@ -13,7 +13,7 @@ servers:
   description: Main URL
 - url: https://api-hosting-dev.minet.net/2.0
   description: dev URL
-- url: http://hosting-local.minet.net/api/2.0
+- url: https://hosting-local.minet.net/api/2.0
   description: local URL
 security:
 - OAuth2: []

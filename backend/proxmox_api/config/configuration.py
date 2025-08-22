@@ -1,6 +1,8 @@
 """File used to configure hosting service"""
 import os
 import logging
+from dotenv import load_dotenv
+load_dotenv()
 
 # Logging info
 LOG_FILE_NAME = "backend.log"

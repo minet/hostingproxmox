@@ -4,31 +4,54 @@ Contributeurs :
 - [Dzenan Cindrak](https://github.com/DzeCin)
 - [Jules Gonzales](https://github.com/Seberus1)
 - [Nathan Stchepinsky](https://github.com/SeaweedbrainCY)
+- [Gustave Beauvallet](https://github.com/getorochied)
+- [Alexandre Naizondard](https://github.com/FirstThunderbolt)
+
 ## Présentation
 Hosting est la plateforme d'hébergement cloud proposée gratuitement par l'[Association MiNET](https://minet.net) à ses adhérents. 
 
 Ce code open source reprend la totalité du code de l'application web [hosting.minet.net](https://minet.net). 
+
+## ✅ Status du Projet
+Le projet utilise maintenant **Connexion 3.x** avec Flask et Angular 14. Toutes les migrations et corrections ont été appliquées :
+
+- ✅ **Backend API** : Migration Connexion 2.x → 3.x terminée
+- ✅ **Tests** : 55/55 tests unit
+- ✅ **CI/CD Pipeline** : Pipeline GitLab CI/CD complètement fonctionnel
+- ✅ **VM Creation** : Problème de hang résolu via correction des threads SQLAlchemy
+- ✅ **Framework** : Compatibilité ASGI/Starlette intégrée
+- ✅ **Test Environment** : MockProxmoxAPI implémenté pour les tests unitaires
+
 ## Prérequis
 ### Global
 - Avoir installé `mysql`, `angular` et `flask`
+- Python 3.8+ (testé avec Python 3.13)
+- Node.js et npm pour le frontend Angular
 ### Backend
 Se placer dans `backend/`
-- Créer un environment virtuel `python3 -m venv venv` et l'activer `source venv/bin/activate`
-- Lancer la commande `pip3 install -r requirements.txt` dans le dépot pour installer les packages requis.
+- Créer un environment virtuel `python3 -m venv .venv` et l'activer `source .venv/bin/activate`
+- **Recommandé** : Utiliser `uv` pour une gestion plus rapide des dépendances : `pip install uv`
+- Lancer la commande `uv sync` ou `pip3 install -r requirements.txt` dans le dépôt pour installer les packages requis.
+
+**Note** : Le backend utilise maintenant **Connexion 3.x** avec Flask et ASGI. Les tests ont été mis à jour pour utiliser l'interface Starlette.
 
 ### Définir les différents secrets 
 Dans `.env`, à la racine du projet : 
+```properties
+KEYRING_DNS_SECRET="<KEYRING_DNS_SECRET>"
+PROXMOX_API_KEY_NAME="<PROXMOX_API_KEY_NAME>"
+PROXMOX_API_KEY="<PROXMOX_API_KEY>"
+PROXMOX_BACK_DB="<PROXMOX_BACK_DB>"
+ADH6_API_KEY="<ADH6_API_KEY>"
+PROXMOX_BACK_DB_DEV="<PROXMOX_BACK_DB_DEV>"
+PROXMOX_HOST=<IP_PROXMOX_HOST>
+MAIN_DNS_SERVER_IP=<IP_DNS_HOSTING>
+LIST_NAME_NODES="<NODES_NAMES>"
+PROXMOX_STORAGE="<STORAGE_NAME>"
+ENVIRONMENT="DEV"
 ```
-export KEYRING_DNS_SECRET=<KEYRING_DNS_SECRET>
-export PROXMOX_API_KEY_NAME=<PROXMOX_API_KEY_NAME>
-export PROXMOX_API_KEY=<PROXMOX_API_KEY>
-export PROXMOX_BACK_DB=<PROXMOX_BACK_DB>
-export ADH6_API_KEY=<ADH6_API_KEY>
-export PROXMOX_BACK_DB_DEV=<PROXMOX_BACK_DB_DEV>
-export PROXMOX_HOST=<IP_PROXMOX_HOST>
-export MAIN_DNS_SERVER_IP=<IP_DNS_HOSTING>
-export ENVIRONMENT="DEV"
-```
+
+**Note importante** : Le fichier `.env` utilise le format `KEY=value` (sans `export`) contrairement à l'exemple bash ci-dessus.
 
 #### Où trouver ces valeurs ?
 
@@ -54,11 +77,23 @@ Un makefile permet de lancer le site aisément :
 
 ### Le `backend`/API à la main: 
 
-
 1. Charger les variables d'environnement `source .env`
-2. Rendez vous dans `backend/` et chargez l'environnement virtuel python : `source venv/bin/activate`
+2. Rendez vous dans `backend/` et chargez l'environnement virtuel python : `source .venv/bin/activate`
+3. Exécutez la commande `uv run python3 -m proxmox_api` (ou `python3 -m proxmox_api` si vous n'utilisez pas uv). Le serveur se lance alors. *Assurez vous qu'il est joignable via le port 8080 de votre machine pour qu'il puisse être joint par le `frontend`*
 
-3. Exécutez la commande `python3 -m proxmox_api`. Le serveur se lance alors. *Assurez vous qu'il est joignable via le port 8080 de votre machine pour qu'il puisse être joint par le `frontend`*
+### Tests
+Pour lancer les tests du backend :
+```bash
+cd backend/
+# Tests unitaires spécifiques
+uv run pytest test/test_default_controller.py -v
+# Tests d'intégration (exclus du CI/CD)
+uv run pytest test/integration/ -v
+# Tous les tests (55 tests au total, 41% de couverture)
+uv run pytest test/ -v --ignore=test/integration/
+# Avec rapport de couverture
+uv run pytest test/ -v --ignore=test/integration/ --cov=proxmox_api --cov-report=html
+```
 
 
 ### Le `frontend`
