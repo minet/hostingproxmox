@@ -22,7 +22,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HistoryComponent } from './history/history.component';
 import {Ng2SearchPipeModule} from "ng2-search-filter";
 import { environment } from './../environments/environment';
-import {HttpClient, HttpClientModule} from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {TranslateModule, TranslateLoader} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import { DeletevmComponent } from './deletevm/deletevm.component';
@@ -38,50 +38,43 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
   return new TranslateHttpLoader(http);
 }
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    HomeComponent,
-    NavbarComponent,
-    FooterComponent,
-    SlugifyPipe,
-    VmsComponent,
-    VmComponent,
-    DnsComponent,
-    SshComponent,
-    LegalComponent,
-    ManualComponent,
-    HistoryComponent,
-    DeletevmComponent,
-    VmBoxComponent,
-    TestComponent,
-  ],
-  imports: [
-    BrowserModule,
-    NgbModule,
-    AppRoutingModule,
-    HttpClientModule,
-    Ng2SearchPipeModule,
-    OAuthModule.forRoot({
-      resourceServer: {
-        allowedUrls: [environment.backendURL],
-        sendAccessToken: true
-      }
-    }),
-    FormsModule,
-    NgbModule,
-    TranslateModule.forRoot({
-      defaultLanguage: 'en',
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient]
-      }
-    }),
-  ],
-  providers: [AuthService, UserService, VmsService, DnsService, User, SlugifyPipe, { provide: OAuthStorage, useFactory: storageFactory }],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        HomeComponent,
+        NavbarComponent,
+        FooterComponent,
+        SlugifyPipe,
+        VmsComponent,
+        VmComponent,
+        DnsComponent,
+        SshComponent,
+        LegalComponent,
+        ManualComponent,
+        HistoryComponent,
+        DeletevmComponent,
+        VmBoxComponent,
+        TestComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        NgbModule,
+        AppRoutingModule,
+        Ng2SearchPipeModule,
+        OAuthModule.forRoot({
+            resourceServer: {
+                allowedUrls: [environment.backendURL],
+                sendAccessToken: true
+            }
+        }),
+        FormsModule,
+        NgbModule,
+        TranslateModule.forRoot({
+            defaultLanguage: 'en',
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        })], providers: [AuthService, UserService, VmsService, DnsService, User, SlugifyPipe, { provide: OAuthStorage, useFactory: storageFactory }, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {
 
 }

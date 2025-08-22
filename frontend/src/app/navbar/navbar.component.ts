@@ -4,7 +4,7 @@ import { User } from '../models/user';
 import {CookieService} from 'ngx-cookie-service';
 import {Observable} from 'rxjs';
 import {TranslateService} from '@ngx-translate/core';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {AuthService} from '../common/services/auth.service';
 import { DOCUMENT } from '@angular/common';
 

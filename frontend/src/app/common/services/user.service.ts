@@ -4,7 +4,7 @@ import {User} from '../../models/user';
 import {OAuthService} from 'angular-oauth2-oidc';
 import {authCodeFlowConfig} from '../../sso.config';
 import { BehaviorSubject, merge, Observable} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 @Injectable({
     providedIn: 'root'
 })

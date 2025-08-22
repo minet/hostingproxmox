@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import {User} from "../models/user";
 import {UserService} from "../common/services/user.service";
 import {AuthService} from "../common/services/auth.service";
