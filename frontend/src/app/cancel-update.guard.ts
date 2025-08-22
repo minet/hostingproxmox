@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot } from '@angular/router';
 import { VmsService } from './common/services/vms.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CancelUpdateGuard implements CanActivate {
+export class CancelUpdateGuard  {
 
   constructor(private vmsService: VmsService) {}
 
