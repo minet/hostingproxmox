@@ -301,14 +301,12 @@ def delete_vm_id(vmid):  # noqa: E501
 def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
     print("Deleting VM " + str(vmid) + ". Is due to an error :", dueToError)
     app = util.create_app() # we need the context to delete the vm if there is an error
-    db_models.db.init_app(app.app)
     with app.app.app_context():
         dbfct.set_vm_status(vmid, "deleting")
     try :
         if node == "" and not dueToError:
             print("Impossible to find the vm to delete.")
             app = util.create_app() # we need the context to delete the vm if there is an error
-            db_models.db.init_app(app.app)
             with app.app.app_context():
                 dbfct.set_vm_status(vmid, "Impossible to find the vm to delete.", isAnError=True)
             return 0
@@ -318,7 +316,6 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
             if not isProxmoxDeleted and not dueToError:
                 print("An error occured while deleting the VM from proxmox")
                 app = util.create_app() # we need the context to delete the vm if there is an error
-                db_models.db.init_app(app.app)
                 with app.app.app_context():
                     dbfct.set_vm_status(vmid, "An error occured while deleting the VM from proxmox", isAnError=True)
                 return 0
@@ -328,7 +325,6 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
         if not isDNSDeleted and not dueToError:
             print("An error occured while deleting the DNS entry")
             app = util.create_app() # we need the context to delete the vm if there is an error
-            db_models.db.init_app(app.app)
             with app.app.app_context():
                 dbfct.set_vm_status(vmid, "An error occured while deleting the DNS entry", isAnError=True)
             return 0
@@ -338,13 +334,11 @@ def delete_vm_in_thread(vmid, user_id, node="", dueToError=False):
         else : 
             print("An error occured while deleting the VM.")
             app = util.create_app() # we need the context to delete the vm if there is an error
-            db_models.db.init_app(app.app)
             with app.app.app_context():
                 dbfct.set_vm_status(vmid,  "An error occured while deleting the VM.", isAnError=True)
     except Exception as e:
         print("An error occured while deleting the VM. Exception : " + str(e))
         app = util.create_app() # we need the context to delete the vm if there is an error
-        db_models.db.init_app(app.app)
         with app.app.app_context():
             dbfct.set_vm_status(vmid,   "An error occured while deleting the VM.", isAnError=True)
 
