@@ -3,9 +3,10 @@ import { Vm } from '../models/vm';
 import { User } from '../models/user';
 
 @Component({
-  selector: 'app-vm-box',
-  templateUrl: './vm-box.component.html',
-  styleUrls: ['./vm-box.component.css']
+    selector: 'app-vm-box',
+    templateUrl: './vm-box.component.html',
+    styleUrls: ['./vm-box.component.css'],
+    standalone: false
 })
 export class VmBoxComponent {
   @Input() vm!: Vm;

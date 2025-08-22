@@ -6,9 +6,10 @@ import { Vm } from '../models/vm';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-deletevm',
-  templateUrl: './deletevm.component.html',
-  styleUrls: ['./deletevm.component.css']
+    selector: 'app-deletevm',
+    templateUrl: './deletevm.component.html',
+    styleUrls: ['./deletevm.component.css'],
+    standalone: false
 })
 export class DeletevmComponent implements OnInit {
   

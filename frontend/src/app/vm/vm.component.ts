@@ -15,7 +15,8 @@ import { VmsService } from '../common/services/vms.service';
 @Component({
     selector: 'app-vm',
     templateUrl: './vm.component.html',
-    styleUrls: ['./vm.component.css']
+    styleUrls: ['./vm.component.css'],
+    standalone: false
 })
 export class VmComponent implements OnInit, OnDestroy {
     vmid: number;

@@ -11,7 +11,8 @@ import { debounceTime, map, tap } from 'rxjs/operators';
 @Component({
     selector: 'app-vms',
     templateUrl: './vms.component.html',
-    styleUrls: ['./vms.component.css']
+    styleUrls: ['./vms.component.css'],
+    standalone: false
 })
 
 export class VmsComponent implements OnInit, OnDestroy {

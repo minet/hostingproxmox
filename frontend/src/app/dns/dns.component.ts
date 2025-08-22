@@ -11,9 +11,10 @@ import { takeUntil, tap } from 'rxjs/operators';
 
 
 @Component({
-  selector: 'app-dns',
-  templateUrl: './dns.component.html',
-  styleUrls: ['./dns.component.css']
+    selector: 'app-dns',
+    templateUrl: './dns.component.html',
+    styleUrls: ['./dns.component.css'],
+    standalone: false
 })
 export class DnsComponent implements OnInit, OnDestroy {
     dns$!: Observable<Dns[]>; // Observable to get the list of DNS

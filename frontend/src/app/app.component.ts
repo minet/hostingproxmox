@@ -9,9 +9,10 @@ import { User } from './models/user';
 import { DnsService } from './common/services/dns.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css'],
+    standalone: false
 })
 /**
  * Represents the root component of the application.

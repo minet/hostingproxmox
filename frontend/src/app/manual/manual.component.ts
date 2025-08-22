@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 
 
 @Component({
-  selector: 'app-manual',
-  templateUrl: './manual.component.html',
-  styleUrls: ['./manual.component.css']
+    selector: 'app-manual',
+    templateUrl: './manual.component.html',
+    styleUrls: ['./manual.component.css'],
+    standalone: false
 })
 export class ManualComponent implements OnInit {
 
