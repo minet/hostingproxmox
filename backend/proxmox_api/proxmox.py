@@ -1075,15 +1075,15 @@ def check_update_cotisation(username, createEntry=False):
 
 
 def next_available_vmid():# determine the next available vmid from both db and proxmox
-    next_vmid_db = 1100
+    next_vmid_db = 119
     is_vmid_available_prox = False 
-    while next_vmid_db != None and is_vmid_available_prox : # if next_vmid_db is None then there is no next vmid available and if is_vmid_available_prox = True then the next vmid is available in proxmox and in db
-        next_vmid_db += 1
-        #next_vmid_db = database.getNextVmID(next_vmid_db)
+    while next_vmid_db != None and not is_vmid_available_prox : # if next_vmid_db is None then there is no next vmid available and if is_vmid_available_prox = True then the next vmid is available in proxmox and in db
+        #next_vmid_db += 1
+        next_vmid_db = database.getNextVmID(next_vmid_db)
        
         is_vmid_available_prox = is_vmid_available_cluster(next_vmid_db)
-    #return next_vmid_db
-    return 601 #TODO : réparer is_vmid_available_cluster pour trouver l'id suivant utilisable
+    return next_vmid_db
+    #return 601 #TODO : réparer is_vmid_available_cluster pour trouver l'id suivant utilisable
 
 
 """_summary_ : This function is called by the job to stop expired vm when the account freeze state is 2.x or 3.1
